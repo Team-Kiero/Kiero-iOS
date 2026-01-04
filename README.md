@@ -1,18 +1,18 @@
 <p align="center">
   <img width="500" alt="image" src="https://github.com/user-attachments/assets/6a196306-e48d-403e-af1a-26ad4340b0c5" />
 </p>
-<br>
 
-# Kiero-iOS
+# Kiero 키어로
 초등학생 자녀의 일정 관리와 자기주도적 습관 형성을 동시에 돕는
 게이미피케이션 기반 성장 플랫폼입니다. 
+<br>
 <br>
 
 ## 🍎 iOS 파트
 |    신혜연   |    안치욱   |   한현서   |    정윤아    |
 | :-------------: | :----------: | :----------: |:----------: |
 | <img src = "https://github.com/hyeyeonie.png" width ="200"> | <img src = "https://github.com/w0o0kgit.png" width ="200">  | <img src = "https://github.com/hyunseo-han.png" width ="200"> | <img src = "https://github.com/laura-jung.png" width ="200"> | 
-|  `iOS Lead` |    `iOS Developer`   |  `iOS Developer`    |    `iOS Developer`   |
+|  `iOS Developer Lead` |    `iOS Developer`   |  `iOS Developer`    |    `iOS Developer`   |
 <br>
 
 ## 📁 프로젝트 구조
