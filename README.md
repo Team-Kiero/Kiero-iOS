@@ -1,12 +1,19 @@
+<p align="center">
+  <img width="500" alt="image" src="https://github.com/user-attachments/assets/6a196306-e48d-403e-af1a-26ad4340b0c5" />
+</p>
+<br>
+
 # Kiero-iOS
 초등학생 자녀의 일정 관리와 자기주도적 습관 형성을 동시에 돕는
 게이미피케이션 기반 성장 플랫폼입니다. 
+<br>
 
 ## 🍎 iOS 파트
 |    신혜연   |    안치욱   |   한현서   |    정윤아    |
 | :-------------: | :----------: | :----------: |:----------: |
 | <img src = "https://github.com/hyeyeonie.png" width ="200"> | <img src = "https://github.com/w0o0kgit.png" width ="200">  | <img src = "https://github.com/hyunseo-han.png" width ="200"> | <img src = "https://github.com/laura-jung.png" width ="200"> | 
 |  `iOS Lead` |    `iOS Developer`   |  `iOS Developer`    |    `iOS Developer`   |
+<br>
 
 ## 📁 프로젝트 구조
 > Presentation 내에 뷰 기능 단위로 폴더링하여, 폴더 안에서 MVVM을 구현합니다.
@@ -25,6 +32,7 @@ Kiero
 │   │   │       ├── Font
 │   │   │       └── Assets
 ```
+<br>
 
 ## ⚒️ 기술 스택
 | 태그 | 기술 | 설명 |
@@ -35,6 +43,7 @@ Kiero
 | `애니메이션` | Lottie | JSON 기반의 가볍고 고품질인 벡터 애니메이션 렌더링 |
 | `버전 관리`| Git, GitHub | 분산 버전 관리 시스템을 통한 형상 관리 및 협업 |
 | `협업 도구`| Figma, Notion| UI/UX 디자인 리소스 공유 및 프로젝트 문서화, 태스크 관리 |
+<br>
 
 ## 💬 Commit Message 규칙
 ### 태그 컨벤션
@@ -51,6 +60,7 @@ Kiero
 | `setting` | 프로젝트 관련 설정 변경 |
 | `merge` | 브랜치 머지 |
 | `hotfix` | 긴급 수정 (배포 또는 개발 중 발생한 치명적 이슈 해결) |
+<br>
 
 ### 커밋 컨벤션
 
@@ -72,15 +82,18 @@ Kiero
 
 
 * **머지**: `[merge] PR 제목`
+<br>
 
 ### 브랜치 컨벤션
 
 * `type/#이슈번호-작업할뷰` 세팅 관련 작업 등 특정 뷰가 없는 경우 뒤에는 생략 가능
   * ex) `feat/#1-DetailView`
+<br>
 
 ## 🌊 Git Flow 전략
 
 > **main 브랜치 보호 전략**: `main` 브랜치는 실제 배포 기준 브랜치로 사용하며, 직접적인 작업이나 커밋은 원칙적으로 금지합니다. 모든 변경 사항은 `develop` 브랜치를 거쳐 PR을 통해서만 `main`에 병합합니다.
+<br>
 
 ### 작업 순서
 
@@ -96,6 +109,7 @@ Kiero
 6. **Merge**: PR 작성자가 본인의 브랜치를 Merge 합니다.
     * merge 전후 상황을 팀원들에게 반드시 공유합니다.
 7. **Pull**: Merge 후 로컬에서 `main`으로 이동하여 반드시 `git pull`을 받아 최신 상태를 유지합니다.
+<br>
 
 ## 📏 코딩 컨벤션
 
