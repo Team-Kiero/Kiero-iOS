@@ -14,7 +14,7 @@
 		24DF50DD2F0A5174007146AC /* Exceptions for "Kiero" folder in "Kiero" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Info.plist,
+				Application/Info.plist,
 			);
 			target = 24DF50CA2F0A5173007146AC /* Kiero */;
 		};
