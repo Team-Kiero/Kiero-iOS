@@ -15,7 +15,6 @@ final class MissionBoxParentView: UIView {
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
-        $0.setTypo(.title3_16_SB, text: "미션 이름 입니다.")
         $0.textColor = .white
         $0.numberOfLines = 1
     }
@@ -25,7 +24,6 @@ final class MissionBoxParentView: UIView {
     }
     
     private let rewardLabel = UILabel().then {
-        $0.setTypo(.body5_10_R, text: "50개")
         $0.textColor = .gray500
     }
     
@@ -88,6 +86,12 @@ final class MissionBoxParentView: UIView {
         rewardLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
         }
-        
     }
+    
+    // MARK: - Configuration
+    
+    func configure(name: String, reward: Int) {
+        titleLabel.setTypo(.title3_16_SB, text: name)
+        rewardLabel.setTypo(.body5_10_R, text: "\(reward)개")
+        }
 }
