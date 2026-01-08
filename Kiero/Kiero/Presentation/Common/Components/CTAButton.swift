@@ -64,8 +64,7 @@ final class CTAButton: UIButton {
         self.clipsToBounds = true
         
         addSubviews(contentStackView)
-        contentStackView.addArrangedSubview(iconImageView)
-        contentStackView.addArrangedSubview(mainLabel)
+        contentStackView.addArrangedSubviews(iconImageView, mainLabel)
         
         self.snp.makeConstraints {
             $0.height.equalTo(50)
