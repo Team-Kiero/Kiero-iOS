@@ -219,6 +219,8 @@
 		};
 		24DF50E12F0A5174007146AC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 24DF50CD2F0A5173007146AC /* Kiero */;
+			baseConfigurationReferenceRelativePath = Application/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -282,6 +284,8 @@
 		};
 		24DF50E22F0A5174007146AC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 24DF50CD2F0A5173007146AC /* Kiero */;
+			baseConfigurationReferenceRelativePath = Application/Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

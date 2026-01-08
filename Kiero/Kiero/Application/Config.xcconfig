@@ -1,0 +1,11 @@
+//
+//  Config.xcconfig
+//  Kiero
+//
+//  Created by 신혜연 on 1/8/26.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
+
+BASE_URL = 13.209.49.82:8080
