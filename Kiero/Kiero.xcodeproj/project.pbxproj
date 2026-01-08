@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
 /* End PBXBuildFile section */
@@ -45,6 +46,7 @@
 			files = (
 				24DF523F2F0A6487007146AC /* SnapKit in Frameworks */,
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
+				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +91,7 @@
 			packageProductDependencies = (
 				24DF523E2F0A6487007146AC /* SnapKit */,
 				24DF52412F0A64A0007146AC /* Then */,
+				249C64192F0FA1F50016D6B7 /* Moya */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero.app */;
@@ -121,6 +124,7 @@
 			packageReferences = (
 				24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */,
 				24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */,
+				249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -356,6 +360,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
 		24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -375,6 +387,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		249C64192F0FA1F50016D6B7 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
 		24DF523E2F0A6487007146AC /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */;
