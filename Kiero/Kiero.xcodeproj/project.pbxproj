@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
 /* End PBXBuildFile section */
@@ -19,8 +20,7 @@
 		24DF50DD2F0A5174007146AC /* Exceptions for "Kiero" folder in "Kiero" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Application/Info.plist,
-				Network/.gitkeep,
+				Info.plist,
 				Presentation/Common/Components/.gitkeep,
 			);
 			target = 24DF50CA2F0A5173007146AC /* Kiero */;
@@ -45,6 +45,7 @@
 			files = (
 				24DF523F2F0A6487007146AC /* SnapKit in Frameworks */,
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
+				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +90,7 @@
 			packageProductDependencies = (
 				24DF523E2F0A6487007146AC /* SnapKit */,
 				24DF52412F0A64A0007146AC /* Then */,
+				249C64192F0FA1F50016D6B7 /* Moya */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero.app */;
@@ -121,6 +123,7 @@
 			packageReferences = (
 				24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */,
 				24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */,
+				249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -161,7 +164,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Kiero/Application/Info.plist;
+				INFOPLIST_FILE = Kiero/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -171,7 +174,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.happy.Kiero;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -191,7 +194,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Kiero/Application/Info.plist;
+				INFOPLIST_FILE = Kiero/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -201,7 +204,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.happy.Kiero;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -215,6 +218,8 @@
 		};
 		24DF50E12F0A5174007146AC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 24DF50CD2F0A5173007146AC /* Kiero */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -278,6 +283,8 @@
 		};
 		24DF50E22F0A5174007146AC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 24DF50CD2F0A5173007146AC /* Kiero */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -356,6 +363,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
 		24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -375,6 +390,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		249C64192F0FA1F50016D6B7 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
 		24DF523E2F0A6487007146AC /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 24DF523D2F0A6487007146AC /* XCRemoteSwiftPackageReference "SnapKit" */;
