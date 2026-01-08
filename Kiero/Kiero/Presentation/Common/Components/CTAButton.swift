@@ -1,5 +1,5 @@
 //
-//  KieroButton.swift
+//  CTAButton.swift
 //  Kiero
 //
 //  Created by Hyunseo Han on 1/8/26.
@@ -9,46 +9,54 @@ import UIKit
 import SnapKit
 import Then
 
-final class KieroButton: UIButton {
-    private let type: KieroButtonType
-    private let color: KieroButtonColor
+final class CTAButton: UIButton {
+    enum Style {
+        case main
+        case gray
+        
+        var backgroundColor: UIColor {
+            switch self {
+            case .main: return .main
+            case .gray: return .gray900
+            }
+        }
+        
+        var titleColor: UIColor {
+            switch self {
+            case .main: return .kBlack
+            case .gray: return .white
+            }
+        }
+    }
+    
+    private let style: Style
     
     private let contentStackView = UIStackView().then {
-        $0.isUserInteractionEnabled = false
+        $0.axis = .horizontal
+        $0.spacing = 10
         $0.alignment = .center
         $0.distribution = .fill
+        $0.isUserInteractionEnabled = false 
     }
     
-    private let mainLabel = UILabel().then {
-        $0.setTypo(.title3_16_SB)
-        $0.textAlignment = .center
-    }
-    
-    //large용
-    private let subLabel = UILabel().then {
-        $0.setTypo(.body2_16_R)
-        $0.textAlignment = .center
-        $0.isHidden = true // 이걸 쓰는 이유?
-    }
-    
-    // medium용
     private let iconImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
         $0.isHidden = true
     }
     
-    // MARK: - init
+    private let mainLabel = UILabel().then {
+        $0.textAlignment = .center
+    }
     
-    init(type: KieroButtonType, color: KieroButtonColor){
-        self.type = type
-        self.color = color
+    init(style: Style) {
+        self.style = style
         super.init(frame: .zero)
         setupUI()
         applyStyle()
     }
     
     required init?(coder: NSCoder) {
-        fatalError("에러입니다")
+        fatalError("init(coder:) has not been implemented")
     }
     
     private func setupUI() {
@@ -56,54 +64,38 @@ final class KieroButton: UIButton {
         self.clipsToBounds = true
         
         addSubviews(contentStackView)
+        contentStackView.addArrangedSubview(iconImageView)
+        contentStackView.addArrangedSubview(mainLabel)
         
-        switch type {
-        case .medium:
-            contentStackView.axis = .horizontal
-            contentStackView.spacing = 10 // ?
-            contentStackView.addArrangedSubview(iconImageView)
-            contentStackView.addArrangedSubview(mainLabel)
-            
-            iconImageView.snp.makeConstraints {
-                $0.size.equalTo(16)
-            }
-            
-        case .large:
-            contentStackView.axis = .vertical
-            contentStackView.spacing = 10 // ?
-            contentStackView.addArrangedSubview(subLabel)
-            contentStackView.addArrangedSubview(mainLabel)
-        }
-        
-        // SnapKit Layout
         self.snp.makeConstraints {
-            $0.height.equalTo(type.height) // Enum에 정의된 높이 사용
+            $0.height.equalTo(50)
         }
         
         contentStackView.snp.makeConstraints {
             $0.center.equalToSuperview()
         }
         
-        
+        iconImageView.snp.makeConstraints {
+            $0.size.equalTo(24)
+        }
     }
     
     private func applyStyle() {
-        self.backgroundColor = color.backgroundColor
-        self.mainLabel.textColor = color.titleColor
+        self.backgroundColor = style.backgroundColor
+        self.mainLabel.textColor = style.titleColor
+        self.iconImageView.tintColor = style.titleColor
     }
     
-    // 여기는 왜 private 안 붙임?: ViewController가 써야 하니까
-    func configure(title: String, subTitle: String? = nil, icon: UIImage? = nil) {
-        mainLabel.text = title
-        
-        if let subTitle = subTitle {
-            subLabel.text = subTitle
-            subLabel.isHidden = false
-        }
+    // MARK: - Configuration
+    
+    func configure(title: String, icon: UIImage? = nil) {
+        mainLabel.setTypo(.title3_16_SB, text: title)
         
         if let icon = icon {
             iconImageView.image = icon
             iconImageView.isHidden = false
+        } else {
+            iconImageView.isHidden = true
         }
     }
 }
