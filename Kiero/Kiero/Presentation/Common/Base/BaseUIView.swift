@@ -1,0 +1,25 @@
+//
+//  BaseUIView.swift
+//  Kiero
+//
+//  Created by 신혜연 on 1/8/26.
+//
+
+import UIKit
+
+class BaseUIView: UIView {
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setUI()
+        setLayout()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setUI() {}
+
+    func setLayout() {}
+}
