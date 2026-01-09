@@ -1,5 +1,5 @@
 //
-//  MissionBoxChildView.swift
+//  MissionBoxChild.swift
 //  Kiero
 //
 //  Created by 정윤아 on 1/8/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class MissionBoxChildView: UIView {
+final class MissionBoxChild: UIView {
     
     // MARK: - State
     

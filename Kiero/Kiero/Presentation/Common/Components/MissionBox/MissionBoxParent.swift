@@ -1,5 +1,5 @@
 //
-//  MissionBoxParentView.swift
+//  MissionBoxParent.swift
 //  Kiero
 //
 //  Created by 정윤아 on 1/8/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class MissionBoxParentView: UIView {
+final class MissionBoxParent: UIView {
     
     // MARK: - UI Components
     
@@ -35,28 +35,28 @@ final class MissionBoxParentView: UIView {
     }
     
     private let missionBox = UIStackView().then {
-        $0.axis = .horizontal 
+        $0.axis = .horizontal
         $0.alignment = .center
     }
     
     override init(frame: CGRect) {
-            super.init(frame: frame)
-            setStyle()
-            setUI()
-            setLayout()
-        }
-
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-
+        super.init(frame: frame)
+        setStyle()
+        setUI()
+        setLayout()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // MARK: - Setup
     
     private func setStyle() {
         backgroundColor = .gray900
         layer.cornerRadius = 10
         layer.masksToBounds = true
-
+        
         rewardStackView.layer.borderColor = UIColor(named: "gray_500")?.cgColor
         rewardIcon.image = UIImage(named: "ic_3d_coin")
     }
@@ -93,5 +93,5 @@ final class MissionBoxParentView: UIView {
     func configure(name: String, reward: Int) {
         titleLabel.setTypo(.title3_16_SB, text: name)
         rewardLabel.setTypo(.body5_10_R, text: "\(reward)개")
-        }
+    }
 }
