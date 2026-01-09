@@ -6,7 +6,14 @@
 //
 
 import Foundation
+import UIKit
 
 public protocol ViewControllerFactory {
-    
+    // 부모 탭
+    func makeScheduleViewController() -> UIViewController
+    func makeNotificationFeedViewController() -> UIViewController
+    // 아이 탭
+    func makeDailyJourneyViewController() -> UIViewController
+    func makeCoinMissionViewController() -> UIViewController
+    func makeWishWellViewController() -> UIViewController
 }
