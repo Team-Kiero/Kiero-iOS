@@ -37,7 +37,7 @@ final class CTAButton: UIButton {
         $0.spacing = 10
         $0.alignment = .center
         $0.distribution = .fill
-        $0.isUserInteractionEnabled = false 
+        $0.isUserInteractionEnabled = false
     }
     
     private let iconImageView = UIImageView().then {
@@ -53,6 +53,7 @@ final class CTAButton: UIButton {
         self.style = style
         super.init(frame: .zero)
         setUI()
+        setLayout()
         setStyle()
     }
     
@@ -66,7 +67,9 @@ final class CTAButton: UIButton {
         
         addSubviews(contentStackView)
         contentStackView.addArrangedSubviews(iconImageView, mainLabel)
-        
+    }
+    
+    private func setLayout() {
         self.snp.makeConstraints {
             $0.height.equalTo(50)
         }
