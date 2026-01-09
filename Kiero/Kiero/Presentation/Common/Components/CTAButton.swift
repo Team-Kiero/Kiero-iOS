@@ -53,7 +53,7 @@ final class CTAButton: UIButton {
         self.style = style
         super.init(frame: .zero)
         setUI()
-        applyStyle()
+        setStyle()
     }
     
     required init?(coder: NSCoder) {
@@ -80,7 +80,7 @@ final class CTAButton: UIButton {
         }
     }
     
-    private func applyStyle() {
+    private func setStyle() {
         self.backgroundColor = style.backgroundColor
         self.mainLabel.textColor = style.titleColor
         self.iconImageView.tintColor = style.titleColor
