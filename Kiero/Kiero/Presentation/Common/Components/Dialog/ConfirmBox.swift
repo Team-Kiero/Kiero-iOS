@@ -42,7 +42,7 @@ final class ConfirmBox: UIView {
     
     var onTapButton: (() -> Void)?
     
-    // MARK: - Set UI
+    // MARK: - UI Component
     
     private let characterImage = UIImageView().then {
         $0.image = UIImage(named: "img_goblin_smile")
@@ -79,10 +79,13 @@ final class ConfirmBox: UIView {
         $0.layoutMargins = UIEdgeInsets(top: 44, left: 16, bottom: 16, right: 16)
     }
     
+    // MARK: Life Cycle
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        setUI()
+        
         setStyle()
+        setUI()
         setLayout()
         bind()
     }
@@ -91,15 +94,17 @@ final class ConfirmBox: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setUI() {
-        addSubviews(container)
-        titleStack.addArrangedSubviews(characterImage, messageLabel)
-        container.addArrangedSubviews(titleStack, actionButton)
-    }
+    // MARK: Setup Methods
     
     private func setStyle() {
         backgroundColor = .gray900
         layer.cornerRadius = 16
+    }
+    
+    private func setUI() {
+        addSubviews(container)
+        titleStack.addArrangedSubviews(characterImage, messageLabel)
+        container.addArrangedSubviews(titleStack, actionButton)
     }
     
     private func setLayout() {
@@ -120,21 +125,24 @@ final class ConfirmBox: UIView {
         }
     }
     
+    // MARK: Configure
+    
     func configure(state: State) {
         messageLabel.text = state.message
         actionButton.setTitle(state.buttonTitle, for: .normal)
     }
     
+    // MARK: Bind
+    
     private func bind() {
         actionButton.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
     }
+    
+    // MARK: Action
     
     @objc
     private func didTapButton() {
         onTapButton?()
     }
-    
-    
-    
     
 }
