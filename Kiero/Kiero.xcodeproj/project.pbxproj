@@ -21,7 +21,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Presentation/Common/Components/.gitkeep,
 			);
 			target = 24DF50CA2F0A5173007146AC /* Kiero */;
 		};
