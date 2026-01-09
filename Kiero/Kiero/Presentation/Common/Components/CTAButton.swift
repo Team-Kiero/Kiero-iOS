@@ -51,7 +51,7 @@ final class CTAButton: UIButton {
     init(style: Style) {
         self.style = style
         super.init(frame: .zero)
-        setupUI()
+        setUI()
         applyStyle()
     }
     
@@ -59,7 +59,7 @@ final class CTAButton: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupUI() {
+    private func setUI() {
         self.layer.cornerRadius = 8
         self.clipsToBounds = true
         

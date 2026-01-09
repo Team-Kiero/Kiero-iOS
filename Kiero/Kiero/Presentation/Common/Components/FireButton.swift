@@ -47,16 +47,16 @@ final class FireButton: UIButton {
     
     init() {
         super.init(frame: .zero)
-        setupUI()
+        setUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setup
+    // MARK: - Set
     
-    private func setupUI() {
+    private func setUI() {
         self.backgroundColor = .gray900
         self.layer.cornerRadius = 8
         self.clipsToBounds = true
