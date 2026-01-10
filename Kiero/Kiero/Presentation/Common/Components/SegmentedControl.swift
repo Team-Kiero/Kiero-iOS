@@ -97,7 +97,8 @@ final class SegmentedControl: UIView {
         }
     }
     
-    @objc private func buttonTapped(_ sender: UIButton) {
+    @objc
+    private func buttonTapped(_ sender: UIButton) {
         updateSelection(sender.tag)
         onIndexChanged?(sender.tag)
     }
