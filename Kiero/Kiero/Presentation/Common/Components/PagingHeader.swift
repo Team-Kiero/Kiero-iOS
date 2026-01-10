@@ -6,8 +6,8 @@
 //
 
 import UIKit
-import SnapKit
 
+import SnapKit
 import Then
 
 final class PagingHeader: UIView {
