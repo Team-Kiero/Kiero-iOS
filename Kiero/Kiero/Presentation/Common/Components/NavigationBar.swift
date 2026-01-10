@@ -66,10 +66,6 @@ final class NavigationBar: UIView {
     }
     
     private func setLayout() {
-        self.snp.makeConstraints {
-            $0.height.equalTo(37)
-        }
-        
         leftButton.snp.makeConstraints {
             $0.leading.equalToSuperview().offset(8)
             $0.centerY.equalToSuperview()
@@ -81,7 +77,7 @@ final class NavigationBar: UIView {
         }
         
         rightButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().offset(-8)
+            $0.trailing.equalToSuperview().inset(8)
             $0.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }
@@ -96,13 +92,13 @@ final class NavigationBar: UIView {
             
         case .closeDone(let title):
             titleLabel.text = title
-            leftButton.setImage(UIImage(resource: .icClose), for: .normal)
+            leftButton.setImage(UIImage(resource: .icCloseLight), for: .normal)
             rightButton.setImage(UIImage(resource: .icDone), for: .normal)
             rightButton.isHidden = false
             
         case .close(let title):
             titleLabel.text = title
-            leftButton.setImage(UIImage(resource: .icClose), for: .normal)
+            leftButton.setImage(UIImage(resource: .icCloseLight), for: .normal)
             rightButton.isHidden = true
         }
     }
