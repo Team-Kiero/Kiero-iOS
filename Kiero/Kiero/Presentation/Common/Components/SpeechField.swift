@@ -29,7 +29,7 @@ final class SpeechField: UIView {
         $0.distribution = .fill
     }
     
-    // MARK: - Init
+    // MARK: - Life Cycle
     
     override init(frame: CGRect) {
         super.init(frame: .zero)
@@ -42,7 +42,7 @@ final class SpeechField: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setup
+    // MARK: - Setup Methods
     
     private func setStyle() {
         nameContainerView.backgroundColor = .main
