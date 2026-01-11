@@ -11,7 +11,6 @@ import SnapKit
 import Then
 
 final class Toast {
-        
     static func show(message: String) {
         let windowScene: UIWindowScene? = UIApplication.shared.connectedScenes.first as? UIWindowScene
         
@@ -32,7 +31,7 @@ final class Toast {
         
         self.animate(view: toastView)
     }
-        
+    
     private static func animate(view: UIView) {
         UIView.animate(
             withDuration: 0.2,
@@ -92,21 +91,21 @@ private final class ToastView: UIView {
     }
     
     private func setUI() {
-        self.addSubview(self.messageLabel)
+        addSubview(self.messageLabel)
     }
     
     private func setLayout() {
-        self.messageLabel.snp.makeConstraints {
+        messageLabel.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(16)
             $0.trailing.equalToSuperview().inset(16)
             $0.centerY.equalToSuperview()
         }
         
-        self.snp.makeConstraints {
+        snp.makeConstraints {
             $0.height.equalTo(49)
         }
     }
-        
+    
     func configure(message: String) {
         self.messageLabel.text = message
     }
