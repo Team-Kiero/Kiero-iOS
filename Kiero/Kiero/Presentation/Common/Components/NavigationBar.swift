@@ -26,7 +26,6 @@ final class NavigationBar: UIView {
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
-        $0.font = .head2_20_B
         $0.textColor = .white
         $0.textAlignment = .center
     }
@@ -86,18 +85,18 @@ final class NavigationBar: UIView {
     private func configure(with type: NavigationBarType) {
         switch type {
         case .back(let title):
-            titleLabel.text = title
+            titleLabel.setTypo(.head2_20_B, text: title)
             leftButton.setImage(UIImage(resource: .icLeft), for: .normal)
             rightButton.isHidden = true
             
         case .closeDone(let title):
-            titleLabel.text = title
+            titleLabel.setTypo(.head2_20_B, text: title)
             leftButton.setImage(UIImage(resource: .icCloseLight), for: .normal)
             rightButton.setImage(UIImage(resource: .icDone), for: .normal)
             rightButton.isHidden = false
             
         case .close(let title):
-            titleLabel.text = title
+            titleLabel.setTypo(.head2_20_B, text: title)
             leftButton.setImage(UIImage(resource: .icCloseLight), for: .normal)
             rightButton.isHidden = true
         }
