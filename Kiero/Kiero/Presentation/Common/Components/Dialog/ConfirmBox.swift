@@ -45,7 +45,7 @@ final class ConfirmBox: UIView {
     // MARK: - UI Component
     
     private let characterImage = UIImageView().then {
-        $0.image = UIImage(named: "img_goblin_smile")
+        $0.image = UIImage(resource: .imgGoblinSmile)
         $0.contentMode = .scaleAspectFit
     }
     
@@ -144,5 +144,4 @@ final class ConfirmBox: UIView {
     private func didTapButton() {
         onTapButton?()
     }
-    
 }

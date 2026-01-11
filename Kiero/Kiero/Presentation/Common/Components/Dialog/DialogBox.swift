@@ -61,7 +61,6 @@ final class DialogBox: UIView {
         
         var cancelButtonTitle: String { "취소" }
         var confirmButtonTitle: String { "확인" }
-        
     }
     
     // MARK: - Properties
@@ -73,7 +72,7 @@ final class DialogBox: UIView {
     // MARK: - UI Conponents
     
     private let closeButton = UIButton().then {
-        $0.setImage(UIImage(named: "ic_close"), for: .normal)
+        $0.setImage(UIImage(resource: .icClose), for: .normal)
     }
     
     private let titleLabel = UILabel().then {
@@ -89,7 +88,7 @@ final class DialogBox: UIView {
     }
     
     private let coinIcon = UIImageView().then {
-        $0.image = UIImage(named: "ic_3d_coin")
+        $0.image = UIImage(resource: .ic3DCoin)
         $0.contentMode = .scaleAspectFit
     }
     
@@ -163,15 +162,15 @@ final class DialogBox: UIView {
         contentStack.addArrangedSubviews(titleLabel, coinStack, messageLabel)
         buttonStack.addArrangedSubviews(cancelButton, confirmButton)
         container.addArrangedSubviews(contentStack, buttonStack)
+        
+        container.isLayoutMarginsRelativeArrangement = true
+        container.layoutMargins = UIEdgeInsets(top: 44, left: 16, bottom: 16, right: 16)
     }
     
     private func setStyle() {
         backgroundColor = .gray900
         layer.cornerRadius = 16
         clipsToBounds = true
-        
-        container.isLayoutMarginsRelativeArrangement = true
-        container.layoutMargins = UIEdgeInsets(top: 44, left: 16, bottom: 16, right: 16)
     }
     
     private func setLayout() {
@@ -243,5 +242,4 @@ final class DialogBox: UIView {
     private func didTapCancel() { onTapCancel?() }
     @objc
     private func didTapConfirm() { onTapConfirm?() }
-    
 }
