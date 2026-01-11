@@ -50,6 +50,15 @@ final class DialogBox: UIView {
             }
         }
         
+        var isCloseButtonHidden: Bool {
+            switch self {
+            case .logout:
+                return true
+            default:
+                return false
+            }
+        }
+        
         var cancelButtonTitle: String { "취소" }
         var confirmButtonTitle: String { "확인" }
         
@@ -209,6 +218,8 @@ final class DialogBox: UIView {
         
         cancelButton.setTitle(state.cancelButtonTitle, for: .normal)
         confirmButton.setTitle(state.confirmButtonTitle, for: .normal)
+        
+        closeButton.isHidden = state.isCloseButtonHidden
         
         if let coin = state.coinText {
             coinStack.isHidden = false
