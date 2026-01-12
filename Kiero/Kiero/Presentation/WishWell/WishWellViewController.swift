@@ -50,21 +50,26 @@ extension WishWellViewController: UICollectionViewDataSource {
               let data = viewModel?.wishList[indexPath.item] else {
             return UICollectionViewCell()
         }
-        cell.configure(name: data.name, price: data.price)
         
+        cell.configure(name: data.name, price: data.price)
         cell.onTapComplete = { [weak self] in
-            guard let self = self, let data = viewModel?.wishList[indexPath.item] else { return }
+            guard let self = self,
+                    let data = viewModel?.wishList[indexPath.item] else { return }
             let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
             
             self.view.showDialog(state: dialogState) { [weak self] in
                 let confirmState = ConfirmBox.State.wishWell(wish: data.name)
-                self?.view.showConfirm(state: confirmState)
-//                DispatchQueue.main.asyncAfter(deadline: .now()) {
-//                    self?.view.showConfirm(state: confirmState)
-//                }
+                self?.view.showConfirm(state: confirmState) { [weak self] in
+                    guard let self = self,
+                            let vm = self.viewModel else { return }
+                    
+                    vm.purchaseCoin(price: data.price)
+                    
+                    self.rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
+                }
+                
             }
         }
-        
         return cell
     }
 }
@@ -76,10 +81,4 @@ extension WishWellViewController: UICollectionViewDelegateFlowLayout {
         let width = (collectionView.bounds.width - (16 * 2) - 13) / 2
         return CGSize(width: width, height: 113)
     }
-}
-
-#Preview {
-    WishWellViewController(
-        viewModel: WishWellViewModel(),
-        diContainer: AppDIContainer.shared)
 }

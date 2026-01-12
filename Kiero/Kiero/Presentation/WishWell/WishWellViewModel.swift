@@ -35,4 +35,8 @@ final class WishWellViewModel: BaseViewModel {
         ]
         completion()
     }
+    
+    func purchaseCoin(price: Int) {
+        self.currentCoinCount -= price 
+    }
 }

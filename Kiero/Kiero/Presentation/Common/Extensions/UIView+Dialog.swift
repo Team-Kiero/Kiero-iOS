@@ -20,7 +20,7 @@ extension UIView {
         dialogBox.configure(state: state)
         
         self.addSubview(dimView)
-        dimView.addSubview(dialogBox)
+        dimView.addSubview(dialogBox)   
         
         dimView.snp.makeConstraints {
             $0.edges.equalToSuperview()
