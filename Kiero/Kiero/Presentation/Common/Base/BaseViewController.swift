@@ -32,6 +32,10 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
     
     // MARK: - Life Cycle
     
+    open override func viewWillAppear(_ animated: Bool) {
+        navigationController?.isNavigationBarHidden = true
+    }
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .kBlack
