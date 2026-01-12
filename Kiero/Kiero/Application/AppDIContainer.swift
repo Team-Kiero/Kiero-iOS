@@ -48,9 +48,8 @@ extension AppDIContainer {
     }
     
     func makeWishWellViewController() -> UIViewController {
-        // TODO: WishWellViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
+        let viewModel = WishWellViewModel()
+        let vc = WishWellViewController(viewModel: viewModel, diContainer: self)
         return vc
     }
 }

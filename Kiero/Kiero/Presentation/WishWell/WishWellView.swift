@@ -32,15 +32,17 @@ final class WishWellView: BaseUIView {
     
     private let coinImg = UIImage(resource: .ic3DCoin)
     
-    private let wishWellIcon = UIImage(resource: .icStarRound)
-    
+    private let wishWellIcon = UIImageView().then {
+        $0.image = UIImage(resource: .icStarRound)
+    }
     private let wishWellLabel = UILabel().then {
         $0.textColor = .white
         $0.setTypo(.title2_20_SB, text: "소원의 우물")
     }
     
     private let wishWellStack = UIStackView().then {
-        $0.axis = .horizontal
+        $0.axis = .vertical
+        $0.alignment = .center
         $0.spacing = 10
     }
     
@@ -51,6 +53,7 @@ final class WishWellView: BaseUIView {
     
     private let totalStack = UIStackView().then {
         $0.axis = .vertical
+        $0.alignment = .center
         $0.spacing = 14
     }
     
@@ -59,11 +62,11 @@ final class WishWellView: BaseUIView {
         $0.backgroundColor = .gray900
     }
     
-    private let line = UILabel().then {
+    private let line = UIView().then {
         $0.backgroundColor = .gray900
     }
     
-    private lazy var wishCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
+    private(set) lazy var wishCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
         $0.scrollDirection = .vertical
         $0.minimumLineSpacing = 13
         $0.sectionInset = UIEdgeInsets(top: 18, left: 16, bottom: 18, right: 16)
@@ -74,21 +77,65 @@ final class WishWellView: BaseUIView {
         $0.register(WishWellCell.self, forCellWithReuseIdentifier: WishWellCell.identifier)
     }
     
+    // MARK: - Setup Method
     
+    override func setUI() {
+        addSubviews(nameStack, coinChip, container, line, wishCollectionView)
+        nameStack.addArrangedSubviews(iconImage, nameLabel)
+        wishWellStack.addArrangedSubviews(wishWellIcon, wishWellLabel)
+        totalStack.addArrangedSubviews(wishWellStack, wishMessage)
+        container.addSubview(totalStack)
+    }
     
+    override func setLayout() {
+        nameStack.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide.snp.top).inset(15)
+            $0.leading.equalToSuperview().inset(16)
+            $0.height.equalTo(40)
+        }
+        
+        iconImage.snp.makeConstraints {
+            $0.size.equalTo(40)
+        }
+        
+        coinChip.snp.makeConstraints {
+            $0.centerY.equalTo(nameStack)
+            $0.trailing.equalToSuperview().inset(16)
+        }
+        
+        wishWellIcon.snp.makeConstraints {
+            $0.size.equalTo(24)
+        }
+        
+        container.snp.makeConstraints {
+            $0.top.equalTo(nameStack.snp.bottom).offset(15)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(147)
+        }
+        
+        totalStack.snp.makeConstraints {
+            $0.top.equalTo(container.snp.top).offset(27)
+            $0.centerX.equalTo(container)
+        }
+        
+        line.snp.makeConstraints {
+            $0.top.equalTo(container.snp.bottom).offset(17)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(2)
+        }
+        
+        wishCollectionView.snp.makeConstraints {
+            $0.top.equalTo(line.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview()
+        }
+        
+    }
     
+    // MARK: - Configuration
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    func configureUserInfo(name: String, price: Int) {
+        nameLabel.setTypo(.title3_16_SB, text: name)
+        coinChip.configure(style: .currentCoinChip, icon: coinImg, text: "\(price) 개")
+    }
 }
