@@ -52,8 +52,17 @@ extension WishWellViewController: UICollectionViewDataSource {
         }
         cell.configure(name: data.name, price: data.price)
         
-        cell.onTapComplete = {
-            print("\(data.name) 구매 버튼 클릭됨")
+        cell.onTapComplete = { [weak self] in
+            guard let self = self, let data = viewModel?.wishList[indexPath.item] else { return }
+            let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
+            
+            self.view.showDialog(state: dialogState) { [weak self] in
+                let confirmState = ConfirmBox.State.wishWell(wish: data.name)
+                self?.view.showConfirm(state: confirmState)
+//                DispatchQueue.main.asyncAfter(deadline: .now()) {
+//                    self?.view.showConfirm(state: confirmState)
+//                }
+            }
         }
         
         return cell
@@ -72,6 +81,5 @@ extension WishWellViewController: UICollectionViewDelegateFlowLayout {
 #Preview {
     WishWellViewController(
         viewModel: WishWellViewModel(),
-        diContainer: AppDIContainer.shared
-    )
+        diContainer: AppDIContainer.shared)
 }
