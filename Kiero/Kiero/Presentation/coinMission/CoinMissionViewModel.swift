@@ -10,7 +10,7 @@ import Combine
 
 struct DailyMissionData {
     let date: Date
-    let missions: [(name: String, reward: Int, isCompleted: Bool)]
+    let missions: [(id: Int64, name: String, reward: Int, isCompleted: Bool)]
 }
 
 final class CoinMissionViewModel: BaseViewModel, ViewModelType {
@@ -28,17 +28,17 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     
     private let missionDataSubject = CurrentValueSubject<[DailyMissionData], Never>([
         DailyMissionData(date: Date(), missions: [
-            ("설거지하기", 50, false),
-            ("동생 숙제 도와주기", 50, false),
-            ("강아지 하리 산책시키기", 50, true)
+            (1, "설거지하기", 50, false),
+            (2, "동생 숙제 도와주기", 50, false),
+            (3, "강아지 하리 산책시키기", 50, true)
         ]),
         DailyMissionData(date: Calendar.current.date(byAdding: .day, value: 1, to: Date())!, missions: [
-            ("방 청소하기", 30, false),
-            ("일기 쓰기", 20, false)
+            (4, "방 청소하기", 30, false),
+            (5, "일기 쓰기", 20, false)
         ]),
         DailyMissionData(date: Calendar.current.date(byAdding: .day, value: 3, to: Date())!, missions: [
-            ("방 청소하기", 30, false),
-            ("일기 쓰기", 20, false)
+            (6, "방 청소하기", 30, false),
+            (7, "일기 쓰기", 20, false)
         ]),
     ])
     
@@ -51,5 +51,9 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
             
         return Output(missionData: missionDataSubject.eraseToAnyPublisher())
+    }
+    
+    func getCoin(reward: Int) {
+        self.currentCoinCount += reward
     }
 }

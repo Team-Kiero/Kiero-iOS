@@ -15,12 +15,9 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     private let rootView = CoinMissionView()
     private var dataSource: [DailyMissionData] = []
     
-    
     // MARK: - Life Cycle
     
-    override func loadView() {
-        view = rootView
-    }
+    override func loadView() { view = rootView }
     
     // MARK: - Setup Methods
     
@@ -29,6 +26,13 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
             rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
         }
     }
+    
+    override func setDelegate() {
+        rootView.missionCollectionView.delegate = self
+        rootView.missionCollectionView.dataSource = self
+    }
+    
+    // MARK: - Bind
     
     override func bind(viewModel: CoinMissionViewModel) {
         let input = CoinMissionViewModel.Input(
@@ -44,15 +48,10 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
             }
             .store(in: &cancellables)
     }
-    
-    override func setDelegate() {
-        rootView.missionCollectionView.delegate = self
-        rootView.missionCollectionView.dataSource = self
-    }
 }
 
 // MARK: - DataSource
-
+    
 extension CoinMissionViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dataSource.count
@@ -65,7 +64,13 @@ extension CoinMissionViewController: UICollectionViewDataSource {
         ) as? DailyMissionCell else { return UICollectionViewCell() }
         
         let data = dataSource[indexPath.item]
-        cell.configure(date: data.date, missions: data.missions)
+        cell.configure(
+            date: data.date,
+            missions: data.missions
+        )
+        cell.missionTapHandler = { [weak self] id, name in
+            self?.handleMissionTap(id: id, name: name)
+        }
         return cell
     }
 }
@@ -76,5 +81,49 @@ extension CoinMissionViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (collectionView.bounds.width - 31)
         return CGSize(width: width, height: 10)
+    }
+}
+
+private extension CoinMissionViewController {
+    func handleMissionTap(id: Int64, name: String) {
+        let dialogState = DialogBox.State.missionComplete(title: name)
+        view.showDialog(state: dialogState) { [weak self] in
+            guard let self = self else { return }
+            
+            var rewardAmount = 0
+            for data in self.dataSource {
+                if let mission = data.missions.first(where: { $0.id == id }) {
+                    rewardAmount = mission.reward
+                    break
+                }
+            }
+            self.view.showConfirm(state: .coinMission(count: rewardAmount)) {
+                self.completeMissionDirectly(id: id, reward: rewardAmount)
+            }
+        }
+    }
+    
+    private func completeMissionDirectly(id: Int64, reward: Int) {
+        viewModel?.getCoin(reward: reward)
+        
+        for (sectionIndex, dayDate) in dataSource.enumerated() {
+            if let missionIndex = dayDate.missions.firstIndex(where: {$0.id == id}) {
+                var updatedMissions = dayDate.missions
+                updatedMissions[missionIndex].isCompleted = true
+                
+                dataSource[sectionIndex] = DailyMissionData(
+                    date: dayDate.date,
+                    missions: updatedMissions
+                )
+                break
+            }
+        }
+        
+        if let vm = viewModel {
+            rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
+        }
+        rootView.missionCollectionView.reloadData()
+        
+        // TODO: 서버에게 변경된 금화 데이터 전송
     }
 }
