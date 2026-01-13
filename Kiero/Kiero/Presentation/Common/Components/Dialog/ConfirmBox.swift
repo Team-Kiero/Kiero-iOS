@@ -24,7 +24,7 @@ final class ConfirmBox: UIView {
             case .coinMission(let count):
                 return "금나와라 뚝딱!\n금화 \(count)개를 만들었어!"
             case .wishWell(let wish):
-                return wish + "를\n획득했어요!"
+                return wish + "를\n획득했어!"
             }
         }
         
