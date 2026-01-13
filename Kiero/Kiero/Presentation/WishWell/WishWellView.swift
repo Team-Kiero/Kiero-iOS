@@ -35,6 +35,7 @@ final class WishWellView: BaseUIView {
     private let wishWellIcon = UIImageView().then {
         $0.image = UIImage(resource: .icStarRound)
     }
+    
     private let wishWellLabel = UILabel().then {
         $0.textColor = .white
         $0.setTypo(.title2_20_SB, text: "소원의 우물")
@@ -129,7 +130,6 @@ final class WishWellView: BaseUIView {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
-        
     }
     
     // MARK: - Configuration

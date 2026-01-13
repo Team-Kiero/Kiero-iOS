@@ -47,6 +47,8 @@ final class WishWellCell: UICollectionViewCell {
         }
     }
     
+    // MARK: - Bind
+    
     private func bind() {
         wishBox.onTap = { [weak self] in
             self?.onTapComplete?()
