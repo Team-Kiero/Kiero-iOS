@@ -102,6 +102,8 @@ private extension WishWellViewController {
             
             vm.purchaseCoin(price: wish.price)
             self.rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
+            
+            // TODO: 서버에게 변경된 금화 데이터 전송
         }
     }
 }
