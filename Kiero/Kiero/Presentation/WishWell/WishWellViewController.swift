@@ -11,9 +11,15 @@ import Then
 
 final class WishWellViewController: BaseViewController<WishWellViewModel>{
     
+    // MARK: - Properties
+    
     private let rootView = WishWellView()
     
+    // MARK: - Life Cycle
+    
     override func loadView() { view = rootView }
+    
+    // MARK: - Setup Methods
     
     override func setUI() {
         if let vm = viewModel {
@@ -26,6 +32,8 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         rootView.wishCollectionView.delegate = self
     }
     
+    // MARK: - Bind
+    
     override func bind(viewModel: WishWellViewModel) {
         super.bind(viewModel: viewModel)
         
@@ -36,7 +44,6 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         }
     }
 }
-
 
 // MARK: - DataSource
 
@@ -53,22 +60,7 @@ extension WishWellViewController: UICollectionViewDataSource {
         
         cell.configure(name: data.name, price: data.price)
         cell.onTapComplete = { [weak self] in
-            guard let self = self,
-                    let data = viewModel?.wishList[indexPath.item] else { return }
-            let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
-            
-            self.view.showDialog(state: dialogState) { [weak self] in
-                let confirmState = ConfirmBox.State.wishWell(wish: data.name)
-                self?.view.showConfirm(state: confirmState) { [weak self] in
-                    guard let self = self,
-                            let vm = self.viewModel else { return }
-                    
-                    vm.purchaseCoin(price: data.price)
-                    
-                    self.rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
-                }
-                
-            }
+            self?.handleWishSelection(at: indexPath)
         }
         return cell
     }
@@ -80,5 +72,36 @@ extension WishWellViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (collectionView.bounds.width - (16 * 2) - 13) / 2
         return CGSize(width: width, height: 113)
+    }
+}
+
+// MARK: - Action
+
+private extension WishWellViewController {
+    func handleWishSelection(at indexPath: IndexPath) {
+        guard let vm = viewModel else { return }
+        let data = vm.wishList[indexPath.item]
+        
+        if vm.currentCoinCount < data.price {
+            Toast.show(message: "금화가 부족해! 미션을 더 하고 오자!")
+            return
+        }
+        let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
+        
+        view.showDialog(state: dialogState) { [weak self] in
+            self?.showPurchaseConfirm(for: data)
+        }
+    }
+    
+    func showPurchaseConfirm(for wish: Wish) {
+        let confirmState = ConfirmBox.State.wishWell(wish: wish.name)
+        
+        view.showConfirm(state: confirmState) { [weak self] in
+            guard let self = self,
+                  let vm = self.viewModel else { return }
+            
+            vm.purchaseCoin(price: wish.price)
+            self.rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
+        }
     }
 }
