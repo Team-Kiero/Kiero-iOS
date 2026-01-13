@@ -107,5 +107,6 @@ private final class ToastView: UIView {
     
     func configure(message: String) {
         self.messageLabel.setTypo(.body4_12_R, text: message)
+        self.messageLabel.textAlignment = .center
     }
 }
