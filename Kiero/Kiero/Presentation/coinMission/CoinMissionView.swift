@@ -88,13 +88,12 @@ final class CoinMissionView: BaseUIView {
         
         speechField.snp.makeConstraints {
             $0.top.equalTo(nameStack.snp.bottom).offset(82)
-            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview()
         }
         
         missionLabel.snp.makeConstraints {
             $0.top.equalTo(speechField.snp.bottom).offset(27)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(20)
         }
         
         missionCollectionView.snp.makeConstraints {
