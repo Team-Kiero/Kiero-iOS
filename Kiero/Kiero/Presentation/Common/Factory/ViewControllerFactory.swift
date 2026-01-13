@@ -16,4 +16,3 @@ public protocol ViewControllerFactory {
     func makeCoinMissionViewController() -> UIViewController
     func makeWishWellViewController() -> UIViewController
 }
-    
