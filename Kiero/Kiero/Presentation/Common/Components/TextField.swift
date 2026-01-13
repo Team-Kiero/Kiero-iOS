@@ -7,12 +7,22 @@
 
 import UIKit
 
+import SnapKit
+
 enum UserRole {
     case parent(ParentField)
     case child(ChildField)
 
-    enum ParentField { case lastName, firstName }
-    enum ChildField { case lastName, firstName, inviteCode }
+    enum ParentField {
+        case lastName
+        case firstName
+        case totalName
+    }
+    enum ChildField {
+        case lastName
+        case firstName
+        case inviteCode
+    }
 }
 
 extension UserRole {
@@ -20,6 +30,7 @@ extension UserRole {
         switch self {
         case .parent(.lastName): return "아이의 성을 입력해주세요."
         case .parent(.firstName): return "아이의 이름을 입력해주세요."
+        case .parent(.totalName): return ""
         case .child(.lastName): return "성"
         case .child(.firstName): return "이름"
         case .child(.inviteCode): return "초대 코드"
@@ -30,35 +41,182 @@ extension UserRole {
         switch self {
         case .parent(.lastName): return "성"
         case .parent(.firstName): return "이름"
+        case .parent(.totalName): return ""
         case .child(.lastName): return "성을 입력해줘!"
         case .child(.firstName): return "이름을 입력해줘!"
-        case .child(.inviteCode): return "부모님께 받은 비밀 암호 6자리를 입력해줘!"
+        case .child(.inviteCode): return "부모님께 받은 비밀 암호를 입력해줘!"
         }
     }
 
-    var regex: String {
+    var regex: String? {
         switch self {
-        case .parent(.lastName), .child(.lastName):
-            return "^[가-힣]{1,2}$"
-        case .parent(.firstName), .child(.firstName):
-            return "^[가-힣]{1,5}$"
+        case .parent(.lastName), .child(.lastName), .parent(.firstName), .parent(.totalName), .child(.firstName):
+            return "^[가-힣]{0,5}$"
         case .child(.inviteCode):
-            return "^[A-Za-z0-9]{6,10}$"
+            return nil
         }
     }
 
-    var errorMessage: String {
+    var errorAppear: Bool {
         switch self {
-        case .parent(.lastName), .child(.lastName):
-            return "특수문자, 이모지, 공백을 포함하지 않은 이름을 입력해주세요"
-        case .parent(.firstName), .child(.firstName):
-            return "이름은 한글로 입력해주세요."
-        case .child(.inviteCode):
-            return "초대코드는 영문/숫자 6~10자입니다."
+        case .parent(.lastName), .child(.lastName), .parent(.firstName), .child(.firstName):
+            return true
+        case .parent(.totalName), .child(.inviteCode):
+            return false
         }
     }
 }
 
 final class TextField: UIView {
     
+    // MARK: - Properties
+    
+    private let type: UserRole
+    
+    private var hasInteracted: Bool = false
+    
+    // MARK: - UI Components
+    
+    private let titleLabel = UILabel().then {
+        $0.textColor = .gray400
+        $0.setTypo(.body3_14_R)
+    }
+    
+    private let textField = UITextField().then {
+        $0.defaultTextAttributes = [
+            .kern: -0.005,
+            .font: UIFont.body4_12_R,
+            .foregroundColor: UIColor.white
+        ]
+        $0.addLeftPadding(13)
+        $0.backgroundColor = .gray900
+        $0.layer.cornerRadius = 15
+        
+    }
+    
+    private let errorImage = UIImageView().then {
+        $0.image = .icInfo
+            .withTintColor(.point)
+            .resized(to: CGSize(width: 11, height: 11))
+        $0.alpha = 0
+    }
+    
+    private let errorLabel = UILabel().then {
+        $0.textColor = .point
+        $0.alpha = 0
+    }
+    
+    // MARK: - Life Cycle
+    
+    init(type: UserRole) {
+        self.type = type
+        super.init(frame: .zero)
+        setUI()
+        setLayout()
+        setDelegate()
+        configure(type: type)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setting Methods
+    
+    private func setUI() {
+        addSubviews(
+            titleLabel,
+            textField,
+            errorImage,
+            errorLabel
+        )
+    }
+    
+    private func setLayout() {
+        titleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(30)
+            $0.leading.equalToSuperview().inset(16)
+        }
+        
+        textField.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(6)
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.height.equalTo(45)
+        }
+        
+        errorLabel.snp.makeConstraints {
+            $0.top.equalTo(textField.snp.bottom).offset(6)
+            $0.trailing.equalToSuperview().inset(16)
+        }
+        
+        errorImage.snp.makeConstraints {
+            $0.centerY.equalTo(errorLabel.snp.centerY)
+            $0.trailing.equalTo(errorLabel.snp.leading).offset(-4)
+        }
+    }
+    
+    private func setDelegate() {
+        textField.delegate = self
+    }
+    
+    private func configure(type: UserRole) {
+        titleLabel.text = type.title
+        titleLabel.isHidden = type.title.isEmpty
+        textField.attributedPlaceholder = NSAttributedString(
+                string: type.placeholder,
+                attributes: [
+                    .kern: -0.005,
+                    .font: UIFont.body4_12_R,
+                    .foregroundColor: UIColor.gray700
+                ]
+            )
+    }
+    
+    private func validate() {
+        textField.layer.borderWidth = 0
+        textField.layer.borderColor = UIColor.clear.cgColor
+        
+        guard type.errorAppear else { return }
+        guard let regex = type.regex else { return }
+        
+        let text = (textField.text ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard hasInteracted else { return }
+        guard !text.isEmpty else { return }
+        
+        let isValid = NSPredicate(
+            format: "SELF MATCHES %@",
+            regex
+        ).evaluate(with: text)
+        
+        updateErrorUI(isValid: isValid)
+    }
+    
+    private func updateErrorUI(isValid: Bool) {
+        if isValid {
+            textField.layer.borderWidth = 0
+            textField.layer.borderColor = UIColor.clear.cgColor
+            return
+        }
+        
+        errorLabel.setTypo(.body5_10_R, text: "특수문자, 이모지, 공백을 포함하지 않은 이름을 입력해주세요")
+        errorLabel.alpha = 1
+        errorImage.alpha = 1
+        
+        textField.layer.borderWidth = 0.5
+        textField.layer.borderColor = UIColor.point.cgColor
+    }
+}
+
+extension TextField: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        hasInteracted = true
+        textField.layer.borderColor = UIColor.gray100.cgColor
+        textField.layer.borderWidth = 0.5
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        validate()
+    }
 }
