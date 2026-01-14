@@ -98,7 +98,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         return DailyJourneyViewData(
             kkubiImageName: "intro_1",
-            bubbleText: "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(scheduleOrder)번째 여정은 \(name) 야!",
+            bubbleText: "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(name) 야!",
             highlightKeywords: [name, stoneType],
             journeyTimeText: "오후 02:00 ~ 오후 04:00",
             isMissionActive: true,
