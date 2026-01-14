@@ -143,7 +143,3 @@ final class CoinMissionView: BaseUIView {
         emptyLabel.isHidden = !isEmpty
     }
 }
-
-
-
-
