@@ -5,7 +5,6 @@
 //  Created by 안치욱 on 1/14/26.
 //
 
-
 import UIKit
 
 final class DownTriangleView: UIView {
