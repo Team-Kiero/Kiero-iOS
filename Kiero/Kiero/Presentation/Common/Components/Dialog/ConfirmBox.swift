@@ -94,7 +94,7 @@ final class ConfirmBox: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: Setup Methods
+    // MARK: - Setup Methods
     
     private func setStyle() {
         backgroundColor = .gray900

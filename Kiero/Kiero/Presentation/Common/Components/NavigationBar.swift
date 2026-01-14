@@ -40,14 +40,14 @@ final class NavigationBar: UIView {
     
     // MARK: - Life Cycle
     
-    init(type: NavigationBarType) {
+    init(type: NavigationBarType, backgroundColor: UIColor = .kBlack) {
         super.init(frame: .zero)
+        self.backgroundColor = backgroundColor
         
-        setStyle()
         setUI()
         setLayout()
         configure(with: type)
-        setupActions()
+        setAction()
     }
     
     required init?(coder: NSCoder) {
@@ -55,10 +55,6 @@ final class NavigationBar: UIView {
     }
     
     // MARK: - Setup Methods
-    
-    private func setStyle() {
-        self.backgroundColor = .kBlack
-    }
     
     private func setUI() {
         addSubviews(leftButton, titleLabel, rightButton)
@@ -102,9 +98,13 @@ final class NavigationBar: UIView {
         }
     }
     
-    private func setupActions() {
+    private func setAction() {
         leftButton.addTarget(self, action: #selector(didTapLeft), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(didTapRight), for: .touchUpInside)
+    }
+    
+    func updateTitle(_ title: String) {
+        titleLabel.setTypo(.title3_16_SB, text: title)
     }
     
     @objc
