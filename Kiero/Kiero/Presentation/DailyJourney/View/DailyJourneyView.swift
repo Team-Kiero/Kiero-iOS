@@ -155,7 +155,7 @@ final class DailyJourneyView: BaseUIView {
         )
         
         journeyTimeView.configure(
-            title: "\(data.scheduleOrder)번째 여정 시간",
+            title: "\(data.scheduleOrderText)번째 여정 시간",
             time: data.journeyTimeText
         )
         
@@ -175,6 +175,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         let lines = data.bubbleText.components(separatedBy: "\n")
+        
         speechField.configure(
             name: "꾸비",
             lines: lines,
