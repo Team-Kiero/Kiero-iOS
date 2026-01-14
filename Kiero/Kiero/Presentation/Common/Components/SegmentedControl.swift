@@ -50,7 +50,7 @@ final class SegmentedControl: UIView {
     // MARK: - Setup Methods
     
     private func setStyle() {
-        self.backgroundColor = .kBlack
+        self.backgroundColor = .gray900
     }
     
     private func setUI() {

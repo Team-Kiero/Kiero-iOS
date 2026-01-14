@@ -67,13 +67,13 @@ final class PagingHeader: UIView {
         
         leftButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.centerX.equalToSuperview().offset(-84)
+            $0.trailing.equalTo(titleLabel.snp.leading).offset(-44)
             $0.size.equalTo(24)
         }
         
         rightButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.centerX.equalToSuperview().offset(84)
+            $0.leading.equalTo(titleLabel.snp.trailing).offset(44)
             $0.size.equalTo(24)
         }
     }

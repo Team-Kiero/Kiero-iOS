@@ -82,7 +82,7 @@ final class TimeField: UIView {
     
     private func updateStyle() {
         if isSelected {
-            self.layer.borderColor = UIColor.main.cgColor
+            self.layer.borderColor = UIColor.gray900.cgColor
             titleLabel.textColor = .main
             timeLabel.textColor = .main
         } else {
