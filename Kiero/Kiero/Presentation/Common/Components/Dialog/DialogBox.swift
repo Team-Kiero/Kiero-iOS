@@ -29,7 +29,7 @@ final class DialogBox: UIView {
             case .wishWell(let title, _):
                 return title
             case .nextJourney:
-                return "다음여정으로 갈까요?"
+                return "다음 여정으로 갈거야?"
             }
         }
         
@@ -42,7 +42,7 @@ final class DialogBox: UIView {
             case .wishWell:
                 return "금화를 사용해 소원을 빌까?"
             case .nextJourney:
-                return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어요!"
+                return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
             }
         }
         
