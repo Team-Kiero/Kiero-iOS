@@ -49,7 +49,7 @@ extension UIView {
     
     func showConfirm(state: ConfirmBox.State, onConfirm: (() -> Void)? = nil) {
         let dimView = UIView().then {
-            $0.backgroundColor = .black.withAlphaComponent(0.75)
+            $0.backgroundColor = .kBlack.withAlphaComponent(0.75)
             $0.alpha = 0
         }
         let confirmBox = ConfirmBox()
