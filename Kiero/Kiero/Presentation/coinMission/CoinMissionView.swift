@@ -57,11 +57,19 @@ final class CoinMissionView: BaseUIView {
         $0.register(DailyMissionCell.self, forCellWithReuseIdentifier: DailyMissionCell.identifier)
     }
     
+    private let emptyLabel = UILabel().then {
+        $0.textColor = .gray400
+        $0.setTypo(.title3_16_SB, text: "아직 등록된 미션이 없어!")
+        $0.isHidden = true
+        
+    }
+    
     // MARK: - Setup Methods
     
     override func setUI() {
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         addSubviews(nameStack, coinChip, characterImg, speechField, missionLabel, missionCollectionView)
+        addSubview(emptyLabel)
     }
     
     override func setLayout() {
@@ -101,6 +109,11 @@ final class CoinMissionView: BaseUIView {
             $0.bottom.equalToSuperview()
             $0.horizontalEdges.equalToSuperview()
         }
+        
+        emptyLabel.snp.makeConstraints {
+            $0.top.equalTo(speechField.snp.bottom).offset(152)
+            $0.centerX.equalToSuperview()
+        }
     }
     
     // MARK: - Configuration
@@ -114,6 +127,13 @@ final class CoinMissionView: BaseUIView {
             lines: ["우리 함께 멋진 금화를 만들어볼까?"],
             highlightKeywords: ["멋진 금화"]
         )
+    }
+    
+    func updateEmptyState(isEmpty: Bool) {
+        missionLabel.isHidden = isEmpty
+        missionCollectionView.isHidden = isEmpty
+        
+        emptyLabel.isHidden = !isEmpty
     }
 }
 

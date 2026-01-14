@@ -43,15 +43,21 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
         output.missionData
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
-                self?.dataSource = data
-                self?.rootView.missionCollectionView.reloadData()
+                guard let self = self else { return }
+                
+                self.dataSource = data
+                let isEmpty = data.isEmpty
+                self.rootView.updateEmptyState(isEmpty: isEmpty)
+                if !isEmpty {
+                    self.rootView.missionCollectionView.reloadData()
+                }
             }
             .store(in: &cancellables)
     }
 }
 
 // MARK: - DataSource
-    
+
 extension CoinMissionViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return dataSource.count
