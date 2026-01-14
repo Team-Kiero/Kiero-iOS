@@ -14,6 +14,7 @@
 		F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D72F123F0D007B1EE4 /* KakaoSDKAuth */; };
 		F6B015DA2F123F0D007B1EE4 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */; };
 		F6B018522F136542007B1EE4 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F6B018512F136542007B1EE4 /* CombineMoya */; };
+		F6B01F172F1779EC007B1EE4 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F6B01F162F1779EC007B1EE4 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,9 +49,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				24DF523F2F0A6487007146AC /* SnapKit in Frameworks */,
-				F6B015D62F123F0D007B1EE4 /* KakaoSDK in Frameworks */,
-				F6B015DA2F123F0D007B1EE4 /* KakaoSDKUser in Frameworks */,
-				F6B018522F136542007B1EE4 /* CombineMoya in Frameworks */,
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
 				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 				F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */,
@@ -111,6 +109,7 @@
 				F6B015D72F123F0D007B1EE4 /* KakaoSDKAuth */,
 				F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */,
 				F6B018512F136542007B1EE4 /* CombineMoya */,
+				F6B01F162F1779EC007B1EE4 /* Kingfisher */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero.app */;
@@ -145,6 +144,7 @@
 				24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */,
 				249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */,
 				F6B015D42F123F0D007B1EE4 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				F6B01F152F1779EC007B1EE4 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -418,6 +418,14 @@
 				minimumVersion = 2.27.1;
 			};
 		};
+		F6B01F152F1779EC007B1EE4 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.6.2;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -455,6 +463,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */;
 			productName = CombineMoya;
+		};
+		F6B01F162F1779EC007B1EE4 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F6B01F152F1779EC007B1EE4 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

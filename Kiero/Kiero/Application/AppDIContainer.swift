@@ -16,10 +16,8 @@ final class AppDIContainer: ViewControllerFactory {
 
 extension AppDIContainer {
     func makeScheduleViewController() -> UIViewController {
-        // TODO: ScheduleViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = ScheduleViewModel()
+        return ScheduleViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeNotificationFeedViewController() -> UIViewController {
@@ -27,6 +25,13 @@ extension AppDIContainer {
         let vc = UIViewController()
         vc.view.backgroundColor = .kBlack
         return vc
+    }
+}
+
+extension AppDIContainer {
+    func makeAddScheduleViewController() -> UIViewController {
+        let viewModel = AddScheduleViewModel()
+        return AddScheduleViewController(viewModel: viewModel, diContainer: self)
     }
 }
 
@@ -41,16 +46,12 @@ extension AppDIContainer {
     }
     
     func makeCoinMissionViewController() -> UIViewController {
-        // TODO: CoinMissionViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = CoinMissionViewModel()
+        return CoinMissionViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeWishWellViewController() -> UIViewController {
-        // TODO: WishWellViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = WishWellViewModel()
+        return WishWellViewController(viewModel: viewModel, diContainer: self)
     }
 }

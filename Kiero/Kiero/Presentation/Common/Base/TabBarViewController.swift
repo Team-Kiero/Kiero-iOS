@@ -28,11 +28,11 @@ public final class TabBarViewController: UITabBarController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.tabBar.isHidden = true
-        setupViewControllers()
-        setupCustomTabBarUI()
+        setViewControllers()
+        setCustomTabBarUI()
     }
     
-    private func setupViewControllers() {
+    private func setViewControllers() {
         if isParent {
             let scheduleVC = factory.makeScheduleViewController()
             let notificationVC = factory.makeNotificationFeedViewController()
@@ -58,7 +58,7 @@ public final class TabBarViewController: UITabBarController {
         customTabBar.updateSelection(0)
     }
 
-    private func setupCustomTabBarUI() {
+    private func setCustomTabBarUI() {
         view.addSubview(customTabBar)
         view.clipsToBounds = false
         
