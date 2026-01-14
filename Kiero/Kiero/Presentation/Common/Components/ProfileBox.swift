@@ -35,8 +35,10 @@ final class ProfileBox: UIView {
     
     init(name: String, profileURL: String) {
         super.init(frame: .zero)
+        setStyle()
         setUI()
         setLayout()
+        setAction()
         configure(name: name, url: profileURL)
     }
     
@@ -46,6 +48,11 @@ final class ProfileBox: UIView {
     
     // MARK: - Setting Methods
     
+    private func setStyle() {
+        backgroundColor = .kBlack
+        layer.cornerRadius = 12
+    }
+    
     private func setUI() {
         addSubviews(
             nameLabel,
@@ -54,20 +61,17 @@ final class ProfileBox: UIView {
     }
     
     private func setLayout() {
-        self.snp.makeConstraints {
-            $0.width.equalTo(100)
-            $0.height.equalTo(40)
-        }
-        
         nameLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalTo(profileImageView.snp.leading)
+            $0.leading.equalToSuperview().inset(21)
+            $0.trailing.equalTo(profileImageView.snp.leading).offset(-5)
         }
         
         profileImageView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalToSuperview()
-            $0.
+            $0.verticalEdges.equalToSuperview().inset(5)
+            $0.trailing.equalToSuperview().inset(21)
+            $0.size.equalTo(30)
         }
     }
     
@@ -76,18 +80,13 @@ final class ProfileBox: UIView {
         addGestureRecognizer(tap)
     }
     
-    private func configure(name: String, url: String) {
+    private func configure(name: String, url: String?) {
         nameLabel.setTypo(.body2_16_R, text: name)
-        profileImageView.kf.setImage(with: URL(string: url), placeholder: UIImage.icParentProfile)
+        profileImageView.kf.setImage(with: URL(string: url ?? ""), placeholder: UIImage.icParentProfile)
     }
     
     @objc
     private func viewDidTap() {
         onTap?()
     }
-}
-
-
-#Preview {
-    ProfileBox(name: "안치욱", profileURL: "https://img1.kakaocdn.net/thumb/R640x640.q70/?fname=https://t1.kakaocdn.net/account_images/default_profile.jpeg")
 }
