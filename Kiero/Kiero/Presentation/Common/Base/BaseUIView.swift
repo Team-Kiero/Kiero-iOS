@@ -11,6 +11,8 @@ class BaseUIView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
+        
+        setStyle()
         setUI()
         setLayout()
     }
@@ -18,8 +20,13 @@ class BaseUIView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func setStyle() {
+        backgroundColor = .kBlack
+    }
 
     func setUI() {}
 
     func setLayout() {}
 }
+

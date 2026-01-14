@@ -62,9 +62,8 @@ private final class ToastView: UIView {
     // MARK: - UI Components
     
     private let messageLabel: UILabel = UILabel().then {
-        $0.textColor = .schedule1
+        $0.textColor = .gray900
         $0.textAlignment = .center
-        $0.font = .body4_12_R
         $0.numberOfLines = 1
     }
     
@@ -84,7 +83,7 @@ private final class ToastView: UIView {
     // MARK: - Setup Methods
     
     private func setStyle() {
-        self.backgroundColor = .gray900
+        self.backgroundColor = .schedule1
         self.layer.cornerRadius = 12
         self.clipsToBounds = true
         self.alpha = 0.0
@@ -107,6 +106,7 @@ private final class ToastView: UIView {
     }
     
     func configure(message: String) {
-        self.messageLabel.text = message
+        self.messageLabel.setTypo(.body4_12_R, text: message)
+        self.messageLabel.textAlignment = .center
     }
 }
