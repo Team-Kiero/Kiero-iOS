@@ -90,6 +90,8 @@ extension CoinMissionViewController: UICollectionViewDelegateFlowLayout {
     }
 }
 
+// MARK: - Action
+
 private extension CoinMissionViewController {
     func handleMissionTap(id: Int64, name: String) {
         let dialogState = DialogBox.State.missionComplete(title: name)
@@ -129,7 +131,6 @@ private extension CoinMissionViewController {
             rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
         }
         rootView.missionCollectionView.reloadData()
-        
-        // TODO: 서버에게 변경된 금화 데이터 전송
+        // TODO: 서버에게 변경된 금화, 상태 데이터 전송
     }
 }

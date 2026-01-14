@@ -68,7 +68,14 @@ final class CoinMissionView: BaseUIView {
     
     override func setUI() {
         nameStack.addArrangedSubviews(iconImage, nameLabel)
-        addSubviews(nameStack, coinChip, characterImg, speechField, missionLabel, missionCollectionView)
+        addSubviews(
+            nameStack,
+            coinChip,
+            characterImg,
+            speechField,
+            missionLabel,
+            missionCollectionView
+        )
         addSubview(emptyLabel)
     }
     
