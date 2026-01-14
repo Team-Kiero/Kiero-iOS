@@ -49,7 +49,7 @@ final class WeekdaySelectionView: UIView {
     
     required init?(coder: NSCoder) { nil }
     
-    // MARK: - Setting Methods
+    // MARK: - Setup Methods
     
     private func setUI() {
         days.enumerated().forEach { index, title in

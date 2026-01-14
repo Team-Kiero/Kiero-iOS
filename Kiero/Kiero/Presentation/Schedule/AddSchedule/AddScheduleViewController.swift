@@ -237,7 +237,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         self.present(vc, animated: false)
     }
     
-    @objc private func textFieldDidChange(_ textField: UITextField) {
+    @objc
+    private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         
         if text.count > 10 {

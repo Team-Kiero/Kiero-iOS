@@ -52,7 +52,7 @@ final class ColorPickerViewController: BaseBottomSheetViewController {
         configureChips()
     }
     
-    // MARK: - Setting Methods
+    // MARK: - Setup Methods
     
     private func setStyle() {
         navigationBar.updateTitle("컬러")
@@ -107,7 +107,8 @@ final class ColorPickerViewController: BaseBottomSheetViewController {
         }
     }
     
-    @objc private func didTapChip(_ gesture: UITapGestureRecognizer) {
+    @objc
+    private func didTapChip(_ gesture: UITapGestureRecognizer) {
         guard let tappedChip = gesture.view as? ColorChip else { return }
         
         colorChips.forEach { $0.isSelected = ($0 == tappedChip) }

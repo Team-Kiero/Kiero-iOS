@@ -42,7 +42,7 @@ final class TimePickerViewController: BaseBottomSheetViewController {
         setAction()
     }
     
-    // MARK: - Setting Methods
+    // MARK: - Setup Methods
     
     private func setUI() {
         containerView.addSubviews(navigationBar, datePicker)

@@ -49,7 +49,7 @@ final class TimeSelectionView: UIView {
     
     required init?(coder: NSCoder) { nil }
     
-    // MARK: - Setting Methods
+    // MARK: - Setup Methods
     
     private func setUI() {
         addSubviews(startTimeField, arrowIcon, endTimeField)
