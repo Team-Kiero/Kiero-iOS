@@ -88,8 +88,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-//        navigationController?.isNavigationBarHidden = true
     }
     
     // MARK: - Setup Methods
@@ -175,8 +173,27 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
         
         navigationBar.rightButtonAction = { [weak self] in
-            self?.view.endEditing(true)
-            self?.dismiss(animated: true)
+            guard let self = self else { return }
+            
+            guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
+                Toast.show(message: "일정 이름을 입력해주세요.")
+                return
+            }
+            
+            if self.weekdaySelectionView.selectedIndices.isEmpty {
+                Toast.show(message: "요일을 선택해주세요.")
+                return
+            }
+            
+            if let start = self.currentStartTime, let end = self.currentEndTime {
+                if start >= end {
+                    Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+                    return
+                }
+            }
+            
+            self.view.endEditing(true)
+            self.dismiss(animated: true)
         }
         
         timeSelectionView.startTimeTapAction = { [weak self] in
@@ -186,6 +203,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         timeSelectionView.endTimeTapAction = { [weak self] in
             self?.presentTimePicker(isStart: false)
         }
+        
+        titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
     }
@@ -216,6 +235,16 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
         
         self.present(vc, animated: false)
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        guard let text = textField.text else { return }
+        
+        if text.count > 10 {
+            let index = text.index(text.startIndex, offsetBy: 10)
+            let newString = String(text[..<index])
+            textField.text = newString
+        }
     }
     
     @objc
