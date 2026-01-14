@@ -42,13 +42,11 @@ extension AppDIContainer {
     
     func makeCoinMissionViewController() -> UIViewController {
         let viewModel = CoinMissionViewModel()
-        let vc = CoinMissionViewController(viewModel: viewModel, diContainer: self)
-        return vc
+        return CoinMissionViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeWishWellViewController() -> UIViewController {
         let viewModel = WishWellViewModel()
-        let vc = WishWellViewController(viewModel: viewModel, diContainer: self)
-        return vc
+        return WishWellViewController(viewModel: viewModel, diContainer: self)
     }
 }
