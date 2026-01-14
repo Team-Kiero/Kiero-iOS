@@ -41,15 +41,12 @@ extension AppDIContainer {
     }
     
     func makeCoinMissionViewController() -> UIViewController {
-        // TODO: CoinMissionViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = CoinMissionViewModel()
+        return CoinMissionViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeWishWellViewController() -> UIViewController {
         let viewModel = WishWellViewModel()
-        let vc = WishWellViewController(viewModel: viewModel, diContainer: self)
-        return vc
+        return WishWellViewController(viewModel: viewModel, diContainer: self)
     }
 }
