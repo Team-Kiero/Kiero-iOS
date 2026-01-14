@@ -53,7 +53,6 @@ final class ConfirmBox: UIView {
         $0.textAlignment = .center
         $0.numberOfLines = 2
         $0.textColor = .gray100
-        $0.setTypo(.body3_14_R)
     }
     
     private let actionButton = UIButton().then {
@@ -94,7 +93,7 @@ final class ConfirmBox: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: Setup Methods
+    // MARK: - Setup Methods
     
     private func setStyle() {
         backgroundColor = .gray900
@@ -128,7 +127,8 @@ final class ConfirmBox: UIView {
     // MARK: Configure
     
     func configure(state: State) {
-        messageLabel.text = state.message
+        messageLabel.setTypo(.body3_14_R, text: state.message)
+        messageLabel.textAlignment = .center
         actionButton.setTitle(state.buttonTitle, for: .normal)
     }
     

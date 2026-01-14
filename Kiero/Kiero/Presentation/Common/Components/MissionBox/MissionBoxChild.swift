@@ -20,7 +20,7 @@ final class MissionBoxChild: UIView {
         
         var backgroundColor: UIColor {
             switch self {
-            case .inProgress: return .kBlack
+            case .inProgress: return .gray900
             case .completed: return UIColor.gray900.withAlphaComponent(0.6)
             }
         }
@@ -120,7 +120,9 @@ final class MissionBoxChild: UIView {
     
     private func setLayout() {
         missionBox.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(13)
+            $0.horizontalEdges.equalToSuperview().inset(13)
+            $0.verticalEdges.equalToSuperview().inset(13.5)
+            $0.width.equalTo(343)
         }
         
         completeButton.snp.makeConstraints {

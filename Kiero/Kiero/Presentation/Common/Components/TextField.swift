@@ -122,7 +122,7 @@ final class TextField: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Setting Methods
+    // MARK: - Setup Methods
     
     private func setUI() {
         addSubviews(
