@@ -19,6 +19,8 @@ final class ProfileBox: UIView {
     
     // MARK: - UI Components
     
+    private var placeholderImage = UIImage.icParentProfile.resized(to: CGSize(width: 30, height: 30))
+    
     private let profileImageView = UIImageView().then {
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 15
@@ -28,6 +30,7 @@ final class ProfileBox: UIView {
     
     private let nameLabel = UILabel().then {
         $0.textColor = .white
+        $0.textAlignment = .right
         $0.isUserInteractionEnabled = true
     }
     
@@ -82,7 +85,7 @@ final class ProfileBox: UIView {
     
     private func configure(name: String, url: String?) {
         nameLabel.setTypo(.body2_16_R, text: name)
-        profileImageView.kf.setImage(with: URL(string: url ?? ""), placeholder: UIImage.icParentProfile)
+        profileImageView.kf.setImage(with: URL(string: url ?? ""), placeholder: placeholderImage)
     }
     
     @objc
