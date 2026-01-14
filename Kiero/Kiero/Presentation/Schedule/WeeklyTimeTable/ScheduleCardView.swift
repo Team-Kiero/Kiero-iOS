@@ -64,10 +64,10 @@ final class ScheduleCardView: BaseUIView {
         applyOverflowIfNeeded()
     }
     
-//    override func setStyle() {
-//        self.layer.cornerRadius = 5
-//        self.clipsToBounds = true
-//    }
+    override func setStyle() {
+        self.layer.cornerRadius = 5
+        self.clipsToBounds = true
+    }
     
     override func setUI() {
         addSubviews(topBar, contentStackView)

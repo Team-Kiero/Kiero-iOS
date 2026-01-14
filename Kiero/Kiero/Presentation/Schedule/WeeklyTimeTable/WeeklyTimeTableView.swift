@@ -82,7 +82,7 @@ final class WeeklyTimeTableView: BaseUIView {
         
         gridBackgroundView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(0)
+            $0.leading.equalToSuperview().offset(32)
             $0.trailing.equalToSuperview()
             $0.height.equalTo(totalGridHeight)
         }
