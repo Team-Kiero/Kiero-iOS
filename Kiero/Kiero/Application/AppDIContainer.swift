@@ -34,8 +34,8 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     func makeDailyJourneyViewController() -> UIViewController {
-        // TODO: DailyJourneyViewController()로 치환
-        let vc = UIViewController()
+        let viewModel = DailyJourneyViewModel()
+        let vc = DailyJourneyViewController(viewModel: viewModel, diContainer: self)
         vc.view.backgroundColor = .kBlack
         return vc
     }
