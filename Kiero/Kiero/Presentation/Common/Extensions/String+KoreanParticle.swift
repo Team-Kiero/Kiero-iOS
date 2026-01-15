@@ -8,7 +8,7 @@
 import Foundation
 
 extension String {
-    private var hasFinalSound: Bool {
+    private var hasCoda: Bool {
         let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let last = trimmed.last else { return false }
         guard let scalar = last.unicodeScalars.first else { return false }
@@ -20,22 +20,22 @@ extension String {
     }
     
     // 이가 / 가
-    var igParticle: String {
-        hasFinalSound ? "이가" : "가"
+    var subjectMarker: String {
+        hasCoda ? "이가" : "가"
     }
     
     // 은 / 는
-    var enParticle: String {
-        hasFinalSound ? "은" : "는"
+    var topicMarker: String {
+        hasCoda ? "은" : "는"
     }
     
     // 을 / 를
-    var erParticle: String {
-        hasFinalSound ? "을" : "를"
+    var objectMarker: String {
+        hasCoda ? "을" : "를"
     }
     
     // 아 / 야
-    var ayParticle: String {
-        hasFinalSound ? "아" : "야"
+    var vocativeMarker: String {
+        hasCoda ? "아" : "야"
     }
 }

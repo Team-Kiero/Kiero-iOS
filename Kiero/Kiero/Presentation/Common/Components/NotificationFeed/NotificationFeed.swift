@@ -166,7 +166,7 @@ final class NotificationFeed: UIView {
         case let .finishSchedule(time, childName, schedule, proofImage, isExpanded):
             timeLabel.setTypo(.body4_12_R, text: time)
             downButton.isHidden = false
-            let subject = "\(childName)\(childName.igParticle)"
+            let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(schedule)에 도착했어요."
             messageLabel.attributedText = makeMessage(message: base, highlight: schedule)
             
@@ -176,7 +176,7 @@ final class NotificationFeed: UIView {
             
         case let .finishAllSchedule(time, childName, coinEarned):
             timeLabel.setTypo(.body4_12_R, text: time)
-            let subject = "\(childName)\(childName.igParticle)"
+            let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) 하루의 일정을 모두 완료했어요."
             messageLabel.attributedText = makePlainMessage(base)
             showCoinChip(style: .usedCoinChip, text: "\(coinEarned)개 획득")
@@ -184,7 +184,7 @@ final class NotificationFeed: UIView {
             
         case let .useCoupon(time, childName, coupon, coinUsed):
             timeLabel.setTypo(.body4_12_R, text: time)
-            let subject = "\(childName)\(childName.igParticle)"
+            let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(coupon) 쿠폰을 사용했어요."
             messageLabel.attributedText = makeMessage(message: base, highlight: coupon)
             showCoinChip(style: .usedCoinChip, text: "\(coinUsed)개 사용")
@@ -192,7 +192,7 @@ final class NotificationFeed: UIView {
             
         case let .finishMission(time, childName, mission, coinEarned):
             timeLabel.setTypo(.body4_12_R, text: time)
-            let subject = "\(childName)\(childName.igParticle)"
+            let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(mission) 미션을 완료했어요."
             messageLabel.attributedText = makeMessage(message: base, highlight: mission)
             showCoinChip(style: .usedCoinChip, text: "\(coinEarned)개 획득")
