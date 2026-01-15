@@ -140,7 +140,7 @@ final class DailyJourneyView: BaseUIView {
     
     // MARK: - Update Methods
     
-    func updateData(with data: DailyJourneyViewData) {
+    func updateData(with data: DailyJourneyModel) {
         headerView.configure(
             kidName: data.kidName,
             date: data.dateText,
