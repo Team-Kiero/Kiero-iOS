@@ -86,15 +86,10 @@ final class DailyJourneyView: BaseUIView {
         backgroundImageView.mask = backgroundMaskView
     }
     
-    // MARK: - SetUI
+    // MARK: - Setup Methods
     
     override func setUI() {
-        addSubview(backgroundImageView)
-        addSubview(headerView)
-        addSubview(journeyTimeView)
-        addSubview(kkubiCharacterImageView)
-        addSubview(goToNextButton)
-        addSubviews(speechField, verifyPhotoButton)
+        addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, goToNextButton, speechField, verifyPhotoButton)
     }
     
     override func setLayout() {
