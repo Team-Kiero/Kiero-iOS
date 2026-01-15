@@ -15,6 +15,13 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     
     // MARK: - UI Components
     
+    private let containerStackView = UIStackView().then {
+        $0.axis = .vertical
+        $0.spacing = 17
+        $0.alignment = .center
+        $0.distribution = .fill
+    }
+    
     private let characterImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
     }
@@ -38,20 +45,25 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     // MARK: - Setup Methods
     
     override func setUI() {
-        view.addSubviews(characterImageView, descriptionLabel)
+        view.addSubview(containerStackView)
+        containerStackView.addArrangedSubviews(characterImageView, descriptionLabel)
     }
     
     override func setLayout() {
-        characterImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(259)
-            $0.horizontalEdges.equalToSuperview()
-            $0.width.equalTo(415)
-            $0.height.equalTo(202)
+        containerStackView.snp.makeConstraints {
+            $0.center.equalToSuperview()
         }
         
         descriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(characterImageView.snp.bottom)
+            $0.bottom.equalToSuperview().inset(298)
             $0.centerX.equalToSuperview()
+        }
+        
+        characterImageView.snp.makeConstraints {
+            $0.bottom.equalTo(descriptionLabel.snp.top).offset(-17)
+            $0.centerX.equalToSuperview()
+            $0.width.equalTo(450)
+            $0.height.equalTo(150)
         }
     }
     
