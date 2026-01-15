@@ -41,10 +41,7 @@ final class DailyJourneyHeaderView: BaseUIView {
     // MARK: - Setup UI
     
     override func setUI() {
-        self.backgroundColor = .clear
-        
-        addSubviews(profileIcon, nameLabel, dateLabel)
-        addSubview(chipStackView)
+        addSubviews(profileIcon, nameLabel, dateLabel, chipStackView)
         chipStackView.addArrangedSubviews(coinChip, fireStoneChip)
     }
     
@@ -69,6 +66,10 @@ final class DailyJourneyHeaderView: BaseUIView {
             $0.centerY.equalToSuperview()
             $0.trailing.equalToSuperview().offset(-20)
         }
+    }
+    
+    func setStyle() {
+        self.backgroundColor = .clear
     }
     
     // MARK: - Configure
