@@ -39,10 +39,8 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     func makeDailyJourneyViewController() -> UIViewController {
-        // TODO: DailyJourneyViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = DailyJourneyViewModel()
+        return DailyJourneyViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeCoinMissionViewController() -> UIViewController {
