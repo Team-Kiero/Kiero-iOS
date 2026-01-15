@@ -12,6 +12,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     // MARK: - Properties
     
     private let contentView = NotificationFeedView()
+    private let emptyView = EmptyView(text: "아직 아이로부터 도착한 알림이 없어요!")
     
     // MARK: - Life Cycle
     
@@ -31,7 +32,16 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         viewModel.onDataUpdated = { [weak self] in
             DispatchQueue.main.async {
-                self?.contentView.tableView.reloadData()
+                guard let self else { return }
+                
+                let isEmpty = self.viewModel?.sections.isEmpty ?? true
+                
+                if isEmpty {
+                    self.contentView.tableView.backgroundView = self.emptyView
+                } else {
+                    self.contentView.tableView.backgroundView = nil
+                }
+                self.contentView.tableView.reloadData()
             }
         }
         viewModel.fetchNotifications()
