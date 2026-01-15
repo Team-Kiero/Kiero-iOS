@@ -6,13 +6,14 @@
 //
 
 import UIKit
+import Combine
 
 import Kingfisher
 import SnapKit
 import Then
 
 final class DailyJourneyView: BaseUIView {
-    
+        
     // MARK: - UI Components
     
     private let backgroundImageView = UIImageView().then {
