@@ -33,15 +33,13 @@ final class DailyJourneyTimeView: BaseUIView {
         $0.distribution = .fill
     }
     
-    // MARK: - SetUI
+    // MARK: - Setup Methods
     
     override func setUI() {
         addSubview(containerView)
         containerView.addSubviews(titleLabel, timeStackView)
     }
-    
-    // MARK: - SetLayout
-    
+        
     override func setLayout() {
         containerView.snp.makeConstraints {
             $0.edges.equalToSuperview()
