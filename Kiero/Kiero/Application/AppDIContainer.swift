@@ -35,9 +35,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeDailyJourneyViewController() -> UIViewController {
         let viewModel = DailyJourneyViewModel()
-        let vc = DailyJourneyViewController(viewModel: viewModel, diContainer: self)
-        vc.view.backgroundColor = .kBlack
-        return vc
+        return DailyJourneyViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeCoinMissionViewController() -> UIViewController {
