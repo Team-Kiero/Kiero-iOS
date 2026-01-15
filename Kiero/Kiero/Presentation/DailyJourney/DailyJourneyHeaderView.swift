@@ -68,7 +68,7 @@ final class DailyJourneyHeaderView: BaseUIView {
         }
     }
     
-    func setStyle() {
+    override func setStyle() {
         self.backgroundColor = .clear
     }
     
