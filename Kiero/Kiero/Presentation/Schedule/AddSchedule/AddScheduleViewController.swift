@@ -117,7 +117,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
         
         titleTextField.snp.makeConstraints {
-            $0.top.equalTo(pagingHeader.snp.bottom).offset(32)
+            $0.top.equalTo(pagingHeader.snp.bottom).offset(30)
             $0.horizontalEdges.equalToSuperview().inset(19)
         }
         
