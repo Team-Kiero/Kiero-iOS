@@ -66,17 +66,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let viewDataOutput = input.viewWillAppear
             .map { [weak self] _ -> DailyJourneyViewData in
                 guard let self = self else { return self!.makeErrorViewData() }
-                
-                // 원하는 시나리오의 주석을 해제하여 확인
-                
-                // Case 1: 현재 일정 진행중 (NOW_SCHEDULE_EXIST)
                 return self.makeScheduleExistData()
-                
-                // Case 2: 금일 일정 없음 (NO_SCHEDULE)
-                // return self.makeNoScheduleData()
-                
-                // Case 3: 모든 일정 완료, 불 안 킴 (FIRE_NOT_LIT)
-                // return self.makeFireNotLitData()
             }
             .eraseToAnyPublisher()
         
@@ -175,7 +165,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         case 8: return "여덟"
         case 9: return "아홉"
         case 10: return "열"
-        default: return "\(number)" 
+        default: return "\(number)"
         }
     }
 }
