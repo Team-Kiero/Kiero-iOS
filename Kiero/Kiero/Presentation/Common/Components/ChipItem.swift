@@ -96,7 +96,6 @@ final class ChipItem: UIView {
             containerView.layer.borderColor = UIColor.gray500.cgColor
             containerView.backgroundColor = .gray900
             textLabel.textColor = .gray500
-            iconImageView.alpha = 0.5
             
         case .highlightChip:
             containerView.layer.borderColor = UIColor.main.cgColor
