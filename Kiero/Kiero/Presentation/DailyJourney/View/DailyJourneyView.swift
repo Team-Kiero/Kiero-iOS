@@ -113,7 +113,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         verifyPhotoButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-20)
+            $0.bottom.equalTo(safeAreaLayoutGuide).offset(-79)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(50)
         }
