@@ -41,7 +41,7 @@ public final class TabBarViewController: UITabBarController {
             
             customTabBar.setTabItems(
                 titles: ["스케줄 관리", "알림 피드"],
-                icons: [.icCalendar, .icBell]
+                icons: [.icCalendarLine, .icBell]
             )
         } else {
             let dailyJourneyVC = factory.makeDailyJourneyViewController()
