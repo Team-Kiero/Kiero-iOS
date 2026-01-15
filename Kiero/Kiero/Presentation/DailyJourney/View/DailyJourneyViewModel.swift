@@ -13,21 +13,6 @@ enum DailyJourneyRoute {
     case showCamera
 }
 
-struct DailyJourneyViewData {
-    let kkubiImageName: String
-    let bubbleText: String
-    let highlightKeywords: [String]
-    let journeyTimeText: String
-    let isMissionActive: Bool
-    let kidName: String
-    let dateText: String
-    let coinCount: Int
-    let fireStoneCount: Int
-    let maxFireStoneCount: Int
-    let scheduleOrder: Int
-    let scheduleOrderText: String
-}
-
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Input & Output
@@ -39,7 +24,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
     
     struct Output {
-        let viewData: AnyPublisher<DailyJourneyViewData, Never>
+        let viewData: AnyPublisher<DailyJourneyModel, Never>
         let route: AnyPublisher<DailyJourneyRoute, Never>
     }
     
@@ -64,7 +49,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
         
         let viewDataOutput = input.viewWillAppear
-            .map { [weak self] _ -> DailyJourneyViewData in
+            .map { [weak self] _ -> DailyJourneyModel in
                 guard let self = self else { return self!.makeErrorViewData() }
                 return self.makeScheduleExistData()
             }
@@ -80,13 +65,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     // TODO: - 명세서의 로직을 여기에 구현
     
-    private func makeScheduleExistData() -> DailyJourneyViewData {
+    private func makeScheduleExistData() -> DailyJourneyModel {
         let scheduleOrder = 4
         let name = "피아노 학원 가기"
         let stoneType = "용기의 불조각"
         let orderText = convertToKoreanOrdinal(scheduleOrder)
         
-        return DailyJourneyViewData(
+        return DailyJourneyModel(
             kkubiImageName: "intro_1",
             bubbleText: "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(name) 야!",
             highlightKeywords: [name, stoneType],
@@ -102,8 +87,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         )
     }
     
-    private func makeNoScheduleData() -> DailyJourneyViewData {
-        return DailyJourneyViewData(
+    private func makeNoScheduleData() -> DailyJourneyModel {
+        return DailyJourneyModel(
             kkubiImageName: "gif_intro",
             bubbleText: "오늘은 예정된 여정이 없어.\n푹 쉬고 내일 만나자!",
             highlightKeywords: [],
@@ -119,8 +104,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         )
     }
     
-    private func makeFireNotLitData() -> DailyJourneyViewData {
-        return DailyJourneyViewData(
+    private func makeFireNotLitData() -> DailyJourneyModel {
+        return DailyJourneyModel(
             kkubiImageName: "gif_intro",
             bubbleText: "모든 여정을 마쳤어!\n이제 불을 피우러 가볼까?",
             highlightKeywords: ["불 피우기"],
@@ -136,8 +121,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         )
     }
     
-    private func makeErrorViewData() -> DailyJourneyViewData {
-        return DailyJourneyViewData(
+    private func makeErrorViewData() -> DailyJourneyModel {
+        return DailyJourneyModel(
             kkubiImageName: "gif_intro",
             bubbleText: "데이터를 불러오지 못했어요.",
             highlightKeywords: [],
