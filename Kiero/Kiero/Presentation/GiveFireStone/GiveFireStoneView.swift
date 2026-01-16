@@ -173,7 +173,7 @@ final class GiveFireStoneView: BaseUIView {
         }
         
         nameView.snp.makeConstraints {
-            $0.bottom.equalToSuperview().offset(-342)
+            $0.bottom.equalTo(giveFireButton.snp.top).offset(-120)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(59)
             $0.height.equalTo(22)
