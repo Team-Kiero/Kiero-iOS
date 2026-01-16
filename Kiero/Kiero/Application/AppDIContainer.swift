@@ -7,14 +7,55 @@
 
 import UIKit
 
+import KakaoSDKAuth
+import Moya
+
 final class AppDIContainer: ViewControllerFactory {
     static let shared = AppDIContainer()
     private init() {}
 }
 
+// MARK: -
+
+extension AppDIContainer {
+    
+    // MARK: - ServiceFactory
+    
+    func makeKakaoAuthService() -> KakaoAuthServiceType {
+        KakaoAuthService()
+    }
+    
+    // MARK: - RepositoryFactory
+    
+    func makeAuthRepository() -> AuthRepositoryType {
+        AuthRepository(provider: MoyaProvider<AuthAPI>())
+    }
+}
+
+// MARK: - Start DIContainer
+
+extension AppDIContainer {
+    func makePickRoleViewController() -> UIViewController {
+        let viewModel = PickRoleViewModel()
+        return PickRoleViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
 // MARK: - ParentTab DIContainer
 
 extension AppDIContainer {
+    func makeLoginViewController() -> UIViewController {
+        //let authRepo = makeAuthRepository()
+        //let kakaoService = makeKakaoAuthService()
+        //let viewModel = LoginViewModel(kakaoService: kakaoService, repo: authRepo)
+        return LoginViewController()
+    }
+    func makeParentsOnboardingViewController() -> UIViewController {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .kBlack
+        return vc
+    }
+    
     func makeScheduleViewController() -> UIViewController {
         let viewModel = ScheduleViewModel()
         return ScheduleViewController(viewModel: viewModel, diContainer: self)
@@ -38,6 +79,12 @@ extension AppDIContainer {
 // MARK: - ChildTab DIContainer
 
 extension AppDIContainer {
+    func makeChildOnboardingViewController() -> UIViewController {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .kBlack
+        return vc
+    }
+
     func makeDailyJourneyViewController() -> UIViewController {
         // TODO: DailyJourneyViewController()로 치환
         let vc = UIViewController()
