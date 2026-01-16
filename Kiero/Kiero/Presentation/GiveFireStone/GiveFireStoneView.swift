@@ -88,9 +88,20 @@ final class GiveFireStoneView: BaseUIView {
     
     private let fireActionLabel = UILabel().then {
         $0.textColor = .white
-        $0.setTypo(.title3_16_SB, text: "불 조각 건네주기")    }
+        $0.setTypo(.title3_16_SB, text: "불 조각 건네주기")
+    }
     
     // MARK: - Life Cycle
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setAction()
+        setTodayDate()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -124,11 +135,6 @@ final class GiveFireStoneView: BaseUIView {
         headerView.addSubviews(backButton, dateLabel)
         nameView.addSubview(nameLabel)
         giveFireButton.addSubviews(fireIconImageView, fireCountLabel, fireActionLabel)
-        
-        giveFireButton.addTarget(self, action: #selector(handleGiveButtonTap), for: .touchUpInside)
-        backButton.addTarget(self, action: #selector(handleBackTap), for: .touchUpInside)
-        
-        setTodayDate()
     }
     
     override func setLayout() {
@@ -199,6 +205,11 @@ final class GiveFireStoneView: BaseUIView {
             $0.top.equalTo(fireIconImageView.snp.bottom).offset(8)
             $0.centerX.equalToSuperview()
         }
+    }
+    
+    func setAction() {
+        giveFireButton.addTarget(self, action: #selector(handleGiveButtonTap), for: .touchUpInside)
+        backButton.addTarget(self, action: #selector(handleBackTap), for: .touchUpInside)
     }
     
     private func setTodayDate() {
