@@ -82,7 +82,7 @@ final class GiveFireStoneAnimationView: BaseUIView {
     // MARK: - Setup Methods
     
     override func setStyle() {
-        self.backgroundColor = UIColor(resource: .kBlack)
+        self.backgroundColor = .kBlack
     }
     
     override func setUI() {

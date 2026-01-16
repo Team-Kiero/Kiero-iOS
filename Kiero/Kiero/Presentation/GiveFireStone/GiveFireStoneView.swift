@@ -169,8 +169,7 @@ final class GiveFireStoneView: BaseUIView {
         kkubiImageView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(11)
             $0.bottom.equalToSuperview().offset(-350)
-            $0.width.equalTo(272)
-            $0.height.equalTo(272)
+            $0.size.equalTo(272)
         }
         
         nameView.snp.makeConstraints {
