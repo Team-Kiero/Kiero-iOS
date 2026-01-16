@@ -15,6 +15,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     // MARK: - Properties
     
     private var currentSelectedDate: Date = Date()
+    var onMissionAdded: ((Mission) -> Void)?
     
     // MARK: - UI Components
     
@@ -33,7 +34,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     }
     
     private let deadlineView = DeadlineSettingView()
-    private let rewardView = RewardSettingView()
+    private let rewardView = RewardSettingView(type: .write)
     
     // MARK: - Life Cycle
     
@@ -94,6 +95,15 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
                 return
             }
             
+            let rewardValue = self.rewardView.selectedReward
+            
+            let newMission = Mission(
+                name: title,
+                reward: rewardValue,
+                dueAt: self.currentSelectedDate.toString(format: "yyyy-MM-dd")
+            )
+            
+            self.onMissionAdded?(newMission)
             self.view.endEditing(true)
             self.dismiss(animated: true)
         }

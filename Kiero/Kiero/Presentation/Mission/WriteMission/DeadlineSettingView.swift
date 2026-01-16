@@ -19,7 +19,7 @@ final class DeadlineSettingView: UIView {
     }
     
     let dateLabel = UILabel().then {
-        $0.text = "2025.12.26.(금)"
+        $0.text = Date().toString()
         $0.font = .title3_16_SB
         $0.textColor = .gray200
     }
