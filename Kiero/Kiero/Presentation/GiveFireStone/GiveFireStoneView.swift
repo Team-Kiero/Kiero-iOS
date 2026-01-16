@@ -6,6 +6,7 @@
 //
 
 import UIKit
+
 import SnapKit
 import Then
 
@@ -28,7 +29,6 @@ final class GiveFireStoneView: BaseUIView {
     
     private let dateLabel = UILabel().then {
         $0.textColor = .gray500
-        $0.font = .body3_14_R
         $0.textAlignment = .center
     }
     
@@ -66,10 +66,9 @@ final class GiveFireStoneView: BaseUIView {
     }
     
     private let nameLabel = UILabel().then {
-        $0.text = "꾸비"
         $0.textColor = .white
-        $0.font = .body5_10_R
         $0.textAlignment = .center
+        $0.setTypo(.body5_10_R, text: "꾸비")
     }
     
     private let giveFireButton = UIButton(type: .custom).then {
@@ -83,16 +82,13 @@ final class GiveFireStoneView: BaseUIView {
     }
     
     private let fireCountLabel = UILabel().then {
-        $0.text = "7개"
         $0.textColor = .gray500
-        $0.font = .body2_16_R
+        $0.setTypo(.body2_16_R, text: "7개")
     }
     
     private let fireActionLabel = UILabel().then {
-        $0.text = "불 조각 건네주기"
         $0.textColor = .white
-        $0.font = .title3_16_SB
-    }
+        $0.setTypo(.title3_16_SB, text: "불 조각 건네주기")    }
     
     // MARK: - Life Cycle
     
@@ -109,7 +105,7 @@ final class GiveFireStoneView: BaseUIView {
             let screenCenter = CGPoint(x: UIScreen.main.bounds.width / 2, y: UIScreen.main.bounds.height / 2)
             let centerInImage = self.convert(screenCenter, to: backgroundImageView)
             
-            let yOffset: CGFloat = 100
+            let yOffset: CGFloat = 50 // 100
             let targetCenter = CGPoint(x: centerInImage.x, y: centerInImage.y - yOffset)
             
             gradientLayer.position = targetCenter
@@ -160,19 +156,19 @@ final class GiveFireStoneView: BaseUIView {
         }
         
         giveSpeechBubble.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(170)
+            $0.top.equalToSuperview().offset(200)
             $0.centerX.equalToSuperview()
         }
         
         kkubiImageView.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(11)
-            $0.top.equalToSuperview().offset(238)
+            $0.bottom.equalToSuperview().offset(-350)
             $0.width.equalTo(272)
             $0.height.equalTo(272)
         }
         
         nameView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(478)
+            $0.bottom.equalToSuperview().offset(-342)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(59)
             $0.height.equalTo(22)
@@ -185,7 +181,7 @@ final class GiveFireStoneView: BaseUIView {
         giveFireButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(81)
-            $0.top.equalToSuperview().offset(590)
+            $0.bottom.equalToSuperview().offset(-141)
         }
         
         fireIconImageView.snp.makeConstraints {
@@ -209,14 +205,16 @@ final class GiveFireStoneView: BaseUIView {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일 EEEE"
-        dateLabel.text = formatter.string(from: Date())
+        dateLabel.setTypo(.body3_14_R, text: formatter.string(from: Date()))
     }
     
-    @objc private func handleGiveButtonTap() {
+    @objc
+    private func handleGiveButtonTap() {
         didTapGiveButton?()
     }
     
-    @objc private func handleBackTap() {
+    @objc
+    private func handleBackTap() {
         didTapBackButton?()
     }
 }
