@@ -1,195 +1,156 @@
 //
-//  GetCoinView.swift
+//  GiveFireStoneResultView.swift
 //  Kiero
 //
 //  Created by Hyunseo Han on 1/16/26.
 //
 
 import UIKit
+import ImageIO
 
+import Kingfisher
 import SnapKit
 import Then
 
-final class GetCoinView: BaseUIView {
+final class GiveFireStoneResultView: BaseUIView {
     
     // MARK: - Properties
     
-    // 확인 버튼 클릭 시 ViewController로 이벤트를 전달할 클로저
-    var didTapConfirmButton: (() -> Void)?
+    var didTapClose: (() -> Void)?
     
     // MARK: - UI Components
     
-    private let dimView = UIView().then {
-        $0.backgroundColor = .black.withAlphaComponent(0.7)
-    }
-    
-    private let containerView = UIView().then {
-        $0.backgroundColor = UIColor(resource: .gray900)
-        $0.layer.cornerRadius = 20
+    private let backgroundImageView = UIImageView().then {
+        $0.image = UIImage(resource: .imgBackground)
+        $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
     }
     
-    private let titleLabel = UILabel().then {
-        $0.text = "불 피우기 성공!"
-        $0.textColor = .white
-        $0.font = .systemFont(ofSize: 20, weight: .bold)
-        $0.textAlignment = .center
+    private let backgroundMaskView = UIView().then {
+        let gradientLayer = CAGradientLayer()
+        
+        gradientLayer.type = .radial
+        gradientLayer.colors = [UIColor.black.cgColor, UIColor.clear.cgColor]
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
+        gradientLayer.locations = [0.0, 1.0]
+        
+        $0.layer.addSublayer(gradientLayer)
     }
     
-    private let descriptionLabel = UILabel().then {
-        $0.text = "꾸비에게 불 조각을 건네주고\n보상을 획득했어요."
-        $0.textColor = .gray300
-        $0.font = .systemFont(ofSize: 14)
-        $0.numberOfLines = 2
-        $0.textAlignment = .center
-    }
-    
-    // 코인 보상 영역
-    private let coinStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.spacing = 8
-        $0.alignment = .center
-    }
-    
-    private let coinImageView = UIImageView().then {
-        // 코인 이미지 리소스가 없다면 시스템 이미지 사용
-        $0.image = UIImage(systemName: "circle.circle.fill")
-        $0.tintColor = .systemYellow
+    private let kkubiImageView = AnimatedImageView().then {
         $0.contentMode = .scaleAspectFit
     }
     
-    private let coinLabel = UILabel().then {
-        $0.text = "0 코인"
-        $0.textColor = .white
-        $0.font = .systemFont(ofSize: 16, weight: .bold)
+    private let speechField = SpeechField().then {
+        $0.isHidden = false
     }
     
-    // 돌(Stone) 보상 영역
-    private let stoneStackView = UIStackView().then {
-        $0.axis = .horizontal
-        $0.spacing = 10
-        $0.alignment = .center
-        $0.distribution = .fillEqually
-    }
+    // MARK: - Life Cycle
     
-    private let confirmButton = UIButton(type: .system).then {
-        $0.setTitle("확인", for: .normal)
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
-        $0.backgroundColor = .main // 혹은 .blue, .systemBlue
-        $0.layer.cornerRadius = 12
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        backgroundMaskView.frame = backgroundImageView.bounds
+        
+        if let gradientLayer = backgroundMaskView.layer.sublayers?.first as? CAGradientLayer {
+            gradientLayer.frame = backgroundMaskView.bounds
+        }
+        backgroundImageView.mask = backgroundMaskView
     }
     
     // MARK: - Setup Methods
     
+    override func setStyle() {
+        self.backgroundColor = UIColor(resource: .kBlack)
+    }
+    
     override func setUI() {
-        addSubviews(dimView, containerView)
-        containerView.addSubviews(titleLabel, descriptionLabel, coinStackView, stoneStackView, confirmButton)
-        
-        coinStackView.addArrangedSubviews(coinImageView, coinLabel)
-        
-        confirmButton.addTarget(self, action: #selector(handleConfirmTap), for: .touchUpInside)
+        addSubviews(backgroundImageView, kkubiImageView, speechField)
     }
     
     override func setLayout() {
-        dimView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        backgroundImageView.snp.makeConstraints {
+            $0.width.equalTo(483)
+            $0.height.equalTo(508)
+            $0.leading.equalToSuperview().offset(-54)
+            $0.top.equalToSuperview().offset(102)
         }
         
-        containerView.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(40)
-            // 내부 컨텐츠에 따라 높이 유동적 (bottom constraint 필수)
+        kkubiImageView.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(11)
+            $0.top.equalToSuperview().offset(289)
+            $0.height.equalTo(352)
         }
         
-        titleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(30)
-            $0.centerX.equalToSuperview()
-        }
-        
-        descriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(10)
-            $0.centerX.equalToSuperview()
-        }
-        
-        coinStackView.snp.makeConstraints {
-            $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
-            $0.centerX.equalToSuperview()
-            $0.height.equalTo(24)
-        }
-        
-        coinImageView.snp.makeConstraints {
-            $0.size.equalTo(24)
-        }
-        
-        stoneStackView.snp.makeConstraints {
-            $0.top.equalTo(coinStackView.snp.bottom).offset(20)
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(60) // 돌 이미지 크기에 맞춰 조정
-        }
-        
-        confirmButton.snp.makeConstraints {
-            $0.top.equalTo(stoneStackView.snp.bottom).offset(30)
-            $0.horizontalEdges.equalToSuperview().inset(20)
-            $0.height.equalTo(50)
-            $0.bottom.equalToSuperview().inset(20) // 컨테이너 바텀 잡아주기
+        speechField.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().inset(107)
         }
     }
     
     // MARK: - Configuration
     
-    /// ViewModel에서 받은 데이터를 UI에 업데이트합니다.
     func configure(coin: Int, stones: [String]) {
-        // 1. 코인 업데이트
-        coinLabel.text = "\(coin) 코인"
+        let firstStoneKey = stones.first ?? ""
+        let stoneKoreanName = mapStoneName(firstStoneKey)
         
-        // 2. 돌(Stones) 업데이트 (기존 뷰 제거 후 다시 생성)
-        stoneStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        speechField.configure(
+            name: "꾸비",
+            lines: [
+                "덕분에 \(stoneKoreanName) 이 커졌어!",
+                "선물로 금화 \(coin) 개를 줄게"
+            ],
+            highlightKeywords: [stoneKoreanName, "\(coin)"]
+        )
+    }
+    
+    func playGif() {
+        kkubiImageView.stopAnimating()
+        kkubiImageView.image = nil
         
-        for stone in stones {
-            let stoneView = createStoneView(name: stone)
-            stoneStackView.addArrangedSubview(stoneView)
+        guard let url = Bundle.main.url(forResource: "kkubi_fire", withExtension: "gif") else { return }
+        
+        kkubiImageView.kf.setImage(with: url)
+        kkubiImageView.repeatCount = .once
+        
+        let gifDuration = getGifDuration(from: url)
+        
+        print("GIF 재생 시간: \(gifDuration)초")
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + gifDuration + 0.5) { [weak self] in
+            print("애니메이션 종료! 닫기 신호 보냄")
+            self?.didTapClose?()
         }
     }
     
-    /// 돌 이름을 받아 이미지와 라벨로 구성된 뷰를 만듭니다.
-    private func createStoneView(name: String) -> UIView {
-        let container = UIView()
+    private func getGifDuration(from url: URL) -> TimeInterval {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { return 0.0 }
+        let count = CGImageSourceGetCount(source)
+        var totalDuration: TimeInterval = 0.0
         
-        let imageView = UIImageView().then {
-            // 예: "COURAGE" -> UIImage(named: "img_COURAGE") 처럼 매핑
-            // 리소스가 없다면 기본 이미지
-            $0.image = UIImage(systemName: "hexagon.fill")
-            $0.tintColor = .lightGray
-            $0.contentMode = .scaleAspectFit
+        for i in 0..<count {
+            if let properties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [String: Any],
+               let gifProperties = properties[kCGImagePropertyGIFDictionary as String] as? [String: Any] {
+                
+                var delay = gifProperties[kCGImagePropertyGIFUnclampedDelayTime as String] as? Double
+                ?? gifProperties[kCGImagePropertyGIFDelayTime as String] as? Double
+                ?? 0.1
+                
+                if delay < 0.011 { delay = 0.1 }
+                
+                totalDuration += delay
+            }
         }
-        
-        let label = UILabel().then {
-            $0.text = name
-            $0.textColor = .gray300
-            $0.font = .systemFont(ofSize: 10)
-            $0.textAlignment = .center
-            $0.adjustsFontSizeToFitWidth = true
-        }
-        
-        container.addSubviews(imageView, label)
-        
-        imageView.snp.makeConstraints {
-            $0.top.centerX.equalToSuperview()
-            $0.size.equalTo(40)
-        }
-        
-        label.snp.makeConstraints {
-            $0.top.equalTo(imageView.snp.bottom).offset(4)
-            $0.horizontalEdges.bottom.equalToSuperview()
-        }
-        
-        return container
+        return totalDuration
     }
     
-    // MARK: - Actions
-    
-    @objc private func handleConfirmTap() {
-        didTapConfirmButton?()
+    private func mapStoneName(_ key: String) -> String {
+        switch key {
+        case "COURAGE": return "용기의 불꽃"
+        case "WISDOM": return "지혜의 불꽃"
+        case "GRIT": return "끈기의 불꽃"
+        default: return "영웅의 불꽃"
+        }
     }
 }
