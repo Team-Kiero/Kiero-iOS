@@ -47,7 +47,6 @@ final class GiveFireStoneAnimationView: BaseUIView {
     
     private let fireStoneImageView = UIImageView().then {
         $0.image = UIImage(resource: .ic3DBluestone)
-        $0.tintColor = .green
         $0.contentMode = .scaleAspectFit
         $0.alpha = 0
     }
