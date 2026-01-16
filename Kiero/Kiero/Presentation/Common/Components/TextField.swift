@@ -173,6 +173,10 @@ final class TextField: UIView {
             )
     }
     
+    func setText(text: String) {
+        textField.text = text
+    }
+    
     private func validate() {
         textField.layer.borderWidth = 0
         textField.layer.borderColor = UIColor.clear.cgColor
