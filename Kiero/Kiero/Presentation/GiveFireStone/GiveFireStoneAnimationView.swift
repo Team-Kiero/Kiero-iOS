@@ -1,34 +1,55 @@
+//
+//  GiveFireStoneAnimationView.swift
+//  Kiero
+//
+//  Created by Hyunseo Han on 1/16/26.
+//
+
 import UIKit
+
 import SnapKit
 import Then
 
-final class GivingFireStoneView: BaseUIView {
-    
-    // 이벤트를 외부로 전달할 클로저
-    var didTapGiveButton: (() -> Void)?
+final class GiveFireStoneAnimationView: BaseUIView {
     
     // MARK: - UI Components
     
-    private let headerView = UIView().then {
-        $0.backgroundColor = .clear
-    }
-    
-    private let backgroundView = UIImageView().then {
+    private let backgroundImageView = UIImageView().then {
         $0.image = UIImage(resource: .imgBackground)
-        $0.contentMode = .scaleAspectFill // 배경 꽉 차게
+        $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
     }
     
-    private let blackMarkupView = UIView().then {
-        $0.backgroundColor = UIColor.kBlack
-        $0.alpha = 0.35
+    private let backgroundMaskView = UIView().then {
+        let gradientLayer = CAGradientLayer()
+        
+        gradientLayer.type = .radial
+        gradientLayer.colors = [UIColor.black.cgColor, UIColor.clear.cgColor]
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
+        gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
+        gradientLayer.locations = [0.0, 1.0]
+        
+        $0.layer.addSublayer(gradientLayer)
     }
     
     private let giveSpeechBubble = SpeechBubble(speech: "불조각을 나에게 건네줘!")
     
-    private let kkubiImageView = UIImageView(image: UIImage(resource: .imgGoblinKid)).then {
-        $0.image = UIImage(resource: .imgGoblinKid)
+    private let kkubiImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
+        $0.image = UIImage(resource: .imgGoblinKid)
+    }
+    
+    private let stoneImages: [UIImage] = [
+        UIImage(resource: .ic3DBluestone),
+        UIImage(resource: .ic3DGreenstone),
+        UIImage(resource: .ic3DRedstone)
+    ]
+    
+    private let fireStoneImageView = UIImageView().then {
+        $0.image = UIImage(resource: .ic3DBluestone)
+        $0.tintColor = .green
+        $0.contentMode = .scaleAspectFit
+        $0.alpha = 0
     }
     
     private let nameView = UIView().then {
@@ -40,70 +61,42 @@ final class GivingFireStoneView: BaseUIView {
     }
     
     private let nameLabel = UILabel().then {
-        $0.text = "꾸비"
         $0.textColor = .white
-        $0.font = .body5_10_R
         $0.textAlignment = .center
+        $0.setTypo(.body5_10_R, text: "꾸비")
     }
     
-    // ⬇️ [복구] 버튼 및 내부 요소 정의
-    private let giveFireButton = UIButton(type: .custom).then {
-        $0.backgroundColor = UIColor(resource: .gray900)
-        $0.layer.cornerRadius = 16
-    }
+    // MARK: - Life Cycle
     
-    private let fireIconImageView = UIImageView().then {
-        $0.image = UIImage(systemName: "flame.fill")?.withRenderingMode(.alwaysTemplate)
-        $0.tintColor = .cyan
-        $0.contentMode = .scaleAspectFit
-    }
-    
-    private let fireCountLabel = UILabel().then {
-        $0.text = "7개"
-        $0.textColor = .lightGray
-        $0.font = .systemFont(ofSize: 14)
-    }
-    
-    private let fireActionLabel = UILabel().then {
-        $0.text = "불 조각 건네주기"
-        $0.textColor = .white
-        $0.font = .systemFont(ofSize: 16, weight: .bold)
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        backgroundMaskView.frame = backgroundImageView.bounds
+        
+        if let gradientLayer = backgroundMaskView.layer.sublayers?.first as? CAGradientLayer {
+            gradientLayer.frame = backgroundMaskView.bounds
+        }
+        
+        backgroundImageView.mask = backgroundMaskView
     }
     
     // MARK: - Setup Methods
     
     override func setStyle() {
-        super.setStyle()
+        self.backgroundColor = UIColor(resource: .kBlack)
     }
     
     override func setUI() {
-        // giveFireButton 추가
-        addSubviews(headerView, backgroundView, blackMarkupView, kkubiImageView, giveSpeechBubble, nameView, giveFireButton)
-        
+        addSubviews(backgroundImageView, kkubiImageView, giveSpeechBubble, nameView, fireStoneImageView)
         nameView.addSubview(nameLabel)
-        
-        // 버튼 내부 UI 추가
-        giveFireButton.addSubviews(fireIconImageView, fireCountLabel, fireActionLabel)
-        
-        // 버튼 액션 연결
-        giveFireButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
     
     override func setLayout() {
-        headerView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(32)
-            $0.top.equalToSuperview().offset(54)
-        }
-        
-        backgroundView.snp.makeConstraints{
-            $0.horizontalEdges.equalToSuperview().inset(-54)
+        backgroundImageView.snp.makeConstraints {
+            $0.width.equalTo(483)
+            $0.height.equalTo(508)
+            $0.leading.equalToSuperview().offset(-54)
             $0.top.equalToSuperview().offset(102)
-            $0.bottom.equalToSuperview()
-        }
-        
-        blackMarkupView.snp.makeConstraints {
-            $0.edges.equalTo(backgroundView)
         }
         
         giveSpeechBubble.snp.makeConstraints {
@@ -117,42 +110,62 @@ final class GivingFireStoneView: BaseUIView {
         }
         
         nameView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(608)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(59)
             $0.height.equalTo(24)
+            $0.bottom.equalToSuperview().offset(-180)
         }
         
         nameLabel.snp.makeConstraints {
             $0.center.equalToSuperview()
         }
         
-        // ⬇️ [복구] 버튼 레이아웃
-        giveFireButton.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(81)
-            $0.bottom.equalToSuperview().inset(50)
-        }
-        
-        fireIconImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(18)
-            $0.centerX.equalToSuperview().offset(-15)
-            $0.size.equalTo(18)
-        }
-        
-        fireCountLabel.snp.makeConstraints {
-            $0.centerY.equalTo(fireIconImageView)
-            $0.leading.equalTo(fireIconImageView.snp.trailing).offset(4)
-        }
-        
-        fireActionLabel.snp.makeConstraints {
-            $0.top.equalTo(fireIconImageView.snp.bottom).offset(8)
-            $0.centerX.equalToSuperview()
+        fireStoneImageView.snp.makeConstraints {
+            $0.centerX.equalTo(kkubiImageView)
+            $0.centerY.equalTo(kkubiImageView).offset(60)
+            $0.size.equalTo(70)
         }
     }
     
-    @objc
-    private func buttonTapped() {
-        didTapGiveButton?()
+    // MARK: - Animation Methods
+    
+    func playAnimation(completion: (() -> Void)? = nil) {
+        self.layoutIfNeeded()
+        
+        let startY = kkubiImageView.frame.maxY > 0 ? kkubiImageView.frame.maxY : 500
+        let targetY = fireStoneImageView.frame.midY
+        let distanceY = (startY - targetY) * 0.2
+        
+        runAnimationLoop(count: 3, distanceY: distanceY, currentIndex: 0, completion: completion)
+    }
+    
+    private func runAnimationLoop(count: Int, distanceY: CGFloat, currentIndex: Int, completion: (() -> Void)?) {
+        guard count > 0 else {
+            UIView.animate(withDuration: 0.3) {
+                self.fireStoneImageView.alpha = 0
+            } completion: { _ in
+                completion?()
+            }
+            return
+        }
+        
+        let imageIndex = currentIndex % stoneImages.count
+        self.fireStoneImageView.image = stoneImages[imageIndex]
+        
+        let rotation = CGAffineTransform(rotationAngle: -30 * .pi / 180)
+        let translation = CGAffineTransform(translationX: 0, y: distanceY)
+        let startTransform = rotation.concatenating(translation)
+        
+        self.fireStoneImageView.transform = startTransform
+        self.fireStoneImageView.alpha = 1
+        
+        UIView.animate(withDuration: 1, delay: 0, options: .curveEaseOut) {
+            self.fireStoneImageView.transform = .identity
+        } completion: { _ in
+            self.runAnimationLoop(count: count - 1,
+                                  distanceY: distanceY,
+                                  currentIndex: currentIndex + 1,
+                                  completion: completion)
+        }
     }
 }
