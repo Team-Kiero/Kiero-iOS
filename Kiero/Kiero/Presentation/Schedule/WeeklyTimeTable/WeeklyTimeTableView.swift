@@ -19,7 +19,7 @@ final class WeeklyTimeTableView: BaseUIView {
     private let endHour = 22
     
     // TODO: 데이터 주입
-    private let days = ["8(월)", "9(화)", "10(수)", "11(목)", "12(금)", "13(토)", "14(일)"]
+    private var daysDates: [Date] = []
     
     // MARK: - UI Components
     
@@ -49,12 +49,8 @@ final class WeeklyTimeTableView: BaseUIView {
         scrollView.addSubview(gridContainer)
         gridContainer.addSubview(gridBackgroundView)
         
-        days.enumerated().forEach { index, day in
-            let itemView = DayItem()
-            itemView.configure(day: day, isToday: index == 0)
-            headerStackView.addArrangedSubview(itemView)
-        }
-        
+        self.daysDates = Date().daysOfWeek
+        updateHeaderLabels()
         setTimeLabel()
     }
     
@@ -128,51 +124,82 @@ final class WeeklyTimeTableView: BaseUIView {
         }
     }
     
-    func addSchedule(schedule: MockSchedule) {
-        let card = ScheduleCardView(name: schedule.name, colorCode: schedule.colorCode)
-        gridBackgroundView.addSubview(card)
+    private func updateHeaderLabels() {
+        headerStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        let startFloat = convertTimeToFloat(schedule.startTime)
-        let endFloat = convertTimeToFloat(schedule.endTime)
-        var topOffset = CGFloat(startFloat - Double(startHour)) * hourHeight
-        var height = CGFloat(endFloat - startFloat) * hourHeight
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
         
-        if Int(startFloat) == startHour {
-            topOffset += 4
-            height -= 4
+        daysDates.enumerated().forEach { index, date in
+            let itemView = DayItem()
+            
+            let dayNum = calendar.component(.day, from: date)
+            let weekday = date.toString(format: "E")
+            let isToday = calendar.isDate(date, inSameDayAs: today)
+            
+            itemView.configure(day: "\(dayNum)(\(weekday))", isToday: isToday)
+            headerStackView.addArrangedSubview(itemView)
         }
-        
-        if Int(endFloat) == endHour {
-            height -= 4
-        }
-        
-        if Int(startFloat) != startHour {
-            topOffset += 1
-            height -= 1
-        }
-        if Int(endFloat) != endHour {
-            height -= 1
-        }
-        
-        let cardWidth: CGFloat = 40
-        
-        guard schedule.dayIndex < headerStackView.arrangedSubviews.count else { return }
-        let targetDayView = headerStackView.arrangedSubviews[schedule.dayIndex]
-        
-        card.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(topOffset)
-            $0.height.equalTo(height)
-            $0.width.equalTo(cardWidth)
-            $0.centerX.equalTo(targetDayView.snp.centerX)
-        }
-        
-        card.layoutIfNeeded()
     }
     
+    func clearSchedules() {
+        gridBackgroundView.subviews.forEach { $0.removeFromSuperview() }
+    }
+    
+    func addSchedule(schedule: Schedule) {
+        let dayIndices = schedule.dayIndices
+        let startFloat = convertTimeToFloat(schedule.startTime)
+        let endFloat = convertTimeToFloat(schedule.endTime)
+        
+        var duration = endFloat - startFloat
+        if duration <= 0 { duration = 1.0 }
+        
+        let topOffset = CGFloat(startFloat - Double(startHour)) * hourHeight
+        let cardHeight = CGFloat(duration) * hourHeight
+        
+        let actualColor: UIColor = {
+            switch schedule.scheduleColor {
+            case "SCHEDULE1": return .schedule1
+            case "SCHEDULE2": return .schedule2
+            case "SCHEDULE3": return .schedule3
+            case "SCHEDULE4": return .schedule4
+            case "SCHEDULE5": return .schedule5
+            default: return .schedule1
+            }
+        }()
+
+        dayIndices.forEach { dayIndex in
+
+            let card = ScheduleCardView(name: schedule.name, color: actualColor)
+            gridBackgroundView.addSubview(card)
+            
+            card.snp.makeConstraints {
+                $0.top.equalToSuperview().offset(topOffset)
+                $0.height.equalTo(cardHeight)
+                $0.width.equalToSuperview().multipliedBy(1.0 / 7.0).inset(1)
+                $0.centerX.equalTo(gridBackgroundView.snp.trailing).multipliedBy((CGFloat(dayIndex) + 0.5) / 7.0)
+            }
+        }
+        
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
+    }
+
     private func convertTimeToFloat(_ time: String) -> Double {
-        let parts = time.split(separator: ":").compactMap { Double($0) }
-        guard parts.count >= 2 else { return 0 }
-        return parts[0] + (parts[1] / 60.0)
+        let formatter = DateFormatter()
+        let formats = ["HH:mm:ss", "hh : mm a", "HH:mm"]
+        
+        for format in formats {
+            formatter.dateFormat = format
+            if let date = formatter.date(from: time) {
+                let calendar = Calendar.current
+                let hour = Double(calendar.component(.hour, from: date))
+                let minute = Double(calendar.component(.minute, from: date))
+                return hour + (minute / 60.0)
+            }
+        }
+        
+        return 0.0
     }
 }
 

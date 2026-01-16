@@ -13,7 +13,18 @@ import Then
 
 final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
     
+    // MARK: - Properties
+    
+    override var viewModel: ScheduleViewModel? {
+        didSet {
+            guard let vm = viewModel else { return }
+            self.bind(viewModel: vm)
+        }
+    }
+    
     private let scheduleView = ScheduleView()
+    
+    // MARK: - Life Cycle
     
     override func loadView() {
         self.view = scheduleView
@@ -23,8 +34,10 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
         super.viewDidLoad()
     }
     
+    // MARK: - Bind
+    
     override func bind(viewModel: ScheduleViewModel) {
-        super.bind(viewModel: viewModel)
+        cancellables.removeAll()
         
         let input = ScheduleViewModel.Input(
             viewDidLoad: Just(()).eraseToAnyPublisher()
@@ -34,8 +47,11 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
         
         output.schedules
             .receive(on: RunLoop.main)
-            .sink { [weak self] schedules in
+            .sink { [weak self] (schedules: [Schedule]) in
                 self?.scheduleView.updateSchedules(schedules)
+                
+                self?.view.setNeedsLayout()
+                self?.view.layoutIfNeeded()
             }
             .store(in: &cancellables)
     }

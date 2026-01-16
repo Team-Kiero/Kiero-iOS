@@ -20,7 +20,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         }
     }
     
-    private let scheduleChildVC = AppDIContainer.shared.makeScheduleChildViewController()
+    private lazy var scheduleChildVC: ScheduleChildViewController = {
+        let vc = AppDIContainer.shared.makeScheduleChildViewController()
+        vc.viewModel = self.viewModel
+        return vc
+    }()
+    
     private let missionVC = AppDIContainer.shared.makeMissionViewController()
     
     // MARK: - UI Components
@@ -89,7 +94,13 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     }
     
     private func presentAddSchedule() {
-        let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController()
+        guard let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController() as? AddScheduleViewController else { return }
+        
+        addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule) in
+            guard let self = self else { return }
+            self.viewModel?.addSchedule(newSchedule)
+        }
+        
         let nav = UINavigationController(rootViewController: addScheduleVC)
         nav.modalPresentationStyle = .fullScreen
         self.present(nav, animated: true)
@@ -99,14 +110,33 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let menuView = MissionFloatingMenuView()
         
         menuView.onMenuSelected = { [weak self] index in
-            guard self != nil else { return }
+            guard let self = self else { return }
             
             if index == 0 {
-//                let directVC = self.diContainer.makeDirectMissionAddViewController()
-//                self.navigationController?.pushViewController(directVC, animated: true)
+                guard let writeVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else { return }
+                
+                writeVC.onMissionAdded = { [weak self] (newMission: Mission) in
+                    if let missionViewController = self?.missionVC as? MissionViewController {
+                        missionViewController.viewModel?.addMission(newMission)
+                    }
+                }
+                
+                let nav = UINavigationController(rootViewController: writeVC)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
+                
             } else {
-//                let aiVC = self.diContainer.makeAIMissionAddViewController()
-//                self.present(aiVC, animated: true)
+                guard let aiVC = self.diContainer.makeAIMissionViewController() as? AIMissionViewController else { return }
+                
+                aiVC.onMissionAdded = { [weak self] (newMission: Mission) in
+                    if let missionVC = self?.missionVC as? MissionViewController {
+                        missionVC.viewModel?.addMission(newMission)
+                    }
+                }
+                
+                let nav = UINavigationController(rootViewController: aiVC)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
             }
         }
         

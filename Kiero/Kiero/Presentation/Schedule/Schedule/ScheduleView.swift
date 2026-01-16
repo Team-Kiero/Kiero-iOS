@@ -12,12 +12,16 @@ import Then
 
 final class ScheduleView: BaseUIView {
     
+    private var currentSchedules: [Schedule] = []
+    
     let pagingHeader = PagingHeader()
     let timeTableView = WeeklyTimeTableView()
     
     override func setUI() {
         addSubviews(pagingHeader, timeTableView)
-        pagingHeader.configure(title: "12월 2주차", isLeftEnabled: true, isRightEnabled: true)
+        
+        let today = Date()
+        pagingHeader.configure(title: today.weekOfMonthString, isLeftEnabled: true, isRightEnabled: true)
     }
     
     override func setLayout() {
@@ -34,10 +38,16 @@ final class ScheduleView: BaseUIView {
         }
     }
     
-    func updateSchedules(_ schedules: [MockSchedule]) {
-        schedules.forEach {
-            timeTableView.addSchedule(schedule: $0)
+    func updateSchedules(_ schedules: [Schedule]) {
+        self.currentSchedules = schedules
+        timeTableView.clearSchedules()
+        
+        schedules.forEach { schedule in
+            timeTableView.addSchedule(schedule: schedule)
         }
+        
+        self.timeTableView.setNeedsLayout()
+        self.timeTableView.layoutIfNeeded()
     }
 }
 

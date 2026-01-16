@@ -17,6 +17,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private var currentStartTime: Date?
     private var currentEndTime: Date?
     private var currentSelectedColor: UIColor?
+    var onScheduleAdded: ((Schedule) -> Void)?
     
     // MARK: - UI Components
     
@@ -36,7 +37,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         )
     }
     
-    // 요일
     private let daySectionTitle = UILabel().then {
         $0.text = "요일"
         $0.font = .title3_16_SB
@@ -58,7 +58,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private let weekdaySelectionView = WeekdaySelectionView()
     
-    // 시간
     private let timeSectionTitle = UILabel().then {
         $0.text = "시간"
         $0.font = .title3_16_SB
@@ -67,7 +66,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private let timeSelectionView = TimeSelectionView()
     
-    // 컬러
     private let colorSectionTitle = UILabel().then {
         $0.text = "컬러"
         $0.font = .title3_16_SB
@@ -100,7 +98,23 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                          timeSectionTitle, timeSelectionView,
                          colorSectionTitle, selectedColorChip, colorArrowButton)
         
-        pagingHeader.configure(title: "12.8(월) - 12.14(일)", isLeftEnabled: true, isRightEnabled: true)
+        let weekDates = Date().daysOfWeek
+        
+        if let firstDay = weekDates.first, let lastDay = weekDates.last {
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M.d(E)"
+            formatter.locale = Locale(identifier: "ko_KR")
+            
+            let startStr = formatter.string(from: firstDay)
+            let endStr = formatter.string(from: lastDay)
+            
+            pagingHeader.configure(
+                title: "\(startStr) - \(endStr)",
+                isLeftEnabled: true,
+                isRightEnabled: true
+            )
+        }
     }
     
     override func setLayout() {
@@ -185,13 +199,37 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
-            if let start = self.currentStartTime, let end = self.currentEndTime {
-                if start >= end {
-                    Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
-                    return
-                }
+            let start = self.currentStartTime ?? Date()
+            let end = self.currentEndTime ?? Date()
+            
+            if start >= end {
+                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+                return
             }
             
+            let colorMapping: [UIColor: String] = [
+                .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+                .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+            ]
+            let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+            
+            let isRecurring = self.repeatSwitch.isOn
+            let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+            let selectedDays = self.weekdaySelectionView.selectedIndices
+                .map { dayLabels[$0] }
+                .joined(separator: ", ")
+            
+            let newSchedule = Schedule(
+                name: title,
+                isRecurring: isRecurring,
+                startTime: start.toString(format: "HH:mm:ss"),
+                endTime: end.toString(format: "HH:mm:ss"),
+                scheduleColor: colorCode,
+                dayOfWeek: isRecurring ? selectedDays : nil,
+                date: isRecurring ? nil : Date().toString(format: "yyyy-MM-dd")
+            )
+            
+            self.onScheduleAdded?(newSchedule)
             self.view.endEditing(true)
             self.dismiss(animated: true)
         }
@@ -224,9 +262,19 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         vc.setInitialTime(savedDate)
         
         vc.onTimeSelected = { [weak self] selectedTime in
-            self?.timeSelectionView.updateTime(isStart: isStart, time: selectedTime)
-            if isStart { self?.currentStartTime = vc.selectedDatePickerDate }
-            else { self?.currentEndTime = vc.selectedDatePickerDate }
+            guard let self = self else { return }
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh : mm a"
+            let englishTimeString = formatter.string(from: selectedTime)
+            
+            self.timeSelectionView.updateTime(isStart: isStart, time: englishTimeString)
+            
+            if isStart {
+                self.currentStartTime = selectedTime
+            } else {
+                self.currentEndTime = selectedTime
+            }
         }
         
         vc.onDismiss = { [weak self] in
