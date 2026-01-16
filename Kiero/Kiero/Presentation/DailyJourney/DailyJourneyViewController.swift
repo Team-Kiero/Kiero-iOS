@@ -74,14 +74,22 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private func didTapVerifyButton() {
         verifyButtonTapSubject.send(())
     }
-        
+    
     private func handleRoute(_ route: DailyJourneyRoute) {
         switch route {
         case .showNextJourneyDialogBox:
+            showNextJourneyDialog()
             print("다음 여정 다이어로그")
             
         case .showCamera:
             openCamera()
+        }
+    }
+    
+    private func showNextJourneyDialog() {
+        self.view.showDialog(state: .nextJourney) { 
+            print("유저가 다음 여정으로 넘어가기를 확정")
+            // TODO: ViewModel의 다음 여정 로직 연결
         }
     }
     
@@ -101,7 +109,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         
         self.present(picker, animated: true)
     }
-        
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         guard let capturedImage = info[.originalImage] as? UIImage else {
@@ -117,7 +125,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
-        
+    
     private func moveToMissionCompleteView(with image: UIImage) {
         let completeViewModel = MissionCompleteViewModel()
         let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
