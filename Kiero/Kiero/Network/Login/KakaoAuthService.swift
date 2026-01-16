@@ -9,7 +9,7 @@
 import Combine
 import KakaoSDKUser
 
-final class KakaoAuthService {
+final class KakaoAuthService: KakaoAuthServiceType {
     func loginWithKakao() -> AnyPublisher<String, Error> {
         Future { promise in
             if UserApi.isKakaoTalkLoginAvailable() {
