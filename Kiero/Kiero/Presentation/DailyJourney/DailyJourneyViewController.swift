@@ -120,7 +120,6 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         
     private func moveToMissionCompleteView(with image: UIImage) {
         let completeViewModel = MissionCompleteViewModel()
-        
         let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
         
         completeVC.initialImage = image

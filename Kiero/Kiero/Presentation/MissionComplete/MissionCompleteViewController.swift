@@ -70,7 +70,7 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
         self.navigationController?.popViewController(animated: true)
     }
     
-    // MARK: - Binding
+    // MARK: - Bind
     
     override func bind(viewModel: MissionCompleteViewModel) {
         super.bind(viewModel: viewModel)

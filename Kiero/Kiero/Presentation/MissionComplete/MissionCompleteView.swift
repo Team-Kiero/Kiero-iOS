@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+
 import SnapKit
 import Then
 
@@ -58,12 +59,12 @@ final class MissionCompleteView: BaseUIView {
         fireStoneImageView.snp.makeConstraints {
             $0.bottom.equalTo(kkubiImageView.snp.top).offset(19)
             $0.centerX.equalToSuperview()
-            $0.width.height.equalTo(140)
+            $0.size.equalTo(140)
         }
         
         speechField.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(131)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.horizontalEdges.equalToSuperview().inset(16)
         }
     }
     
