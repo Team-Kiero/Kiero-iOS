@@ -209,7 +209,7 @@ final class TextField: UIView {
         errorLabel.alpha = 1
         errorImage.alpha = 1
         
-        textField.layer.borderWidth = 0.5
+        textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.point.cgColor
     }
 }
@@ -218,7 +218,7 @@ extension TextField: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
         hasInteracted = true
         textField.layer.borderColor = UIColor.gray100.cgColor
-        textField.layer.borderWidth = 0.5
+        textField.layer.borderWidth = 1
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
