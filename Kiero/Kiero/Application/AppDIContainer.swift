@@ -44,12 +44,6 @@ extension AppDIContainer {
 // MARK: - ParentTab DIContainer
 
 extension AppDIContainer {
-    func makeLoginViewController() -> UIViewController {
-        //let authRepo = makeAuthRepository()
-        //let kakaoService = makeKakaoAuthService()
-        //let viewModel = LoginViewModel(kakaoService: kakaoService, repo: authRepo)
-        return LoginViewController()
-    }
     func makeParentsOnboardingViewController() -> UIViewController {
         let vc = UIViewController()
         vc.view.backgroundColor = .kBlack
