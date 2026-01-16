@@ -72,7 +72,6 @@ final class CTAButton: UIButton {
     private func setLayout() {
         self.snp.makeConstraints {
             $0.height.equalTo(50)
-            $0.leading.trailing.equalToSuperview().inset(16)
         }
         
         contentStackView.snp.makeConstraints {

@@ -18,6 +18,7 @@ final class DialogBox: UIView {
         case missionComplete(title: String)
         case logout
         case wishWell(title: String, coin: String)
+        case nextJourney
         
         var title: String {
             switch self {
@@ -27,6 +28,8 @@ final class DialogBox: UIView {
                 return "로그아웃"
             case .wishWell(let title, _):
                 return title
+            case .nextJourney:
+                return "다음 여정으로 갈거야?"
             }
         }
         
@@ -38,6 +41,8 @@ final class DialogBox: UIView {
                 return "로그아웃 하시겠습니까?"
             case .wishWell:
                 return "금화를 사용해 소원을 빌까?"
+            case .nextJourney:
+                return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
             }
         }
         
@@ -101,6 +106,7 @@ final class DialogBox: UIView {
         $0.textAlignment = .center
         $0.textColor = .white
         $0.numberOfLines = 2
+        $0.font = .body3_14_R
     }
     
     private let contentStack = UIStackView().then {
@@ -213,6 +219,7 @@ final class DialogBox: UIView {
     func configure(state: State) {
         titleLabel.setTypo(.title2_20_SB, text: state.title)
         messageLabel.setTypo(.body3_14_R, text: state.message)
+        messageLabel.textAlignment = .center
         coinLabel.setTypo(.title4_14_SB, text: state.coinText)
         
         cancelButton.setTitle(state.cancelButtonTitle, for: .normal)
