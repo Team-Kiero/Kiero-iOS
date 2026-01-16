@@ -27,9 +27,15 @@ public final class TabBarViewController: UITabBarController {
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        self.tabBar.isHidden = true
+        
+        setStyle()
         setViewControllers()
         setCustomTabBarUI()
+    }
+    
+    private func setStyle() {
+        self.tabBar.isHidden = true
+        view.backgroundColor = .kBlack
     }
     
     private func setViewControllers() {
