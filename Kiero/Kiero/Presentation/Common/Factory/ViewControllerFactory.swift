@@ -9,12 +9,15 @@ import UIKit
 
 public protocol ViewControllerFactory {
     // 부모 탭
+    func makeLoginViewController() -> UIViewController
+    func makeParentsOnboardingViewController() -> UIViewController
     func makeScheduleViewController() -> UIViewController
     func makeNotificationFeedViewController() -> UIViewController
     
     func makeAddScheduleViewController() -> UIViewController
     
     // 아이 탭
+    func makeChildOnboardingViewController() -> UIViewController
     func makeDailyJourneyViewController() -> UIViewController
     func makeCoinMissionViewController() -> UIViewController
     func makeWishWellViewController() -> UIViewController
