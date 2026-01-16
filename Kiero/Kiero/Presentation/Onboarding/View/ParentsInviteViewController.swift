@@ -67,7 +67,7 @@ final class ParentsInviteViewController: BaseViewController<BaseViewModel> {
         inviteView.snp.makeConstraints {
             $0.top.equalTo(textField.snp.bottom)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(343)
+            $0.height.equalTo(266)
         }
         
         startButton.snp.makeConstraints {

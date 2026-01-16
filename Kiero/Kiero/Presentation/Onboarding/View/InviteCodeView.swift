@@ -98,11 +98,6 @@ final class InviteCodeView: UIView {
     }
     
     private func setLayout() {
-        self.snp.makeConstraints {
-            $0.width.equalTo(343)
-            $0.height.equalTo(266)
-        }
-        
         inviteView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(27)
             $0.centerX.equalToSuperview()
