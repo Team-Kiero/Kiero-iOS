@@ -23,19 +23,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //        self.window = window
 //        window.makeKeyAndVisible()
         
-        guard let windowScene = scene as? UIWindowScene else { return }
-        
-        let authRepository = AppContainer.shared.authRepository
-        
-        let loginViewModel = LoginViewModel(repo: authRepository)
-        
-        let loginViewController = LoginViewController(viewModel: loginViewModel)
-        
+        guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
-        window.rootViewController = loginViewController
+        let vc = UINavigationController(rootViewController: ParentsInviteViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared))
+        window.rootViewController = vc
+        self.window = window
         window.makeKeyAndVisible()
         
-        self.window = window
     }
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

@@ -10,11 +10,11 @@
 		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
-		F6B015D62F123F0D007B1EE4 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D52F123F0D007B1EE4 /* KakaoSDK */; };
+		F689777E2F18102D004D5783 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D52F123F0D007B1EE4 /* KakaoSDK */; };
+		F689777F2F18102D004D5783 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */; };
+		F68977802F18102D004D5783 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F6B018512F136542007B1EE4 /* CombineMoya */; };
+		F68977812F18102D004D5783 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F6B01F162F1779EC007B1EE4 /* Kingfisher */; };
 		F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D72F123F0D007B1EE4 /* KakaoSDKAuth */; };
-		F6B015DA2F123F0D007B1EE4 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */; };
-		F6B018522F136542007B1EE4 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F6B018512F136542007B1EE4 /* CombineMoya */; };
-		F6B01F172F1779EC007B1EE4 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F6B01F162F1779EC007B1EE4 /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +48,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F68977812F18102D004D5783 /* Kingfisher in Frameworks */,
+				F68977802F18102D004D5783 /* CombineMoya in Frameworks */,
+				F689777F2F18102D004D5783 /* KakaoSDKUser in Frameworks */,
+				F689777E2F18102D004D5783 /* KakaoSDK in Frameworks */,
 				24DF523F2F0A6487007146AC /* SnapKit in Frameworks */,
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
 				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
@@ -184,6 +188,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 39XAF6MZHA;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -214,6 +219,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 39XAF6MZHA;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
