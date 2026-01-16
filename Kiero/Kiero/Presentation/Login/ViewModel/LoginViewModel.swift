@@ -9,34 +9,55 @@
 import Foundation
 import Combine
 
-final class LoginViewModel {
-    
-    let kakaoButtonTapped = PassthroughSubject<Void, Never>()
-    private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
-    var state: AnyPublisher<LoginState, Never> {
-        stateSubject.eraseToAnyPublisher()
+final class LoginViewModel: BaseViewModel, ViewModelType {
+
+    // MARK: - Input / Output
+
+    struct Input {
+        /// VC에서 버튼 탭을 publisher로 넘겨주거나, subject를 직접 넘겨도 됨
+        let kakaoButtonTapped: AnyPublisher<Void, Never>
     }
-    let route = PassthroughSubject<LoginRoute, Never>()
-    private let kakaoService: KakaoAuthService
+
+    struct Output {
+        let state: AnyPublisher<LoginState, Never>
+        let route: AnyPublisher<LoginRoute, Never>
+    }
+
+    // MARK: - Private
+
+    private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
+    private let routeSubject = PassthroughSubject<LoginRoute, Never>()
+
+    private let kakaoService: any KakaoAuthServiceType
     private let repo: AuthRepositoryType
-    private var cancellables = Set<AnyCancellable>()
+
+    // MARK: - Init
 
     init(
-        kakaoService: KakaoAuthService = KakaoAuthService(),
+        kakaoService: any KakaoAuthServiceType = KakaoAuthService(),
         repo: AuthRepositoryType
     ) {
         self.kakaoService = kakaoService
         self.repo = repo
-        bind()
+        super.init()
     }
 
-    private func bind() {
-        kakaoButtonTapped
+    // MARK: - Transform
+
+    func transform(input: Input) -> Output {
+        input.kakaoButtonTapped
             .sink { [weak self] in
                 self?.requestKakaoLogin()
             }
             .store(in: &cancellables)
+
+        return Output(
+            state: stateSubject.eraseToAnyPublisher(),
+            route: routeSubject.eraseToAnyPublisher()
+        )
     }
+
+    // MARK: - Business Logic
 
     private func requestKakaoLogin() {
         stateSubject.send(.loading)
@@ -53,11 +74,9 @@ final class LoginViewModel {
                     self.stateSubject.send(.failure(error.errorDescription))
                 }
             } receiveValue: { [weak self] loginData in
-
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
-
                 self?.stateSubject.send(.idle)
-                self?.route.send(.home)
+                //self?.routeSubject.send(.home)
             }
             .store(in: &cancellables)
     }
