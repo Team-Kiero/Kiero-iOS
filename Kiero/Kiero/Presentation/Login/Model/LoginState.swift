@@ -12,5 +12,6 @@ enum LoginState: Equatable {
 }
 
 enum LoginRoute {
-    case home
+    case parent
+    case child
 }
