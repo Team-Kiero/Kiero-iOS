@@ -82,7 +82,6 @@ private extension NotificationFeedViewModel {
     }
     
     func makeMockEvents() -> [MockEvent] {
-        let image = UIImage(resource: .test)
         
         return [
             .init(eventType: "COUPON", occurredAt: "2026-01-10 12:12",
@@ -90,7 +89,7 @@ private extension NotificationFeedViewModel {
                   schedule: nil, mission: nil),
             
                 .init(eventType: "FINISH_SCHEDULE", occurredAt: "2026-01-10 12:00",
-                      childName: "근영", content: nil, amount: nil, proofImage: image,
+                      childName: "근영", content: nil, amount: nil, proofImage: nil,
                       schedule: "피아노 학원", mission: nil),
             
                 .init(eventType: "MISSION", occurredAt: "2026-01-10 09:40",
