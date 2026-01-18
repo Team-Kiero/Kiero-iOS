@@ -52,18 +52,18 @@ extension UserRole {
     var regex: String? {
         switch self {
         case .parent(.lastName), .child(.lastName), .parent(.firstName), .parent(.totalName), .child(.firstName):
-            return "^[가-힣]{0,5}$"
+            return "^[가-힣]$"
         case .child(.inviteCode):
             return nil
         }
     }
 
-    var errorAppear: Bool {
+    var errorAppear: UIColor {
         switch self {
         case .parent(.lastName), .child(.lastName), .parent(.firstName), .child(.firstName):
-            return true
+            return .point
         case .parent(.totalName), .child(.inviteCode):
-            return false
+            return .clear
         }
     }
 }
@@ -96,14 +96,10 @@ final class TextField: UIView {
     }
     
     private let errorImage = UIImageView().then {
-        $0.image = .icInfo
-            .withTintColor(.point)
-            .resized(to: CGSize(width: 11, height: 11))
         $0.alpha = 0
     }
     
     private let errorLabel = UILabel().then {
-        $0.textColor = .point
         $0.alpha = 0
     }
     
@@ -163,6 +159,10 @@ final class TextField: UIView {
     private func configure(type: UserRole) {
         titleLabel.text = type.title
         titleLabel.isHidden = type.title.isEmpty
+        errorLabel.textColor = type.errorAppear
+        errorImage.image = .icInfo
+            .withTintColor(.point)
+            .resized(to: CGSize(width: 11, height: 11))
         textField.attributedPlaceholder = NSAttributedString(
                 string: type.placeholder,
                 attributes: [
@@ -181,11 +181,17 @@ final class TextField: UIView {
         textField.layer.borderWidth = 0
         textField.layer.borderColor = UIColor.clear.cgColor
         
-        guard type.errorAppear else { return }
         guard let regex = type.regex else { return }
         
         let text = (textField.text ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        if textField.text == nil || textField.text == ""{
+            textField.layer.borderColor = UIColor.white.cgColor
+            textField.layer.borderWidth = 0
+            errorLabel.alpha = 0
+            errorImage.alpha = 0
+        }
         
         guard hasInteracted else { return }
         guard !text.isEmpty else { return }
@@ -223,5 +229,19 @@ extension TextField: UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         validate()
+    }
+    
+    func textField(
+        _ textField: UITextField,
+        shouldChangeCharactersIn range: NSRange,
+        replacementString string: String
+    ) -> Bool {
+
+        let currentText = textField.text ?? ""
+
+        guard let textRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: textRange, with: string)
+
+        return updatedText.count <= 5
     }
 }
