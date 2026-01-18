@@ -106,7 +106,6 @@ final class DailyJourneyView: BaseUIView {
         
         kkubiCharacterImageView.snp.makeConstraints {
             $0.top.equalTo(journeyTimeView.snp.bottom).offset(20)
-            $0.bottom.equalTo(speechField.snp.top).offset(-20)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
         }
