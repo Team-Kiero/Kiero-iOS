@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel>, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel> {
     
     // MARK: - Properties
     
@@ -87,13 +87,11 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
     
     private func showNextJourneyDialog() {
-        self.view.showDialog(state: .nextJourney) { 
+        self.view.showDialog(state: .nextJourney) {
             print("유저가 다음 여정으로 넘어가기를 확정")
             // TODO: ViewModel의 다음 여정 로직 연결
         }
     }
-    
-    // MARK: - Camera Logic
     
     private func openCamera() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
@@ -110,6 +108,17 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         self.present(picker, animated: true)
     }
     
+    private func moveToMissionCompleteView(with image: UIImage) {
+        let completeViewModel = MissionCompleteViewModel()
+        let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
+        
+        completeVC.initialImage = image
+        
+        self.navigationController?.pushViewController(completeVC, animated: true)
+    }
+}
+
+extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         guard let capturedImage = info[.originalImage] as? UIImage else {
@@ -124,14 +133,5 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
-    }
-    
-    private func moveToMissionCompleteView(with image: UIImage) {
-        let completeViewModel = MissionCompleteViewModel()
-        let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
-        
-        completeVC.initialImage = image
-        
-        self.navigationController?.pushViewController(completeVC, animated: true)
     }
 }
