@@ -40,34 +40,6 @@ final class DailyJourneyView: BaseUIView {
         $0.contentMode = .scaleAspectFit
     }
     
-    let goToNextButton = UIButton().then {
-        var config = UIButton.Configuration.plain()
-        
-        config.baseForegroundColor = .gray600
-        
-        let originalImage = UIImage(resource: .icRight)
-        let targetSize = CGSize(width: 14, height: 14)
-        let resizedImage = UIGraphicsImageRenderer(size: targetSize).image { _ in
-            originalImage.draw(in: CGRect(origin: .zero, size: targetSize))
-        }
-        
-        config.image = resizedImage
-        config.imagePlacement = .trailing
-        config.imagePadding = 0
-        
-        var titleContainer = AttributeContainer()
-        
-        titleContainer.font = .body5_10_R
-        titleContainer.foregroundColor = .gray600
-        
-        config.attributedTitle = AttributedString("다음 여정으로", attributes: titleContainer)
-        config.contentInsets = .zero
-        
-        $0.configuration = config
-        $0.layer.cornerRadius = 4
-        $0.clipsToBounds = true
-    }
-    
     private let speechField = SpeechField(type: .gray)
     
     let verifyPhotoButton = CTAButton(style: .gray900).then {
@@ -90,7 +62,7 @@ final class DailyJourneyView: BaseUIView {
     // MARK: - Setup Methods
     
     override func setUI() {
-        addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, goToNextButton, speechField, verifyPhotoButton)
+        addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
     }
     
     override func setLayout() {
@@ -122,13 +94,6 @@ final class DailyJourneyView: BaseUIView {
         speechField.snp.makeConstraints {
             $0.bottom.equalTo(verifyPhotoButton.snp.top).offset(-27)
             $0.horizontalEdges.equalToSuperview()
-        }
-        
-        goToNextButton.snp.makeConstraints {
-            $0.bottom.equalTo(speechField.snp.top).offset(14)
-            $0.trailing.equalToSuperview().offset(-24.5)
-            $0.width.equalTo(89)
-            $0.height.equalTo(24)
         }
         
         kkubiCharacterImageView.snp.makeConstraints {
