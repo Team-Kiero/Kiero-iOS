@@ -39,7 +39,11 @@ final class WeeklyTimeTableView: BaseUIView {
         $0.layer.cornerRadius = 10
         $0.layer.borderWidth = 0.3
         $0.layer.borderColor = UIColor.gray800.cgColor
-        $0.clipsToBounds = true
+        $0.clipsToBounds = false
+    }
+    
+    private let cardContainerView = UIView().then {
+        $0.backgroundColor = .clear
     }
     
     // MARK: - Setup Methods
@@ -48,6 +52,7 @@ final class WeeklyTimeTableView: BaseUIView {
         addSubviews(headerStackView, scrollView)
         scrollView.addSubview(gridContainer)
         gridContainer.addSubview(gridBackgroundView)
+        gridBackgroundView.addSubview(cardContainerView)
         
         self.daysDates = Date().daysOfWeek
         updateHeaderLabels()
@@ -57,7 +62,7 @@ final class WeeklyTimeTableView: BaseUIView {
     override func setLayout() {
         headerStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(34)
+            $0.leading.equalToSuperview().offset(27)
             $0.trailing.equalToSuperview().inset(5)
             $0.height.equalTo(25)
         }
@@ -78,9 +83,13 @@ final class WeeklyTimeTableView: BaseUIView {
         
         gridBackgroundView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(32)
+            $0.leading.equalToSuperview().offset(23)
             $0.trailing.equalToSuperview()
             $0.height.equalTo(totalGridHeight)
+        }
+        
+        cardContainerView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 0, left: 4, bottom: 0, right: 4))
         }
     }
     
@@ -93,7 +102,7 @@ final class WeeklyTimeTableView: BaseUIView {
             
             timeRowContainer.snp.makeConstraints {
                 $0.top.equalTo(gridBackgroundView.snp.top).offset(yOffset)
-                $0.leading.equalToSuperview().inset(9)
+                $0.leading.equalToSuperview()
                 $0.width.equalTo(23)
                 $0.height.equalTo(hourHeight)
             }
@@ -116,7 +125,7 @@ final class WeeklyTimeTableView: BaseUIView {
                 
                 line.snp.makeConstraints {
                     $0.bottom.equalTo(timeRowContainer.snp.top).offset(-3)
-                    $0.leading.equalToSuperview().inset(9)
+                    $0.leading.equalToSuperview()
                     $0.width.equalTo(23)
                     $0.height.equalTo(0.3)
                 }
@@ -143,7 +152,7 @@ final class WeeklyTimeTableView: BaseUIView {
     }
     
     func clearSchedules() {
-        gridBackgroundView.subviews.forEach { $0.removeFromSuperview() }
+        cardContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
     
     func addSchedule(schedule: Schedule) {
@@ -167,17 +176,17 @@ final class WeeklyTimeTableView: BaseUIView {
             default: return .schedule1
             }
         }()
-
+        
         dayIndices.forEach { dayIndex in
-
             let card = ScheduleCardView(name: schedule.name, color: actualColor)
-            gridBackgroundView.addSubview(card)
+            
+            cardContainerView.addSubview(card)
             
             card.snp.makeConstraints {
                 $0.top.equalToSuperview().offset(topOffset)
                 $0.height.equalTo(cardHeight)
-                $0.width.equalToSuperview().multipliedBy(1.0 / 7.0).inset(1)
-                $0.centerX.equalTo(gridBackgroundView.snp.trailing).multipliedBy((CGFloat(dayIndex) + 0.5) / 7.0)
+                $0.width.equalToSuperview().multipliedBy(1.0 / 7.0).inset(2)
+                $0.centerX.equalToSuperview().multipliedBy((CGFloat(dayIndex) + 0.5) / 3.5)
             }
         }
         
