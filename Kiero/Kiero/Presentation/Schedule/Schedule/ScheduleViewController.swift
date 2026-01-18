@@ -31,13 +31,15 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - UI Components
     
-    private let profileBox = ProfileBox(
+    private lazy var profileBox = ProfileBox(
         name: "신키로",
         profileURL: "",
         backgroundColor: .clear
     ).then {
-        $0.onTap = {
-            // TODO: 로그아웃VC 연결
+        $0.onTap = {[weak self] in
+            self?.showLogoutDialog {
+                self?.performLogout()
+            }
         }
     }
     
@@ -144,7 +146,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         
         addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, finalDate: Date) in
             guard let self = self else { return }
-           
+            
             self.viewModel?.addSchedule(newSchedule)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 self.viewModel?.currentReferenceDate.send(finalDate)

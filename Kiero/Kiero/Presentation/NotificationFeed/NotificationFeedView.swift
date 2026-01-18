@@ -12,6 +12,10 @@ import Then
 
 final class NotificationFeedView: BaseUIView {
     
+    // MARK: - Properties
+    
+    var onProfileTapped: (() -> Void)?
+    
     // MARK: - UI Components
     
     private let profileView = ProfileBox(name: "윤아", profileURL: "")
@@ -31,6 +35,10 @@ final class NotificationFeedView: BaseUIView {
     
     override func setUI() {
         addSubviews(profileView, tableView)
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        profileView.addGestureRecognizer(tap)
+        profileView.isUserInteractionEnabled = true
     }
     
     override func setLayout() {
@@ -44,5 +52,10 @@ final class NotificationFeedView: BaseUIView {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().inset(100)
         }
+    }
+    
+    @objc
+    private func handleTap() {
+        onProfileTapped?()
     }
 }
