@@ -17,6 +17,12 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private var currentStartTime: Date?
     private var currentEndTime: Date?
     private var currentSelectedColor: UIColor?
+    var onScheduleAdded: ((Schedule, Date) -> Void)?
+    var baseDate: Date = Date() {
+        didSet {
+            updatePagingTitle()
+        }
+    }
     
     // MARK: - UI Components
     
@@ -36,7 +42,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         )
     }
     
-    // 요일
     private let daySectionTitle = UILabel().then {
         $0.text = "요일"
         $0.font = .title3_16_SB
@@ -53,12 +58,11 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         $0.onTintColor = .main
         $0.backgroundColor = .gray800
         $0.layer.cornerRadius = 16
-        $0.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
+        $0.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
     }
     
     private let weekdaySelectionView = WeekdaySelectionView()
     
-    // 시간
     private let timeSectionTitle = UILabel().then {
         $0.text = "시간"
         $0.font = .title3_16_SB
@@ -67,7 +71,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private let timeSelectionView = TimeSelectionView()
     
-    // 컬러
     private let colorSectionTitle = UILabel().then {
         $0.text = "컬러"
         $0.font = .title3_16_SB
@@ -88,6 +91,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setInitialTime()
+        addTarget()
+        updatePagingTitle()
     }
     
     // MARK: - Setup Methods
@@ -100,7 +107,23 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                          timeSectionTitle, timeSelectionView,
                          colorSectionTitle, selectedColorChip, colorArrowButton)
         
-        pagingHeader.configure(title: "12.8(월) - 12.14(일)", isLeftEnabled: true, isRightEnabled: true)
+        let weekDates = Date().daysOfWeek
+        
+        if let firstDay = weekDates.first, let lastDay = weekDates.last {
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "M.d(E)"
+            formatter.locale = Locale(identifier: "ko_KR")
+            
+            let startStr = formatter.string(from: firstDay)
+            let endStr = formatter.string(from: lastDay)
+            
+            pagingHeader.configure(
+                title: "\(startStr) - \(endStr)",
+                isLeftEnabled: true,
+                isRightEnabled: true
+            )
+        }
     }
     
     override func setLayout() {
@@ -117,7 +140,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
         
         titleTextField.snp.makeConstraints {
-            $0.top.equalTo(pagingHeader.snp.bottom).offset(32)
+            $0.top.equalTo(pagingHeader.snp.bottom).offset(30)
             $0.horizontalEdges.equalToSuperview().inset(19)
         }
         
@@ -133,7 +156,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         repeatLabel.snp.makeConstraints {
             $0.centerY.equalTo(daySectionTitle)
-            $0.trailing.equalTo(repeatSwitch.snp.leading).offset(-8)
+            $0.trailing.equalTo(repeatSwitch.snp.leading)
         }
         
         weekdaySelectionView.snp.makeConstraints {
@@ -168,6 +191,14 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     override func addTarget() {
+        pagingHeader.onLeftButtonTapped = { [weak self] in
+            self?.moveWeek(value: -1)
+        }
+        
+        pagingHeader.onRightButtonTapped = { [weak self] in
+            self?.moveWeek(value: 1)
+        }
+        
         navigationBar.leftButtonAction = { [weak self] in
             self?.dismiss(animated: true)
         }
@@ -180,15 +211,103 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
-            if self.weekdaySelectionView.selectedIndices.isEmpty {
+            let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
+            if selectedIndices.isEmpty {
                 Toast.show(message: "요일을 선택해주세요.")
                 return
             }
             
-            if let start = self.currentStartTime, let end = self.currentEndTime {
-                if start >= end {
-                    Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            let weekDates = self.baseDate.daysOfWeek
+            let isRecurring = self.repeatSwitch.isOn
+            
+            let start = self.currentStartTime ?? Date()
+            let end = self.currentEndTime ?? Date()
+            let startMin = calendar.component(.hour, from: start) * 60 + calendar.component(.minute, from: start)
+            let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
+            
+            if startMin >= endMin {
+                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+                return
+            }
+            
+            let existingSchedules = self.viewModel?.scheduleList ?? []
+            
+            let isOverlapping = existingSchedules.contains { existing in
+                let existingDayIndices = existing.dayIndices
+                let hasCommonDay = !Set(selectedIndices).isDisjoint(with: Set(existingDayIndices))
+                
+                if hasCommonDay {
+                    let exStart = self.convertTimeToMinutes(existing.startTime)
+                    let exEnd = self.convertTimeToMinutes(existing.endTime)
+                    let isTimeOverlapping = startMin < exEnd && exStart < endMin
+                    
+                    if isTimeOverlapping {
+                        if isRecurring || existing.isRecurring {
+                            return true
+                        }
+                        
+                        if let existingDateStr = existing.date,
+                           let existingDate = existingDateStr.toDate(format: "yyyy-MM-dd") {
+                            
+                            return selectedIndices.contains { index in
+                                let targetDate = calendar.startOfDay(for: weekDates[index])
+                                return calendar.isDate(targetDate, inSameDayAs: existingDate)
+                            }
+                        }
+                        return true
+                    }
+                }
+                return false
+            }
+            
+            if isOverlapping {
+                Toast.show(message: "해당 시간에 이미 등록된 일정이 있습니다.")
+                return
+            }
+            
+            if isRecurring {
+                let hasPastDay = selectedIndices.contains { calendar.startOfDay(for: weekDates[$0]) < today }
+                if hasPastDay {
+                    Toast.show(message: "과거 요일을 포함하여 반복 일정을 시작할 수 없습니다.")
                     return
+                }
+            } else {
+                let hasPastDate = selectedIndices.contains { calendar.startOfDay(for: weekDates[$0]) < today }
+                if hasPastDate {
+                    Toast.show(message: "지난 날짜에는 일정을 추가할 수 없습니다.")
+                    return
+                }
+            }
+            
+            let colorMapping: [UIColor: String] = [
+                .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+                .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+            ]
+            let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+            let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+            let selectedDayStrings = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
+            let startDate = weekDates.first?.toString(format: "yyyy-MM-dd")
+            
+            if isRecurring {
+                let newSchedule = Schedule(
+                    name: title, isRecurring: true,
+                    startTime: start.toString(format: "HH:mm:ss"),
+                    endTime: end.toString(format: "HH:mm:ss"),
+                    scheduleColor: colorCode, dayOfWeek: selectedDayStrings, date: startDate
+                )
+                self.onScheduleAdded?(newSchedule, self.baseDate)
+            } else {
+                selectedIndices.forEach { index in
+                    let newSchedule = Schedule(
+                        name: title, isRecurring: false,
+                        startTime: start.toString(format: "HH:mm:ss"),
+                        endTime: end.toString(format: "HH:mm:ss"),
+                        scheduleColor: colorCode, dayOfWeek: nil,
+                        date: weekDates[index].toString(format: "yyyy-MM-dd")
+                    )
+                    self.onScheduleAdded?(newSchedule, self.baseDate)
                 }
             }
             
@@ -196,21 +315,95 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             self.dismiss(animated: true)
         }
         
-        timeSelectionView.startTimeTapAction = { [weak self] in
-            self?.presentTimePicker(isStart: true)
-        }
-        
-        timeSelectionView.endTimeTapAction = { [weak self] in
-            self?.presentTimePicker(isStart: false)
-        }
-        
+        timeSelectionView.startTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: true) }
+        timeSelectionView.endTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: false) }
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
+    }
+    
+    private func convertTimeToMinutes(_ timeString: String) -> Int {
+        let components = timeString.split(separator: ":").map { Int($0) ?? 0 }
+        if components.count >= 2 {
+            return components[0] * 60 + components[1]
+        }
+        return 0
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
+    }
+    
+    private func moveWeek(value: Int) {
+        let calendar = Calendar.current
+        guard let newDate = calendar.date(byAdding: .weekOfYear, value: value, to: baseDate) else { return }
+        
+        let now = Date()
+        let currentWeekStart = now.daysOfWeek.first!
+        let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
+        let maxDate = calendar.date(byAdding: .weekOfYear, value: 12, to: now)!
+        
+        let newDateWeekStart = calendar.startOfDay(for: newDate.daysOfWeek.first!)
+        
+        if newDateWeekStart < startOfCurrentWeek {
+            return
+        }
+        
+        if newDateWeekStart <= calendar.startOfDay(for: maxDate) {
+            self.baseDate = newDate
+        } else {
+            Toast.show(message: "현재 날짜 기준 12주 이내만 선택 가능합니다.")
+        }
+    }
+    
+    private func setInitialTime() {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        var startComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        startComponents.hour = 12
+        startComponents.minute = 0
+        let defaultStart = calendar.date(from: startComponents)
+        
+        var endComponents = startComponents
+        endComponents.hour = 12
+        let defaultEnd = calendar.date(from: endComponents)
+        
+        self.currentStartTime = defaultStart
+        self.currentEndTime = defaultEnd
+        
+        if let start = defaultStart, let end = defaultEnd {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh : mm a"
+            formatter.locale = Locale(identifier: "en_US")
+            
+            timeSelectionView.updateTime(isStart: true, time: formatter.string(from: start))
+            timeSelectionView.updateTime(isStart: false, time: formatter.string(from: end))
+        }
+    }
+    
+    private func updatePagingTitle() {
+        let weekDates = baseDate.daysOfWeek
+        guard let firstDay = weekDates.first, let lastDay = weekDates.last else { return }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M.d(E)"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
+        let title = "\(formatter.string(from: firstDay)) - \(formatter.string(from: lastDay))"
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        let currentWeekStart = now.daysOfWeek.first!
+        let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
+        
+        let maxDate = calendar.date(byAdding: .weekOfYear, value: 12, to: now)!
+        
+        let isLeftEnabled = calendar.startOfDay(for: firstDay) > startOfCurrentWeek
+        
+        let isRightEnabled = calendar.date(byAdding: .weekOfYear, value: 1, to: baseDate)! <= calendar.startOfDay(for: maxDate)
+        
+        pagingHeader.configure(title: title, isLeftEnabled: isLeftEnabled, isRightEnabled: isRightEnabled)
     }
     
     private func presentTimePicker(isStart: Bool) {
@@ -224,9 +417,19 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         vc.setInitialTime(savedDate)
         
         vc.onTimeSelected = { [weak self] selectedTime in
-            self?.timeSelectionView.updateTime(isStart: isStart, time: selectedTime)
-            if isStart { self?.currentStartTime = vc.selectedDatePickerDate }
-            else { self?.currentEndTime = vc.selectedDatePickerDate }
+            guard let self = self else { return }
+            
+            let formatter = DateFormatter()
+            formatter.dateFormat = "hh : mm a"
+            let englishTimeString = formatter.string(from: selectedTime)
+            
+            self.timeSelectionView.updateTime(isStart: isStart, time: englishTimeString)
+            
+            if isStart {
+                self.currentStartTime = selectedTime
+            } else {
+                self.currentEndTime = selectedTime
+            }
         }
         
         vc.onDismiss = { [weak self] in

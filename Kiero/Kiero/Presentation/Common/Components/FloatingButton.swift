@@ -37,6 +37,10 @@ final class FloatingButton: UIButton {
     
     // MARK: - Setup Methods
     
+    func updateType(_ type: FloatingButtonType) {
+        setStyle(type: type)
+    }
+    
     private func setStyle(type: FloatingButtonType) {
         switch type {
         case .schedule:

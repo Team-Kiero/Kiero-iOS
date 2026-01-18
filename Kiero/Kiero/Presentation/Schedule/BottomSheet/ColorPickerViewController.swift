@@ -116,7 +116,10 @@ final class ColorPickerViewController: BaseBottomSheetViewController {
     }
     
     override func hideSheet() {
-        onDismiss?()
+        if let color = self.selectedColor {
+            self.onColorSelected?(color)
+        }
+        self.onDismiss?()
         super.hideSheet()
     }
 }

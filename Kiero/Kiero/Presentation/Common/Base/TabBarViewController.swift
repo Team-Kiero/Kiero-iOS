@@ -27,9 +27,15 @@ public final class TabBarViewController: UITabBarController {
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        self.tabBar.isHidden = true
+        
+        setStyle()
         setViewControllers()
         setCustomTabBarUI()
+    }
+    
+    private func setStyle() {
+        self.tabBar.isHidden = true
+        view.backgroundColor = .kBlack
     }
     
     private func setViewControllers() {
@@ -41,7 +47,7 @@ public final class TabBarViewController: UITabBarController {
             
             customTabBar.setTabItems(
                 titles: ["스케줄 관리", "알림 피드"],
-                icons: [.icCalendar, .icBell]
+                icons: [.icCalendarLine, .icBell]
             )
         } else {
             let dailyJourneyVC = factory.makeDailyJourneyViewController()
