@@ -128,7 +128,7 @@ final class WishWellView: BaseUIView {
         wishCollectionView.snp.makeConstraints {
             $0.top.equalTo(line.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(10)
+            $0.bottom.equalToSuperview().inset(100)
         }
     }
     
