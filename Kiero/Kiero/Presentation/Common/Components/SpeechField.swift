@@ -12,14 +12,57 @@ import Then
 
 final class SpeechField: UIView {
     
+    enum fieldType {
+        case no
+        case gray
+        case main
+        
+        var textColor: UIColor {
+            switch self {
+            case .no:
+                return .clear
+            case .gray:
+                return .gray600
+            case .main:
+                return .main
+            }
+        }
+        
+        var buttonTitle: String {
+            switch self {
+            case .no:
+                return ""
+            case .gray:
+                return "다음 여정으로"
+            case .main:
+                return "다음"
+            }
+        }
+    }
+    
+    private let type: fieldType
+    
+    var onTap: (() -> Void)?
+    
     // MARK: - UI Components
     
     private let nameContainerView = UIView()
     
     private let containerView = UIView()
     
+    private let buttonContainerView = UIView()
+    
     private let nameLabel = UILabel().then {
         $0.textAlignment = .center
+    }
+    
+    private let buttonLabel = UILabel().then {
+        $0.isUserInteractionEnabled = true
+    }
+    
+    private let buttonImage = UIImageView().then {
+        $0.image = .icRight.withRenderingMode(.alwaysTemplate)
+        $0.isUserInteractionEnabled = true
     }
     
     private let contentStackView = UIStackView().then {
@@ -31,11 +74,13 @@ final class SpeechField: UIView {
     
     // MARK: - Life Cycle
     
-    override init(frame: CGRect) {
+    init(type: fieldType) {
+        self.type = type
         super.init(frame: .zero)
         setStyle()
         setUI()
         setLayout()
+        addTarget()
     }
     
     required init?(coder: NSCoder) {
@@ -57,17 +102,19 @@ final class SpeechField: UIView {
         nameLabel.font = .body5_10_R
         
         contentStackView.backgroundColor = .clear
+        buttonContainerView.backgroundColor = .clear
     }
     
     private func setUI() {
-        addSubviews(containerView, nameContainerView)
+        addSubviews(containerView, nameContainerView, buttonContainerView)
         nameContainerView.addSubview(nameLabel)
         containerView.addSubview(contentStackView)
+        buttonContainerView.addSubviews(buttonLabel, buttonImage)
     }
     
     private func setLayout() {
         nameContainerView.snp.makeConstraints {
-            $0.top.equalToSuperview()
+            $0.top.equalToSuperview().offset(15)
             $0.height.equalTo(21)
             $0.width.greaterThanOrEqualTo(43)
             $0.leading.equalTo(containerView.snp.leading).offset(18)
@@ -88,6 +135,30 @@ final class SpeechField: UIView {
             $0.leading.trailing.equalToSuperview().inset(20)
             $0.bottom.equalToSuperview().inset(27)
         }
+        
+        buttonContainerView.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.height.equalTo(36)
+            $0.trailing.equalTo(containerView.snp.trailing)
+            $0.bottom.equalTo(nameContainerView.snp.bottom)
+        }
+        
+        buttonImage.snp.makeConstraints {
+            $0.trailing.equalToSuperview().inset(10)
+            $0.centerY.equalToSuperview()
+            $0.size.equalTo(14)
+        }
+        
+        buttonLabel.snp.makeConstraints {
+            $0.trailing.equalTo(buttonImage.snp.leading)
+            $0.centerY.equalToSuperview()
+            $0.leading.equalToSuperview().inset(10)
+        }
+    }
+    
+    private func addTarget() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(labelButtonDidTap))
+        addGestureRecognizer(tap)
     }
     
     // MARK: - Configuration
@@ -95,6 +166,9 @@ final class SpeechField: UIView {
     func configure(name: String, lines: [String], highlightKeywords: [String] = []) {
         nameLabel.text = name
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        buttonLabel.setTypo(.body5_10_R, text: type.buttonTitle)
+        buttonLabel.textColor = type.textColor
+        buttonImage.tintColor = type.textColor
         
         for line in lines {
             let label = UILabel().then {
@@ -116,5 +190,16 @@ final class SpeechField: UIView {
             }
             contentStackView.addArrangedSubview(label)
         }
+    }
+    
+    @objc
+    private func labelButtonDidTap() {
+        onTap?()
+    }
+}
+
+#Preview {
+    SpeechField(type: .main).then {
+        $0.configure(name: "꾸삐삐", lines: ["다른 도깨비들은 장난치는 걸 좋아하지만,", "난 '영웅의 불씨'를 품고 태어난 특별한 도깨비야!", "너의 노력을 멋진 소원으로 바꾸는 꼬마 히어로 지"], highlightKeywords: ["꼬마 히어로"])
     }
 }

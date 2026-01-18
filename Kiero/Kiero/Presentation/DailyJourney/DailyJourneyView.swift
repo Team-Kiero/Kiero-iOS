@@ -67,9 +67,9 @@ final class DailyJourneyView: BaseUIView {
         $0.clipsToBounds = true
     }
     
-    private let speechField = SpeechField()
+    private let speechField = SpeechField(type: .gray)
     
-    let verifyPhotoButton = CTAButton(style: .gray).then {
+    let verifyPhotoButton = CTAButton(style: .gray900).then {
         $0.setTitle("인증하고 불조각 받기", for: .normal)
         $0.setImage(UIImage(resource: .icCamera), for: .normal)
     }

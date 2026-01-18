@@ -37,7 +37,7 @@ final class CoinMissionView: BaseUIView {
         $0.image = UIImage(resource: .imgGoblinCoin)
     }
     
-    private let speechField = SpeechField()
+    private let speechField = SpeechField(type: .no)
     
     private let missionLabel = UILabel().then {
         $0.textColor = .white
