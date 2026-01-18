@@ -182,7 +182,6 @@ final class DialogBox: UIView {
     private func setLayout() {
         container.snp.makeConstraints {
             $0.edges.equalToSuperview()
-            $0.height.equalTo(container.snp.width).multipliedBy(194.0 / 343.0)
         }
         
         closeButton.snp.makeConstraints {
@@ -197,7 +196,6 @@ final class DialogBox: UIView {
         
         cancelButton.snp.makeConstraints {
             $0.height.equalTo(49)
-            $0.height.equalTo(cancelButton.snp.width).multipliedBy(49.0 / 147.5)
         }
         
         confirmButton.snp.makeConstraints {

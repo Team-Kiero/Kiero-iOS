@@ -30,6 +30,12 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     override func bind(viewModel: NotificationFeedViewModel) {
         super.bind(viewModel: viewModel)
         
+        contentView.onProfileTapped = { [weak self] in
+            self?.showLogoutDialog {
+                self?.performLogout()
+            }
+        }
+        
         viewModel.onDataUpdated = { [weak self] in
             DispatchQueue.main.async {
                 guard let self else { return }
