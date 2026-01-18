@@ -7,20 +7,44 @@
 
 import Foundation
 
+extension String {
+    func toDate(format: String = "yyyy-MM-dd") -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.date(from: self)
+    }
+}
+
 extension Date {
     var daysOfWeek: [Date] {
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: self)
-        var components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: startOfDay)
-        components.weekday = 2
+        var calendarWithMonday = calendar
+        calendarWithMonday.firstWeekday = 2
         
-        guard let monday = calendar.date(from: components) else { return [] }
+        let components = calendarWithMonday.dateComponents([.yearForWeekOfYear, .weekOfYear], from: self)
+        guard let startOfWeek = calendarWithMonday.date(from: components) else { return [] }
         
         return (0..<7).compactMap { day in
-            calendar.date(byAdding: .day, value: day, to: monday)
+            calendarWithMonday.date(byAdding: .day, value: day, to: startOfWeek)
         }
     }
-
+    
+    func toString(format: String = "yyyy-MM-dd") -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = format
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: self)
+    }
+    
+    var isToday: Bool {
+        return Calendar.current.isDateInToday(self)
+    }
+    
+    var isTomorrow: Bool {
+        return Calendar.current.isDateInTomorrow(self)
+    }
+    
     var weekOfMonthString: String {
         let calendar = Calendar.current
         let month = calendar.component(.month, from: self)
