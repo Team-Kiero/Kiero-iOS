@@ -201,6 +201,11 @@ final class WeeklyTimeTableView: BaseUIView {
         
         return 0.0
     }
+    
+    func updateDaysDates(_ dates: [Date]) {
+        self.daysDates = dates
+        updateHeaderLabels()
+    }
 }
 
 #Preview {

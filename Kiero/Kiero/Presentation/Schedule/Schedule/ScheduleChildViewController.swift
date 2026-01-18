@@ -39,20 +39,40 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
     override func bind(viewModel: ScheduleViewModel) {
         cancellables.removeAll()
         
+        let prevWeek = PassthroughSubject<Void, Never>()
+        let nextWeek = PassthroughSubject<Void, Never>()
+        
+        scheduleView.pagingHeader.onLeftButtonTapped = { prevWeek.send(()) }
+        scheduleView.pagingHeader.onRightButtonTapped = { nextWeek.send(()) }
+        
         let input = ScheduleViewModel.Input(
-            viewDidLoad: Just(()).eraseToAnyPublisher()
+            viewDidLoad: Just(()).eraseToAnyPublisher(),
+            prevWeekTapped: prevWeek.eraseToAnyPublisher(),
+            nextWeekTapped: nextWeek.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)
         
-        output.schedules
+        output.headerInfo
             .receive(on: RunLoop.main)
-            .sink { [weak self] (schedules: [Schedule]) in
+            .sink { [weak self] info in
+                self?.scheduleView.pagingHeader.configure(
+                    title: info.title,
+                    isLeftEnabled: info.leftEnabled,
+                    isRightEnabled: info.rightEnabled
+                )
+            }.store(in: &cancellables)
+        
+        output.filteredSchedules
+            .receive(on: RunLoop.main)
+            .sink { [weak self] schedules in
                 self?.scheduleView.updateSchedules(schedules)
-                
-                self?.view.setNeedsLayout()
-                self?.view.layoutIfNeeded()
-            }
-            .store(in: &cancellables)
+            }.store(in: &cancellables)
+        
+        output.weeklyDates
+            .receive(on: RunLoop.main)
+            .sink { [weak self] dates in
+                self?.scheduleView.timeTableView.updateDaysDates(dates)
+            }.store(in: &cancellables)
     }
 }
