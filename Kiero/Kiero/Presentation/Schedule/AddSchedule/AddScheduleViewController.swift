@@ -241,7 +241,23 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 if hasCommonDay {
                     let exStart = self.convertTimeToMinutes(existing.startTime)
                     let exEnd = self.convertTimeToMinutes(existing.endTime)
-                    return startMin < exEnd && exStart < endMin
+                    let isTimeOverlapping = startMin < exEnd && exStart < endMin
+                    
+                    if isTimeOverlapping {
+                        if isRecurring || existing.isRecurring {
+                            return true
+                        }
+                        
+                        if let existingDateStr = existing.date,
+                           let existingDate = existingDateStr.toDate(format: "yyyy-MM-dd") {
+                            
+                            return selectedIndices.contains { index in
+                                let targetDate = calendar.startOfDay(for: weekDates[index])
+                                return calendar.isDate(targetDate, inSameDayAs: existingDate)
+                            }
+                        }
+                        return true
+                    }
                 }
                 return false
             }
