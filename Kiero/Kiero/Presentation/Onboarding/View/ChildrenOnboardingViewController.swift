@@ -23,7 +23,9 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     // MARK: - UI Components
     
-    private let storyImageView = UIImageView()
+    private let storyImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFill
+    }
     
     private let mainSF = SpeechField(type: .main)
     
@@ -47,7 +49,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     override func setLayout() {
         storyImageView.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.edges.equalToSuperview()
         }
         
         startButton.snp.makeConstraints {

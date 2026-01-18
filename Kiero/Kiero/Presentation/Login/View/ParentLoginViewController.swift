@@ -22,7 +22,6 @@ final class ParentLoginViewController: BaseViewController<BaseViewModel> {
         $0.image = .imgGoblinParent.resized(to: CGSize(width: 572, height: 572))
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
-        
     }
     
     private let kakaoLoginButton = UIButton().then {

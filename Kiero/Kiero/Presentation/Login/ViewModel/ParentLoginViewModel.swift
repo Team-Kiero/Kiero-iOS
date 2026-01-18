@@ -1,20 +1,18 @@
 //
-//  LoginViewModel.swift
+//  ParentLoginViewModel.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/11/26.
 //
 
-
 import Foundation
 import Combine
 
-final class LoginViewModel: BaseViewModel, ViewModelType {
+final class ParentLoginViewModel: BaseViewModel, ViewModelType {
 
     // MARK: - Input / Output
 
     struct Input {
-        /// VC에서 버튼 탭을 publisher로 넘겨주거나, subject를 직접 넘겨도 됨
         let kakaoButtonTapped: AnyPublisher<Void, Never>
     }
 

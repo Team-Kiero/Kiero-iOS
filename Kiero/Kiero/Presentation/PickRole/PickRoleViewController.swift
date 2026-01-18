@@ -12,8 +12,6 @@ import Then
 
 final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
-    //private let viewModel: PickRoleViewModelType
-    
     private let logoImageView = UIImageView().then {
         $0.image = .imgLogo
         $0.contentMode = .scaleAspectFit
@@ -65,15 +63,11 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     override func addTarget() {
         parentButton.onTap = {
-            
+            // TODO: - 부모님으로 시작하기 버튼함수 구현
         }
         
         childButton.onTap = {
-            
+            // TODO: - 자녀로 시작하기 버튼함수 구현
         }
     }
-}
-
-#Preview {
-    PickRoleViewController(viewModel: PickRoleViewModel(), diContainer: AppDIContainer.shared)
 }

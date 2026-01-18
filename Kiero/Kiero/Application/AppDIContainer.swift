@@ -46,7 +46,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     
     func makeParentLoginViewController() -> UIViewController {
-        let vm = LoginViewModel(kakaoService: makeKakaoAuthService(), repo: makeAuthRepository())
+        let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService(), repo: makeAuthRepository())
         return ParentLoginViewController(viewModel: vm, diContainer: self)
     }
     

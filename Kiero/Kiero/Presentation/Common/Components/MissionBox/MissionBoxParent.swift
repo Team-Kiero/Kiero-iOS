@@ -57,8 +57,8 @@ final class MissionBoxParent: UIView {
         layer.cornerRadius = 10
         layer.masksToBounds = true
         
-        rewardStackView.layer.borderColor = UIColor(named: "gray_500")?.cgColor
-        rewardIcon.image = UIImage(named: "ic_3d_coin")
+        rewardStackView.layer.borderColor = UIColor.gray500.cgColor
+        rewardIcon.image = .ic3DCoin
     }
     
     private func setUI() {

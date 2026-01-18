@@ -209,8 +209,8 @@ final class NotificationFeed: UIView {
     private func applyExpanded(_ expanded: Bool, animated: Bool) {
         proofImageView.isHidden = !expanded
         proofImageView.snp.updateConstraints { $0.height.equalTo(expanded ? 343 : 0) }
-        let name = expanded ? "ic_up" : "ic_down"
-        downButton.setImage(UIImage(named: name), for: .normal)
+        let name = expanded ? UIImage.icUp : UIImage.icDown
+        downButton.setImage(name, for: .normal)
     }
     
     private func updateBottomAnchorForSchedule(isExpanded: Bool) {

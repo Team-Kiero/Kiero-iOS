@@ -27,7 +27,7 @@ final class ChildrenOnboardingViewModel: BaseViewModel, ViewModelType {
     private let items: [SpeechItem]
     private let indexSubject = CurrentValueSubject<Int, Never>(0)
 
-    // MARK: - Init (DIContainer에서 items 주입)
+    // MARK: - Init
 
     init(items: [SpeechItem]) {
         self.items = items
