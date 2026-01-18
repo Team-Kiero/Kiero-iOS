@@ -32,8 +32,8 @@ final class ScheduleCardView: BaseUIView {
     private let titleLabel = UILabel().then {
         $0.numberOfLines = 2
         $0.textColor = .white
-        $0.lineBreakMode = .byTruncatingTail
-        $0.textAlignment = .left
+        $0.lineBreakMode = .byWordWrapping
+        $0.textAlignment = .center
     }
     
     private lazy var contentStackView = UIStackView(arrangedSubviews: [dotView, titleLabel]).then {
@@ -45,23 +45,24 @@ final class ScheduleCardView: BaseUIView {
     
     // MARK: - Life Cycle
     
-    init(name: String, colorCode: String) {
+    init(name: String, color: UIColor) {
         super.init(frame: .zero)
-        let baseColor = UIColor(hex: colorCode)
         
         self.originalText = name
         titleLabel.text = name
         titleLabel.setTypo(.body5_10_R)
-        topBar.backgroundColor = baseColor
-        dotView.backgroundColor = baseColor
-        self.backgroundColor = baseColor.withAlphaComponent(0.2)
+        
+        topBar.backgroundColor = color
+        dotView.backgroundColor = color
+        
+        self.backgroundColor = color.withAlphaComponent(0.2)
     }
     
     required init?(coder: NSCoder) { nil }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        applyOverflowIfNeeded()
+        applyDynamicTextLogic()
     }
     
     override func setStyle() {
@@ -76,45 +77,47 @@ final class ScheduleCardView: BaseUIView {
     override func setLayout() {
         topBar.snp.makeConstraints {
             $0.top.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(5)
+            $0.height.equalTo(4)
         }
         
         dotView.snp.makeConstraints {
-            $0.size.equalTo(5)
+            $0.size.equalTo(4)
         }
         
         contentStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(8)
             $0.centerX.equalToSuperview()
-            $0.leading.greaterThanOrEqualToSuperview().inset(2)
-            $0.trailing.lessThanOrEqualToSuperview().inset(2)
-            $0.bottom.lessThanOrEqualToSuperview().inset(1)
+            $0.leading.lessThanOrEqualToSuperview().inset(8)
+            $0.trailing.lessThanOrEqualToSuperview().inset(6)
+            $0.bottom.lessThanOrEqualToSuperview().inset(2)
+        }
+    }
+
+    private func applyDynamicTextLogic() {
+        let cardHeight = bounds.height
+        _ = bounds.width
+        
+        if cardHeight < 20 {
+            titleLabel.isHidden = true
+            dotView.isHidden = false
+            return
         }
         
-        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-    }
-    
-    private func applyOverflowIfNeeded() {
-        guard let text = originalText as String? else { return }
-
-        titleLabel.text = text
-
-        let availableHeight = bounds.height - 10
-        let targetWidth = titleLabel.bounds.width
-
-        let fittedSize = titleLabel.sizeThatFits(
-            CGSize(width: targetWidth, height: .greatestFiniteMagnitude)
-        )
-
-        if fittedSize.height > availableHeight {
-            titleLabel.text = truncatedText(text)
+        titleLabel.isHidden = false
+        titleLabel.text = originalText
+        
+        if cardHeight < 38 {
+            titleLabel.numberOfLines = 1
+            if originalText.count >= 4 {
+                titleLabel.text = "\(originalText.prefix(2))..."
+            }
         }
-    }
-
-    private func truncatedText(_ text: String) -> String {
-        guard text.count > 2 else { return text }
-        let prefix = text.prefix(2)
-        return "\(prefix)..."
+        else {
+            titleLabel.numberOfLines = 2
+            if originalText.count >= 7 {
+                titleLabel.text = "\(originalText.prefix(5))..."
+            }
+        }
     }
 }
 

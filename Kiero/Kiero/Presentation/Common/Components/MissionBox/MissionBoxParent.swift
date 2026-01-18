@@ -32,6 +32,7 @@ final class MissionBoxParent: UIView {
         $0.layer.borderWidth = 1
         $0.layer.cornerRadius = 12
         $0.spacing = 6
+        $0.alignment = .center
     }
     
     private let missionBox = UIStackView().then {
@@ -59,6 +60,8 @@ final class MissionBoxParent: UIView {
         
         rewardStackView.layer.borderColor = UIColor(named: "gray_500")?.cgColor
         rewardIcon.image = UIImage(named: "ic_3d_coin")
+        rewardStackView.isLayoutMarginsRelativeArrangement = true
+        rewardStackView.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
     }
     
     private func setUI() {
@@ -74,17 +77,10 @@ final class MissionBoxParent: UIView {
         
         rewardStackView.snp.makeConstraints {
             $0.height.equalTo(24)
-            $0.width.equalTo(61)
         }
         
         rewardIcon.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(8)
-            $0.centerY.equalToSuperview()
             $0.size.equalTo(16)
-        }
-        
-        rewardLabel.snp.makeConstraints {
-            $0.centerY.equalToSuperview()
         }
     }
     
