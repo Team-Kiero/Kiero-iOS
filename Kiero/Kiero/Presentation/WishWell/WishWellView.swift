@@ -90,7 +90,7 @@ final class WishWellView: BaseUIView {
     
     override func setLayout() {
         nameStack.snp.makeConstraints {
-            $0.top.equalTo(safeAreaLayoutGuide.snp.top).inset(15)
+            $0.top.equalToSuperview().offset(59)
             $0.leading.equalToSuperview().inset(16)
             $0.height.equalTo(40)
         }

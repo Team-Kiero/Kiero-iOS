@@ -43,7 +43,11 @@ public final class TabBarViewController: UITabBarController {
             let scheduleVC = factory.makeScheduleViewController()
             let notificationVC = factory.makeNotificationFeedViewController()
             
-            self.viewControllers = [scheduleVC, notificationVC].map { UINavigationController(rootViewController: $0) }
+            self.viewControllers = [scheduleVC, notificationVC].map {
+                let nav = UINavigationController(rootViewController: $0)
+                nav.isNavigationBarHidden = true
+                return nav
+            }
             
             customTabBar.setTabItems(
                 titles: ["스케줄 관리", "알림 피드"],
@@ -54,7 +58,11 @@ public final class TabBarViewController: UITabBarController {
             let coinMissionVC = factory.makeCoinMissionViewController()
             let wishWellVC = factory.makeWishWellViewController()
             
-            self.viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map { UINavigationController(rootViewController: $0) }
+            self.viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map {
+                let nav = UINavigationController(rootViewController: $0)
+                nav.isNavigationBarHidden = true
+                return nav
+            }
             
             customTabBar.setTabItems(
                 titles: ["오늘의 여정", "금화 미션", "소원의 우물"],

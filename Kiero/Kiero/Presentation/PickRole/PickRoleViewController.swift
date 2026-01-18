@@ -63,11 +63,19 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     override func addTarget() {
         parentButton.onTap = {
-            // TODO: - 부모님으로 시작하기 버튼함수 구현
+            self.navigateToMain(isParent: true)
         }
         
         childButton.onTap = {
-            // TODO: - 자녀로 시작하기 버튼함수 구현
+            self.navigateToMain(isParent: false)
+        }
+    }
+    
+    private func navigateToMain(isParent: Bool) {
+        let tabBarVC = TabBarViewController(factory: AppDIContainer.shared, isParent: isParent)
+        
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(tabBarVC)
         }
     }
 }
