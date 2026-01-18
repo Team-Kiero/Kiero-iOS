@@ -30,14 +30,6 @@ final class MissionView: BaseUIView {
         $0.contentInsetAdjustmentBehavior = .never
     }
     
-    // MARK: - Life Cycle
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-    
-    required init?(coder: NSCoder) { fatalError() }
-    
     // MARK: - Setup Methods
     
     override func setUI() {
@@ -53,8 +45,6 @@ final class MissionView: BaseUIView {
     }
     
     func updateMissions(_ missions: [Mission]) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
         let todayString = Date().toString(format: "yyyy-MM-dd")
         let futureMissions = missions.filter { $0.dueAt >= todayString }
         
@@ -97,9 +87,7 @@ extension MissionView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let dateString = sortedDates[section]
         
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        guard let headerDate = formatter.date(from: dateString) else { return nil }
+        guard let headerDate = dateString.toDate(format: "yyyy-MM-dd") else { return nil }
         
         let headerView = UIView()
         let containerStack = UIStackView().then {
@@ -124,7 +112,7 @@ extension MissionView: UITableViewDelegate {
         }
         
         let dateLabel = UILabel().then {
-            $0.text = headerDate.toString()
+            $0.text = headerDate.toString(format: "yyyy.MM.dd.(E)")
             $0.font = .body3_14_R
             $0.textColor = .gray500
         }
@@ -139,23 +127,6 @@ extension MissionView: UITableViewDelegate {
         }
         
         return headerView
-    }
-}
-
-extension Date {
-    var isToday: Bool {
-        return Calendar.current.isDateInToday(self)
-    }
-    
-    var isTomorrow: Bool {
-        return Calendar.current.isDateInTomorrow(self)
-    }
-    
-    func toString(format: String = "yyyy.MM.dd.(E)") -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = format
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter.string(from: self)
     }
 }
 
