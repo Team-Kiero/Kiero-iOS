@@ -51,7 +51,7 @@ final class ParentLoginViewController: BaseViewController<BaseViewModel> {
         
         parentBubble.snp.makeConstraints {
             $0.top.equalTo(parentNaviBar.snp.bottom).offset(131)
-            $0.leading.equalToSuperview().inset(90)
+            $0.trailing.equalTo(parentImageView.snp.trailing).inset(378)
         }
         
         parentImageView.snp.makeConstraints {
@@ -65,8 +65,4 @@ final class ParentLoginViewController: BaseViewController<BaseViewModel> {
             $0.height.equalTo(48)
         }
     }
-}
-
-#Preview {
-    ParentLoginViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
 }
