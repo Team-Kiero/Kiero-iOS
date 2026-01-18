@@ -70,7 +70,3 @@ final class ParentsOnboardingViewController: BaseViewController<BaseViewModel> {
         }
     }
 }
-
-#Preview {
-    ParentsOnboardingViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
-}
