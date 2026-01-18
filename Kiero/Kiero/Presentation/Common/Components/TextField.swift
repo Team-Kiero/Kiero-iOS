@@ -52,7 +52,7 @@ extension UserRole {
     var regex: String? {
         switch self {
         case .parent(.lastName), .child(.lastName), .parent(.firstName), .parent(.totalName), .child(.firstName):
-            return "^[가-힣]$"
+            return "^[가-힣]{0,5}$"
         case .child(.inviteCode):
             return nil
         }
@@ -208,6 +208,8 @@ final class TextField: UIView {
         if isValid {
             textField.layer.borderWidth = 0
             textField.layer.borderColor = UIColor.clear.cgColor
+            errorImage.alpha = 0
+            errorLabel.alpha = 0
             return
         }
         
