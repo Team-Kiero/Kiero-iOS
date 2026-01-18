@@ -164,12 +164,10 @@ class SplashViewController: UIViewController {
     }
     
     private func transitionToMain() {
-        // TODO: 부모/자식 선택VC으로 이동
-        let tabBarVC = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-        let nav = UINavigationController(rootViewController: tabBarVC)
+        let pickRoleVC = AppDIContainer.shared.makePickRoleViewController()
         
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+            sceneDelegate.changeRootViewController(pickRoleVC)
         }
     }
 }

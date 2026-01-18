@@ -35,7 +35,7 @@ final class NotificationFeedView: BaseUIView {
     
     override func setLayout() {
         profileView.snp.makeConstraints {
-            $0.top.equalTo(safeAreaLayoutGuide).offset(15)
+            $0.top.equalToSuperview().offset(59)
             $0.trailing.equalToSuperview()
         }
         
