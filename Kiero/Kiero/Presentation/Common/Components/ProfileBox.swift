@@ -69,7 +69,7 @@ final class ProfileBox: UIView {
         nameLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().inset(21)
-            $0.trailing.equalTo(profileImageView.snp.leading)
+            $0.trailing.equalTo(profileImageView.snp.leading).inset(-5)
         }
         
         profileImageView.snp.makeConstraints {
