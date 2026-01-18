@@ -58,8 +58,8 @@ final class MissionBoxParent: UIView {
         layer.cornerRadius = 10
         layer.masksToBounds = true
         
-        rewardStackView.layer.borderColor = UIColor(named: "gray_500")?.cgColor
-        rewardIcon.image = UIImage(named: "ic_3d_coin")
+        rewardStackView.layer.borderColor = UIColor.gray500.cgColor
+        rewardIcon.image = .ic3DCoin
         rewardStackView.isLayoutMarginsRelativeArrangement = true
         rewardStackView.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
     }

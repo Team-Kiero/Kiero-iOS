@@ -30,7 +30,7 @@ final class FireButton: UIButton {
     
     private let fireIconImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(named: "ic_fire")?.withRenderingMode(.alwaysTemplate)
+        $0.image = .icFire.withRenderingMode(.alwaysTemplate)
         $0.tintColor = .main
     }
     

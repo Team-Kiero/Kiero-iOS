@@ -42,7 +42,7 @@ final class GiveFireStoneResultView: BaseUIView {
         $0.contentMode = .scaleAspectFit
     }
     
-    private let speechField = SpeechField().then {
+    private let speechField = SpeechField(type: .no).then {
         $0.isHidden = false
     }
     

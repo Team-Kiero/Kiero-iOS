@@ -9,6 +9,8 @@ import UIKit
 
 public protocol ViewControllerFactory {
     // 부모 탭
+    //func makeLoginViewController() -> UIViewController
+    func makeParentOnboardingViewController() -> UIViewController
     func makeScheduleViewController() -> UIViewController
     func makeNotificationFeedViewController() -> UIViewController
     
@@ -19,6 +21,7 @@ public protocol ViewControllerFactory {
     func makeAIMissionViewController() -> UIViewController
     
     // 아이 탭
+    func makeChildOnboardingViewController() -> UIViewController
     func makeDailyJourneyViewController() -> UIViewController
     func makeCoinMissionViewController() -> UIViewController
     func makeWishWellViewController() -> UIViewController

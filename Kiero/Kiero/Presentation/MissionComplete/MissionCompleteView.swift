@@ -24,7 +24,7 @@ final class MissionCompleteView: BaseUIView {
         $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.6)
     }
     
-    let speechField = SpeechField().then {
+    let speechField = SpeechField(type: .no).then {
         $0.isHidden = false
     }
     
