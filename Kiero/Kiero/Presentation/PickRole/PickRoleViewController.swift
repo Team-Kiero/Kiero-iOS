@@ -62,6 +62,16 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
             $0.bottom.equalTo(childButton.snp.top).offset(-25)
         }
     }
+    
+    override func addTarget() {
+        parentButton.onTap = {
+            
+        }
+        
+        childButton.onTap = {
+            
+        }
+    }
 }
 
 #Preview {

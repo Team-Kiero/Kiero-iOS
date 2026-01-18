@@ -117,9 +117,9 @@ final class RolePickButton: UIView {
     
     @objc
     private func loginButtonDidTap() {
-        UIView.animate(withDuration: 0.1,
+        UIView.animate(withDuration: 0.12,
                        animations: {
-            self.alpha = 0.6
+            self.alpha = 0.5
         },
                        completion: { _ in
             self.alpha = 1.0
