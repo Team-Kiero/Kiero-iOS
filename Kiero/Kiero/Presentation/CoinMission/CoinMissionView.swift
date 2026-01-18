@@ -113,7 +113,7 @@ final class CoinMissionView: BaseUIView {
         
         missionCollectionView.snp.makeConstraints {
             $0.top.equalTo(missionLabel.snp.bottom)
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(100)
             $0.horizontalEdges.equalToSuperview()
         }
         

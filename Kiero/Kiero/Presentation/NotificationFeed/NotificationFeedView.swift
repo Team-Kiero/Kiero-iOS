@@ -42,7 +42,7 @@ final class NotificationFeedView: BaseUIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(25)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(100)
         }
     }
 }
