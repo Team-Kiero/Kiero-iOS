@@ -84,9 +84,9 @@ final class SpeechField: UIView {
         }
         
         contentStackView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
+            $0.top.equalToSuperview().offset(14)
             $0.leading.trailing.equalToSuperview().inset(20)
-            $0.bottom.equalToSuperview().inset(27)
+            $0.bottom.equalToSuperview().inset(14)
         }
     }
     
