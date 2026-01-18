@@ -34,8 +34,9 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     
     override func addTarget() {
         super.addTarget()
-        
-        mainView.goToNextButton.addTarget(self, action: #selector(didTapNextButton), for: .touchUpInside)
+        mainView.onNextJourneyTap = { [weak self] in
+            self?.didTapNextButton()
+        }
         mainView.verifyPhotoButton.addTarget(self, action: #selector(didTapVerifyButton), for: .touchUpInside)
     }
     
