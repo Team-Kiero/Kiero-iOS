@@ -15,6 +15,10 @@ public protocol ViewControllerFactory {
     func makeNotificationFeedViewController() -> UIViewController
     
     func makeAddScheduleViewController() -> UIViewController
+    func makeMissionViewController() -> UIViewController
+    func makeWriteMissionViewController() -> UIViewController
+    func makeLoadingViewController() -> UIViewController
+    func makeAIMissionViewController() -> UIViewController
     
     // 아이 탭
     func makeChildOnboardingViewController() -> UIViewController

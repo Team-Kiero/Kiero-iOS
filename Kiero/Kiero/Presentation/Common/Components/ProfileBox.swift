@@ -17,11 +17,16 @@ final class ProfileBox: UIView {
     
     var onTap: (() -> Void)?
     
+    override var backgroundColor: UIColor? {
+        didSet {
+            layer.backgroundColor = backgroundColor?.cgColor
+        }
+    }
+    
     // MARK: - UI Components
     
-    private var placeholderImage = UIImage.icParentProfile.resized(to: CGSize(width: 30, height: 30))
-    
     private let profileImageView = UIImageView().then {
+        $0.image = UIImage(resource: .icParentProfile).resized(to: CGSize(width: 30, height: 30))
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 15
         $0.contentMode = .scaleAspectFill
@@ -29,6 +34,7 @@ final class ProfileBox: UIView {
     }
     
     private let nameLabel = UILabel().then {
+        
         $0.textColor = .white
         $0.textAlignment = .right
         $0.isUserInteractionEnabled = true
@@ -36,9 +42,10 @@ final class ProfileBox: UIView {
     
     // MARK: - Life Cycle
     
-    init(name: String, profileURL: String) {
+    init(name: String, profileURL: String, backgroundColor: UIColor = .kBlack) {
         super.init(frame: .zero)
-        setStyle()
+        self.backgroundColor = backgroundColor
+        
         setUI()
         setLayout()
         setAction()
@@ -51,11 +58,6 @@ final class ProfileBox: UIView {
     
     // MARK: - Setting Methods
     
-    private func setStyle() {
-        backgroundColor = .kBlack
-        layer.cornerRadius = 12
-    }
-    
     private func setUI() {
         addSubviews(
             nameLabel,
@@ -67,13 +69,13 @@ final class ProfileBox: UIView {
         nameLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.leading.equalToSuperview().inset(21)
-            $0.trailing.equalTo(profileImageView.snp.leading).offset(-5)
+            $0.trailing.equalTo(profileImageView.snp.leading).inset(-5)
         }
         
         profileImageView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.verticalEdges.equalToSuperview().inset(5)
-            $0.trailing.equalToSuperview().inset(21)
+            $0.trailing.equalToSuperview().inset(16)
             $0.size.equalTo(30)
         }
     }
@@ -85,7 +87,9 @@ final class ProfileBox: UIView {
     
     private func configure(name: String, url: String?) {
         nameLabel.setTypo(.body2_16_R, text: name)
-        profileImageView.kf.setImage(with: URL(string: url ?? ""), placeholder: placeholderImage)
+        if let urlString = url, let imageURL = URL(string: urlString) {
+            profileImageView.kf.setImage(with: imageURL)
+        }
     }
     
     @objc

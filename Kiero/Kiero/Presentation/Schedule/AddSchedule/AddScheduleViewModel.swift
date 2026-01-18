@@ -9,5 +9,5 @@ import Foundation
 import Combine
 
 final class AddScheduleViewModel: BaseViewModel {
-
+    var scheduleList: [Schedule] = []
 }
