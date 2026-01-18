@@ -21,10 +21,8 @@ extension AppDIContainer {
     }
     
     func makeNotificationFeedViewController() -> UIViewController {
-        // TODO: NotificationFeedViewController()로 치환
-        let vc = UIViewController()
-        vc.view.backgroundColor = .kBlack
-        return vc
+        let viewModel = NotificationFeedViewModel()
+        return NotificationFeedViewController(viewModel: viewModel, diContainer: self)
     }
 }
 
