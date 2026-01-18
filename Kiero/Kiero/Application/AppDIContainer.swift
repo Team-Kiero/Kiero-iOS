@@ -50,10 +50,10 @@ extension AppDIContainer {
         return ParentLoginViewController(viewModel: vm, diContainer: self)
     }
     
-    func makeParentOnboardingViewController() -> UIViewController {
-        let vm = BaseViewModel()
-        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
-    }
+//    func makeParentOnboardingViewController() -> UIViewController {
+//        let vm = ParentOnboardingViewModel(name: <#String#>, profileURL: <#String#>)
+//        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
+//    }
     
     func makeScheduleViewController() -> UIViewController {
         let viewModel = ScheduleViewModel()

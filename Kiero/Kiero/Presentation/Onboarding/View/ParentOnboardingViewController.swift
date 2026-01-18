@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ParentOnboardingViewController: BaseViewController<BaseViewModel> {
+final class ParentOnboardingViewController: BaseViewController<ParentOnboardingViewModel> {
     
     // MARK: - UI Components
     
@@ -68,5 +68,10 @@ final class ParentOnboardingViewController: BaseViewController<BaseViewModel> {
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(41)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
+    }
+    
+    override func bind(viewModel: ParentOnboardingViewModel) {
+        super.bind(viewModel: viewModel)
+        profileBox.configure(name: viewModel.name, url: viewModel.profileURL)
     }
 }

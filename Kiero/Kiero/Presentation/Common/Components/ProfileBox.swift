@@ -26,7 +26,7 @@ final class ProfileBox: UIView {
     // MARK: - UI Components
     
     private let profileImageView = UIImageView().then {
-        $0.image = UIImage(resource: .icParentProfile).resized(to: CGSize(width: 30, height: 30))
+        //$0.image = UIImage(resource: .icParentProfile).resized(to: CGSize(width: 30, height: 30))
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 15
         $0.contentMode = .scaleAspectFill
@@ -85,10 +85,10 @@ final class ProfileBox: UIView {
         addGestureRecognizer(tap)
     }
     
-    private func configure(name: String, url: String?) {
+    func configure(name: String, url: String?) {
         nameLabel.setTypo(.body2_16_R, text: name)
         if let urlString = url, let imageURL = URL(string: urlString) {
-            profileImageView.kf.setImage(with: imageURL)
+            profileImageView.kf.setImage(with: imageURL, placeholder: UIImage.icParentProfile)
         }
     }
     

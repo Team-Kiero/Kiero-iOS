@@ -153,3 +153,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
         nextTap.send(())
     }
 }
+
+#Preview {
+    AppDIContainer.shared.makeChildOnboardingViewController()
+}

@@ -158,7 +158,15 @@ final class SpeechField: UIView {
     
     private func addTarget() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(labelButtonDidTap))
-        addGestureRecognizer(tap)
+        switch type {
+        case .main:
+            addGestureRecognizer(tap)
+        case .no:
+            return
+        case .gray:
+            buttonContainerView.addGestureRecognizer(tap)
+            buttonContainerView.isUserInteractionEnabled = true
+        }
     }
     
     // MARK: - Configuration

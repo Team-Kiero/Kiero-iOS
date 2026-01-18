@@ -63,7 +63,7 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     override func addTarget() {
         parentButton.onTap = {
-            self.navigateToMain(isParent: true)
+            self.navigateToParentLogin()
         }
         
         childButton.onTap = {
@@ -76,6 +76,22 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
         
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
             sceneDelegate.changeRootViewController(tabBarVC)
+        }
+    }
+    
+    private func navigateToParentLogin() {
+        let repo = AppDIContainer.shared.makeAuthRepository()
+
+        let vm = ParentLoginViewModel(repo: repo)
+
+        let vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
+
+        if let nav = navigationController {
+            nav.pushViewController(vc, animated: true)
+        } else {
+            let nav = UINavigationController(rootViewController: vc)
+            nav.modalPresentationStyle = .fullScreen
+            present(nav, animated: true)
         }
     }
 }

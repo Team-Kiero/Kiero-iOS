@@ -62,19 +62,19 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
 
         kakaoService.loginWithKakao()
             .mapError { _ in NetworkError.unknownError }
-            .flatMap { [repo] kakaoAccessToken in
-                repo.loginWithKakao(accessToken: kakaoAccessToken)
+            .flatMap { [repo] token in
+                repo.loginWithKakao(accessToken: token)
+                    .mapError { _ in NetworkError.unknownError }
             }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                guard let self else { return }
                 if case .failure(let error) = completion {
-                    self.stateSubject.send(.failure(error.errorDescription))
+                    self?.stateSubject.send(.failure(error.errorDescription))
                 }
             } receiveValue: { [weak self] loginData in
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 self?.stateSubject.send(.idle)
-                //self?.routeSubject.send(.home)
+                self?.routeSubject.send(.parentOnboarding(name: loginData.name, url: loginData.image))
             }
             .store(in: &cancellables)
     }
