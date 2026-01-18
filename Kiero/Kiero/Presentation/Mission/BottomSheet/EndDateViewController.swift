@@ -149,12 +149,14 @@ final class EndDateViewController: BaseBottomSheetViewController {
         collectionView.reloadData()
     }
     
-    @objc private func didTapPrev() {
+    @objc
+    private func didTapPrev() {
         baseDate = calendar.date(byAdding: .month, value: -1, to: baseDate) ?? Date()
         updateCalendar()
     }
     
-    @objc private func didTapNext() {
+    @objc
+    private func didTapNext() {
         baseDate = calendar.date(byAdding: .month, value: 1, to: baseDate) ?? Date()
         updateCalendar()
     }

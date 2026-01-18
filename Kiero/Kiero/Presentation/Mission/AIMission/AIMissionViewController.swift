@@ -99,7 +99,8 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         addMissionButton.configure(title: buttonTitle)
     }
     
-    @objc private func didTapBottomButton() {
+    @objc
+    private func didTapBottomButton() {
         if !isAnalysisDone {
             // TODO: 로딩VC 진입
             isAnalysisDone = true
