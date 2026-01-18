@@ -1,5 +1,5 @@
 //
-//  ChildOnboardingViewController.swift
+//  ChildrenOnboardingViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -11,7 +11,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ChildOnboardingViewController: BaseViewController<ChildOnboardingViewModel> {
+final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboardingViewModel> {
     
     // MARK: - Properties
     
@@ -70,7 +70,7 @@ final class ChildOnboardingViewController: BaseViewController<ChildOnboardingVie
         }
     }
     
-    override func bind(viewModel: ChildOnboardingViewModel) {
+    override func bind(viewModel: ChildrenOnboardingViewModel) {
         super.bind(viewModel: viewModel)
         
         let output = viewModel.transform(

@@ -5,7 +5,6 @@
 //  Created by 안치욱 on 1/9/26.
 //
 
-
 struct LoginData: Codable {
     let name: String
     let email: String

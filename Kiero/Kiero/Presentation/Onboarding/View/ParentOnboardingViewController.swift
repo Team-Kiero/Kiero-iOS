@@ -1,5 +1,5 @@
 //
-//  ParentsOnboardingViewController.swift
+//  ParentOnboardingViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/15/26.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ParentsOnboardingViewController: BaseViewController<BaseViewModel> {
+final class ParentOnboardingViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     

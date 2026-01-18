@@ -1,5 +1,5 @@
 //
-//  ParentsLoginViewController.swift
+//  ParentLoginViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ParentsLoginViewController: BaseViewController<BaseViewModel> {
+final class ParentLoginViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     

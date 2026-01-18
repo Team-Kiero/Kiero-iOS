@@ -1,5 +1,5 @@
 //
-//  ChildLoadingViewController.swift
+//  ChildrenLoadingViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -11,7 +11,7 @@ import Kingfisher
 import SnapKit
 import Then
 
-final class ChildLoadingViewController: BaseViewController<BaseViewModel> {
+final class ChildrenLoadingViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     
@@ -36,5 +36,5 @@ final class ChildLoadingViewController: BaseViewController<BaseViewModel> {
 }
 
 #Preview {
-    ChildLoadingViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+    ChildrenLoadingViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
 }

@@ -45,14 +45,14 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     
-    func makeParentsLoginViewController() -> UIViewController {
+    func makeParentLoginViewController() -> UIViewController {
         let vm = LoginViewModel(kakaoService: makeKakaoAuthService(), repo: makeAuthRepository())
-        return ParentsLoginViewController(viewModel: vm, diContainer: self)
+        return ParentLoginViewController(viewModel: vm, diContainer: self)
     }
     
-    func makeParentsOnboardingViewController() -> UIViewController {
+    func makeParentOnboardingViewController() -> UIViewController {
         let vm = BaseViewModel()
-        return ParentsOnboardingViewController(viewModel: vm, diContainer: self)
+        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
     }
     
     func makeScheduleViewController() -> UIViewController {
@@ -86,8 +86,8 @@ extension AppDIContainer {
             .init(image: .imgStory4, name: "꾸비", lines: ["오늘의 여정을 따라 하루를 보내고", "불조각을 나에게 건네줘!", "너가 준 [용기, 인내, 지혜의 불조각] 이", "내 마음의 불꽃을 키워줄거야."], highlightKeywords: ["[용기, 인내, 지혜의 불조각]"]),
             .init(image: .imgStory5, name: "꾸비", lines: ["그 힘으로 내가 반짝이는 금화를 만들어줄게!", "소원의 우물에서 금화를 통해", "너의 소원을 이룰 수 있을거야!"], highlightKeywords: [])
         ]
-        let viewModel = ChildOnboardingViewModel(items: items)
-        return ChildOnboardingViewController(viewModel: viewModel, diContainer: self)
+        let viewModel = ChildrenOnboardingViewModel(items: items)
+        return ChildrenOnboardingViewController(viewModel: viewModel, diContainer: self)
     }
 
     func makeDailyJourneyViewController() -> UIViewController {

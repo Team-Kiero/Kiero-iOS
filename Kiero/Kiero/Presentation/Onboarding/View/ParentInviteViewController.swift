@@ -1,5 +1,5 @@
 //
-//  ParentsInviteViewController.swift
+//  ParentInviteViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ParentsInviteViewController: BaseViewController<BaseViewModel> {
+final class ParentInviteViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     
@@ -77,5 +77,5 @@ final class ParentsInviteViewController: BaseViewController<BaseViewModel> {
 }
 
 #Preview {
-    ParentsInviteViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+    ParentInviteViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
 }

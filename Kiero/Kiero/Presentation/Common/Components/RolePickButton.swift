@@ -48,6 +48,7 @@ final class RolePickButton: UIView {
     }
     
     private let buttonLabel = UILabel().then {
+        $0.textAlignment = .center
         $0.isUserInteractionEnabled = true
     }
     
@@ -92,8 +93,7 @@ final class RolePickButton: UIView {
         
         buttonLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalTo(buttonImageView.snp.trailing).offset(18)
-            $0.width.equalTo(187)
+            $0.centerX.equalToSuperview().offset(20)
         }
     }
     
