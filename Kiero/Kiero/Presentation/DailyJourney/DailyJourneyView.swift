@@ -14,6 +14,8 @@ import Then
 
 final class DailyJourneyView: BaseUIView {
     
+    var onNextJourneyTap: (() -> Void)?
+    
     // MARK: - UI Components
     
     private let backgroundImageView = UIImageView().then {
@@ -63,6 +65,10 @@ final class DailyJourneyView: BaseUIView {
     
     override func setUI() {
         addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
+        
+        speechField.onTap = { [weak self] in
+            self?.onNextJourneyTap?()
+        }
     }
     
     override func setLayout() {
