@@ -29,7 +29,7 @@ final class DailyJourneyTimeView: BaseUIView {
     private let timeStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.spacing = 4
-        $0.alignment = .firstBaseline
+        $0.alignment = .center
         $0.distribution = .fill
     }
     
