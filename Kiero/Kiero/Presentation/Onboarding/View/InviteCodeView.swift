@@ -31,18 +31,8 @@ final class InviteCodeView: UIView {
         $0.textColor = .kBlack
     }
     
-    private let copyButton = UIButton().then {
-        $0.translatesAutoresizingMaskIntoConstraints = false
-        $0.titleLabel?.adjustsFontForContentSizeCategory = true
-        $0.setImage(.icCopy, for: .normal)
-        $0.tintColor = .white
-        $0.setTitle("복사하기", for: .normal)
-        $0.setTitleColor(.white, for: .normal)
-        $0.semanticContentAttribute = .forceLeftToRight
-        $0.contentVerticalAlignment = .center
-        $0.contentHorizontalAlignment = .center
-        $0.backgroundColor = .kBlack
-        $0.layer.cornerRadius = 10
+    private let copyButton = CTAButton(style: .black).then {
+        $0.configure(title: "복사하기", icon: .icCopy)
     }
     
     private let timeLimitLabel = UILabel().then {

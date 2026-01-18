@@ -26,10 +26,8 @@ final class ParentsInviteViewController: BaseViewController<BaseViewModel> {
     
     private let inviteView = InviteCodeView()
     
-    private let startButton = UIButton().then {
-        $0.backgroundColor = .gray900
-        $0.layer.cornerRadius = 8
-        $0.setTitle("시작하기", for: .normal)
+    private let startButton = CTAButton(style: .gray900).then {
+        $0.configure(title: "시작하기")
     }
     
     override func setStyle() {
@@ -61,11 +59,11 @@ final class ParentsInviteViewController: BaseViewController<BaseViewModel> {
         textField.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(14)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(95)
+            $0.height.equalTo(91)
         }
         
         inviteView.snp.makeConstraints {
-            $0.top.equalTo(textField.snp.bottom)
+            $0.top.equalTo(textField.snp.bottom).offset(5)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(266)
         }

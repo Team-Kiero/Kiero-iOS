@@ -13,19 +13,36 @@ import Then
 final class CTAButton: UIButton {
     enum Style {
         case main
-        case gray
+        case gray900
+        case gray800
+        case gray100
+        case black
         
         var backgroundColor: UIColor {
             switch self {
             case .main: return .main
-            case .gray: return .gray900
+            case .gray900: return .gray900
+            case .gray800: return .gray800
+            case .gray100: return .gray100
+            case .black: return .kBlack
             }
         }
         
         var titleColor: UIColor {
             switch self {
             case .main: return .kBlack
-            case .gray: return .white
+            case .gray900: return .white
+            case .gray800: return .white
+            case .gray100: return .kBlack
+            case .black: return .white
+            }
+        }
+    }
+    
+    override var isHighlighted: Bool {
+        didSet {
+            UIView.animate(withDuration: 0.12, delay: 0, options: [.allowUserInteraction, .curveEaseOut]) {
+                self.alpha = self.isHighlighted ? 0.5 : 1.0
             }
         }
     }
@@ -71,7 +88,7 @@ final class CTAButton: UIButton {
     
     private func setLayout() {
         self.snp.makeConstraints {
-            $0.height.equalTo(50)
+            $0.height.equalTo(49)
         }
         
         contentStackView.snp.makeConstraints {
@@ -102,3 +119,4 @@ final class CTAButton: UIButton {
         }
     }
 }
+
