@@ -112,7 +112,22 @@ final class TimePickerViewController: BaseBottomSheetViewController {
     }
     
     override func hideSheet() {
-        onDismiss?()
+        let calendar = Calendar.current
+        let hour = calendar.component(.hour, from: datePicker.date)
+        var finalDate = datePicker.date
+        
+        if hour < 8 {
+            if let minDate = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) {
+                finalDate = minDate
+            }
+        } else if hour >= 22 {
+            if let maxDate = calendar.date(bySettingHour: 22, minute: 0, second: 0, of: Date()) {
+                finalDate = maxDate
+            }
+        }
+        
+        self.onTimeSelected?(finalDate)
+        self.onDismiss?()
         super.hideSheet()
     }
     

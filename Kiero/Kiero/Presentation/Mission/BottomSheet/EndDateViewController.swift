@@ -162,12 +162,18 @@ final class EndDateViewController: BaseBottomSheetViewController {
     }
     
     private func setAction() {
-        navigationBar.leftButtonAction = { [weak self] in self?.hideSheet() }
-        navigationBar.rightButtonAction = { [weak self] in
-            guard let self = self else { return }
-            self.onDateSelected?(self.selectedDate)
-            self.hideSheet()
+        navigationBar.leftButtonAction = { [weak self] in
+            self?.hideSheet()
         }
+        
+        navigationBar.rightButtonAction = { [weak self] in
+            self?.hideSheet()
+        }
+    }
+    
+    override func hideSheet() {
+        self.onDateSelected?(self.selectedDate)
+        super.hideSheet()
     }
     
     func setInitialDate(_ date: Date) {
