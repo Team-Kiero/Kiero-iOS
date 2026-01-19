@@ -23,6 +23,15 @@ final class WeeklyTimeTableView: BaseUIView {
     
     // MARK: - UI Components
     
+    private let emptyLabel = UILabel().then {
+        $0.numberOfLines = 0
+        let text = "등록된 일정이 없어요.\n우측 하단 버튼을 눌러 일정을 추가해보세요!"
+        $0.setTypo(.title4_14_SB, text: text)
+        $0.textAlignment = .center
+        $0.textColor = .gray400
+        $0.isHidden = false
+    }
+    
     private let headerStackView = UIStackView().then {
         $0.axis = .horizontal
         $0.distribution = .fillEqually
@@ -52,7 +61,7 @@ final class WeeklyTimeTableView: BaseUIView {
         addSubviews(headerStackView, scrollView)
         scrollView.addSubview(gridContainer)
         gridContainer.addSubview(gridBackgroundView)
-        gridBackgroundView.addSubview(cardContainerView)
+        gridBackgroundView.addSubviews(cardContainerView, emptyLabel)
         
         self.daysDates = Date().daysOfWeek
         updateHeaderLabels()
@@ -86,6 +95,11 @@ final class WeeklyTimeTableView: BaseUIView {
             $0.leading.equalToSuperview().offset(23)
             $0.trailing.equalToSuperview()
             $0.height.equalTo(totalGridHeight)
+        }
+        
+        emptyLabel.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.top.equalToSuperview().inset(155)
         }
         
         cardContainerView.snp.makeConstraints {
@@ -153,6 +167,7 @@ final class WeeklyTimeTableView: BaseUIView {
     
     func clearSchedules() {
         cardContainerView.subviews.forEach { $0.removeFromSuperview() }
+        emptyLabel.isHidden = false
     }
     
     func scrollToTop() {
@@ -160,6 +175,7 @@ final class WeeklyTimeTableView: BaseUIView {
     }
     
     func addSchedule(schedule: Schedule) {
+        emptyLabel.isHidden = true
         let dayIndices = schedule.dayIndices
         let startFloat = convertTimeToFloat(schedule.startTime)
         let endFloat = convertTimeToFloat(schedule.endTime)
