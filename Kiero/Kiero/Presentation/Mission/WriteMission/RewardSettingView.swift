@@ -43,7 +43,7 @@ final class RewardSettingView: UIView {
             rewardTextField.text = "\(currentRewardValue)"
         }
     }
-    
+        
     // MARK: - UI Components
     
     private let rewardIcon = UIImageView(image: .ic3DCoin)
@@ -171,7 +171,12 @@ final class RewardSettingView: UIView {
             currentRewardValue = 1
         } else if value > 500 {
             currentRewardValue = 500
-            Toast.show(message: "보상은 500개까지 설정할 수 있어요.")
+            if viewType == .ai {
+                Toast.show(message: "보상은 500개까지 설정할 수 있어요.", sideInset: 32, bottomInset: 300)
+            } else {
+                Toast.show(message: "보상은 500개까지 설정할 수 있어요.")
+            }
+            
         } else {
             currentRewardValue = value
         }
