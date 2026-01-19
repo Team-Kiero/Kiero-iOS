@@ -68,7 +68,9 @@ final class TabBarView: UIView {
     
     private func setLayout() {
         stackView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.centerX.equalToSuperview()
+            $0.verticalEdges.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().priority(.low)
         }
     }
     
@@ -91,7 +93,7 @@ final class TabBarView: UIView {
                 
                 itemView.snp.makeConstraints {
                     $0.width.equalTo(43)
-                    $0.height.equalTo(51)
+                    $0.height.equalTo(51).priority(.high)
                 }
                 
                 stackView.addArrangedSubview(itemView)
