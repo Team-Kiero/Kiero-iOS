@@ -21,9 +21,8 @@ final class DailyJourneyTimeView: BaseUIView {
     }
     
     private let titleLabel = UILabel().then {
-        $0.text = "여정 시간"
         $0.textColor = .gray400
-        $0.font = .body3_14_R
+        $0.setTypo(.body3_14_R, text: "여정 시간")
     }
     
     private let timeStackView = UIStackView().then {

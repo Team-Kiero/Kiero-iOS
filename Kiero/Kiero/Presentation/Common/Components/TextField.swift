@@ -80,7 +80,6 @@ final class TextField: UIView {
     
     private let titleLabel = UILabel().then {
         $0.textColor = .gray400
-        $0.setTypo(.body3_14_R)
     }
     
     private let textField = UITextField().then {
@@ -157,7 +156,7 @@ final class TextField: UIView {
     }
     
     private func configure(type: UserRole) {
-        titleLabel.text = type.title
+        titleLabel.setTypo(.body3_14_R, text: type.title)
         titleLabel.isHidden = type.title.isEmpty
         errorLabel.textColor = type.errorAppear
         errorImage.image = .icInfo

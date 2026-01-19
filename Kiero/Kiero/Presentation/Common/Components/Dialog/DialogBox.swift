@@ -103,10 +103,8 @@ final class DialogBox: UIView {
     }
     
     private let messageLabel = UILabel().then {
-        $0.textAlignment = .center
         $0.textColor = .white
         $0.numberOfLines = 2
-        $0.font = .body3_14_R
     }
     
     private let contentStack = UIStackView().then {
@@ -116,7 +114,6 @@ final class DialogBox: UIView {
     }
     
     private let cancelButton = UIButton().then {
-        $0.titleLabel?.font = .title3_16_SB
         $0.setTitleColor(.white, for: .normal)
         $0.backgroundColor = .gray800
         $0.layer.cornerRadius = 8
@@ -124,7 +121,6 @@ final class DialogBox: UIView {
     }
     
     private let confirmButton = UIButton().then {
-        $0.titleLabel?.font = .title3_16_SB
         $0.setTitleColor(.kBlack, for: .normal)
         $0.backgroundColor = .main
         $0.layer.cornerRadius = 8
@@ -222,9 +218,8 @@ final class DialogBox: UIView {
         messageLabel.textAlignment = .center
         coinLabel.setTypo(.title4_14_SB, text: state.coinText)
         
-        cancelButton.setTitle(state.cancelButtonTitle, for: .normal)
-        confirmButton.setTitle(state.confirmButtonTitle, for: .normal)
-        
+        cancelButton.setTypo(.title3_16_SB, text: state.cancelButtonTitle, for: .normal)
+        confirmButton.setTypo(.title3_16_SB, text: state.confirmButtonTitle, for: .normal)
         closeButton.isHidden = state.isCloseButtonHidden
         
         if let coin = state.coinText {

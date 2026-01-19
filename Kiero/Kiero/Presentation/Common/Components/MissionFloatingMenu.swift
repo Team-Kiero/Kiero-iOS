@@ -88,8 +88,14 @@ final class MissionFloatingMenuView: UIView {
         config.imagePlacement = .trailing
         config.imagePadding = 4
         
+        let style: UIFont.NotoSans = .title4_14_SB
+        
         var titleAttr = AttributedString(title)
-        titleAttr.font = .title4_14_SB
+        titleAttr.font = style.font
+        
+        let kernValue = style.size * (style.letterSpacingPercent / 100.0)
+        titleAttr.kern = kernValue
+        
         config.attributedTitle = titleAttr
         
         return UIButton(configuration: config)

@@ -48,8 +48,7 @@ final class RewardSettingView: UIView {
     
     private let rewardIcon = UIImageView(image: .ic3DCoin)
     private let rewardTitle = UILabel().then {
-        $0.text = "보상"
-        $0.font = .body2_16_R
+        $0.setTypo(.body2_16_R, text: "보상")
         $0.textColor = .white
     }
     

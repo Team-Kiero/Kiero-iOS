@@ -23,13 +23,11 @@ final class TimeField: UIView {
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
-        $0.font = .body5_10_R
-        $0.text = "시작"
+        $0.setTypo(.body5_10_R, text: "시작")
     }
     
     private let timeLabel = UILabel().then {
-        $0.font = .title2_20_SB
-        $0.text = "09 : 00 AM"
+        $0.setTypo(.title2_20_SB, text: "09 : 00 AM")
     }
     
     // MARK: - Life Cycle

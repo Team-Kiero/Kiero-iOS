@@ -23,9 +23,7 @@ final class TabItem: UIView {
         $0.contentMode = .scaleAspectFit
     }
     
-    private let titleLabel = UILabel().then {
-        $0.font = .body5_10_R
-    }
+    private let titleLabel = UILabel()
     
     var isSelected: Bool = false {
         didSet {
@@ -37,7 +35,7 @@ final class TabItem: UIView {
     init(title: String, image: UIImage?) {
         super.init(frame: .zero)
         iconImageView.image = image?.withRenderingMode(.alwaysTemplate)
-        titleLabel.text = title
+        titleLabel.setTypo(.body5_10_R, text: title)
         
         setUI()
         setLayout()

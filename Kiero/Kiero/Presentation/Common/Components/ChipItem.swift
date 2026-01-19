@@ -43,7 +43,7 @@ final class ChipItem: UIView {
             }
         }
         
-        var font: UIFont {
+        var font: UIFont.NotoSans {
             switch self {
             case .usedCoinChip:
                 return .body5_10_R
@@ -136,8 +136,7 @@ final class ChipItem: UIView {
     }
     
     func configure(style: ChipStyle, icon: UIImage, text: String) {
-        textLabel.text = text
-        textLabel.font = style.font
+        textLabel.setTypo(style.font, text: text)
         
         iconImageView.image = icon
         iconImageView.isHidden = false

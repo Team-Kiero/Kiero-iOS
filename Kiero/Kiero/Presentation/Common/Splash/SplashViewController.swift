@@ -22,9 +22,8 @@ class SplashViewController: UIViewController {
     private let gradientView = UIView()
     
     private let titleLabel = UILabel().then {
-        $0.text = "아이의 하루가 모험이 되는 곳"
         $0.textColor = .sub
-        $0.font = .body2_16_R
+        $0.setTypo(.body2_16_R, text: "아이의 하루가 모험이 되는 곳")
     }
     
     private let logoImageView = UIImageView().then {

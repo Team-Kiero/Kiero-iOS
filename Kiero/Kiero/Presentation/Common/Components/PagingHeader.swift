@@ -20,7 +20,6 @@ final class PagingHeader: UIView {
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
-        $0.font = .title4_14_SB
         $0.textColor = .white
         $0.textAlignment = .center
     }
@@ -81,7 +80,7 @@ final class PagingHeader: UIView {
     // MARK: - Public Methods
     
     func configure(title: String, isLeftEnabled: Bool, isRightEnabled: Bool) {
-        titleLabel.text = title
+        titleLabel.setTypo(.title4_14_SB, text: title)
         
         leftButton.isEnabled = isLeftEnabled
         leftButton.alpha = isLeftEnabled ? 1.0 : 0.2

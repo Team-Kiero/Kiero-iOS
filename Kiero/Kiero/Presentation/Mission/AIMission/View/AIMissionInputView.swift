@@ -33,8 +33,7 @@ final class AIMissionInputView: BaseUIView {
     }
     
     private let placeholderLabel = UILabel().then {
-        $0.text = "알림장 내용을 입력하세요."
-        $0.font = .body3_14_R
+        $0.setTypo(.body3_14_R, text: "알림장 내용을 입력하세요.")
         $0.textColor = .gray400
         $0.isUserInteractionEnabled = false
     }

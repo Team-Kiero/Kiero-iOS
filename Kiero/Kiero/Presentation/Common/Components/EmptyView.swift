@@ -15,7 +15,6 @@ final class EmptyView: BaseUIView {
     // MARK: - UI Components
     
     private let descriptionLabel = UILabel().then {
-        $0.font = .title3_16_SB
         $0.textColor = .gray400
         $0.textAlignment = .center
         $0.numberOfLines = 0
@@ -37,7 +36,7 @@ final class EmptyView: BaseUIView {
     
     init(text: String) {
         super.init(frame: .zero)
-        self.descriptionLabel.text = text
+        self.descriptionLabel.setTypo(.title3_16_SB, text: text)
     }
     
     override init(frame: CGRect) {
