@@ -26,6 +26,10 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private let generateButton = CTAButton(style: .main).then {
         $0.configure(title: "초대코드 생성")
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
    
     override func setStyle() {
         titleLabel.setTypo(.title2_20_SB, text: "아직 연결된 자녀 계정이 없어요\n자녀를 추가해주세요!")
