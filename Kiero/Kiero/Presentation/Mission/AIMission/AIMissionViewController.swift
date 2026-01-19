@@ -177,7 +177,8 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         self.isAnalysisDone = isDone
     }
     
-    @objc private func keyboardWillShow(notification: NSNotification) {
+    @objc
+    private func keyboardWillShow(notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
         
@@ -197,7 +198,8 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         }
     }
 
-    @objc private func keyboardWillHide(notification: NSNotification) {
+    @objc
+    private func keyboardWillHide(notification: NSNotification) {
         missionInputView.textView.contentInset = .zero
         missionInputView.textView.scrollIndicatorInsets = .zero
     }
