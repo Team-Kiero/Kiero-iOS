@@ -132,7 +132,6 @@ final class NotificationFeed: UIView {
         coinChip.snp.makeConstraints {
             $0.top.equalTo(messageLabel.snp.bottom).offset(6)
             $0.leading.equalToSuperview().inset(13)
-//            $0.bottom.equalToSuperview().inset(12)
         }
         
         proofImageView.snp.makeConstraints {
