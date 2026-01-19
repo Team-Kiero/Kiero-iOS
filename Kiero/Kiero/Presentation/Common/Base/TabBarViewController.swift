@@ -16,15 +16,15 @@ public final class TabBarViewController: UITabBarController {
     private let isParent: Bool
     
     private lazy var customTabBar = TabBarView(cornerRadius: isParent ? 24 : 0, isParent: isParent)
-
+    
     public init(factory: ViewControllerFactory, isParent: Bool) {
         self.factory = factory
         self.isParent = isParent
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) { fatalError() }
-
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         self.delegate = self
@@ -47,6 +47,7 @@ public final class TabBarViewController: UITabBarController {
             self.viewControllers = [scheduleVC, notificationVC].map {
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
+                nav.delegate = self
                 return nav
             }
             
@@ -62,6 +63,7 @@ public final class TabBarViewController: UITabBarController {
             self.viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map {
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
+                nav.delegate = self
                 return nav
             }
             
@@ -72,7 +74,7 @@ public final class TabBarViewController: UITabBarController {
         }
         customTabBar.updateSelection(0)
     }
-
+    
     private func setCustomTabBarUI() {
         view.addSubview(customTabBar)
         view.clipsToBounds = false
@@ -143,6 +145,21 @@ extension TabBarViewController: UITabBarControllerDelegate {
 
 protocol ScrollToTopAvailable {
     func scrollToTop()
+}
+
+extension TabBarViewController: UINavigationControllerDelegate {
+    public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+        
+        let shouldHide = viewController.hidesBottomBarWhenPushed
+        
+        if shouldHide {
+            self.customTabBar.transform = CGAffineTransform(translationX: 0, y: 100)
+            self.customTabBar.alpha = 0
+        } else {
+            self.customTabBar.transform = .identity
+            self.customTabBar.alpha = 1
+        }
+    }
 }
 
 #Preview {

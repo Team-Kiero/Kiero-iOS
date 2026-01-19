@@ -11,22 +11,39 @@ import SnapKit
 import Then
 
 final class Toast {
-    static func show(message: String) {
-        let windowScene: UIWindowScene? = UIApplication.shared.connectedScenes.first as? UIWindowScene
+    static func show(message: String,
+                     in view: UIView? = nil,
+                     sideInset: CGFloat = 16,
+                     bottomInset: CGFloat = 31) {
         
-        guard let window: UIWindow = windowScene?.windows.first(where: { $0.isKeyWindow }) else {
+        let parentView: UIView
+        let useSafeArea: Bool
+        
+        if let targetView = view {
+            parentView = targetView
+            useSafeArea = false
+        } else if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let window = windowScene.windows.first(where: { $0.isKeyWindow }) {
+            parentView = window
+            useSafeArea = true
+        } else {
             return
         }
         
-        let toastView: ToastView = ToastView()
-        
+        let toastView = ToastView()
         toastView.configure(message: message)
         
-        window.addSubview(toastView)
+        parentView.addSubview(toastView)
         
         toastView.snp.makeConstraints {
-            $0.bottom.equalTo(window.safeAreaLayoutGuide).inset(31)
-            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview().inset(sideInset)
+            $0.height.equalTo(49)
+            
+            if useSafeArea {
+                $0.bottom.equalTo(parentView.safeAreaLayoutGuide).inset(bottomInset)
+            } else {
+                $0.bottom.equalToSuperview().inset(bottomInset)
+            }
         }
         
         self.animate(view: toastView)
@@ -61,7 +78,7 @@ private final class ToastView: UIView {
     
     // MARK: - UI Components
     
-    private let messageLabel: UILabel = UILabel().then {
+    private let messageLabel = UILabel().then {
         $0.textColor = .gray900
         $0.textAlignment = .center
         $0.numberOfLines = 1
@@ -95,13 +112,8 @@ private final class ToastView: UIView {
     
     private func setLayout() {
         messageLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(16)
-            $0.trailing.equalToSuperview().inset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
             $0.centerY.equalToSuperview()
-        }
-        
-        snp.makeConstraints {
-            $0.height.equalTo(49)
         }
     }
     

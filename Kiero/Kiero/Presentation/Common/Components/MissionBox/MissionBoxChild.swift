@@ -28,7 +28,7 @@ final class MissionBoxChild: UIView {
         var titleColor: UIColor {
             switch self {
             case .inProgress: return .white
-            case .completed: return UIColor.white.withAlphaComponent(0.6)
+            case .completed: return .white.withAlphaComponent(0.6)
             }
         }
         
@@ -49,7 +49,7 @@ final class MissionBoxChild: UIView {
         var buttonTextColor: UIColor {
             switch self {
             case .inProgress: return .kBlack
-            case .completed: return UIColor.white.withAlphaComponent(0.6)
+            case .completed: return .white.withAlphaComponent(0.6)
             }
         }
         
@@ -82,7 +82,6 @@ final class MissionBoxChild: UIView {
     }
     
     private let completeButton = UIButton().then {
-        $0.titleLabel?.font = .title4_14_SB
         $0.layer.cornerRadius = 8
     }
     
@@ -144,6 +143,7 @@ final class MissionBoxChild: UIView {
         titleLabel.setTypo(.body2_16_R, text: name)
         rewardLabel.setTypo(.body4_12_R, text: "금화 \(reward) 개")
         apply(state: state)
+        completeButton.setTypo(.title4_14_SB, text: state.buttonTitle, for: .normal)
     }
     
     // MARK: - Apply
@@ -156,7 +156,6 @@ final class MissionBoxChild: UIView {
         rewardLabel.textColor = state.rewardColor
         
         completeButton.backgroundColor = state.buttonColor
-        completeButton.setTitle(state.buttonTitle, for: .normal)
         completeButton.setTitleColor(state.buttonTextColor, for: .normal)
         
         completeButton.isEnabled = (state == .inProgress)

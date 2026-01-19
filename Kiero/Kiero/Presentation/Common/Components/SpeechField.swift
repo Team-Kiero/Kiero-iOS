@@ -99,7 +99,6 @@ final class SpeechField: UIView {
         containerView.clipsToBounds = true
         
         nameLabel.textColor = .kBlack
-        nameLabel.font = .body5_10_R
         
         contentStackView.backgroundColor = .clear
         buttonContainerView.backgroundColor = .clear
@@ -164,7 +163,7 @@ final class SpeechField: UIView {
     // MARK: - Configuration
     
     func configure(name: String, lines: [String], highlightKeywords: [String] = []) {
-        nameLabel.text = name
+        nameLabel.setTypo(.body5_10_R, text: name)
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         buttonLabel.setTypo(.body5_10_R, text: type.buttonTitle)
         buttonLabel.textColor = type.textColor

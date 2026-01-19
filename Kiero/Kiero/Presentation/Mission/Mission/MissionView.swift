@@ -106,14 +106,13 @@ extension MissionView: UITableViewDelegate {
         }
         
         let titleLabel = UILabel().then {
-            $0.font = .title4_14_SB
             $0.textColor = .gray300
             
             if headerDate.isToday {
-                $0.text = "오늘"
+                $0.setTypo(.title4_14_SB, text: "오늘")
                 $0.isHidden = false
             } else if headerDate.isTomorrow {
-                $0.text = "내일"
+                $0.setTypo(.title4_14_SB, text: "내일")
                 $0.isHidden = false
             } else {
                 $0.isHidden = true

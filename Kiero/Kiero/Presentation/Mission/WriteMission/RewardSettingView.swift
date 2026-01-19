@@ -43,13 +43,12 @@ final class RewardSettingView: UIView {
             rewardTextField.text = "\(currentRewardValue)"
         }
     }
-    
+        
     // MARK: - UI Components
     
     private let rewardIcon = UIImageView(image: .ic3DCoin)
     private let rewardTitle = UILabel().then {
-        $0.text = "보상"
-        $0.font = .body2_16_R
+        $0.setTypo(.body2_16_R, text: "보상")
         $0.textColor = .white
     }
     
@@ -172,7 +171,13 @@ final class RewardSettingView: UIView {
             Toast.show(message: "최소 보상은 1개입니다.")
         } else if value > 500 {
             currentRewardValue = 500
-            Toast.show(message: "최대 보상은 500개입니다.")
+          
+            if viewType == .ai {
+                Toast.show(message: "보상은 500개까지 설정할 수 있어요.", sideInset: 32, bottomInset: 300)
+            } else {
+                Toast.show(message: "보상은 500개까지 설정할 수 있어요.")
+            }
+            
         } else {
             currentRewardValue = value
         }

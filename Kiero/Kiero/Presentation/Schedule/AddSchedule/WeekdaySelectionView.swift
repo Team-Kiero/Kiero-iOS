@@ -28,9 +28,8 @@ final class WeekdaySelectionView: UIView {
     }
     
     private lazy var everyDayButton = UIButton().then {
-        $0.setTitle("매일", for: .normal)
         $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = .body5_10_R
+        $0.setTypo(.body5_10_R, text: "매일", for: .normal)
         $0.setImage(UIImage(resource: .btnUncheck), for: .normal)
         $0.setImage(UIImage(resource: .btnCheck), for: .selected)
         $0.semanticContentAttribute = .forceLeftToRight
@@ -54,10 +53,10 @@ final class WeekdaySelectionView: UIView {
     private func setUI() {
         days.enumerated().forEach { index, title in
             let button = UIButton().then {
-                $0.setTitle(title, for: .normal)
-                $0.titleLabel?.font = .body1_18_R
                 $0.setTitleColor(.gray700, for: .normal)
+                $0.setTypo(.body1_18_R, text: title, for: .normal)
                 $0.setTitleColor(.main, for: .selected)
+                $0.setTypo(.body1_18_R, text: title, for: .selected)
                 $0.backgroundColor = .gray900
                 $0.layer.cornerRadius = 21
                 $0.layer.borderColor = UIColor.main.cgColor

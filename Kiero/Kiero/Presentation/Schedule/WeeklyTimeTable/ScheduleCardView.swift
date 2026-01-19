@@ -49,8 +49,7 @@ final class ScheduleCardView: BaseUIView {
         super.init(frame: .zero)
         
         self.originalText = name
-        titleLabel.text = name
-        titleLabel.setTypo(.body5_10_R)
+        titleLabel.setTypo(.body5_10_R, text: name)
         
         topBar.backgroundColor = color
         dotView.backgroundColor = color
