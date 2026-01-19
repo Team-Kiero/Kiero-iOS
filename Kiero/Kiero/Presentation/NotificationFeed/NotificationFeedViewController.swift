@@ -25,6 +25,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     override func setDelegate() {
         contentView.tableView.delegate = self
         contentView.tableView.dataSource = self
+        contentView.tableView.showsVerticalScrollIndicator = false
     }
     
     override func bind(viewModel: NotificationFeedViewModel) {
@@ -105,6 +106,14 @@ extension NotificationFeedViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return .leastNormalMagnitude
+    }
+}
+
+extension NotificationFeedViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        if viewModel?.sections.isEmpty == false {
+            contentView.tableView.setContentOffset(.zero, animated: false)
+        }
     }
 }
 

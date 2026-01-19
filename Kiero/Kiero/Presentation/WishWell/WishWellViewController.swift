@@ -106,3 +106,9 @@ private extension WishWellViewController {
         }
     }
 }
+
+extension WishWellViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        rootView.wishCollectionView.setContentOffset(.zero, animated: true)
+    }
+}

@@ -105,11 +105,6 @@ final class AIMissionResultView: BaseUIView {
         self.addGestureRecognizer(backgroundTap)
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        nameTextField.becomeFirstResponder()
-    }
-    
     @objc
     private func deadlineViewDidTap() {
         onDeadlineViewTapped?()

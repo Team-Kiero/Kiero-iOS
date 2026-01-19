@@ -82,7 +82,6 @@ final class WishBox: UIView {
         
         completeButton.snp.makeConstraints {
             $0.height.equalTo(40)
-            $0.width.equalTo(139)
         }
     }
     

@@ -17,6 +17,20 @@ extension String {
 }
 
 extension Date {
+    var toFullDateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd.(E)"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: self)
+    }
+    
+    var toHeaderDateString: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "M.d(E)"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: self)
+    }
+
     var daysOfWeek: [Date] {
         let calendar = Calendar.current
         var calendarWithMonday = calendar

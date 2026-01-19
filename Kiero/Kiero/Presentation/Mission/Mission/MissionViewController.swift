@@ -61,6 +61,14 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     }
 }
 
+extension MissionViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        DispatchQueue.main.async { [weak self] in
+            self?.missionView.scrollToTop()
+        }
+    }
+}
+
 #Preview {
     AppDIContainer.shared.makeMissionViewController()
 }

@@ -27,6 +27,7 @@ public final class TabBarViewController: UITabBarController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        self.delegate = self
         
         setStyle()
         setViewControllers()
@@ -84,9 +85,66 @@ public final class TabBarViewController: UITabBarController {
         }
         
         customTabBar.onTabSelected = { [weak self] index in
-            self?.selectedIndex = index
+            guard let self = self else { return }
+            
+            self.selectedIndex = index
+            
+            if let selectedVC = self.viewControllers?[index] {
+                self.handleScrollToTop(for: selectedVC)
+            }
+            
+            self.selectedIndex = index
         }
     }
+    
+    private func handleScrollToTop(for viewController: UIViewController) {
+        let targetVC: UIViewController
+        if let nav = viewController as? UINavigationController {
+            targetVC = nav.viewControllers.first ?? viewController
+        } else {
+            targetVC = viewController
+        }
+        scrollToTop(viewController: targetVC)
+    }
+}
+
+extension TabBarViewController: UITabBarControllerDelegate {
+    public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+        let targetVC: UIViewController
+        if let nav = viewController as? UINavigationController {
+            targetVC = nav.viewControllers.first ?? viewController
+        } else {
+            targetVC = viewController
+        }
+        
+        scrollToTop(viewController: targetVC)
+    }
+    
+    private func scrollToTop(viewController: UIViewController) {
+        if let scrollableVC = viewController as? ScrollToTopAvailable {
+            scrollableVC.scrollToTop()
+            return
+        }
+        
+        findScrollViewAndScrollToTop(in: viewController.view)
+    }
+    
+    private func findScrollViewAndScrollToTop(in view: UIView) {
+        for subview in view.subviews {
+            if let tableView = subview as? UITableView {
+                tableView.setContentOffset(.zero, animated: false)
+                return
+            } else if let scrollView = subview as? UIScrollView {
+                scrollView.setContentOffset(.zero, animated: false)
+                return
+            }
+            findScrollViewAndScrollToTop(in: subview)
+        }
+    }
+}
+
+protocol ScrollToTopAvailable {
+    func scrollToTop()
 }
 
 extension TabBarViewController: UINavigationControllerDelegate {
