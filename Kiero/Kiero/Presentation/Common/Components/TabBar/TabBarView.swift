@@ -25,7 +25,7 @@ final class TabBarView: UIView {
         $0.axis = .horizontal
         $0.distribution = .fillEqually
     }
-
+    
     // MARK: - Life Cycle
     
     init(cornerRadius: CGFloat, isParent: Bool) {
@@ -37,7 +37,7 @@ final class TabBarView: UIView {
         setUI()
         setLayout()
     }
-
+    
     required init?(coder: NSCoder) { nil }
     
     // MARK: - Setup Methods
@@ -76,19 +76,58 @@ final class TabBarView: UIView {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         itemViews.removeAll()
         
-        for (index, title) in titles.enumerated() {
-            let image = UIImage(resource: icons[index])
-            let itemView = TabItem(title: title, image: image)
-            itemView.tag = index
+        if isParent {
+            stackView.distribution = .fill
+            stackView.alignment = .center
+            stackView.spacing = 99
             
-            let tap = UITapGestureRecognizer(target: self, action: #selector(tabTapped(_:)))
-            itemView.addGestureRecognizer(tap)
-            itemView.isUserInteractionEnabled = true
+            let leftSpacer = UIView().then { $0.isUserInteractionEnabled = false }
+            let rightSpacer = UIView().then { $0.isUserInteractionEnabled = false }
             
-            stackView.addArrangedSubview(itemView)
-            itemViews.append(itemView)
+            stackView.addArrangedSubview(leftSpacer)
+            
+            for (index, title) in titles.enumerated() {
+                let itemView = createTabItem(title: title, icon: icons[index], index: index)
+                
+                itemView.snp.makeConstraints {
+                    $0.width.equalTo(43)
+                    $0.height.equalTo(51)
+                }
+                
+                stackView.addArrangedSubview(itemView)
+                itemViews.append(itemView)
+            }
+            
+            stackView.addArrangedSubview(rightSpacer)
+            
+            leftSpacer.snp.makeConstraints {
+                $0.width.equalTo(rightSpacer.snp.width)
+            }
+            self.layoutIfNeeded()
+        } else {
+            stackView.distribution = .fillEqually
+            stackView.alignment = .fill
+            stackView.spacing = 0
+            
+            for (index, title) in titles.enumerated() {
+                let itemView = createTabItem(title: title, icon: icons[index], index: index)
+                stackView.addArrangedSubview(itemView)
+                itemViews.append(itemView)
+            }
+            self.setNeedsLayout()
         }
-        self.layoutIfNeeded()
+    }
+    
+    private func createTabItem(title: String, icon: ImageResource, index: Int) -> TabItem {
+        let image = UIImage(resource: icon)
+        let itemView = TabItem(title: title, image: image)
+        itemView.tag = index
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(tabTapped(_:)))
+        itemView.addGestureRecognizer(tap)
+        itemView.isUserInteractionEnabled = true
+        
+        return itemView
     }
     
     @objc private func tabTapped(_ sender: UITapGestureRecognizer) {
@@ -96,7 +135,7 @@ final class TabBarView: UIView {
         updateSelection(index)
         onTabSelected?(index)
     }
-
+    
     func updateSelection(_ index: Int) {
         itemViews.enumerated().forEach { $1.isSelected = ($0 == index) }
     }
