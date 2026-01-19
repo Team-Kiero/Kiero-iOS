@@ -17,6 +17,14 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     var isAnalysisDone: Bool = false {
         didSet {
             updateViewStatus()
+            if isAnalysisDone {
+                missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+            } else {
+                self.currentSelectedDate = Date()
+                
+                missionResultView.nameTextField.text = ""
+                missionInputView.textView.text = ""
+            }
         }
     }
     
@@ -42,6 +50,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
     }
     
     // MARK: - Setup Methods
@@ -110,7 +119,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             }
             
             let rewardValue = missionResultView.selectedReward
-
+            
             let newMission = Mission(
                 name: title,
                 reward: rewardValue,
@@ -129,11 +138,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         endDateVC.onDateSelected = { [weak self] selectedDate in
             guard let self = self else { return }
             self.currentSelectedDate = selectedDate
-            
-            let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "ko_KR")
-            formatter.dateFormat = "yyyy.MM.dd.(E)"
-            self.missionResultView.deadlineView.dateLabel.text = formatter.string(from: selectedDate)
+            self.missionResultView.deadlineView.dateLabel.text = selectedDate.toFullDateString
         }
         
         endDateVC.modalPresentationStyle = .overFullScreen
