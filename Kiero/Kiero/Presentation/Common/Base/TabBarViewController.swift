@@ -90,6 +90,8 @@ public final class TabBarViewController: UITabBarController {
             if let selectedVC = self.viewControllers?[index] {
                 self.handleScrollToTop(for: selectedVC)
             }
+            
+            self.selectedIndex = index
         }
     }
     
