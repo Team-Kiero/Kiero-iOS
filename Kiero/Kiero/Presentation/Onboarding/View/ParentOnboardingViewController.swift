@@ -53,7 +53,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         }
         
         lastNameTextField.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(10)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(17)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(91)
         }
@@ -70,8 +70,39 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         }
     }
     
+    override func addTarget() {
+        generateButton.addTarget(self, action: #selector(generateButtonDidTap), for: .touchUpInside)
+    }
+    
+    override func setDelegate() {
+        lastNameTextField.externalDelegate = self
+        firstNameTextField.externalDelegate = self
+    }
+    
     override func bind(viewModel: ParentOnboardingViewModel) {
         super.bind(viewModel: viewModel)
         profileBox.configure(name: viewModel.name, url: viewModel.profileURL)
+    }
+    
+    @objc
+    private func generateButtonDidTap() {
+        navigateToInviteView()
+    }
+    
+    private func navigateToInviteView() {
+        let vc = ParentInviteViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
+}
+
+extension ParentOnboardingViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField === lastNameTextField.innerTextField{
+            firstNameTextField.innerTextField.becomeFirstResponder()
+        }
+        else if textField === firstNameTextField.innerTextField{
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }
