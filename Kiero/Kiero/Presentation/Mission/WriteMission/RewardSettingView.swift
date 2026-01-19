@@ -169,9 +169,10 @@ final class RewardSettingView: UIView {
     private func applyValueLimit(_ value: Int) {
         if value < 1 {
             currentRewardValue = 1
+            Toast.show(message: "최소 보상은 1개입니다.")
         } else if value > 500 {
             currentRewardValue = 500
-            Toast.show(message: "보상은 500개까지 설정할 수 있어요.")
+            Toast.show(message: "최대 보상은 500개입니다.")
         } else {
             currentRewardValue = value
         }
