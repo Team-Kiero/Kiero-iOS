@@ -26,7 +26,6 @@ final class ProfileBox: UIView {
     // MARK: - UI Components
     
     private let profileImageView = UIImageView().then {
-        //$0.image = UIImage(resource: .icParentProfile).resized(to: CGSize(width: 30, height: 30))
         $0.clipsToBounds = true
         $0.layer.cornerRadius = 15
         $0.contentMode = .scaleAspectFill

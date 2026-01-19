@@ -69,16 +69,7 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
         }
         
         childButton.onTap = {
-            //self.navigateToMain(isParent: false)
             self.navigateToChildrenLogin()
-        }
-    }
-    
-    private func navigateToMain(isParent: Bool) {
-        let tabBarVC = TabBarViewController(factory: AppDIContainer.shared, isParent: isParent)
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(tabBarVC)
         }
     }
     
