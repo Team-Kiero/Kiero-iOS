@@ -48,7 +48,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         contentViews: [scheduleChildVC.view, missionVC.view]
     ).then {
         $0.onIndexChanged = { [weak self] index in
-            self?.currentTabIndex = index
+            guard let self = self else { return }
+            self.currentTabIndex = index
+            
+            if index == 0 {
+                self.viewModel?.currentReferenceDate.send(Date())
+            }
         }
     }
     
