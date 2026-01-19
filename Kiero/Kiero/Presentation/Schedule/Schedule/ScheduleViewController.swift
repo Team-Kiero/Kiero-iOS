@@ -192,7 +192,11 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             }
         }
         
-        menuView.show(in: self.view)
+        if let tabBarView = self.tabBarController?.view {
+            menuView.show(in: tabBarView)
+        } else {
+            menuView.show(in: self.view)
+        }
     }
 }
 
