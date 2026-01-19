@@ -42,12 +42,14 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     override func setLayout() {
         logoImageView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(186)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(12)
+            $0.width.equalTo(300)
+            $0.height.equalTo(63)
         }
         
         descriptionLabel.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalTo(logoImageView.snp.bottom).offset(10)
+            $0.centerX.equalToSuperview().offset(-22)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(189)
         }
         
         childButton.snp.makeConstraints {
@@ -67,7 +69,8 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
         }
         
         childButton.onTap = {
-            self.navigateToMain(isParent: false)
+            //self.navigateToMain(isParent: false)
+            self.navigateToChildrenLogin()
         }
     }
     
@@ -93,5 +96,11 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
             nav.modalPresentationStyle = .fullScreen
             present(nav, animated: true)
         }
+    }
+    
+    private func navigateToChildrenLogin() {
+        let vc = ChildrenLoginViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+        navigationController?.pushViewController(vc, animated: true)
+        print("nav:", navigationController as Any)
     }
 }
