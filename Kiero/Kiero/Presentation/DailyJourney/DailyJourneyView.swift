@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import ImageIO
 
 import Kingfisher
 import SnapKit
@@ -38,7 +39,7 @@ final class DailyJourneyView: BaseUIView {
     
     private let journeyTimeView = DailyJourneyTimeView()
     
-    private let kkubiCharacterImageView = UIImageView().then {
+    private let kkubiCharacterImageView = AnimatedImageView().then {
         $0.contentMode = .scaleAspectFit
     }
     
@@ -108,6 +109,7 @@ final class DailyJourneyView: BaseUIView {
             $0.top.equalTo(journeyTimeView.snp.bottom).offset(20)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
+            $0.height.equalTo(343)
         }
     }
     
@@ -127,19 +129,14 @@ final class DailyJourneyView: BaseUIView {
             time: data.journeyTimeText
         )
         
+        kkubiCharacterImageView.stopAnimating()
+        kkubiCharacterImageView.image = nil
+        
         if let url = Bundle.main.url(forResource: data.kkubiImageName, withExtension: "gif") {
-            let resource = LocalFileImageDataProvider(fileURL: url)
-            kkubiCharacterImageView.kf.setImage(
-                with: resource,
-                options: [
-                    .scaleFactor(UIScreen.main.scale),
-                    .cacheOriginalImage,
-                    .transition(.fade(0.2))
-                ]
-            )
+            kkubiCharacterImageView.kf.setImage(with: url)
         } else {
             kkubiCharacterImageView.image = UIImage(resource: .imgGoblinKid)
-            print("gif 경로 못 찾음")
+            print("gif 경로 못 찾음: \(data.kkubiImageName)")
         }
         
         let lines = data.bubbleText.components(separatedBy: "\n")
