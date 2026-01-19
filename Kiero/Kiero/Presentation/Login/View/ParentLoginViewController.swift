@@ -48,7 +48,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     override func setLayout() {
         parentNaviBar.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            $0.top.equalToSuperview().offset(54)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(37)
         }
@@ -72,6 +72,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     override func addTarget() {
         kakaoLoginButton.addTarget(self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
+        parentNaviBar.leftButtonAction = { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
     }
     
     override func bind(viewModel: ParentLoginViewModel) {
@@ -102,7 +105,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     private func navigateToParentOnboarding(name: String, url: String) {
         let vm = ParentOnboardingViewModel(name: name, profileURL: url)
-        let onboardingVC = ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared)
+        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
         
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
             sceneDelegate.changeRootViewController(onboardingVC)
