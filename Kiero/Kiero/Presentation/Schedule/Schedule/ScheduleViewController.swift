@@ -200,6 +200,14 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     }
 }
 
+extension ScheduleChildViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        DispatchQueue.main.async { [weak self] in
+            self?.scheduleView.timeTableView.scrollToTop()
+        }
+    }
+}
+
 #Preview {
     AppDIContainer.shared.makeScheduleViewController()
 }

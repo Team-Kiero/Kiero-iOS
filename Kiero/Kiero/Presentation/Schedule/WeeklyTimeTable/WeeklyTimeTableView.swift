@@ -155,6 +155,10 @@ final class WeeklyTimeTableView: BaseUIView {
         cardContainerView.subviews.forEach { $0.removeFromSuperview() }
     }
     
+    func scrollToTop() {
+        scrollView.setContentOffset(CGPoint.zero, animated: false)
+    }
+    
     func addSchedule(schedule: Schedule) {
         let dayIndices = schedule.dayIndices
         let startFloat = convertTimeToFloat(schedule.startTime)
