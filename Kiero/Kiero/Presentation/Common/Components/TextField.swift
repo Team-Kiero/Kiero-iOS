@@ -66,6 +66,17 @@ extension UserRole {
             return .clear
         }
     }
+    
+    var errorMessage: String {
+        switch self {
+        case .parent(.lastName), .parent(.firstName):
+            return "특수문자나 이모지를 포함하지 않은 이름을 입력해주세요"
+        case .child(.lastName), .child(.firstName):
+            return "특수문자나 이모지를 포함하지 않은 이름을 입력해줘!"
+        case .parent(.totalName), .child(.inviteCode):
+            return "잘 하고 있다"
+        }
+    }
 }
 
 final class TextField: UIView {
@@ -75,6 +86,10 @@ final class TextField: UIView {
     private let type: UserRole
     
     private var hasInteracted: Bool = false
+    
+    weak var externalDelegate: UITextFieldDelegate?
+    
+    var innerTextField: UITextField { textField }
     
     // MARK: - UI Components
     
@@ -92,7 +107,6 @@ final class TextField: UIView {
         $0.addLeftPadding(13)
         $0.backgroundColor = .gray900
         $0.layer.cornerRadius = 15
-        
     }
     
     private let errorImage = UIImageView().then {
@@ -108,6 +122,7 @@ final class TextField: UIView {
     init(type: UserRole) {
         self.type = type
         super.init(frame: .zero)
+        setStyle()
         setUI()
         setLayout()
         setDelegate()
@@ -120,6 +135,15 @@ final class TextField: UIView {
     
     // MARK: - Setup Methods
     
+    private func setStyle() {
+        switch type {
+        case .parent(.lastName), .child(.firstName), .child(.lastName):
+            return textField.returnKeyType = .next
+        case .parent(.firstName), .parent(.totalName), .child(.inviteCode):
+            return textField.returnKeyType = .done
+        }
+    }
+    
     private func setUI() {
         addSubviews(
             titleLabel,
@@ -131,7 +155,7 @@ final class TextField: UIView {
     
     private func setLayout() {
         titleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(30)
+            $0.top.equalToSuperview()
             $0.leading.equalToSuperview().inset(16)
         }
         
@@ -213,7 +237,7 @@ final class TextField: UIView {
             return
         }
         
-        errorLabel.setTypo(.body5_10_R, text: "특수문자, 이모지, 공백을 포함하지 않은 이름을 입력해주세요")
+        errorLabel.setTypo(.body5_10_R, text: type.errorMessage)
         errorLabel.alpha = 1
         errorImage.alpha = 1
         
@@ -223,16 +247,22 @@ final class TextField: UIView {
 }
 
 extension TextField: UITextFieldDelegate {
+
     func textFieldDidBeginEditing(_ textField: UITextField) {
         hasInteracted = true
         textField.layer.borderColor = UIColor.gray100.cgColor
         textField.layer.borderWidth = 1
+        errorLabel.alpha = 0
+        errorImage.alpha = 0
+
+        externalDelegate?.textFieldDidBeginEditing?(textField)
     }
-    
+
     func textFieldDidEndEditing(_ textField: UITextField) {
         validate()
+        externalDelegate?.textFieldDidEndEditing?(textField)
     }
-    
+
     func textField(
         _ textField: UITextField,
         shouldChangeCharactersIn range: NSRange,
@@ -240,10 +270,34 @@ extension TextField: UITextFieldDelegate {
     ) -> Bool {
 
         let currentText = textField.text ?? ""
-
         guard let textRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: textRange, with: string)
+        
+        if string.contains(where: { $0.isWhitespace }) {
+            return false
+        }
 
-        return updatedText.count <= 5
+        let lengthOK: Bool = {
+            switch type {
+            case .parent(.firstName), .parent(.lastName), .parent(.totalName),
+                 .child(.firstName), .child(.lastName):
+                return updatedText.count <= 5
+            case .child(.inviteCode):
+                return updatedText.count <= 25
+            }
+        }()
+
+        guard lengthOK else { return false }
+
+        let externalOK = externalDelegate?
+            .textField?(textField, shouldChangeCharactersIn: range, replacementString: string) ?? true
+
+        return externalOK
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        let externalOK = externalDelegate?.textFieldShouldReturn?(textField) ?? true
+        if externalOK { textField.resignFirstResponder() }
+        return externalOK
     }
 }
