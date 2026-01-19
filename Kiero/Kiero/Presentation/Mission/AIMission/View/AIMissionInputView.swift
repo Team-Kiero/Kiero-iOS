@@ -73,7 +73,7 @@ final class AIMissionInputView: BaseUIView {
         textView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(12)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(463)
+            $0.bottom.equalToSuperview()
         }
         
         placeholderLabel.snp.makeConstraints {

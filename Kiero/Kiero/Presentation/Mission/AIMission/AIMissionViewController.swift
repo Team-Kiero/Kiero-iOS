@@ -51,6 +51,12 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         super.viewDidLoad()
         missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
         updateButtonState(text: "")
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
@@ -72,7 +78,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             $0.snp.makeConstraints { make in
                 make.top.equalTo(navigationBar.snp.bottom)
                 make.horizontalEdges.equalToSuperview()
-                make.bottom.equalTo(addMissionButton.snp.top).offset(-10)
+                make.bottom.equalTo(addMissionButton.snp.top).offset(-61)
             }
         }
         
@@ -169,6 +175,31 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     func setAnalysisStatus(isDone: Bool) {
         self.isAnalysisDone = isDone
+    }
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+        
+        let keyboardHeight = keyboardFrame.cgRectValue.height
+        let safeAreaBottom = view.safeAreaInsets.bottom
+        let targetInset = keyboardHeight - safeAreaBottom - 40
+        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: targetInset, right: 0)
+        
+        UIView.animate(withDuration: 0.3) {
+            self.missionInputView.textView.contentInset = contentInset
+            self.missionInputView.textView.scrollIndicatorInsets = contentInset
+            
+            if let selectedRange = self.missionInputView.textView.selectedTextRange {
+                let cursorRect = self.missionInputView.textView.caretRect(for: selectedRange.start)
+                self.missionInputView.textView.scrollRectToVisible(cursorRect, animated: false)
+            }
+        }
+    }
+
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        missionInputView.textView.contentInset = .zero
+        missionInputView.textView.scrollIndicatorInsets = .zero
     }
 }
 
