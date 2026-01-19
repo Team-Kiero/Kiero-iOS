@@ -132,7 +132,6 @@ final class NotificationFeed: UIView {
         coinChip.snp.makeConstraints {
             $0.top.equalTo(messageLabel.snp.bottom).offset(6)
             $0.leading.equalToSuperview().inset(13)
-            $0.bottom.equalToSuperview().inset(12)
         }
         
         proofImageView.snp.makeConstraints {
@@ -217,7 +216,7 @@ final class NotificationFeed: UIView {
     private func updateBottomAnchorForSchedule(isExpanded: Bool) {
         bottomSpacer.snp.remakeConstraints {
             if isExpanded {
-                $0.top.equalTo(proofImageView.snp.bottom).offset(12)
+                $0.top.equalTo(proofImageView.snp.bottom)
             } else {
                 $0.top.equalTo(messageLabel.snp.bottom)
             }
@@ -230,7 +229,7 @@ final class NotificationFeed: UIView {
     private func updateBottomAnchorForNormal(hasChip: Bool) {
         bottomSpacer.snp.remakeConstraints {
             if hasChip {
-                $0.top.equalTo(coinChip.snp.bottom).offset(12)
+                $0.top.equalTo(coinChip.snp.bottom)
             } else {
                 $0.top.equalTo(messageLabel.snp.bottom)
             }
