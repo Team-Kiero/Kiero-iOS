@@ -58,10 +58,11 @@ final class SegmentedControl: UIView {
         
         titles.enumerated().forEach { index, title in
             let button = UIButton().then {
-                $0.setTitle(title, for: .normal)
-                $0.titleLabel?.font = .head2_20_B
+
                 $0.setTitleColor(.gray500, for: .normal)
+                $0.setTypo(.head2_20_B, text: title, for: .normal)
                 $0.setTitleColor(.white, for: .selected)
+                $0.setTypo(.head2_20_B, text: title, for: .selected)
                 $0.tag = index
                 $0.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
             }

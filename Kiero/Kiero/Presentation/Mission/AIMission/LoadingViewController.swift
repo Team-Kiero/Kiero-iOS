@@ -27,9 +27,8 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     }
     
     private let descriptionLabel = UILabel().then {
-        $0.font = .title2_20_SB
         $0.textColor = .white
-        $0.text = "알림장을 분석하고 있어요!"
+        $0.setTypo(.title2_20_SB, text: "알림장을 분석하고 있어요!")
         $0.textAlignment = .center
         $0.numberOfLines = 0
     }

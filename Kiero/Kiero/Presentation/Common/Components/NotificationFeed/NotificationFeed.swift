@@ -160,7 +160,8 @@ final class NotificationFeed: UIView {
         proofImageView.isHidden = true
         coinChip.isHidden = true
         proofImageView.snp.updateConstraints{ $0.height.equalTo(0) }
-        messageLabel.font = .title3_16_SB
+        
+        let style: UIFont.NotoSans = .title3_16_SB
         
         switch state {
         case let .finishSchedule(time, childName, schedule, proofImage, isExpanded):
@@ -168,7 +169,7 @@ final class NotificationFeed: UIView {
             downButton.isHidden = false
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(schedule)에 도착했어요."
-            messageLabel.attributedText = makeMessage(message: base, highlight: schedule)
+            messageLabel.attributedText = makeMessage(message: base, highlight: schedule, style: style)
             
             proofImageView.image = proofImage
             applyExpanded(isExpanded, animated: false)
@@ -178,7 +179,7 @@ final class NotificationFeed: UIView {
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) 하루의 일정을 모두 완료했어요."
-            messageLabel.attributedText = makePlainMessage(base)
+            messageLabel.attributedText = makePlainMessage(base, style: style)
             showCoinChip(style: .usedCoinChip, text: "\(coinEarned)개 획득")
             updateBottomAnchorForNormal(hasChip: true)
             
@@ -186,7 +187,7 @@ final class NotificationFeed: UIView {
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(coupon) 쿠폰을 사용했어요."
-            messageLabel.attributedText = makeMessage(message: base, highlight: coupon)
+            messageLabel.attributedText = makeMessage(message: base, highlight: coupon, style: style)
             showCoinChip(style: .usedCoinChip, text: "\(coinUsed)개 사용")
             updateBottomAnchorForNormal(hasChip: true)
             
@@ -194,7 +195,7 @@ final class NotificationFeed: UIView {
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(mission) 미션을 완료했어요."
-            messageLabel.attributedText = makeMessage(message: base, highlight: mission)
+            messageLabel.attributedText = makeMessage(message: base, highlight: mission, style: style)
             showCoinChip(style: .usedCoinChip, text: "\(coinEarned)개 획득")
             updateBottomAnchorForNormal(hasChip: true)
         }
@@ -247,18 +248,27 @@ final class NotificationFeed: UIView {
         onToggleExpand?()
     }
     
-    private func makePlainMessage(_ text: String) -> NSAttributedString {
-        NSAttributedString(string: text, attributes: [
-            .foregroundColor: UIColor.white,
-            .font: messageLabel.font as Any
-        ])
+    private func makePlainMessage(_ text: String, style: UIFont.NotoSans) -> NSAttributedString {
+        return makeMessage(message: text, highlight: "", style: style)
     }
     
-    private func makeMessage(message: String, highlight: String) -> NSAttributedString {
+    private func makeMessage(message: String, highlight: String, style: UIFont.NotoSans) -> NSAttributedString {
+        let lineHeight = style.size * (style.lineHeightPercent / 100.0)
+        let kernValue = style.size * (style.letterSpacingPercent / 100.0)
+        let baselineOffset = (lineHeight - style.font.lineHeight) / 4.0
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = lineHeight
+        paragraphStyle.maximumLineHeight = lineHeight
+        
         let attr = NSMutableAttributedString(string: message, attributes: [
             .foregroundColor: UIColor.white,
-            .font: messageLabel.font as Any
+            .font: style.font,
+            .kern: kernValue,
+            .paragraphStyle: paragraphStyle,
+            .baselineOffset: baselineOffset
         ])
+        
         let range = (message as NSString).range(of: highlight)
         if range.location != NSNotFound {
             attr.addAttributes([.foregroundColor: UIColor.main], range: range)

@@ -43,14 +43,12 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     private let daySectionTitle = UILabel().then {
-        $0.text = "요일"
-        $0.font = .title3_16_SB
+        $0.setTypo(.title3_16_SB, text: "요일")
         $0.textColor = .white
     }
     
     private let repeatLabel = UILabel().then {
-        $0.text = "매주 반복"
-        $0.font = .body4_12_R
+        $0.setTypo(.body4_12_R, text: "매주 반복")
         $0.textColor = .white
     }
     
@@ -64,16 +62,14 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private let weekdaySelectionView = WeekdaySelectionView()
     
     private let timeSectionTitle = UILabel().then {
-        $0.text = "시간"
-        $0.font = .title3_16_SB
+        $0.setTypo(.title3_16_SB, text: "시간")
         $0.textColor = .white
     }
     
     private let timeSelectionView = TimeSelectionView()
     
     private let colorSectionTitle = UILabel().then {
-        $0.text = "컬러"
-        $0.font = .title3_16_SB
+        $0.setTypo(.title3_16_SB, text: "컬러")
         $0.textColor = .white
     }
     

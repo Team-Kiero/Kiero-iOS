@@ -56,7 +56,6 @@ final class ConfirmBox: UIView {
     }
     
     private let actionButton = UIButton().then {
-        $0.titleLabel?.font = .title3_16_SB
         $0.setTitleColor(.kBlack, for: .normal)
         $0.backgroundColor = .main
         $0.layer.cornerRadius = 10
@@ -127,9 +126,9 @@ final class ConfirmBox: UIView {
     // MARK: Configure
     
     func configure(state: State) {
+        actionButton.setTypo(.title3_16_SB, text: state.buttonTitle, for: .normal)
         messageLabel.setTypo(.body3_14_R, text: state.message)
         messageLabel.textAlignment = .center
-        actionButton.setTitle(state.buttonTitle, for: .normal)
     }
     
     // MARK: Bind

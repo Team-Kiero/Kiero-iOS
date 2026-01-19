@@ -13,12 +13,11 @@ import Then
 final class DayItem: BaseUIView {
     
     private let dayLabel = UILabel().then {
-        $0.font = .body5_10_R
         $0.textAlignment = .center
     }
 
     func configure(day: String, isToday: Bool) {
-        dayLabel.text = day
+        dayLabel.setTypo(.body5_10_R, text: day)
         dayLabel.textColor = isToday ? .main : .gray100
     }
 

@@ -35,9 +35,8 @@ final class WishBox: UIView {
     }
     
     private let completeButton = UIButton().then {
-        $0.titleLabel?.font = .title4_14_SB
-        $0.setTitle("소원빌기", for: .normal)
         $0.setTitleColor(.kBlack, for: .normal)
+        $0.setTypo(.title4_14_SB, text: "소원빌기", for: .normal)
         $0.layer.cornerRadius = 8
         $0.backgroundColor = .white
     }

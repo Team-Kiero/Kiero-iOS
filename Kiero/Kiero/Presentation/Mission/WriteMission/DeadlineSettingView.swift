@@ -13,14 +13,12 @@ import Then
 final class DeadlineSettingView: UIView {
     
     private let titleLabel = UILabel().then {
-        $0.text = "마감일"
-        $0.font = .body3_14_R
+        $0.setTypo(.body3_14_R, text: "마감일")
         $0.textColor = .gray200
     }
     
     let dateLabel = UILabel().then {
-        $0.text = Date().toString()
-        $0.font = .title3_16_SB
+        $0.setTypo(.title3_16_SB, text: Date().toString())
         $0.textColor = .gray200
     }
     
