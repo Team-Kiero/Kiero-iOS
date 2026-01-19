@@ -6,5 +6,12 @@
 //
 
 final class ParentOnboardingViewModel: BaseViewModel {
+    let name: String
+    let profileURL: String
     
+    init(name: String, profileURL: String) {
+        self.name = name
+        self.profileURL = profileURL
+        super.init()
+    }
 }

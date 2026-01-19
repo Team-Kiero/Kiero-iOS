@@ -17,6 +17,9 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     var isAnalysisDone: Bool = false {
         didSet {
             updateViewStatus()
+            if isAnalysisDone {
+                missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+            }
         }
     }
     
@@ -40,8 +43,20 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     // MARK: - Life Cycle
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+        updateButtonState(text: "")
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
@@ -63,7 +78,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             $0.snp.makeConstraints { make in
                 make.top.equalTo(navigationBar.snp.bottom)
                 make.horizontalEdges.equalToSuperview()
-                make.bottom.equalTo(addMissionButton.snp.top).offset(-10)
+                make.bottom.equalTo(addMissionButton.snp.top).offset(-61)
             }
         }
         
@@ -89,6 +104,21 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                 self.dismiss(animated: true)
             }
         }
+        
+        missionInputView.onTextChanged = { [weak self] text in
+            self?.updateButtonState(text: text)
+        }
+    }
+
+    private func updateButtonState(text: String) {
+        if !isAnalysisDone {
+            let isValid = text.count >= 10 && text.count <= 1000
+            addMissionButton.isEnabled = isValid
+            addMissionButton.alpha = isValid ? 1.0 : 0.5
+        } else {
+            addMissionButton.isEnabled = true
+            addMissionButton.alpha = 1.0
+        }
     }
     
     private func updateViewStatus() {
@@ -97,12 +127,19 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         
         let buttonTitle = isAnalysisDone ? "저장하기" : "분석하고 미션추가하기"
         addMissionButton.configure(title: buttonTitle)
+        
+        if !isAnalysisDone {
+            updateButtonState(text: missionInputView.textView.text)
+        } else {
+            updateButtonState(text: "")
+        }
     }
     
     @objc
     private func didTapBottomButton() {
         if !isAnalysisDone {
             // TODO: 로딩VC 진입
+            self.view.endEditing(true)
             isAnalysisDone = true
         } else {
             guard let title = missionResultView.nameTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
@@ -110,7 +147,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             }
             
             let rewardValue = missionResultView.selectedReward
-
+            
             let newMission = Mission(
                 name: title,
                 reward: rewardValue,
@@ -129,11 +166,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         endDateVC.onDateSelected = { [weak self] selectedDate in
             guard let self = self else { return }
             self.currentSelectedDate = selectedDate
-            
-            let formatter = DateFormatter()
-            formatter.locale = Locale(identifier: "ko_KR")
-            formatter.dateFormat = "yyyy.MM.dd.(E)"
-            self.missionResultView.deadlineView.dateLabel.text = formatter.string(from: selectedDate)
+            self.missionResultView.deadlineView.dateLabel.text = selectedDate.toFullDateString
         }
         
         endDateVC.modalPresentationStyle = .overFullScreen
@@ -142,6 +175,33 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     func setAnalysisStatus(isDone: Bool) {
         self.isAnalysisDone = isDone
+    }
+    
+    @objc
+    private func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+        
+        let keyboardHeight = keyboardFrame.cgRectValue.height
+        let safeAreaBottom = view.safeAreaInsets.bottom
+        let targetInset = keyboardHeight - safeAreaBottom - 40
+        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: targetInset, right: 0)
+        
+        UIView.animate(withDuration: 0.3) {
+            self.missionInputView.textView.contentInset = contentInset
+            self.missionInputView.textView.scrollIndicatorInsets = contentInset
+            
+            if let selectedRange = self.missionInputView.textView.selectedTextRange {
+                let cursorRect = self.missionInputView.textView.caretRect(for: selectedRange.start)
+                self.missionInputView.textView.scrollRectToVisible(cursorRect, animated: false)
+            }
+        }
+    }
+
+    @objc
+    private func keyboardWillHide(notification: NSNotification) {
+        missionInputView.textView.contentInset = .zero
+        missionInputView.textView.scrollIndicatorInsets = .zero
     }
 }
 

@@ -146,10 +146,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     }
     
     private func updateDeadlineDate(with date: Date) {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "yyyy.MM.dd.(E)"
-        deadlineView.dateLabel.text = formatter.string(from: date)
+        deadlineView.dateLabel.text = date.toFullDateString
     }
 }
 

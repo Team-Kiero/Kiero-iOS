@@ -30,6 +30,10 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
         $0.configure(title: "여정 시작하기")
     }
     
+    override func setStyle() {
+        titleLabel.setTypo(.title3_16_SB, text: "이름과 부모님께 받은 초대 코드를 입력해줘!")
+    }
+    
     override func setUI() {
         view.addSubviews(
             childNaviBar,
@@ -43,8 +47,9 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
     
     override func setLayout() {
         childNaviBar.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            $0.top.equalToSuperview().offset(54)
             $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(37)
         }
         
         titleLabel.snp.makeConstraints {
@@ -65,7 +70,7 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
         }
         
         codeTextField.snp.makeConstraints {
-            $0.top.equalTo(firstNameTextField.snp.bottom).offset(35)
+            $0.top.equalTo(firstNameTextField.snp.bottom).offset(30)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(91)
         }
@@ -74,5 +79,32 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
             $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-17)
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
+    }
+    
+    override func addTarget() {
+        childNaviBar.leftButtonAction = { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+    }
+    
+    override func setDelegate() {
+        firstNameTextField.externalDelegate = self
+        lastNameTextField.externalDelegate = self
+        codeTextField.externalDelegate = self
+    }
+}
+
+extension ChildrenLoginViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField === lastNameTextField.innerTextField{
+            firstNameTextField.innerTextField.becomeFirstResponder()
+        }
+        else if textField === firstNameTextField.innerTextField{
+            codeTextField.innerTextField.becomeFirstResponder()
+        }
+        else if textField === codeTextField.innerTextField{
+            textField.resignFirstResponder()
+        }
+        return true
     }
 }

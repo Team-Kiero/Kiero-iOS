@@ -27,6 +27,8 @@ final class MissionView: BaseUIView {
         $0.dataSource = self
         $0.delegate = self
         $0.sectionHeaderTopPadding = 0
+        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
+        $0.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
         $0.contentInsetAdjustmentBehavior = .never
     }
     
@@ -52,6 +54,10 @@ final class MissionView: BaseUIView {
         sortedDates = groupedMissions.keys.sorted()
         
         tableView.reloadData()
+    }
+    
+    func scrollToTop() {
+        tableView.setContentOffset(CGPoint.zero, animated: false)
     }
 }
 
@@ -89,11 +95,14 @@ extension MissionView: UITableViewDelegate {
         
         guard let headerDate = dateString.toDate(format: "yyyy-MM-dd") else { return nil }
         
-        let headerView = UIView()
+        let headerView = UIView().then {
+            $0.backgroundColor = .kBlack
+        }
         let containerStack = UIStackView().then {
             $0.axis = .vertical
             $0.spacing = 4
             $0.alignment = .leading
+            $0.backgroundColor = .kBlack
         }
         
         let titleLabel = UILabel().then {

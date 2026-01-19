@@ -24,7 +24,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     // MARK: - UI Components
     
     private let storyImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
     }
     
     private let mainSF = SpeechField(type: .main)
@@ -152,4 +152,8 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     private func didTapNext() {
         nextTap.send(())
     }
+}
+
+#Preview {
+    AppDIContainer.shared.makeChildOnboardingViewController()
 }

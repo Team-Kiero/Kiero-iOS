@@ -34,7 +34,3 @@ final class ChildrenLoadingViewController: BaseViewController<BaseViewModel> {
         }
     }
 }
-
-#Preview {
-    ChildrenLoadingViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
-}

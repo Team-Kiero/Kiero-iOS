@@ -48,7 +48,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         contentViews: [scheduleChildVC.view, missionVC.view]
     ).then {
         $0.onIndexChanged = { [weak self] index in
-            self?.currentTabIndex = index
+            guard let self = self else { return }
+            self.currentTabIndex = index
+            
+            if index == 0 {
+                self.viewModel?.currentReferenceDate.send(Date())
+            }
         }
     }
     
@@ -164,6 +169,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         menuView.onMenuSelected = { [weak self] index in
             guard let self = self else { return }
             
+            self.view.endEditing(true)
+            
             if index == 0 {
                 guard let writeVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else { return }
                 
@@ -192,7 +199,19 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             }
         }
         
-        menuView.show(in: self.view)
+        if let tabBarView = self.tabBarController?.view {
+            menuView.show(in: tabBarView)
+        } else {
+            menuView.show(in: self.view)
+        }
+    }
+}
+
+extension ScheduleChildViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        DispatchQueue.main.async { [weak self] in
+            self?.scheduleView.timeTableView.scrollToTop()
+        }
     }
 }
 

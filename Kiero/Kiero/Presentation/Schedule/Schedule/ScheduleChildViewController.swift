@@ -22,7 +22,7 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
         }
     }
     
-    private let scheduleView = ScheduleView()
+    let scheduleView = ScheduleView()
     
     // MARK: - Life Cycle
     

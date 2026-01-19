@@ -28,6 +28,7 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
     
     init(viewModel: MissionCompleteViewModel) {
         super.init(viewModel: viewModel, diContainer: AppDIContainer.shared)
+        self.hidesBottomBarWhenPushed = true
     }
     
     required init?(coder: NSCoder) {

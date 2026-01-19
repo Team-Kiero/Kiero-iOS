@@ -134,3 +134,14 @@ private extension CoinMissionViewController {
         // TODO: 서버에게 변경된 금화, 상태 데이터 전송
     }
 }
+
+extension CoinMissionViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        let collectionView = rootView.missionCollectionView
+        if collectionView.numberOfSections > 0 && collectionView.numberOfItems(inSection: 0) > 0 {
+            collectionView.scrollToItem(at: IndexPath(item: 0, section: 0), at: .top, animated: true)
+        } else {
+            collectionView.setContentOffset(.zero, animated: true)
+        }
+    }
+}
