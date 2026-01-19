@@ -19,11 +19,6 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             updateViewStatus()
             if isAnalysisDone {
                 missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
-            } else {
-                self.currentSelectedDate = Date()
-                
-                missionResultView.nameTextField.text = ""
-                missionInputView.textView.text = ""
             }
         }
     }
@@ -48,9 +43,14 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     // MARK: - Life Cycle
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+        updateButtonState(text: "")
     }
     
     // MARK: - Setup Methods
@@ -98,6 +98,21 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                 self.dismiss(animated: true)
             }
         }
+        
+        missionInputView.onTextChanged = { [weak self] text in
+            self?.updateButtonState(text: text)
+        }
+    }
+
+    private func updateButtonState(text: String) {
+        if !isAnalysisDone {
+            let isValid = text.count >= 10 && text.count <= 1000
+            addMissionButton.isEnabled = isValid
+            addMissionButton.alpha = isValid ? 1.0 : 0.5
+        } else {
+            addMissionButton.isEnabled = true
+            addMissionButton.alpha = 1.0
+        }
     }
     
     private func updateViewStatus() {
@@ -106,12 +121,19 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         
         let buttonTitle = isAnalysisDone ? "저장하기" : "분석하고 미션추가하기"
         addMissionButton.configure(title: buttonTitle)
+        
+        if !isAnalysisDone {
+            updateButtonState(text: missionInputView.textView.text)
+        } else {
+            updateButtonState(text: "")
+        }
     }
     
     @objc
     private func didTapBottomButton() {
         if !isAnalysisDone {
             // TODO: 로딩VC 진입
+            self.view.endEditing(true)
             isAnalysisDone = true
         } else {
             guard let title = missionResultView.nameTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {

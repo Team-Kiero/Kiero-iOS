@@ -15,6 +15,7 @@ final class AIMissionInputView: BaseUIView {
     // MARK: - Properties
     
     var onTextChanged: ((String) -> Void)?
+    private var isUserTouched: Bool = false
     
     // MARK: - UI Components
     
@@ -30,6 +31,11 @@ final class AIMissionInputView: BaseUIView {
         $0.font = .body3_14_R
         $0.textContainerInset = UIEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
         $0.returnKeyType = .done
+        $0.isScrollEnabled = true
+        $0.alwaysBounceVertical = true
+        $0.showsVerticalScrollIndicator = false
+        $0.contentInsetAdjustmentBehavior = .never
+        $0.autocorrectionType = .no
     }
     
     private let placeholderLabel = UILabel().then {
@@ -79,16 +85,20 @@ final class AIMissionInputView: BaseUIView {
     private func setDelegate() {
         textView.delegate = self
     }
+    
+    func activateTextView() {
+        textView.isEditable = true
+        textView.becomeFirstResponder()
+    }
 }
 
 extension AIMissionInputView: UITextViewDelegate {
+    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+        return true
+    }
+    
     func textViewDidChange(_ textView: UITextView) {
         placeholderLabel.isHidden = !textView.text.isEmpty
-        
-        if textView.text.count > 1000 {
-            textView.text = String(textView.text.prefix(1000))
-        }
-        
         onTextChanged?(textView.text)
     }
     
@@ -97,7 +107,12 @@ extension AIMissionInputView: UITextViewDelegate {
             textView.resignFirstResponder()
             return false
         }
-        return true
+        
+        let currentText = textView.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let changedText = currentText.replacingCharacters(in: stringRange, with: text)
+        
+        return changedText.count <= 1000
     }
 }
 

@@ -169,6 +169,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         menuView.onMenuSelected = { [weak self] index in
             guard let self = self else { return }
             
+            self.view.endEditing(true)
+            
             if index == 0 {
                 guard let writeVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else { return }
                 
