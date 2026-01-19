@@ -216,7 +216,7 @@ extension EndDateViewController: UICollectionViewDataSource {
 
 extension EndDateViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = collectionView.frame.width / 7
+        let width = floor(collectionView.frame.width / 7)
         return CGSize(width: width, height: 36)
     }
     
