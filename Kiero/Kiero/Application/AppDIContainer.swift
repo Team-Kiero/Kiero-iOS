@@ -105,7 +105,10 @@ extension AppDIContainer {
     }
     
     func makeWriteMissionViewController() -> UIViewController {
-        let viewModel = WriteMissionViewModel()
+        let service = WriteMissionService()
+        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
+        let viewModel = WriteMissionViewModel(service: service, childId: selectedChildId)
         return WriteMissionViewController(viewModel: viewModel, diContainer: self)
     }
     
