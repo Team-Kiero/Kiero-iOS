@@ -65,7 +65,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         
         kakaoLoginButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-41)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
         }
     }
     
