@@ -7,6 +7,12 @@
 
 import Foundation
 
+enum TokenRefreshPolicy {
+    case none
+    case parent
+    case child
+}
+
 enum EndPoint {
     // Invite Code
     case postInviteCode
@@ -14,7 +20,7 @@ enum EndPoint {
     case subscribeConnection
     
     // Login
-    case childSignup
+    case childSignup(lastName: String, firstName: String, inviteCode: String)
     case kakaoLogin(authCode: String)
     case kakaoAccessToken(token: String)
     
@@ -37,6 +43,16 @@ enum EndPoint {
     
     // WriteMission
     case postMission(childId: Int, request: WriteMissionRequestDTO)
+    var refreshPolicy: TokenRefreshPolicy {
+        switch self {
+        case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
+            return .none
+        case .fetchSchedules:
+            return .child
+        default:
+            return .parent
+        }
+    }
     
     var url: String {
         switch self {
@@ -87,10 +103,21 @@ enum EndPoint {
     
     var header: [String: String] {
         switch self {
-        case .kakaoLogin, .kakaoAccessToken, .childSignup:
+        case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken:
             return HeaderType.none.type
         default:
             return HeaderType.auth.type
+        }
+    }
+    
+    var queryItems: [URLQueryItem]? {
+        switch self {
+        case .kakaoAccessToken(let token):
+            return [URLQueryItem(name: "accessToken", value: token)]
+        case .kakaoLogin(let authCode):
+            return [URLQueryItem(name: "authCode", value: authCode)]
+        default:
+            return nil
         }
     }
 }

@@ -14,5 +14,5 @@ protocol ServiceFactory {
 }
 
 protocol KakaoAuthServiceType {
-    func loginWithKakao() -> AnyPublisher<String, Error>
+    func loginWithKakao() async throws -> String
 }

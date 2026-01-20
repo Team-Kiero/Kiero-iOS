@@ -10,19 +10,48 @@ import Combine
 import KakaoSDKUser
 
 final class KakaoAuthService: KakaoAuthServiceType {
-    func loginWithKakao() -> AnyPublisher<String, Error> {
-        Future { promise in
-            if UserApi.isKakaoTalkLoginAvailable() {
-                UserApi.shared.loginWithKakaoTalk { token, error in
-                    if let error = error { promise(.failure(error)) }
-                    else { promise(.success(token?.accessToken ?? "")) }
-                }
-            } else {
-                UserApi.shared.loginWithKakaoAccount { token, error in
-                    if let error = error { promise(.failure(error)) }
-                    else { promise(.success(token?.accessToken ?? "")) }
-                }
-            }
-        }.eraseToAnyPublisher()
+
+    func loginWithKakao() async throws -> String {
+        if UserApi.isKakaoTalkLoginAvailable() {
+            return try await loginWithKakaoTalk()
+        } else {
+            return try await loginWithKakaoAccount()
+        }
     }
+
+    private func loginWithKakaoTalk() async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            UserApi.shared.loginWithKakaoTalk { token, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let access = token?.accessToken, !access.isEmpty else {
+                    continuation.resume(throwing: KakaoAuthError.emptyAccessToken)
+                    return
+                }
+                continuation.resume(returning: access)
+            }
+        }
+    }
+
+    private func loginWithKakaoAccount() async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            UserApi.shared.loginWithKakaoAccount { token, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                guard let access = token?.accessToken, !access.isEmpty else {
+                    continuation.resume(throwing: KakaoAuthError.emptyAccessToken)
+                    return
+                }
+                continuation.resume(returning: access)
+            }
+        }
+    }
+}
+
+enum KakaoAuthError: Error {
+    case emptyAccessToken
 }
