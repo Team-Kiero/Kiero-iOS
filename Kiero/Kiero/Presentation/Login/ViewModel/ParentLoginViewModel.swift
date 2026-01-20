@@ -5,12 +5,10 @@
 //  Created by 안치욱 on 1/11/26.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class ParentLoginViewModel: BaseViewModel, ViewModelType {
-
-    // MARK: - Input / Output
 
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
@@ -21,26 +19,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         let route: AnyPublisher<LoginRoute, Never>
     }
 
-    // MARK: - Private
-
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<LoginRoute, Never>()
 
     private let kakaoService: any KakaoAuthServiceType
-    private let repo: AuthRepositoryType
 
-    // MARK: - Init
-
-    init(
-        kakaoService: any KakaoAuthServiceType = KakaoAuthService(),
-        repo: AuthRepositoryType
-    ) {
+    init(kakaoService: any KakaoAuthServiceType = KakaoAuthService()) {
         self.kakaoService = kakaoService
-        self.repo = repo
         super.init()
     }
-
-    // MARK: - Transform
 
     func transform(input: Input) -> Output {
         input.kakaoButtonTapped
@@ -55,27 +42,35 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         )
     }
 
-    // MARK: - Business Logic
-
     private func requestKakaoLogin() {
         stateSubject.send(.loading)
 
-        kakaoService.loginWithKakao()
-            .mapError { _ in NetworkError.unknownError }
-            .flatMap { [repo] token in
-                repo.loginWithKakao(accessToken: token)
-                    .mapError { _ in NetworkError.unknownError }
-            }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
-                if case .failure(let error) = completion {
-                    self?.stateSubject.send(.failure(error.errorDescription))
-                }
-            } receiveValue: { [weak self] loginData in
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let kakaoToken = try await kakaoService.loginWithKakao()
+
+                let loginData: LoginData = try await BaseService.shared.request(
+                    endPoint: .kakaoAccessToken(token: kakaoToken)
+                )
+
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
-                self?.stateSubject.send(.idle)
-                self?.routeSubject.send(.parentOnboarding(name: loginData.name, url: loginData.image))
+                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
+
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    self.routeSubject.send(.parentOnboarding(name: loginData.name, url: loginData.image))
+                }
+            } catch let error as NetworkError {
+                await MainActor.run {
+                    self.stateSubject.send(.failure(error.errorDescription))
+                }
+            } catch {
+                await MainActor.run {
+                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                }
             }
-            .store(in: &cancellables)
+        }
     }
 }
