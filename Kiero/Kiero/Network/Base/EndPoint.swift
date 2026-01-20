@@ -32,6 +32,9 @@ enum EndPoint {
     // AddSchedule
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
     
+    // Mission
+    case fetchMissions(childId: Int?)
+    
     var url: String {
         switch self {
         case .postInviteCode, .checkConnection:
@@ -56,12 +59,19 @@ enum EndPoint {
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
         case .postSchedule(let childId, _):
             return "/api/v1/schedules/\(childId)"
+        case .fetchMissions(let childId):
+            var path = "/api/v1/missions"
+            if let id = childId {
+                path += "?childId=\(id)"
+            }
+            return path
         }
     }
-
+    
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules:
+        case .checkConnection, .subscribeConnection,
+                .fetchChildren, .fetchSchedules, .fetchMissions:
             return "GET"
         case .postSchedule:
             return "POST"
