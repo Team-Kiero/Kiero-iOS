@@ -37,6 +37,26 @@ final class CTAButton: UIButton {
             case .black: return .white
             }
         }
+        
+        var buttonHeight: CGFloat {
+            switch self {
+            case .main, .gray900, .gray800:
+                return 49
+            case .black:
+                return 45
+            case .gray100:
+                return 40
+            }
+        }
+        
+        var typo: UIFont.NotoSans {
+            switch self {
+            case .main, .gray900, .gray800, .black:
+                return .title3_16_SB
+            case .gray100:
+                return .title4_14_SB
+            }
+        }
     }
     
     override var isHighlighted: Bool {
@@ -70,7 +90,7 @@ final class CTAButton: UIButton {
         self.style = style
         super.init(frame: .zero)
         setUI()
-        setLayout()
+        setLayout(height: style.buttonHeight)
         setStyle()
     }
     
@@ -86,9 +106,9 @@ final class CTAButton: UIButton {
         contentStackView.addArrangedSubviews(iconImageView, mainLabel)
     }
     
-    private func setLayout() {
+    private func setLayout(height: CGFloat) {
         self.snp.makeConstraints {
-            $0.height.equalTo(49)
+            $0.height.equalTo(height)
         }
         
         contentStackView.snp.makeConstraints {
@@ -109,7 +129,7 @@ final class CTAButton: UIButton {
     // MARK: - Configuration
     
     func configure(title: String, icon: UIImage? = nil) {
-        mainLabel.setTypo(.title3_16_SB, text: title)
+        mainLabel.setTypo(style.typo, text: title)
         
         if let icon = icon {
             iconImageView.image = icon
