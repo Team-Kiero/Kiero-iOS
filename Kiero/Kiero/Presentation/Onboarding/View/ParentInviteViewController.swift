@@ -69,9 +69,8 @@ final class ParentInviteViewController: BaseViewController<BaseViewModel> {
         }
         
         startButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-41)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(49)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
         }
     }
     

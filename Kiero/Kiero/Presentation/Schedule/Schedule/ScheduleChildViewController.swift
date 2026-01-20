@@ -22,6 +22,9 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
         }
     }
     
+    let prevButtonTapped = PassthroughSubject<Void, Never>()
+    let nextButtonTapped = PassthroughSubject<Void, Never>()
+    
     let scheduleView = ScheduleView()
     
     // MARK: - Life Cycle
@@ -32,6 +35,14 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    override init(viewModel: ScheduleViewModel, diContainer: any ViewControllerFactory) {
+        super.init(viewModel: viewModel, diContainer: diContainer)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: - Bind
@@ -74,5 +85,30 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
             .sink { [weak self] dates in
                 self?.scheduleView.timeTableView.updateDaysDates(dates)
             }.store(in: &cancellables)
+    }
+    
+    private func setAction() {
+        scheduleView.pagingHeader.onLeftButtonTapped = { [weak self] in
+            self?.prevButtonTapped.send(())
+        }
+        scheduleView.pagingHeader.onRightButtonTapped = { [weak self] in
+            self?.nextButtonTapped.send(())
+        }
+    }
+    
+    func updateHeader(title: String, leftEnabled: Bool, rightEnabled: Bool) {
+        scheduleView.pagingHeader.configure(
+            title: title,
+            isLeftEnabled: leftEnabled,
+            isRightEnabled: rightEnabled
+        )
+    }
+    
+    func updateSchedules(_ schedules: [Schedule]) {
+        scheduleView.updateSchedules(schedules)
+    }
+    
+    func updateWeeklyDates(_ dates: [Date]) {
+        scheduleView.timeTableView.updateDaysDates(dates)
     }
 }

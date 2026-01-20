@@ -10,6 +10,7 @@ import UIKit
 
 protocol ServiceFactory {
     func makeKakaoAuthService() -> KakaoAuthServiceType
+    func makeScheduleService() -> ScheduleServiceType
 }
 
 protocol KakaoAuthServiceType {

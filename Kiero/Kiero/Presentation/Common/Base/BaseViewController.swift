@@ -45,6 +45,7 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
         setLayout()
         addTarget()
         setDelegate()
+        bindViewModel()
     }
     
     // MARK: - Custom Method
@@ -54,6 +55,7 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
     open func setLayout() {}
     open func addTarget() {}
     open func setDelegate() {}
+    open func bindViewModel() { }
     
     // MARK: - Bind Method
     

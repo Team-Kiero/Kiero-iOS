@@ -107,8 +107,7 @@ final class ConfirmBox: UIView {
     
     private func setLayout() {
         container.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.width.equalTo(343)
+            $0.edges.equalToSuperview().inset(16)
             $0.height.equalTo(248)
         }
         
@@ -118,7 +117,7 @@ final class ConfirmBox: UIView {
         }
         
         actionButton.snp.makeConstraints {
-            $0.width.equalTo(311)
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(49)
         }
     }

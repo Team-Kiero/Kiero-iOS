@@ -86,9 +86,8 @@ final class ProfileBox: UIView {
     
     func configure(name: String, url: String?) {
         nameLabel.setTypo(.body2_16_R, text: name)
-        if let urlString = url, let imageURL = URL(string: urlString) {
-            profileImageView.kf.setImage(with: imageURL, placeholder: UIImage.icParentProfile)
-        }
+        let imageURL = URL(string: url ?? "")
+        profileImageView.kf.setImage(with: imageURL, placeholder: UIImage.icParentProfile)
     }
     
     @objc
