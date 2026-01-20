@@ -29,6 +29,9 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
+    // AddSchedule
+    case postSchedule(childId: Int, request: AddScheduleRequestDTO)
+    
     var url: String {
         switch self {
         case .postInviteCode, .checkConnection:
@@ -51,6 +54,8 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .postSchedule(let childId, _):
+            return "/api/v1/schedules/\(childId)"
         }
     }
 
@@ -58,11 +63,13 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules:
             return "GET"
+        case .postSchedule:
+            return "POST"
         default:
             return "POST"
         }
     }
-
+    
     var header: [String: String] {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup:
