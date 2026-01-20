@@ -72,6 +72,8 @@ final class DailyJourneyView: BaseUIView {
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
         }
+        
+        loadIntroGif()
     }
     
     override func setLayout() {
@@ -112,6 +114,14 @@ final class DailyJourneyView: BaseUIView {
         }
     }
     
+    private func loadIntroGif() {
+        if let url = Bundle.main.url(forResource: "intro_1", withExtension: "gif") {
+            kkubiCharacterImageView.kf.setImage(with: url)
+        } else {
+            print("⚠️ gif 파일을 Bundle에서 찾을 수 없습니다.")
+        }
+    }
+    
     // MARK: - Update Methods
     
     func updateData(with data: DailyJourneyModel) {
@@ -127,16 +137,6 @@ final class DailyJourneyView: BaseUIView {
             title: "\(data.scheduleOrderText)번째 여정 시간",
             time: data.journeyTimeText
         )
-        
-        kkubiCharacterImageView.stopAnimating()
-        kkubiCharacterImageView.image = nil
-        
-        if let url = Bundle.main.url(forResource: data.kkubiImageName, withExtension: "gif") {
-            kkubiCharacterImageView.kf.setImage(with: url)
-        } else {
-            kkubiCharacterImageView.image = UIImage(resource: .imgGoblinKid)
-            print("gif 경로 못 찾음: \(data.kkubiImageName)")
-        }
         
         let lines = data.bubbleText.components(separatedBy: "\n")
         
