@@ -22,8 +22,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     }
     
     private lazy var scheduleChildVC: ScheduleChildViewController = {
-        let vc = AppDIContainer.shared.makeScheduleChildViewController()
-        vc.viewModel = self.viewModel
+        guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
+        let vc = AppDIContainer.shared.makeScheduleChildViewController(viewModel: viewModel)
         return vc
     }()
     
@@ -204,6 +204,40 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         } else {
             menuView.show(in: self.view)
         }
+    }
+    
+    override func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        let input = ScheduleViewModel.Input(
+            viewDidLoad: Just(()).eraseToAnyPublisher(),
+            prevWeekTapped: scheduleChildVC.prevButtonTapped.eraseToAnyPublisher(),
+            nextWeekTapped: scheduleChildVC.nextButtonTapped.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.headerInfo
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] info in
+                self?.scheduleChildVC.updateHeader(
+                    title: info.title,
+                    leftEnabled: info.leftEnabled,
+                    rightEnabled: info.rightEnabled
+                )
+            }.store(in: &cancellables)
+            
+        output.filteredSchedules
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] schedules in
+                self?.scheduleChildVC.updateSchedules(schedules)
+            }.store(in: &cancellables)
+
+        output.weeklyDates
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] dates in
+                self?.scheduleChildVC.updateWeeklyDates(dates)
+            }.store(in: &cancellables)
     }
 }
 

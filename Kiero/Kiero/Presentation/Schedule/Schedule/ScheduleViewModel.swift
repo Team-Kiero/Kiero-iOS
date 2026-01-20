@@ -12,6 +12,9 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Properties
     
+    private let service: ScheduleServiceType
+    private let childId: Int = 5 // MARK: 임시 Id
+    
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
     let currentReferenceDate = CurrentValueSubject<Date, Never>(Date())
     
@@ -29,9 +32,33 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         let weeklyDates: AnyPublisher<[Date], Never>
     }
     
+    // MARK: - Life Cycle
+    
+    init(service: ScheduleServiceType, childId: Int) {
+        self.service = service
+//        self.childId = childId
+        super.init()
+    }
+    
     // MARK: - Transform
     
     func transform(input: Input) -> Output {
+        currentReferenceDate
+            .flatMap { [weak self] date -> AnyPublisher<[Schedule], Never> in
+                guard let self = self else { return Just([]).eraseToAnyPublisher() }
+                
+                let days = date.daysOfWeek
+                guard let startDate = days.first, let endDate = days.last else {
+                    return Just([]).eraseToAnyPublisher()
+                }
+                
+                return self.service.fetchSchedules(childId: self.childId, startDate: startDate, endDate: endDate)
+                    .replaceError(with: [])
+                    .eraseToAnyPublisher()
+            }
+            .subscribe(scheduleList)
+            .store(in: &cancellables)
+        
         input.prevWeekTapped
             .sink { [weak self] in
                 guard let self = self else { return }
