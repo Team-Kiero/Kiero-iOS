@@ -70,6 +70,8 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
         noSF.onTap = {
             self.didTapNext()
         }
+        
+        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
     }
     
     override func bind(viewModel: ChildrenOnboardingViewModel) {
@@ -152,8 +154,16 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     private func didTapNext() {
         nextTap.send(())
     }
-}
-
-#Preview {
-    AppDIContainer.shared.makeChildOnboardingViewController()
+    
+    private func navigateToChildrenTap() {
+        let nav = UINavigationController(rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: false))
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(nav)
+        }
+    }
+    
+    @objc
+    private func startButtonDidTap() {
+        navigateToChildrenTap()
+    }
 }

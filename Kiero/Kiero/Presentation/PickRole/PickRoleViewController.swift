@@ -75,23 +75,13 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     private func navigateToParentLogin() {
         let repo = AppDIContainer.shared.makeAuthRepository()
-
         let vm = ParentLoginViewModel(repo: repo)
-
         let vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-
-        if let nav = navigationController {
-            nav.pushViewController(vc, animated: true)
-        } else {
-            let nav = UINavigationController(rootViewController: vc)
-            nav.modalPresentationStyle = .fullScreen
-            present(nav, animated: true)
-        }
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func navigateToChildrenLogin() {
         let vc = ChildrenLoginViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
         navigationController?.pushViewController(vc, animated: true)
-        print("nav:", navigationController as Any)
     }
 }
