@@ -74,14 +74,13 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     }
     
     private func navigateToParentLogin() {
-        let repo = AppDIContainer.shared.makeAuthRepository()
-        let vm = ParentLoginViewModel(repo: repo)
+        let vm = ParentLoginViewModel()
         let vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
         navigationController?.pushViewController(vc, animated: true)
     }
     
     private func navigateToChildrenLogin() {
-        let vc = ChildrenLoginViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+        let vc = ChildrenLoginViewController(viewModel: ChildrenLoginViewModel(), diContainer: AppDIContainer.shared)
         navigationController?.pushViewController(vc, animated: true)
     }
 }

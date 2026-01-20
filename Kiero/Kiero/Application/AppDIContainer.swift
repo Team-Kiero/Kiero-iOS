@@ -10,7 +10,7 @@ import UIKit
 import KakaoSDKAuth
 import Moya
 
-final class AppDIContainer: ViewControllerFactory, ServiceFactory, RepositoryFactory {
+final class AppDIContainer: ViewControllerFactory, ServiceFactory{
     static let shared = AppDIContainer()
     private init() {}
 }
@@ -22,12 +22,8 @@ extension AppDIContainer {
         return KakaoAuthService()
     }
     
-    func makeAuthRepository() -> AuthRepositoryType {
-        return AuthRepository(provider: MoyaProvider<AuthAPI>())
-    }
-    
     func makeParentLoginViewController() -> UIViewController {
-        let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService(), repo: makeAuthRepository())
+        let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService())
         return ParentLoginViewController(viewModel: vm, diContainer: self)
     }
     
