@@ -31,7 +31,7 @@ enum EndPoint {
     
     // Child
     case fetchChildren
-
+    
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
@@ -45,6 +45,9 @@ enum EndPoint {
             return .parent
         }
     }
+    
+    // DailyJourney
+    case updateDailyJourney
     
     var url: String {
         switch self {
@@ -68,18 +71,22 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .updateDailyJourney:
+            return "/api/v1/schedules/today"
         }
     }
-
+    
     var method: String {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules:
             return "GET"
+        case .updateDailyJourney:
+            return "PATCH"
         default:
             return "POST"
         }
     }
-
+    
     var header: [String: String] {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken:
