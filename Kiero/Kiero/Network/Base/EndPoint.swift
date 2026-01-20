@@ -35,6 +35,9 @@ enum EndPoint {
     // Mission
     case fetchMissions(childId: Int?)
     
+    // WriteMission
+    case postMission(childId: Int, request: WriteMissionRequestDTO)
+    
     var url: String {
         switch self {
         case .postInviteCode, .checkConnection:
@@ -65,6 +68,8 @@ enum EndPoint {
                 path += "?childId=\(id)"
             }
             return path
+        case .postMission(let childId, _):
+            return "/api/v1/missions/\(childId)"
         }
     }
     
@@ -73,7 +78,7 @@ enum EndPoint {
         case .checkConnection, .subscribeConnection,
                 .fetchChildren, .fetchSchedules, .fetchMissions:
             return "GET"
-        case .postSchedule:
+        case .postSchedule, .postMission:
             return "POST"
         default:
             return "POST"
