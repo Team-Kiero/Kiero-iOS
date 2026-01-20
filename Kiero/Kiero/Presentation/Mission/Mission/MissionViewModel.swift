@@ -10,18 +10,31 @@ import Combine
 
 final class MissionViewModel: BaseViewModel {
     
-    @Published var missions: [Mission] = []
+    @Published var missionGroups: [MissionGroupDTO] = []
+    private let service: MissionServiceType
+    
+    init(service: MissionServiceType) {
+        self.service = service
+        super.init()
+    }
     
     func fetchMissions() {
-        self.missions = [
-            Mission(name: "설거지 하기", reward: 50, dueAt: "2026-01-16"),
-            Mission(name: "화장실 청소하기", reward: 100, dueAt: "2026-01-17"),
-            Mission(name: "방 청소", reward: 30, dueAt: "2026-01-19")
-        ]
+        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let childId = selectedChildId == 0 ? nil : selectedChildId
+        
+        service.fetchMissions(childId: childId)
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    print("❌ 미션 조회 실패: \(error)")
+                }
+            } receiveValue: { [weak self] response in
+                self?.missionGroups = response.missionsByDate
+            }
+            .store(in: &cancellables)
     }
     
     func addMission(_ mission: Mission) {
-        self.missions.append(mission)
-        // TODO: 미션 생성 API 호출
+        print("🚀 새로운 미션 추가 시도: \(mission.name)")
+        fetchMissions()
     }
 }

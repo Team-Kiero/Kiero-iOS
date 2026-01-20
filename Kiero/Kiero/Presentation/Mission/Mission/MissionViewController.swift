@@ -20,6 +20,10 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     // MARK: - Life Cycle
     
+    public override init(viewModel: MissionViewModel, diContainer: any ViewControllerFactory) {
+        super.init(viewModel: viewModel, diContainer: diContainer)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -41,20 +45,18 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         missionView.snp.makeConstraints { $0.edges.equalToSuperview() }
     }
     
-    override func bind(viewModel: MissionViewModel) {
-        super.bind(viewModel: viewModel)
-        
-        viewModel.$missions
+    override func bindViewModel() {
+        viewModel?.$missionGroups
             .receive(on: RunLoop.main)
-            .sink { [weak self] missions in
+            .sink { [weak self] groups in
                 guard let self = self else { return }
                 
-                let hasData = !missions.isEmpty
+                let hasData = !groups.isEmpty
                 self.emptyView.isHidden = hasData
                 self.missionView.isHidden = !hasData
                 
                 if hasData {
-                    self.missionView.updateMissions(missions)
+                    self.missionView.updateMissionGroups(groups)
                 }
             }
             .store(in: &cancellables)
