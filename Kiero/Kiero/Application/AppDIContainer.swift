@@ -74,7 +74,10 @@ extension AppDIContainer {
     }
     
     func makeAddScheduleViewController() -> UIViewController {
-        let viewModel = AddScheduleViewModel()
+        let service = AddScheduleService()
+        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
+        let viewModel = AddScheduleViewModel(service: service, childId: selectedChildId)
         return AddScheduleViewController(viewModel: viewModel, diContainer: self)
     }
 }
