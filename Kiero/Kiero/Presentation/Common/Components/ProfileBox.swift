@@ -95,8 +95,3 @@ final class ProfileBox: UIView {
         onTap?()
     }
 }
-
-
-#Preview {
-    ProfileBox(name: "스꾸삐", profileURL: "")
-}
