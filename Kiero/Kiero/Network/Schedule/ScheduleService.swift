@@ -1,0 +1,36 @@
+//
+//  ScheduleService.swift
+//  Kiero
+//
+//  Created by 신혜연 on 1/20/26.
+//
+
+import Foundation
+import Combine
+
+protocol ScheduleServiceType {
+    func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError>
+}
+
+final class ScheduleService: ScheduleServiceType {
+    func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError> {
+        let startStr = startDate.toString(format: "yyyy-MM-dd")
+        let endStr = endDate.toString(format: "yyyy-MM-dd")
+        
+        let endPoint = EndPoint.fetchSchedules(childId: childId, startDate: startStr, endDate: endStr)
+        
+        return Future<[Schedule], NetworkError> { promise in
+            Task {
+                do {
+                    let response: ScheduleResponseDTO = try await BaseService.shared.request(endPoint: endPoint)
+                    promise(.success(response.toEntity()))
+                } catch let error as NetworkError {
+                    promise(.failure(error))
+                } catch {
+                    promise(.failure(.unknownError))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+}
