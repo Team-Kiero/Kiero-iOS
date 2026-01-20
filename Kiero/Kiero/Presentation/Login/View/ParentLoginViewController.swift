@@ -30,7 +30,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     }
     
     private let kakaoLoginButton = UIButton().then {
-        $0.setImage(.kakaoButton, for: .normal)
+        $0.setBackgroundImage(.btnKakao, for: .normal)
     }
     
     override func setStyle() {
@@ -65,8 +65,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         
         kakaoLoginButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-39)
-            $0.height.equalTo(48)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
         }
     }
     

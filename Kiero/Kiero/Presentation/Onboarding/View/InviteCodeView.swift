@@ -129,6 +129,6 @@ final class InviteCodeView: UIView {
     @objc
     private func copyButtonDidTap() {
         UIPasteboard.general.string = codeLabel.text
-        Toast.show(message: "초대코드가 복사되었습니다.")
+        Toast.show(message: "초대코드가 복사되었습니다.", bottomInset: 83)
     }
 }

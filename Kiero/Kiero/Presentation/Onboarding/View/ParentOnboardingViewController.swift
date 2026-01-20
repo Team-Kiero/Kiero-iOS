@@ -69,8 +69,8 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         }
         
         generateButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(41)
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
         }
     }
     
