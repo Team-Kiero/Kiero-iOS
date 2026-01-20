@@ -9,10 +9,28 @@ import Foundation
 import Combine
 
 protocol ScheduleServiceType {
+    func fetchChildren() -> AnyPublisher<[ChildResponseDTO], NetworkError>
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError>
 }
 
 final class ScheduleService: ScheduleServiceType {
+    func fetchChildren() -> AnyPublisher<[ChildResponseDTO], NetworkError> {
+        let endPoint = EndPoint.fetchChildren
+        
+        return Future<[ChildResponseDTO], NetworkError> { promise in
+            Task {
+                do {
+                    let response: [ChildResponseDTO] = try await BaseService.shared.request(endPoint: endPoint)
+                    promise(.success(response))
+                } catch let error as NetworkError {
+                    promise(.failure(error))
+                } catch {
+                    promise(.failure(.unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError> {
         let startStr = startDate.toString(format: "yyyy-MM-dd")
         let endStr = endDate.toString(format: "yyyy-MM-dd")
