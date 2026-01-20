@@ -5,6 +5,8 @@
 //  Created by 신혜연 on 1/8/26.
 //
 
+import Foundation
+
 enum HeaderType {
     case none
     case auth
@@ -14,9 +16,10 @@ enum HeaderType {
         case .none:
             return ["Content-Type": "application/json"]
         case .auth:
+            let token = TokenManager.shared.getAccessToken() ?? ""
             return [
                 "Content-Type": "application/json",
-                // TODO: 인증이 필요한 API의 경우 추가
+                "Authorization": "Bearer \(token)"
             ]
         }
     }
