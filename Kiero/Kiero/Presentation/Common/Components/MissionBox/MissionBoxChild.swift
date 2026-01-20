@@ -121,7 +121,7 @@ final class MissionBoxChild: UIView {
         missionBox.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(13)
             $0.verticalEdges.equalToSuperview().inset(13.5)
-            $0.width.equalTo(343)
+            $0.width.equalTo(343).priority(.low)
         }
         
         completeButton.snp.makeConstraints {
