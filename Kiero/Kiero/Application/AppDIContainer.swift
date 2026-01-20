@@ -94,8 +94,13 @@ extension AppDIContainer {
 // MARK: - Mission
 
 extension AppDIContainer {
+    func makeMissionService() -> MissionServiceType {
+        return MissionService()
+    }
+
     func makeMissionViewController() -> UIViewController {
-        let viewModel = MissionViewModel()
+        let service = makeMissionService()
+        let viewModel = MissionViewModel(service: service)
         return MissionViewController(viewModel: viewModel, diContainer: self)
     }
     
