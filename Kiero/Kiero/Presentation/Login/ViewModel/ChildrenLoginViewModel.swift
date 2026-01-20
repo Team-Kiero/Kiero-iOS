@@ -1,0 +1,163 @@
+//
+//  ChildrenLoginViewModel.swift
+//  Kiero
+//
+//  Created by 안치욱 on 1/21/26.
+//
+
+import Combine
+import Foundation
+
+enum ChildLoginRoute {
+    case childOnboarding
+}
+
+enum ChildLoginState: Equatable {
+    case idle
+    case loading
+    case failure(String)
+}
+
+final class ChildrenLoginViewModel: BaseViewModel {
+
+    // MARK: - Publisher
+
+    private let stateSubject = CurrentValueSubject<ChildLoginState, Never>(.idle)
+    private let routeSubject = PassthroughSubject<ChildLoginRoute, Never>()
+
+    var state: AnyPublisher<ChildLoginState, Never> {
+        stateSubject.eraseToAnyPublisher()
+    }
+
+    var route: AnyPublisher<ChildLoginRoute, Never> {
+        routeSubject.eraseToAnyPublisher()
+    }
+
+    // MARK: - Public Action
+
+    func signup(lastName: String, firstName: String, inviteCode: String) {
+        let last = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let first = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let code = inviteCode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !last.isEmpty, !first.isEmpty, !code.isEmpty else {
+            stateSubject.send(.failure("성, 이름, 초대코드를 모두 입력해줘"))
+            return
+        }
+
+        stateSubject.send(.loading)
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            do {
+                let body = ChildSignupRequest(
+                    lastName: last,
+                    firstName: first,
+                    inviteCode: code
+                )
+
+                let data: ChildSignupData = try await BaseService.shared.request(
+                    endPoint: .childSignup(
+                        lastName: last,
+                        firstName: first,
+                        inviteCode: code
+                    ),
+                    body: body
+                )
+
+                TokenManager.shared.saveAccessToken(data.accessToken)
+                TokenManager.shared.saveRefreshToken(data.refreshToken)
+                TokenManager.shared.saveUserRole(data.role)
+                TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
+
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    self.routeSubject.send(.childOnboarding)
+                }
+
+            } catch let error as NetworkError {
+                await MainActor.run {
+                    self.stateSubject.send(.failure(error.errorDescription))
+                }
+            } catch {
+                await MainActor.run {
+                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                }
+            }
+        }
+    }
+}
+
+//import Combine
+//import Foundation
+//
+//enum ChildLoginRoute {
+//    case childOnboarding
+//}
+//
+//enum ChildLoginState: Equatable {
+//    case idle
+//    case loading
+//    case failure(String)
+//}
+//
+//final class ChildrenLoginViewModel: BaseViewModel {
+//
+//    private let stateSubject = CurrentValueSubject<ChildLoginState, Never>(.idle)
+//    private let routeSubject = PassthroughSubject<ChildLoginRoute, Never>()
+//
+//    var state: AnyPublisher<ChildLoginState, Never> {
+//        stateSubject.eraseToAnyPublisher()
+//    }
+//
+//    var route: AnyPublisher<ChildLoginRoute, Never> {
+//        routeSubject.eraseToAnyPublisher()
+//    }
+//
+//    func signup(lastName: String, firstName: String, inviteCode: String) {
+//        let last = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
+//        let first = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
+//        let code = inviteCode.trimmingCharacters(in: .whitespacesAndNewlines)
+//
+//        guard !last.isEmpty, !first.isEmpty, !code.isEmpty else {
+//            stateSubject.send(.failure("성, 이름, 초대코드를 모두 입력해줘"))
+//            return
+//        }
+//
+//        stateSubject.send(.loading)
+//
+//        Task { [weak self] in
+//            guard let self else { return }
+//            do {
+//                let body = ChildSignupRequest(
+//                    lastName: last,
+//                    firstName: first,
+//                    inviteCode: code
+//                )
+//
+//                let _: ChildSignupData = try await BaseService.shared.request(
+//                    endPoint: .childSignup(
+//                        lastName: last,
+//                        firstName: first,
+//                        inviteCode: code
+//                    ),
+//                    body: body
+//                )
+//
+//                await MainActor.run {
+//                    self.stateSubject.send(.idle)
+//                    self.routeSubject.send(.childOnboarding)
+//                }
+//            } catch let error as NetworkError {
+//                await MainActor.run {
+//                    self.stateSubject.send(.failure(error.errorDescription))
+//                }
+//            } catch {
+//                await MainActor.run {
+//                    self.stateSubject.send(.failure("알 수 없는 에러"))
+//                }
+//            }
+//        }
+//    }
+//}
