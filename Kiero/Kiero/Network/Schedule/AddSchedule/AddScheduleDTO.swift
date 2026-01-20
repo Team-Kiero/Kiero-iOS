@@ -6,3 +6,18 @@
 //
 
 import Foundation
+
+struct AddScheduleRequestDTO: Encodable {
+    let name: String
+    let isRecurring: Bool
+    let startTime: String
+    let endTime: String
+    let scheduleColor: String
+    let dayOfWeek: String?
+    let dates: String?
+}
+
+struct AddScheduleResponseDTO: Decodable {
+    let status: Int
+    let message: String
+}
