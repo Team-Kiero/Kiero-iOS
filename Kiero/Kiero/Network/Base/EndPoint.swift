@@ -29,6 +29,11 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
+    //CoinMission
+    case fetchChildrenInfo
+    case fetchWishes
+    case purchaseCoupon(couponId: Int64)
+    
     var url: String {
         switch self {
         case .postInviteCode, .checkConnection:
@@ -51,13 +56,21 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .fetchChildrenInfo:
+            return "/api/v1/children/me"
+        case .fetchWishes:
+            return "/api/v1/coupons"
+        case .purchaseCoupon(let couponId):
+            return "/api/v1/coupons/\(couponId)"
         }
     }
 
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
             return "GET"
+        case .purchaseCoupon:
+            return "PATCH"
         default:
             return "POST"
         }
