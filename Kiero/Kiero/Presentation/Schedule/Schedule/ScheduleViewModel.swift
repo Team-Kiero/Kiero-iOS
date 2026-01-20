@@ -44,7 +44,6 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     private func fetchInitialChildId() {
         service.fetchChildren()
             .sink { _ in } receiveValue: { [weak self] children in
-                // 첫 번째 자녀의 ID를 사용합니다.
                 if let firstChildId = children.first?.childId {
                     self?.childId.send(firstChildId)
                 }
