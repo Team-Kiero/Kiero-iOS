@@ -133,8 +133,16 @@ extension AppDIContainer {
 // MARK: - WishWell
 
 extension AppDIContainer {
+    func makeWishWellService() -> WishWellServiceType {
+        return WishWellService()
+    }
+    
+    func makeWishWellViewModel() -> WishWellViewModel {
+        return WishWellViewModel(service: makeWishWellService())
+    }
+    
     func makeWishWellViewController() -> UIViewController {
-        let viewModel = WishWellViewModel()
+        let viewModel = makeWishWellViewModel()
         return WishWellViewController(viewModel: viewModel, diContainer: self)
     }
 }
