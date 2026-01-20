@@ -8,7 +8,6 @@
 import Foundation
 
 struct DailyJourneyModel {
-    let kkubiImageName: String
     let bubbleText: String
     let highlightKeywords: [String]
     let journeyTimeText: String
