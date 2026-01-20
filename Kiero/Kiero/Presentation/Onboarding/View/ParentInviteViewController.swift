@@ -74,8 +74,20 @@ final class ParentInviteViewController: BaseViewController<BaseViewModel> {
             $0.height.equalTo(49)
         }
     }
-}
-
-#Preview {
-    ParentInviteViewController(viewModel: BaseViewModel(), diContainer: AppDIContainer.shared)
+    
+    override func addTarget() {
+        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
+    }
+    
+    private func navigateToParentTap() {
+        let nav = UINavigationController(rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: true))
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(nav)
+        }
+    }
+    
+    @objc
+    private func startButtonDidTap() {
+        navigateToParentTap()
+    }
 }
