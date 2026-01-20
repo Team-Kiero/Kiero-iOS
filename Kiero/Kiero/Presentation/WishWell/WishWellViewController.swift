@@ -4,6 +4,8 @@
 //
 //  Created by 정윤아 on 1/12/26.
 //
+
+import Combine
 import UIKit
 
 import SnapKit
@@ -15,17 +17,15 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     
     private let rootView = WishWellView()
     
+    private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private let refreshSubject = PassthroughSubject<Void, Never>()
+    private let purchaseConfirmedSubject = PassthroughSubject<Int64, Never>()
+    
     // MARK: - Life Cycle
     
     override func loadView() { view = rootView }
     
     // MARK: - Setup Methods
-    
-    override func setUI() {
-        if let vm = viewModel {
-            rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
-        }
-    }
     
     override func setDelegate() {
         rootView.wishCollectionView.dataSource = self
@@ -37,11 +37,36 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     override func bind(viewModel: WishWellViewModel) {
         super.bind(viewModel: viewModel)
         
-        viewModel.fetchWishList { [weak self] in
-            DispatchQueue.main.async {
+        let input = WishWellViewModel.Input(
+            viewDidLoad: viewDidLoadSubject.eraseToAnyPublisher(),
+            refresh: refreshSubject.eraseToAnyPublisher(),
+            purchaseConfirmed: purchaseConfirmedSubject.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.userInfo
+            .receive(on: RunLoop.main)
+            .sink { [weak self] info in
+                self?.rootView.configureUserInfo(name: info.name, price: info.coin)
+            }
+            .store(in: &cancellables)
+        
+        output.coupons
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
                 self?.rootView.wishCollectionView.reloadData()
             }
-        }
+            .store(in: &cancellables)
+        
+        output.errorMessage
+            .receive(on: RunLoop.main)
+            .sink { msg in
+                Toast.show(message: msg)
+            }
+            .store(in: &cancellables)
+        
+        viewDidLoadSubject.send(())
     }
 }
 
@@ -49,12 +74,12 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
 
 extension WishWellViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return viewModel?.wishList.count ?? 0
+        return viewModel?.coupons.count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WishWellCell.identifier, for: indexPath) as? WishWellCell,
-              let data = viewModel?.wishList[indexPath.item] else {
+              let data = viewModel?.coupons[indexPath.item] else {
             return UICollectionViewCell()
         }
         
@@ -80,7 +105,7 @@ extension WishWellViewController: UICollectionViewDelegateFlowLayout {
 private extension WishWellViewController {
     func handleWishSelection(at indexPath: IndexPath) {
         guard let vm = viewModel else { return }
-        let data = vm.wishList[indexPath.item]
+        let data = vm.coupons[indexPath.item]
         
         if vm.currentCoinCount < data.price {
             Toast.show(message: "금화가 부족해! 미션을 더 하고 오자!")
@@ -93,16 +118,11 @@ private extension WishWellViewController {
         }
     }
     
-    func showPurchaseConfirm(for wish: Wish) {
-        let confirmState = ConfirmBox.State.wishWell(wish: wish.name)
+    func showPurchaseConfirm(for coupon: Coupon) {
+        let confirmState = ConfirmBox.State.wishWell(wish: coupon.name)
         
         view.showConfirm(state: confirmState) { [weak self] in
-            guard let self = self,
-                  let vm = self.viewModel else { return }
-            
-            vm.purchaseCoin(price: wish.price)
-            self.rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
-            // TODO: 서버에게 변경된 금화 데이터 전송
+            self?.purchaseConfirmedSubject.send(coupon.id)
         }
     }
 }
