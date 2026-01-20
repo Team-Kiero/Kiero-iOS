@@ -30,6 +30,10 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
         $0.configure(title: "여정 시작하기")
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
     override func setStyle() {
         titleLabel.setTypo(.title3_16_SB, text: "이름과 부모님께 받은 초대 코드를 입력해줘!")
     }
@@ -82,6 +86,7 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
     }
     
     override func addTarget() {
+        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
         childNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
@@ -91,6 +96,16 @@ final class ChildrenLoginViewController: BaseViewController<BaseViewModel> {
         firstNameTextField.externalDelegate = self
         lastNameTextField.externalDelegate = self
         codeTextField.externalDelegate = self
+    }
+    
+    private func navigateToChildOnboarding() {
+        let vc = AppDIContainer.shared.makeChildOnboardingViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc
+    private func startButtonDidTap() {
+        navigateToChildOnboarding()
     }
 }
 
