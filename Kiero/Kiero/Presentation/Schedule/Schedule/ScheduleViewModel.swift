@@ -13,7 +13,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     // MARK: - Properties
     
     private let service: ScheduleServiceType
-    private let childId: Int = 5 // MARK: 임시 Id
+    private let childId = CurrentValueSubject<Int, Never>(0)
     
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
     let currentReferenceDate = CurrentValueSubject<Date, Never>(Date())
@@ -36,15 +36,25 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     init(service: ScheduleServiceType, childId: Int) {
         self.service = service
-//        self.childId = childId
         super.init()
+        
+        fetchInitialChildId()
     }
     
-    // MARK: - Transform
+    private func fetchInitialChildId() {
+        service.fetchChildren()
+            .sink { _ in } receiveValue: { [weak self] children in
+                if let firstChildId = children.first?.childId {
+                    self?.childId.send(firstChildId)
+                }
+            }
+            .store(in: &cancellables)
+    }
     
     func transform(input: Input) -> Output {
-        currentReferenceDate
-            .flatMap { [weak self] date -> AnyPublisher<[Schedule], Never> in
+        Publishers.CombineLatest(childId, currentReferenceDate)
+            .filter { id, _ in id != 0 }
+            .flatMap { [weak self] (id, date) -> AnyPublisher<[Schedule], Never> in
                 guard let self = self else { return Just([]).eraseToAnyPublisher() }
                 
                 let days = date.daysOfWeek
@@ -52,7 +62,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                     return Just([]).eraseToAnyPublisher()
                 }
                 
-                return self.service.fetchSchedules(childId: self.childId, startDate: startDate, endDate: endDate)
+                return self.service.fetchSchedules(childId: id, startDate: startDate, endDate: endDate)
                     .replaceError(with: [])
                     .eraseToAnyPublisher()
             }

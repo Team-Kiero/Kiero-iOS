@@ -29,6 +29,12 @@ struct NormalScheduleDTO: Decodable {
     let date: String
 }
 
+struct ChildResponseDTO: Decodable {
+    let childId: Int
+    let childLastName: String
+    let childFirstName: String
+}
+
 extension ScheduleResponseDTO {
     func toEntity() -> [Schedule] {
         let recurring = recurringSchedules.map {

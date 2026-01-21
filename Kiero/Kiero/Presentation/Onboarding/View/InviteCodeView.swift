@@ -126,6 +126,24 @@ final class InviteCodeView: UIView {
         copyButton.addTarget(self, action: #selector(copyButtonDidTap), for: .touchUpInside)
     }
     
+    func configure(code: String, remainingTime: String, isExpired: Bool) {
+        codeLabel.text = code
+            if isExpired {
+                timeLimitLabel.setTypo(.body4_12_R, text: "코드 재발급하기")
+                timeLimitLabel.textColor = .point
+                copyButton.alpha = 0.3
+                copyButton.isEnabled = false
+            } else {
+                timeLimitLabel.setTypo(
+                    .body4_12_R,
+                    text: "유효기간 \(remainingTime)"
+                )
+                timeLimitLabel.textColor = .schedule1
+                copyButton.alpha = 1.0
+                copyButton.isEnabled = true
+            }
+        }
+    
     @objc
     private func copyButtonDidTap() {
         UIPasteboard.general.string = codeLabel.text
