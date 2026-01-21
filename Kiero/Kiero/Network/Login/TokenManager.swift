@@ -77,5 +77,7 @@ final class TokenManager {
         clearUserInfo()
     }
 
-    var isLoggedIn: Bool { getAccessToken() != nil }
+    var isLoggedIn: Bool {
+        getAccessToken() != nil && getRefreshToken() != nil
+    }
 }
