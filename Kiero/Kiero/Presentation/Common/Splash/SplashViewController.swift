@@ -163,10 +163,9 @@ class SplashViewController: UIViewController {
     }
     
     private func transitionToMain() {
-        let pickRoleVC = AppDIContainer.shared.makePickRoleViewController()
-        let nav = UINavigationController(rootViewController: pickRoleVC)
+        let authVC = AuthGateViewController()
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+            sceneDelegate.changeRootViewController(authVC)
         }
     }
 }
