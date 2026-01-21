@@ -20,3 +20,21 @@ struct SuggestedMissionDTO: Decodable {
     let dueAt: String
     let reward: Int
 }
+
+struct MissionBulkCreateRequestDTO: Encodable {
+    let missions: [MissionBulkItemDTO]
+}
+
+struct MissionBulkItemDTO: Encodable {
+    let name: String
+    let reward: Int
+    let dueAt: String
+}
+
+struct MissionBulkCreateResponseDTO: Decodable {
+    let id: Int
+    let name: String
+    let reward: Int
+    let dueAt: String
+    let isCompleted: Bool
+}
