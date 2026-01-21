@@ -35,7 +35,7 @@ final class WishWellService: WishWellServiceType {
     }
     
     func fetchCoupons() -> AnyPublisher<[Coupon], NetworkError> {
-        let endpoint = EndPoint.fetchChildrenInfo
+        let endpoint = EndPoint.fetchWishes
         
         return Future<[Coupon], NetworkError> { promise in
             Task {
@@ -53,7 +53,7 @@ final class WishWellService: WishWellServiceType {
     }
     
     func purchaseCoupon(couponId: Int64) -> AnyPublisher<Coupon, NetworkError> {
-        let endpoint = EndPoint.fetchChildrenInfo
+        let endpoint = EndPoint.purchaseCoupon(couponId: couponId)
         
         return Future<Coupon, NetworkError> { promise in
             Task {
