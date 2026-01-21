@@ -252,7 +252,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 )
             } else {
                 let datesStr = selectedIndices.map {
-                    weekDates[$0].toString(format: "yy-MM-dd")
+                    weekDates[$0].toString(format: "yyyy-MM-dd")
                 }.joined(separator: ", ")
                 
                 viewModel?.addSchedule(
@@ -293,6 +293,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         viewModel.isAddSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
+                print("✅ 일정 생성 성공 신호 수신 - 화면을 닫습니다.")
                 self?.dismiss(animated: true)
             }
             .store(in: &cancellables)

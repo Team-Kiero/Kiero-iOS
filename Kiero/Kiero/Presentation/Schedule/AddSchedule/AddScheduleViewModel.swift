@@ -46,6 +46,7 @@ final class AddScheduleViewModel: BaseViewModel {
                     print("❌ 일정 추가 실패: \(error)")
                 }
             } receiveValue: { [weak self] _ in
+                print("✅ [VM] 서버 저장 성공 신호 보냄")
                 self?.isAddSuccess.send(())
             }
             .store(in: &cancellables)
