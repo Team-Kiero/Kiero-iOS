@@ -43,7 +43,8 @@ extension ScheduleResponseDTO {
                 isRecurring: true,
                 startTime: $0.startTime,
                 endTime: $0.endTime,
-                scheduleColor: $0.colorCode,
+                scheduleColor: "SCHEDULE1",
+                colorCode: $0.colorCode,
                 dayOfWeek: $0.dayOfWeek,
                 date: nil
             )
@@ -55,7 +56,8 @@ extension ScheduleResponseDTO {
                 isRecurring: false,
                 startTime: $0.startTime,
                 endTime: $0.endTime,
-                scheduleColor: $0.colorCode,
+                scheduleColor: "SCHEDULE1",
+                colorCode: $0.colorCode,
                 dayOfWeek: nil,
                 date: $0.date
             )

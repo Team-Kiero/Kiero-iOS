@@ -96,21 +96,25 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
             }
             
             let rewardValue = self.rewardView.selectedReward
+            let dueAtStr = self.currentSelectedDate.toString(format: "yyyy-MM-dd")
             
-            let newMission = Mission(
-                name: title,
-                reward: rewardValue,
-                dueAt: self.currentSelectedDate.toString(format: "yyyy-MM-dd")
-            )
-            
-            self.onMissionAdded?(newMission)
+            self.viewModel?.createMission(name: title, reward: rewardValue, dueAt: dueAtStr)
             self.view.endEditing(true)
-            self.dismiss(animated: true)
         }
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapDeadlineView))
         deadlineView.addGestureRecognizer(tapGesture)
         deadlineView.isUserInteractionEnabled = true
+    }
+    
+    override func bindViewModel() {
+        viewModel?.isMissionAddSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] mission in
+                self?.onMissionAdded?(mission)
+                self?.dismiss(animated: true)
+            }
+            .store(in: &cancellables)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
