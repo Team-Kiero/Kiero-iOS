@@ -19,6 +19,7 @@ final class TokenManager {
         static let role = "user_role"
         static let name = "user_name"
         static let profile = "profile_url"
+        static let sse = "sse_token"
     }
 
     func saveAccessToken(_ access: String) {
@@ -59,6 +60,14 @@ final class TokenManager {
     
     func getProfile() -> String? {
         userDefaults.string(forKey: Key.profile)
+    }
+    
+    func saveSseToken(_ sse: String) {
+        userDefaults.set(sse, forKey: Key.sse)
+    }
+    
+    func getSseToken() -> String? {
+        userDefaults.string(forKey: Key.sse)
     }
 
     func clearTokens() {

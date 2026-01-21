@@ -28,6 +28,7 @@ enum EndPoint {
     case logout
     case reissueAccessToken
     case reissueAllTokens
+    case sseToken
     
     // Child
     case fetchChildren
@@ -56,7 +57,9 @@ enum EndPoint {
         case .postInviteCode, .checkConnection:
             return "/api/v1/parents/invite"
         case .subscribeConnection:
-            return "/api/v1/parents/invite/subscribe"
+            return "/api/v1/subscribe"
+        case .sseToken:
+            return "/api/v1/tokens/subscribe-token"
         case .childSignup:
             return "/api/v1/children/signup"
         case .fetchChildren:
@@ -97,6 +100,8 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken:
             return HeaderType.none.type
+        case .sseToken:
+            return HeaderType.sseSubscribe.type
         default:
             return HeaderType.auth.type
         }
