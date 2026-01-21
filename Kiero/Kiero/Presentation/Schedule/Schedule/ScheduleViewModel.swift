@@ -53,6 +53,10 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
     }
     
+    func refreshSchedules() {
+        self.childId.send(self.childId.value)
+    }
+    
     func transform(input: Input) -> Output {
         Publishers.CombineLatest(childId, currentReferenceDate)
             .filter { id, _ in id != 0 }

@@ -293,8 +293,39 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         viewModel.isAddSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                print("✅ 일정 생성 성공 신호 수신 - 화면을 닫습니다.")
-                self?.dismiss(animated: true)
+                guard let self = self else { return }
+                
+                let name = self.titleTextField.text ?? ""
+                let isRecurring = self.repeatSwitch.isOn
+                let startTime = self.currentStartTime?.toString(format: "HH:mm:ss") ?? ""
+                let endTime = self.currentEndTime?.toString(format: "HH:mm:ss") ?? ""
+                
+                let colorMapping: [UIColor: String] = [
+                    .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+                    .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+                ]
+                let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+                
+                let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
+                let weekDates = self.baseDate.daysOfWeek
+                
+                if let firstIndex = selectedIndices.first {
+                    let targetDate = weekDates[firstIndex]
+                    
+                    let actualSchedule = Schedule(
+                        name: name,
+                        isRecurring: isRecurring,
+                        startTime: startTime,
+                        endTime: endTime,
+                        scheduleColor: colorCode,
+                        dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
+                        date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd")
+                    )
+                    
+                    self.onScheduleAdded?(actualSchedule, targetDate)
+                }
+                
+                self.dismiss(animated: true)
             }
             .store(in: &cancellables)
     }
