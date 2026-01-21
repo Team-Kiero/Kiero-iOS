@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 enum ParentOnboardingRoute {
-    case invite(childFullName: String, inviteCode: String, issuedAt: Date)
+    case invite(childLastName: String, childFirstName: String, inviteCode: String, issuedAt: Date)
 }
 
 final class ParentOnboardingViewModel: BaseViewModel {
@@ -18,10 +18,23 @@ final class ParentOnboardingViewModel: BaseViewModel {
 
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<ParentOnboardingRoute, Never>()
+    let lastName = CurrentValueSubject<String, Never>("")
+    let firstName = CurrentValueSubject<String, Never>("")
 
     var state: AnyPublisher<LoginState, Never> { stateSubject.eraseToAnyPublisher() }
     var route: AnyPublisher<ParentOnboardingRoute, Never> { routeSubject.eraseToAnyPublisher() }
 
+    var isGenerateEnabled: AnyPublisher<Bool, Never> {
+        Publishers.CombineLatest(lastName, firstName)
+            .map { last, first in
+                let l = last.trimmingCharacters(in: .whitespacesAndNewlines)
+                let f = first.trimmingCharacters(in: .whitespacesAndNewlines)
+                return !l.isEmpty && !f.isEmpty
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
     init(name: String, profileURL: String) {
         self.name = name
         self.profileURL = profileURL
@@ -49,12 +62,11 @@ final class ParentOnboardingViewModel: BaseViewModel {
                     body: req
                 )
 
-                let fullName = "\(data.childLastName)\(data.childFirstName)"
-
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     self.routeSubject.send(.invite(
-                        childFullName: fullName,
+                        childLastName: data.childLastName,
+                        childFirstName: data.childFirstName,
                         inviteCode: data.code,
                         issuedAt: Date()
                     ))
