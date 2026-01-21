@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import UIKit
+
 import Combine
 
 final class AddScheduleViewModel: BaseViewModel {
@@ -15,6 +17,7 @@ final class AddScheduleViewModel: BaseViewModel {
     
     let isAddSuccess = PassthroughSubject<Void, Never>()
     let errorMessage = PassthroughSubject<String, Never>()
+    let defaultColor = PassthroughSubject<UIColor, Never>()
 
     init(service: AddScheduleServiceType, childId: Int) {
         self.service = service
@@ -58,6 +61,19 @@ final class AddScheduleViewModel: BaseViewModel {
             } receiveValue: { [weak self] _ in
                 print("✅ [VM] 서버 저장 성공 신호 보냄")
                 self?.isAddSuccess.send(())
+            }
+            .store(in: &cancellables)
+    }
+    
+    func fetchDefaultColor() {
+        service.fetchDefaultColor(childId: childId)
+            .sink { _ in } receiveValue: { [weak self] response in
+                let colorMapping: [String: UIColor] = [
+                    "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
+                    "SCHEDULE3": .schedule3, "SCHEDULE4": .schedule4, "SCHEDULE5": .schedule5
+                ]
+                let color = colorMapping[response.scheduleColor] ?? .schedule1
+                self?.defaultColor.send(color)
             }
             .store(in: &cancellables)
     }

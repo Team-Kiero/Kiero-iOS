@@ -91,6 +91,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         setInitialTime()
         addTarget()
         updatePagingTitle()
+        viewModel?.fetchDefaultColor()
     }
     
     // MARK: - Setup Methods
@@ -333,6 +334,15 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { message in
                 Toast.show(message: message)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.defaultColor
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] color in
+                self?.currentSelectedColor = color
+                self?.selectedColorChip.isHidden = false
+                self?.selectedColorChip.configure(with: color, isSelected: false)
             }
             .store(in: &cancellables)
     }
