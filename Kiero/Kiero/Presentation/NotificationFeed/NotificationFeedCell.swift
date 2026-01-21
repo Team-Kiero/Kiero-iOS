@@ -59,6 +59,7 @@ final class NotificationFeedCell: UITableViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        feedView.resetForReuse()
         onToggleExpand = nil
     }
 }
