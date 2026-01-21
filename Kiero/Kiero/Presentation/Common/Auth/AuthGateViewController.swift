@@ -22,7 +22,6 @@ final class AuthGateViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
 
         bind()
         viewModel.decideRoute()
