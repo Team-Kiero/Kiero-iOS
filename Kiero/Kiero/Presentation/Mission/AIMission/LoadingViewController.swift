@@ -22,7 +22,7 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
         $0.distribution = .fill
     }
     
-    private let characterImageView = UIImageView().then {
+    private let characterImageView = AnimatedImageView().then {
         $0.contentMode = .scaleAspectFit
     }
     
@@ -80,17 +80,10 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     
     private func setGIFImage() {
         if let url = Bundle.main.url(forResource: "parent", withExtension: "gif") {
-                let resource = LocalFileImageDataProvider(fileURL: url)
-                
-                characterImageView.kf.setImage(
-                    with: resource,
-                    options: [
-                        .cacheOriginalImage,
-                        .transition(.fade(0.2))
-                    ]
-                )
-            }
+            let resource = LocalFileImageDataProvider(fileURL: url)
+            characterImageView.kf.setImage(with: resource)
         }
+    }
 }
 
 #Preview {
