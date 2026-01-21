@@ -47,6 +47,7 @@ enum EndPoint {
     // AIMission
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
+    
     //CoinMission
     case fetchChildrenInfo
     case fetchWishes
@@ -110,14 +111,12 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions:
             return "GET"
         case .postSchedule, .postMission, .postMissionSuggestions:
             return "POST"
-        case .purchaseCoupon:
-            return "PATCH"
         default:
-            return "POST"
+            return "PATCH"
         }
     }
     
