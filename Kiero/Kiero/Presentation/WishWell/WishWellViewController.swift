@@ -64,13 +64,6 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
             }
             .store(in: &cancellables)
         
-        output.errorMessage
-            .receive(on: RunLoop.main)
-            .sink { msg in
-                Toast.show(message: msg)
-            }
-            .store(in: &cancellables)
-        
         viewDidLoadSubject.send(())
     }
 }
