@@ -16,8 +16,3 @@ struct AddScheduleRequestDTO: Encodable {
     let dayOfWeek: String?
     let dates: String?
 }
-
-struct AddScheduleResponseDTO: Decodable {
-    let status: Int
-    let message: String
-}
