@@ -113,10 +113,10 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions:
             return "GET"
-        case .postSchedule, .postMission, .postMissionSuggestions:
-            return "POST"
-        default:
+        case .purchaseCoupon:
             return "PATCH"
+        default:
+            return "POST"
         }
     }
     
