@@ -24,10 +24,13 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         super.init(viewModel: viewModel, diContainer: diContainer)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel?.fetchMissions()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        viewModel?.fetchMissions()
     }
     
     // MARK: - Setup Methods
