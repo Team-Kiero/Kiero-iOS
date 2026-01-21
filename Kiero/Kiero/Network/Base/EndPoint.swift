@@ -46,6 +46,7 @@ enum EndPoint {
     
     // AIMission
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
+    case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
@@ -92,6 +93,8 @@ enum EndPoint {
             return "/api/v1/missions/\(childId)"
         case .postMissionSuggestions:
             return "/api/v1/missions/suggestions"
+        case .postBulkMissions(let childId, _):
+            return "/api/v1/missions/\(childId)/bulk"
         }
     }
     
