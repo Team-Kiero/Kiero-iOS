@@ -37,6 +37,7 @@ enum EndPoint {
     
     // AddSchedule
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
+    case fetchDefaultColor(childId: Int)
     
     // Mission
     case fetchMissions(childId: Int?)
@@ -106,12 +107,14 @@ enum EndPoint {
             return "/api/v1/coupons"
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
+        case .fetchDefaultColor(let childId):
+            return "/api/v1/schedules/\(childId)/default"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor:
             return "GET"
         case .purchaseCoupon:
             return "PATCH"
