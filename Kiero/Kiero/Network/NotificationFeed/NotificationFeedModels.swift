@@ -31,3 +31,8 @@ struct FeedMetadata: Hashable {
     let imageUrl: String?
     let amount: Int?
 }
+
+struct FeedSection {
+    let date: String
+    var items: [NotificationFeed.State]
+}
