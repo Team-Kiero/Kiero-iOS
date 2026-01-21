@@ -23,8 +23,9 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     private let textField = TextField(type: .parent(.totalName))
     private let inviteView = InviteCodeView()
 
-    private let startButton = CTAButton(style: .gray900).then {
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
         $0.configure(title: "시작하기")
+        $0.isEnabled = false
     }
 
     override func setStyle() {
@@ -76,21 +77,31 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
 
     override func bind(viewModel: ParentInviteViewModel) {
         super.bind(viewModel: viewModel)
-        
+
         profileBox.configure(name: viewModel.parentName, url: viewModel.profileURL)
         textField.setText(text: viewModel.childName)
-        
-        Publishers.CombineLatest(viewModel.remainingText, viewModel.isExpired)
+
+        inviteView.refreshDidTap = { [weak viewModel] in
+            viewModel?.reissueInviteCode()
+        }
+        viewModel.expiredEvent
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] (time: String, expired: Bool) in
+            .sink { _ in
+                Toast.show(message: "초대코드가 만료되었습니다.", bottomInset: 83)
+            }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest3(viewModel.inviteCode, viewModel.remainingText, viewModel.isExpired)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] code, time, expired in
                 guard let self else { return }
-                
+
                 self.inviteView.configure(
-                    code: viewModel.inviteCode,
+                    code: code,
                     remainingTime: time,
                     isExpired: expired
                 )
-                
+
                 self.startButton.isEnabled = !expired
                 self.startButton.alpha = expired ? 0.5 : 1.0
             }
