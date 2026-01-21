@@ -38,7 +38,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     ).then {
         $0.onTap = {[weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                self?.viewModel?.performLogout()
             }
         }
     }
@@ -239,6 +239,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] dates in
                 self?.scheduleChildVC.updateWeeklyDates(dates)
+            }.store(in: &cancellables)
+        
+        viewModel.logoutSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToPickRole()
             }.store(in: &cancellables)
     }
 }
