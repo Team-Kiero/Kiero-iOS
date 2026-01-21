@@ -68,7 +68,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 return self.scheduleService.fetchChildren()
                     .map { children -> Int in
                         if let firstId = children.first?.childId {
-                            self.childId = firstId // UserDefaults에 자동 저장
+                            self.childId = firstId
                             return firstId
                         }
                         return 0
