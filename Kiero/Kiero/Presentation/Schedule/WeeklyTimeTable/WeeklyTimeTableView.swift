@@ -30,6 +30,7 @@ final class WeeklyTimeTableView: BaseUIView {
         $0.textAlignment = .center
         $0.textColor = .gray400
         $0.isHidden = false
+        $0.alpha = 0
     }
     
     private let headerStackView = UIStackView().then {
@@ -166,15 +167,29 @@ final class WeeklyTimeTableView: BaseUIView {
     
     func clearSchedules() {
         cardContainerView.subviews.forEach { $0.removeFromSuperview() }
-        emptyLabel.isHidden = false
+        emptyLabel.alpha = 0
+        cardContainerView.layoutIfNeeded()
     }
     
     func scrollToTop() {
         scrollView.setContentOffset(CGPoint.zero, animated: false)
     }
     
+    func updateEmptyState(isEmpty: Bool) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            if isEmpty {
+                UIView.animate(withDuration: 0.4) {
+                    self.emptyLabel.alpha = 1
+                }
+            } else {
+                self.emptyLabel.alpha = 0
+            }
+        }
+    }
+    
     func addSchedule(schedule: Schedule) {
-        emptyLabel.isHidden = true
         let dayIndices = schedule.dayIndices
         let startFloat = convertTimeToFloat(schedule.startTime)
         let endFloat = convertTimeToFloat(schedule.endTime)
