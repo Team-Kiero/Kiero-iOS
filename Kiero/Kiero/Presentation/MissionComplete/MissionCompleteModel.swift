@@ -1,5 +1,5 @@
 //
-//  MissioinCompleteModel.swift
+//  MissionCompleteModel.swift
 //  Kiero
 //
 //  Created by Hyunseo Han on 1/16/26.
@@ -7,20 +7,20 @@
 
 import UIKit
 
-enum MissioinCompleteModel: Int, CaseIterable {
+enum MissionCompleteModel: Int, CaseIterable {
     case courage = 0
-    case patience
+    case grit
     case wisdom
     
-    static func from(scheduleDetailId: Int) -> MissioinCompleteModel {
+    static func from(scheduleDetailId: Int) -> MissionCompleteModel {
         let index = (scheduleDetailId - 1) % 3
-        return MissioinCompleteModel(rawValue: index) ?? .courage
+        return MissionCompleteModel(rawValue: index) ?? .courage
     }
     
     var name: String {
         switch self {
         case .courage: return "용기"
-        case .patience: return "인내"
+        case .grit: return "인내"
         case .wisdom: return "지혜"
         }
     }
@@ -28,7 +28,7 @@ enum MissioinCompleteModel: Int, CaseIterable {
     var image: UIImage {
         switch self {
         case .courage: return UIImage(resource: .ic3DBluestone)
-        case .patience: return UIImage(resource: .ic3DRedstone)
+        case .grit: return UIImage(resource: .ic3DRedstone)
         case .wisdom: return UIImage(resource: .ic3DGreenstone)
         }
     }
@@ -39,5 +39,15 @@ enum MissioinCompleteModel: Int, CaseIterable {
     
     var highlightKeyword: String {
         return "\(self.name)의 불조각"
+    }
+}
+
+extension MissionCompleteModel {
+    static func from(stoneType: StoneType) -> MissionCompleteModel {
+        switch stoneType {
+        case .courage: return .courage // 용기
+        case .grit:    return .grit    // 인내
+        case .wisdom:  return .wisdom  // 지혜
+        }
     }
 }
