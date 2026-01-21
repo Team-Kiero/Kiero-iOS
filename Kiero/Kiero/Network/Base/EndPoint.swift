@@ -43,6 +43,10 @@ enum EndPoint {
     
     // WriteMission
     case postMission(childId: Int, request: WriteMissionRequestDTO)
+    
+    // AIMission
+    case postMissionSuggestions(request: MissionSuggestionRequestDTO)
+    
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
@@ -86,6 +90,8 @@ enum EndPoint {
             return path
         case .postMission(let childId, _):
             return "/api/v1/missions/\(childId)"
+        case .postMissionSuggestions:
+            return "/api/v1/missions/suggestions"
         }
     }
     
@@ -94,7 +100,7 @@ enum EndPoint {
         case .checkConnection, .subscribeConnection,
                 .fetchChildren, .fetchSchedules, .fetchMissions:
             return "GET"
-        case .postSchedule, .postMission:
+        case .postSchedule, .postMission, .postMissionSuggestions:
             return "POST"
         default:
             return "POST"

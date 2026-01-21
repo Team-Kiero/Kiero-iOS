@@ -11,6 +11,7 @@ import UIKit
 protocol ServiceFactory {
     func makeKakaoAuthService() -> KakaoAuthServiceType
     func makeScheduleService() -> ScheduleServiceType
+    func makeAIMissionService() -> AIMissionServiceType
 }
 
 protocol KakaoAuthServiceType {
