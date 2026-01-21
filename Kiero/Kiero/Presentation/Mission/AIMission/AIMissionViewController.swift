@@ -109,6 +109,49 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             self?.updateButtonState(text: text)
         }
     }
+    
+    override func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if isLoading {
+                    let loadingVC = LoadingViewController(viewModel: LoadingViewModel(), diContainer: AppDIContainer.shared)
+                    loadingVC.modalPresentationStyle = .overFullScreen
+                    self?.present(loadingVC, animated: false)
+                } else {
+                    self?.presentedViewController?.dismiss(animated: false)
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.suggestionResult
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] missions in
+                guard let self = self, let mission = missions.first else { return }
+                
+                self.missionResultView.nameTextField.text = mission.name
+                
+                if let serverDate = mission.dueAt.toDate(format: "yyyy-MM-dd") {
+                    self.currentSelectedDate = serverDate
+                }
+                
+                self.isAnalysisDone = true
+            }
+            .store(in: &cancellables)
+    }
+    
+    @objc
+    private func didTapBottomButton() {
+        if !isAnalysisDone {
+            self.view.endEditing(true)
+            guard let text = missionInputView.textView.text, !text.isEmpty else { return }
+            viewModel?.analyzeNotice(text: text)
+        } else {
+            saveActualMission()
+        }
+    }
 
     private func updateButtonState(text: String) {
         if !isAnalysisDone {
@@ -135,28 +178,24 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         }
     }
     
-    @objc
-    private func didTapBottomButton() {
-        if !isAnalysisDone {
-            // TODO: 로딩VC 진입
-            self.view.endEditing(true)
-            isAnalysisDone = true
-        } else {
-            guard let title = missionResultView.nameTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
-                return
-            }
-            
-            let rewardValue = missionResultView.selectedReward
-            
-            let newMission = Mission(
-                name: title,
-                reward: rewardValue,
-                dueAt: self.currentSelectedDate.toString(format: "yyyy-MM-dd")
-            )
-            
-            self.onMissionAdded?(newMission)
-            self.dismiss(animated: true)
+    private func saveActualMission() {
+        guard let title = missionResultView.nameTextField.text,
+              !title.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return
         }
+        
+        let rewardValue = missionResultView.selectedReward
+        
+        let newMission = Mission(
+            name: title,
+            reward: rewardValue,
+            dueAt: self.currentSelectedDate.toString(format: "yyyy-MM-dd")
+        )
+        
+        self.onMissionAdded?(newMission)
+        
+        print("✅ AI 추천 미션이 최종 저장되었습니다: \(title)")
+        self.dismiss(animated: true)
     }
     
     private func presentEndDateViewController() {

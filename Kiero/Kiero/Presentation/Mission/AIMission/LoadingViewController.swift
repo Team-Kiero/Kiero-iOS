@@ -23,7 +23,7 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     }
     
     private let characterImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
     }
     
     private let descriptionLabel = UILabel().then {
@@ -64,6 +64,18 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
             $0.width.equalTo(450)
             $0.height.equalTo(150)
         }
+    }
+    
+    override func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.timeoutTrigger
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                Toast.show(message: "잠시 후 다시 시도해주세요")
+                self?.dismiss(animated: false)
+            }
+            .store(in: &cancellables)
     }
     
     private func setGIFImage() {
