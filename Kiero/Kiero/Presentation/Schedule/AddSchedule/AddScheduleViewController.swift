@@ -74,7 +74,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     private let selectedColorChip = ColorChip().then {
-        $0.isHidden = true
         $0.isUserInteractionEnabled = false
     }
     
@@ -91,6 +90,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         setInitialTime()
         addTarget()
         updatePagingTitle()
+        viewModel?.fetchDefaultColor()
     }
     
     // MARK: - Setup Methods
@@ -202,6 +202,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
+            self.navigationBar.isRightButtonEnabled = false
+            
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
                 Toast.show(message: "일정 이름을 입력해주세요.")
                 return
@@ -214,7 +216,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
             
             let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
+            _ = calendar.startOfDay(for: Date())
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
             
@@ -228,87 +230,45 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
-            let existingSchedules = self.viewModel?.scheduleList ?? []
-            
-            let isOverlapping = existingSchedules.contains { existing in
-                let existingDayIndices = existing.dayIndices
-                let hasCommonDay = !Set(selectedIndices).isDisjoint(with: Set(existingDayIndices))
-                
-                if hasCommonDay {
-                    let exStart = self.convertTimeToMinutes(existing.startTime)
-                    let exEnd = self.convertTimeToMinutes(existing.endTime)
-                    let isTimeOverlapping = startMin < exEnd && exStart < endMin
-                    
-                    if isTimeOverlapping {
-                        if isRecurring || existing.isRecurring {
-                            return true
-                        }
-                        
-                        if let existingDateStr = existing.date,
-                           let existingDate = existingDateStr.toDate(format: "yyyy-MM-dd") {
-                            
-                            return selectedIndices.contains { index in
-                                let targetDate = calendar.startOfDay(for: weekDates[index])
-                                return calendar.isDate(targetDate, inSameDayAs: existingDate)
-                            }
-                        }
-                        return true
-                    }
-                }
-                return false
-            }
-            
-            if isOverlapping {
-                Toast.show(message: "해당 시간에 이미 등록된 일정이 있습니다.")
-                return
-            }
-            
-            if isRecurring {
-                let hasPastDay = selectedIndices.contains { calendar.startOfDay(for: weekDates[$0]) < today }
-                if hasPastDay {
-                    Toast.show(message: "과거 요일을 포함하여 반복 일정을 시작할 수 없습니다.")
-                    return
-                }
-            } else {
-                let hasPastDate = selectedIndices.contains { calendar.startOfDay(for: weekDates[$0]) < today }
-                if hasPastDate {
-                    Toast.show(message: "지난 날짜에는 일정을 추가할 수 없습니다.")
-                    return
-                }
-            }
-            
             let colorMapping: [UIColor: String] = [
                 .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
                 .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
             ]
             let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
             let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-            let selectedDayStrings = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
-            let startDate = weekDates.first?.toString(format: "yyyy-MM-dd")
+            
+            let startTimeStr = start.toString(format: "HH:mm:ss")
+            let endTimeStr = end.toString(format: "HH:mm:ss")
             
             if isRecurring {
-                let newSchedule = Schedule(
-                    name: title, isRecurring: true,
-                    startTime: start.toString(format: "HH:mm:ss"),
-                    endTime: end.toString(format: "HH:mm:ss"),
-                    scheduleColor: colorCode, dayOfWeek: selectedDayStrings, date: startDate
+                let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
+                
+                viewModel?.addSchedule(
+                    name: title,
+                    isRecurring: true,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    color: colorCode,
+                    dayOfWeek: dayOfWeekStr,
+                    dates: nil
                 )
-                self.onScheduleAdded?(newSchedule, self.baseDate)
             } else {
-                selectedIndices.forEach { index in
-                    let newSchedule = Schedule(
-                        name: title, isRecurring: false,
-                        startTime: start.toString(format: "HH:mm:ss"),
-                        endTime: end.toString(format: "HH:mm:ss"),
-                        scheduleColor: colorCode, dayOfWeek: nil,
-                        date: weekDates[index].toString(format: "yyyy-MM-dd")
-                    )
-                    self.onScheduleAdded?(newSchedule, self.baseDate)
-                }
+                let datesStr = selectedIndices.map {
+                    weekDates[$0].toString(format: "yyyy-MM-dd")
+                }.joined(separator: ", ")
+                
+                viewModel?.addSchedule(
+                    name: title,
+                    isRecurring: false,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    color: colorCode,
+                    dayOfWeek: nil,
+                    dates: datesStr
+                )
             }
             
             self.view.endEditing(true)
-            self.dismiss(animated: true)
         }
         
         timeSelectionView.startTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: true) }
@@ -327,6 +287,72 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
+    }
+    
+    override func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.isAddSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                guard let self = self else { return }
+                
+                let name = self.titleTextField.text ?? ""
+                let isRecurring = self.repeatSwitch.isOn
+                let startTime = self.currentStartTime?.toString(format: "HH:mm:ss") ?? ""
+                let endTime = self.currentEndTime?.toString(format: "HH:mm:ss") ?? ""
+                
+                let colorMapping: [UIColor: String] = [
+                    .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+                    .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+                ]
+                let colorName = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+                
+                let hexCode = self.currentSelectedColor?.toHexString() ?? "#FF5C5C"
+                
+                let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
+                let weekDates = self.baseDate.daysOfWeek
+                
+                if let firstIndex = selectedIndices.first {
+                    let targetDate = weekDates[firstIndex]
+                    
+                    let actualSchedule = Schedule(
+                        name: name,
+                        isRecurring: isRecurring,
+                        startTime: startTime,
+                        endTime: endTime,
+                        scheduleColor: colorName,
+                        colorCode: hexCode,
+                        dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
+                        date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd")
+                    )
+                    
+                    self.onScheduleAdded?(actualSchedule, targetDate)
+                }
+                
+                self.dismiss(animated: true)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { message in
+                Toast.show(message: message)
+            }
+            .store(in: &cancellables)
+        
+        viewModel.defaultColor
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] color in
+                guard let self = self else { return }
+                
+                if self.currentSelectedColor == nil {
+                    self.currentSelectedColor = color
+                    self.selectedColorChip.isHidden = false
+                    self.selectedColorChip.configure(with: color, isSelected: false)
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func moveWeek(value: Int) {
@@ -454,9 +480,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         vc.initialSelectedColor = currentSelectedColor
         
         vc.onColorSelected = { [weak self] selectedColor in
-            self?.selectedColorChip.isHidden = false
-            self?.selectedColorChip.configure(with: selectedColor, isSelected: false)
-            self?.currentSelectedColor = selectedColor
+            guard let self = self else { return }
+            self.selectedColorChip.isHidden = false
+            self.selectedColorChip.configure(with: selectedColor, isSelected: false)
+            self.currentSelectedColor = selectedColor
         }
         
         self.present(vc, animated: false)

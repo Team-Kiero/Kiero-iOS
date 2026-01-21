@@ -146,6 +146,10 @@ final class RewardSettingView: UIView {
         }
     }
     
+    func selectReward(_ value: Int) {
+        applyValueLimit(value)
+    }
+    
     // MARK: - Action Methods
     
     @objc private func rewardButtonTapped(_ sender: UIButton) {
