@@ -44,7 +44,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon:
             return .child
         default:
             return .parent
