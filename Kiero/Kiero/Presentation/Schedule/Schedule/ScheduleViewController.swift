@@ -32,8 +32,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     // MARK: - UI Components
     
     private lazy var profileBox = ProfileBox(
-        name: "신키로",
-        profileURL: "",
+        name: TokenManager.shared.getUserName() ?? "신키로",
+        profileURL: TokenManager.shared.getProfile() ?? "",
         backgroundColor: .clear
     ).then {
         $0.onTap = {[weak self] in
