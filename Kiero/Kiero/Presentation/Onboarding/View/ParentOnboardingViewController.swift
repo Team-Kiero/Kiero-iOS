@@ -4,6 +4,7 @@
 //
 //  Created by 안치욱 on 1/15/26.
 //
+
 import Combine
 import UIKit
 
@@ -11,6 +12,11 @@ import SnapKit
 import Then
 
 final class ParentOnboardingViewController: BaseViewController<ParentOnboardingViewModel> {
+    
+    // MARK: - Properties
+    
+    private var isLastValid = false
+    private var isFirstValid = false
 
     // MARK: - UI Components
 
@@ -25,8 +31,9 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private let lastNameTextField = TextField(type: .parent(.lastName))
     private let firstNameTextField = TextField(type: .parent(.firstName))
 
-    private let generateButton = CTAButton(style: .main).then {
+    private let generateButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
         $0.configure(title: "초대코드 생성")
+        $0.isEnabled = false
     }
 
     // MARK: - Life Cycle
@@ -80,6 +87,9 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
 
     override func addTarget() {
         generateButton.addTarget(self, action: #selector(generateButtonDidTap), for: .touchUpInside)
+        
+        lastNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        firstNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
     }
 
     override func setDelegate() {
@@ -91,20 +101,42 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         super.bind(viewModel: viewModel)
 
         profileBox.configure(name: viewModel.name, url: viewModel.profileURL)
+        
+        lastNameTextField.onValidationChanged = { [weak self] isValid in
+            self?.isLastValid = isValid
+            self?.updateGenerateButton()
+        }
+        
+        firstNameTextField.onValidationChanged = { [weak self] isValid in
+            self?.isFirstValid = isValid
+            self?.updateGenerateButton()
+        }
 
         viewModel.route
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] (route: ParentOnboardingRoute) in
+            .sink { [weak self] route in
                 guard let self else { return }
                 switch route {
-                case .invite(let childFullName, let inviteCode, let issue):
-                    self.navigateToInviteView(childName: childFullName, inviteCode: inviteCode, issuedAt: issue)
+                case .invite(let last, let first, let inviteCode, let issuedAt):
+                    self.navigateToInviteView(childLastName: last,
+                                              childFirstName: first,
+                                              inviteCode: inviteCode,
+                                              issuedAt: issuedAt)
                 }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.isGenerateEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                self?.generateButton.isEnabled = enabled
             }
             .store(in: &cancellables)
 
         // TODO: - state 구독해서 로딩/에러 UI 처리
         // viewModel.state.sink { ... }.store(in: &cancellables)
+        
+        textDidChange()
     }
 
     @objc
@@ -113,15 +145,33 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         let first = firstNameTextField.innerTextField.text ?? ""
         viewModel?.generateInviteCode(childLastName: last, childFirstName: first)
     }
+    
+    @objc
+    private func textDidChange() {
+        viewModel?.lastName.send(lastNameTextField.innerTextField.text ?? "")
+        viewModel?.firstName.send(firstNameTextField.innerTextField.text ?? "")
+    }
+    
+    private func updateGenerateButton() {
+        let enabled = isLastValid && isFirstValid
+        generateButton.isEnabled = enabled
+    }
 
-    private func navigateToInviteView(childName: String, inviteCode: String, issuedAt: Date) {
+    private func navigateToInviteView(
+        childLastName: String,
+        childFirstName: String,
+        inviteCode: String,
+        issuedAt: Date
+    ) {
         let vm = ParentInviteViewModel(
             parentName: viewModel?.name ?? "",
             profileURL: viewModel?.profileURL ?? "",
-            childName: childName,
+            childLastName: childLastName,
+            childFirstName: childFirstName,
             inviteCode: inviteCode,
             issuedAt: issuedAt
         )
+
         let vc = ParentInviteViewController(viewModel: vm, diContainer: AppDIContainer.shared)
         navigationController?.pushViewController(vc, animated: true)
     }
