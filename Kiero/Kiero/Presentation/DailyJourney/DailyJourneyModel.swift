@@ -19,4 +19,5 @@ struct DailyJourneyModel {
     let maxFireStoneCount: Int
     let scheduleOrder: Int
     let scheduleOrderText: String
+    let speechFieldType: SpeechField.fieldType
 }
