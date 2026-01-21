@@ -14,7 +14,13 @@ protocol AIMissionServiceType {
 
 final class AIMissionService: AIMissionServiceType {
     func postMissionSuggestions(text: String) -> AnyPublisher<[SuggestedMissionDTO], NetworkError> {
-        let requestDTO = MissionSuggestionRequestDTO(noticeText: text)
+        let escapedText = text
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+            .replacingOccurrences(of: "\n", with: "\\n")
+            .replacingOccurrences(of: "\r", with: "\\r")
+        
+        let requestDTO = MissionSuggestionRequestDTO(noticeText: escapedText)
         let endPoint = EndPoint.postMissionSuggestions(request: requestDTO)
         
         return Future<[SuggestedMissionDTO], NetworkError> { promise in
