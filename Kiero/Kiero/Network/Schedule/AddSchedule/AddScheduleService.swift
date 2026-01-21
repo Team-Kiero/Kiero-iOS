@@ -10,6 +10,7 @@ import Combine
 
 protocol AddScheduleServiceType {
     func postSchedule(childId: Int, request: AddScheduleRequestDTO) -> AnyPublisher<Bool, NetworkError>
+    func fetchDefaultColor(childId: Int) -> AnyPublisher<DefaultColorResponseDTO, NetworkError>
 }
 
 final class AddScheduleService: AddScheduleServiceType {
@@ -32,6 +33,24 @@ final class AddScheduleService: AddScheduleServiceType {
                     promise(.failure(error))
                 } catch {
                     print("❌ [Service] 알 수 없는 에러: \(error)")
+                    promise(.failure(.responseDecodingError))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func fetchDefaultColor(childId: Int) -> AnyPublisher<DefaultColorResponseDTO, NetworkError> {
+        let endPoint = EndPoint.fetchDefaultColor(childId: childId)
+        
+        return Future<DefaultColorResponseDTO, NetworkError> { promise in
+            Task {
+                do {
+                    let response: DefaultColorResponseDTO = try await BaseService.shared.request(
+                        endPoint: endPoint
+                    )
+                    promise(.success(response))
+                } catch {
                     promise(.failure(.responseDecodingError))
                 }
             }

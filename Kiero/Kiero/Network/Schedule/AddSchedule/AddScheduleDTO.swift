@@ -16,3 +16,8 @@ struct AddScheduleRequestDTO: Encodable {
     let dayOfWeek: String?
     let dates: String?
 }
+
+struct DefaultColorResponseDTO: Decodable {
+    let scheduleColor: String
+    let colorCode: String
+}
