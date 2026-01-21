@@ -14,6 +14,7 @@ final class AddScheduleViewModel: BaseViewModel {
     var scheduleList: [Schedule] = []
     
     let isAddSuccess = PassthroughSubject<Void, Never>()
+    let errorMessage = PassthroughSubject<String, Never>()
 
     init(service: AddScheduleServiceType, childId: Int) {
         self.service = service
@@ -39,11 +40,20 @@ final class AddScheduleViewModel: BaseViewModel {
             dayOfWeek: dayOfWeek,
             dates: dates
         )
-
+        
         service.postSchedule(childId: self.childId, request: request)
             .sink { completion in
                 if case .failure(let error) = completion {
-                    print("❌ 일정 추가 실패: \(error)")
+                    switch error {
+                    case .clientError(let code):
+                        if code == 400 {
+                            self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
+                        } else {
+                            self.errorMessage.send("일정 추가에 실패했습니다.")
+                        }
+                    default:
+                        self.errorMessage.send("네트워크 연결을 확인해주세요.")
+                    }
                 }
             } receiveValue: { [weak self] _ in
                 print("✅ [VM] 서버 저장 성공 신호 보냄")

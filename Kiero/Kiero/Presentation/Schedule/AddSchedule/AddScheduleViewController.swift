@@ -328,6 +328,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 self.dismiss(animated: true)
             }
             .store(in: &cancellables)
+        
+        viewModel.errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { message in
+                Toast.show(message: message)
+            }
+            .store(in: &cancellables)
     }
     
     private func moveWeek(value: Int) {
