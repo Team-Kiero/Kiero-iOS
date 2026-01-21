@@ -25,6 +25,11 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     
     override func loadView() { view = rootView }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        refreshSubject.send(())
+    }
+    
     // MARK: - Setup Methods
     
     override func setDelegate() {
