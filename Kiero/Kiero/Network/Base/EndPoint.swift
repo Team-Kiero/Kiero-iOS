@@ -35,11 +35,16 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
+    //CoinMission
+    case fetchChildrenInfo
+    case fetchWishes
+    case purchaseCoupon(couponId: Int64)
+    
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon:
             return .child
         default:
             return .parent
@@ -48,6 +53,13 @@ enum EndPoint {
     
     // DailyJourney
     case updateDailyJourney
+    case skipJourney(scheduleDetailId: Int)
+    
+    // Presigned URL 요청
+    case getPresignedURL
+    
+    // 인증 완료 요청
+    case completeSchedule(scheduleDetailId: Int) // 바디는 서비스에서 넘겨줌
     
     var url: String {
         switch self {
@@ -71,16 +83,28 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .fetchChildrenInfo:
+            return "/api/v1/children/me"
+        case .fetchWishes:
+            return "/api/v1/coupons"
+        case .purchaseCoupon(let couponId):
+            return "/api/v1/coupons/\(couponId)"
         case .updateDailyJourney:
             return "/api/v1/schedules/today"
+        case .skipJourney(let scheduleDetailId):
+            return "/api/v1/schedules/skip/\(scheduleDetailId)"
+        case .getPresignedURL:
+            return "/api/v1/presigned-url/schedules"
+        case .completeSchedule(let scheduleDetailId):
+            return "/api/v1/schedules/\(scheduleDetailId)"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
             return "GET"
-        case .updateDailyJourney:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon:
             return "PATCH"
         default:
             return "POST"

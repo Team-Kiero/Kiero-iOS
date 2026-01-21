@@ -16,6 +16,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
+    private let skipConfirmSubject = PassthroughSubject<Void, Never>()
     
     // MARK: - Life Cycle
     
@@ -46,7 +47,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         let input = DailyJourneyViewModel.Input(
             viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
             nextJourneyButtonTap: nextButtonTapSubject.eraseToAnyPublisher(),
-            verifyButtonTap: verifyButtonTapSubject.eraseToAnyPublisher()
+            verifyButtonTap: verifyButtonTapSubject.eraseToAnyPublisher(),
+            skipConfirmTap: skipConfirmSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)
@@ -88,9 +90,10 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
     
     private func showNextJourneyDialog() {
-        self.view.showDialog(state: .nextJourney) {
+        self.view.showDialog(state: .nextJourney) { [weak self] in
             print("유저가 다음 여정으로 넘어가기를 확정")
             // TODO: ViewModel의 다음 여정 로직 연결
+            self?.skipConfirmSubject.send(())
         }
     }
     
@@ -137,6 +140,6 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
     }
 }
 
-#Preview {
-    DailyJourneyViewController(viewModel: DailyJourneyViewModel(), diContainer: AppDIContainer.shared)
-}
+//#Preview {
+//    DailyJourneyViewController(viewModel: DailyJourneyViewModel(), diContainer: AppDIContainer.shared)
+//}

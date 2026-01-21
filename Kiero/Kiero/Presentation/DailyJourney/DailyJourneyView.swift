@@ -146,7 +146,6 @@ final class DailyJourneyView: BaseUIView {
             highlightKeywords: data.highlightKeywords
         )
         
-        verifyPhotoButton.isEnabled = data.isMissionActive
-        verifyPhotoButton.backgroundColor = data.isMissionActive ? .gray900 : .gray400
+        verifyPhotoButton.isHidden = !data.isMissionActive
     }
 }

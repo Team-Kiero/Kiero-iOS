@@ -5,38 +5,132 @@
 //  Created by 정윤아 on 1/12/26.
 //
 
-// MARK: - Model
+import Combine
+import Foundation
 
-struct Wish: Codable {
-    let name: String
-    let price: Int
-}
-
-// MARK: - ViewModel
-
-final class WishWellViewModel: BaseViewModel {
-
-    private(set) var wishList: [Wish] = []
-    let userName: String = "윤아"
-    var currentCoinCount: Int = 350
+final class WishWellViewModel: BaseViewModel, ViewModelType {
     
-    func fetchWishList(completion: @escaping () -> Void) {
-        self.wishList = [
-            Wish(name: "게임시간 30분 추가", price: 100),
-            Wish(name: "용돈 5,000원 받기", price: 50),
-            Wish(name: "야구장 직관가기", price: 100),
-            Wish(name: "저녁으로 치킨 먹기", price: 100),
-            Wish(name: "데이식스 팬싸인회 가기", price: 100),
-            Wish(name: "데이식스 콘서트 가기", price: 350),
-            Wish(name: "박성찐이야 보기", price: 20),
-            Wish(name: "행복 앱잼하기", price: 30),
-            Wish(name: "아요랑 맛있는거 먹기", price: 40),
-            Wish(name: "집에 가고 싶다", price: 40)
-        ]
-        completion()
+    private let service: WishWellServiceType
+    
+    private var userInfoSubject = CurrentValueSubject<ChildrenInfo?, Never>(nil)
+    private var couponsSubject = CurrentValueSubject<[Coupon], Never>([])
+    private var isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
+    private var errorMessageSubject = PassthroughSubject<String, Never>()
+    private var purchaseCompletedSubject = PassthroughSubject<Coupon, Never>()
+    
+    var currentCoinCount: Int { userInfoSubject.value?.coinAmount ?? 0 }
+    var userName: String { userInfoSubject.value?.firstName ?? "" }
+    var coupons: [Coupon] { couponsSubject.value }
+    
+    struct Input {
+        let viewDidLoad: AnyPublisher<Void, Never>
+        let refresh: AnyPublisher<Void, Never>
+        let purchaseConfirmed: AnyPublisher<Int64, Never> // couponId
     }
     
-    func purchaseCoin(price: Int) {
-        self.currentCoinCount -= price 
+    struct Output {
+        let userInfo: AnyPublisher<(name: String, coin: Int, today: String), Never>
+        let coupons: AnyPublisher<[Coupon], Never>
+        let isLoading: AnyPublisher<Bool, Never>
+        let errorMessage: AnyPublisher<String, Never>
+        let purchaseCompleted: AnyPublisher<Coupon, Never>
+    }
+    
+    // MARK: - Init
+    
+    init(service: WishWellServiceType) {
+        self.service = service
+        super.init()
+    }
+    
+    func transform(input: Input) -> Output {
+        let loadTrigger = Publishers.Merge(input.viewDidLoad, input.refresh)
+            .eraseToAnyPublisher()
+        
+        loadTrigger
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(true)
+            })
+            .flatMap{ [weak self] _ -> AnyPublisher<(ChildrenInfo, [Coupon]), Never> in
+                guard let self = self else {
+                    return Just((ChildrenInfo(firstName: "", coinAmount: 0, today: ""), []))
+                        .eraseToAnyPublisher()
+                }
+                
+                let me = self.service.fetchMyInfo()
+                    .catch { [weak self] err -> Just<ChildrenInfo> in
+                        self?.errorMessageSubject.send(err.errorDescription)
+                        return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
+                    }
+                
+                let coupons = self.service.fetchCoupons()
+                    .catch { [weak self] err -> Just<[Coupon]> in
+                        self?.errorMessageSubject.send(err.errorDescription)
+                        return Just([])
+                    }
+                
+                return Publishers.Zip(me, coupons).eraseToAnyPublisher()
+            }
+            .sink { [weak self] me, coupons in
+                guard let self = self else { return }
+                self.userInfoSubject.send(me)
+                self.couponsSubject.send(coupons)
+                self.isLoadingSubject.send(false)
+            }
+            .store(in: &cancellables)
+        
+        input.purchaseConfirmed
+            .handleEvents(receiveOutput: { [weak self] _ in
+                self?.isLoadingSubject.send(true)
+            })
+            .flatMap { [weak self] couponId -> AnyPublisher<Coupon, Never> in
+                guard let self = self else { return Empty().eraseToAnyPublisher()}
+                return self.service.purchaseCoupon(couponId: couponId)
+                    .handleEvents(receiveOutput: { [weak self] purchased in
+                        self?.purchaseCompletedSubject.send(purchased)
+                    })
+                    .catch { [weak self] err -> Empty<Coupon, Never> in
+                        self?.errorMessageSubject.send(err.errorDescription)
+                        self?.isLoadingSubject.send(false)
+                        return .init()
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .flatMap { [weak self] _ -> AnyPublisher<(ChildrenInfo, [Coupon]), Never> in
+                guard let self = self else {
+                    return Just((ChildrenInfo(firstName: "", coinAmount: 0, today: ""), []))
+                    .eraseToAnyPublisher()}
+                let me = self.service.fetchMyInfo()
+                    .catch { [weak self] err -> Just<ChildrenInfo> in
+                        self?.errorMessageSubject.send(err.errorDescription)
+                        return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
+                    }
+                let coupons = self.service.fetchCoupons()
+                    .catch { [weak self] err -> Just<[Coupon]> in
+                        self?.errorMessageSubject.send(err.errorDescription)
+                        return Just([])
+                    }
+                return Publishers.Zip(me, coupons).eraseToAnyPublisher()
+            }
+            .sink { [weak self] me, coupons in
+                guard let self = self else { return }
+                self.userInfoSubject.send(me)
+                self.couponsSubject.send(coupons)
+                self.isLoadingSubject.send(false)
+            }
+            .store(in: &cancellables)
+        
+        let userInfo = userInfoSubject
+            .compactMap { $0 }
+            .map { (name: $0.firstName, coin: $0.coinAmount, today: $0.today) }
+            .eraseToAnyPublisher()
+        
+        return Output(
+            userInfo: userInfo,
+            coupons: couponsSubject.eraseToAnyPublisher(),
+            isLoading: isLoadingSubject.eraseToAnyPublisher(),
+            errorMessage: errorMessageSubject.eraseToAnyPublisher(),
+            purchaseCompleted: purchaseCompletedSubject.eraseToAnyPublisher()
+        )
     }
 }
