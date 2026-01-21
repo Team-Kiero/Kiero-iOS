@@ -104,19 +104,28 @@ final class BaseService {
         } else if !(200...299).contains(statusCode) {
             throw NetworkError.unknownError
         }
-
+        
         // 디코딩
         do {
-            // 응답 데이터가 없는(EmptyResponse) 경우 처리
             if Response.self == EmptyResponse.self {
                 let decoded = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
-                return decoded as! Response
+                return EmptyResponse() as! Response
             }
-
+            
             let decoded = try JSONDecoder().decode(BaseResponse<Response>.self, from: data)
-            guard let data = decoded.data else { throw NetworkError.noData }
-            return data
+            
+            if let data = decoded.data {
+                return data
+            } else if let emptyResponse = EmptyResponse() as? Response {
+                return emptyResponse
+            } else {
+                throw NetworkError.noData
+            }
+            
+        } catch let error as NetworkError {
+            throw error
         } catch {
+            print("❌ Decoding Error 상세: \(error)")
             throw NetworkError.responseDecodingError
         }
     }
