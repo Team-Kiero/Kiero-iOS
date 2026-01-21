@@ -93,7 +93,11 @@ extension AppDIContainer {
     func makeMissionService() -> MissionServiceType {
         return MissionService()
     }
-
+    
+    func makeAIMissionService() -> AIMissionServiceType {
+        return AIMissionService()
+    }
+    
     func makeMissionViewController() -> UIViewController {
         let service = makeMissionService()
         let viewModel = MissionViewModel(service: service)
@@ -114,7 +118,8 @@ extension AppDIContainer {
     }
     
     func makeAIMissionViewController() -> UIViewController {
-        let viewModel = AIMissionViewModel()
+        let service = makeAIMissionService()
+        let viewModel = AIMissionViewModel(service: service)
         return AIMissionViewController(viewModel: viewModel, diContainer: self)
     }
 }
