@@ -139,7 +139,3 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
         picker.dismiss(animated: true)
     }
 }
-
-//#Preview {
-//    DailyJourneyViewController(viewModel: DailyJourneyViewModel(), diContainer: AppDIContainer.shared)
-//}
