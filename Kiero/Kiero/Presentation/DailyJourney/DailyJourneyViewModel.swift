@@ -15,9 +15,11 @@ enum DailyJourneyRoute {
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
+    private let wishWellService = WishWellService()
     private var currentScheduleDetailId: Int?
     
     // MARK: - Input & Output
+    
     struct Input {
         let viewWillAppear: AnyPublisher<Void, Never>
         let nextJourneyButtonTap: AnyPublisher<Void, Never>
@@ -31,10 +33,12 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
     
     // MARK: - Properties
+    
     private let routeSubject = PassthroughSubject<DailyJourneyRoute, Never>()
     private let viewDataSubject = PassthroughSubject<DailyJourneyModel, Never>()
     
     // MARK: - Transform
+    
     func transform(input: Input) -> Output {
         input.viewWillAppear
             .sink { [weak self] in self?.fetchDailyJourney() }
@@ -58,84 +62,94 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         )
     }
     
-    // MARK: - Network Logic (Combine Style)
+    // MARK: - Network Logic
     
     private func fetchDailyJourney() {
-        // Child 없이 단독 호출
-        DailyJourneyService.shared.updateDailyJourney()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] completion in
-                if case .failure(let error) = completion {
-                    print("❌ Fetch Error: \(error)")
-                    self?.viewDataSubject.send(self?.makeErrorViewData() ?? DailyJourneyModel.empty)
-                }
-            } receiveValue: { [weak self] dto in
-                guard let self = self else { return }
-                
-                // 1. ID 저장
-                self.currentScheduleDetailId = dto.scheduleDetailId
-                
-                // 2. 모델 변환 (DTO 1개만 전달)
-                let model = self.convertDTOToModel(dto)
-                self.viewDataSubject.send(model)
+        // Zip을 사용하여 일정 정보와 아이 정보를 병렬로 호출
+        Publishers.Zip(
+            DailyJourneyService.shared.updateDailyJourney(),
+            self.wishWellService.fetchMyInfo()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { completion in
+            if case .failure(let error) = completion {
+                print("❌ Fetch Error: \(error)")
             }
-            .store(in: &cancellables)
+        } receiveValue: { [weak self] (scheduleDTO, childInfo) in
+            guard let self = self else { return }
+            
+            // 1. ID 저장
+            self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
+            
+            // 2. 두 데이터를 합쳐서 Model 변환
+            let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
+            self.viewDataSubject.send(model)
+        }
+        .store(in: &cancellables)
     }
     
     private func skipSchedule() {
-        // 🔍 [로그 1] 함수가 호출되었는지 확인
-        print("📢 [ViewModel] skipSchedule() 함수 호출됨!")
+        print("📢 [ViewModel] skipSchedule() 함수 호출됨")
         
         guard let id = currentScheduleDetailId else {
-            // 🔍 [로그 2] ID가 없어서 막혔는지 확인
-            print("⚠️ [ViewModel] 저장된 스케줄 ID가 없습니다. (fetch가 먼저 안 됐거나 실패함)")
+            print("⚠️ [ViewModel] 저장된 스케줄 ID가 없음 (fetch가 먼저 안 됐거나 실패함)")
             return
         }
         
-        // 🔍 [로그 3] 실제 API 요청 시작 확인
-        print("🚀 [ViewModel] API 요청 시작! (ID: \(id))")
+        print("🚀 [ViewModel] API 요청 시작 (ID: \(id))")
         
-        DailyJourneyService.shared.skipJourney(scheduleDetailId: id)
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    print("❌ Skip Error: \(error)")
-                }
-            } receiveValue: { dto in
-                print("✅ 건너뛰기 성공! (서버 응답 받음)")
-                // ... 기존 로직 ...
+        Publishers.Zip(
+            DailyJourneyService.shared.skipJourney(scheduleDetailId: id),
+            self.wishWellService.fetchMyInfo()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { completion in
+            if case .failure(let error) = completion {
+                print("❌ Skip Error: \(error)")
             }
-            .store(in: &cancellables)
+        } receiveValue: { [weak self] (newScheduleDTO, childInfo) in
+            guard let self = self else { return }
+            
+            print("✅ 건너뛰기 성공! (서버 응답 받음)")
+            
+            // 1. 갱신된 ID 저장
+            self.currentScheduleDetailId = newScheduleDTO.scheduleDetailId
+            
+            // 2. 화면 갱신
+            let model = self.convertDTOToModel(schedule: newScheduleDTO, child: childInfo)
+            self.viewDataSubject.send(model)
+        }
+        .store(in: &cancellables)
     }
     
     // MARK: - Converter (DTO -> Model)
     
-    private func convertDTOToModel(_ dto: DailyJourneyDTO) -> DailyJourneyModel {
+    private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
         
-        // ⚠️ Child API 연결 전 임시 데이터
-        let kidName = "친구" // 나중에 ChildDTO에서 가져와야 함
-        let coinCount = 0   // 나중에 ChildDTO에서 가져와야 함
-        let todayDateText = "1월 99일" // 나중에 ChildDTO에서 가져와야 함
+        // 1. Child API 데이터 매핑
+        let kidName = child.firstName
+        let coinCount = child.coinAmount
+        let todayDateText = child.today
         
-        // Schedule 데이터 가공
-        let orderText = convertToKoreanOrdinal(dto.scheduleOrder)
-        let scheduleName = dto.name ?? ""
-        let stoneTypeName = convertStoneTypeToKorean(dto.stoneType)
-        let timeText = formatTimeRange(start: dto.startTime, end: dto.endTime)
+        // 2. Schedule 데이터 가공
+        let orderText = convertToKoreanOrdinal(schedule.scheduleOrder)
+        let scheduleName = schedule.name ?? ""
+        let stoneTypeName = convertStoneTypeToKorean(schedule.stoneType)
+        let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
         
-        switch dto.scheduleStatus {
+        switch schedule.scheduleStatus {
         case .noSchedule:
             return DailyJourneyModel(
                 bubbleText: "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!",
                 highlightKeywords: [],
                 journeyTimeText: "-",
-                isMissionActive: true, // 나중에 false로 바꾸기
+                isMissionActive: false, 
                 kidName: kidName,
                 dateText: todayDateText,
                 coinCount: coinCount,
-                fireStoneCount: dto.earnedStones ?? 0,
-                maxFireStoneCount: dto.totalSchedule,
-                scheduleOrder: dto.scheduleOrder,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no
             )
@@ -149,9 +163,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 kidName: kidName,
                 dateText: todayDateText,
                 coinCount: coinCount,
-                fireStoneCount: dto.earnedStones ?? 0,
-                maxFireStoneCount: dto.totalSchedule,
-                scheduleOrder: dto.scheduleOrder,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
                 speechFieldType: .gray
             )
@@ -165,9 +179,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 kidName: kidName,
                 dateText: todayDateText,
                 coinCount: coinCount,
-                fireStoneCount: dto.earnedStones ?? 0,
-                maxFireStoneCount: dto.totalSchedule,
-                scheduleOrder: dto.scheduleOrder,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no
             )
@@ -175,11 +189,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
     
     // MARK: - Helper Methods
-    
-    private func makeErrorViewData() -> DailyJourneyModel {
-        // 기존 에러 뷰 데이터 생성 로직 유지
-        return DailyJourneyModel.empty // (DailyJourneyModel에 empty static var가 없다면 기존처럼 직접 생성)
-    }
     
     private func formatTimeRange(start: String?, end: String?) -> String {
         guard let start = start, let end = end else { return "-" }
@@ -194,7 +203,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         }
         return "-"
     }
-    
     
     private func convertStoneTypeToKorean(_ type: StoneType?) -> String {
         guard let type = type else { return "" }
@@ -219,16 +227,5 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         case 10: return "열"
         default: return "\(number)"
         }
-    }
-}
-
-// 없으면
-extension DailyJourneyModel {
-    static var empty: DailyJourneyModel {
-        return DailyJourneyModel(
-            bubbleText: "로딩 실패", highlightKeywords: [], journeyTimeText: "오전 3 : 00 ~ 오후 8 : 00", isMissionActive: true,
-            kidName: "현서", dateText: "12월 10일", coinCount: 350, fireStoneCount: 4, maxFireStoneCount: 7,
-            scheduleOrder: 3, scheduleOrderText: "ㅎㅎ", speechFieldType: .gray
-        )
     }
 }
