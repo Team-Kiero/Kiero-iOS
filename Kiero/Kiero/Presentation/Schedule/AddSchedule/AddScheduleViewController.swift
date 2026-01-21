@@ -203,6 +203,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
+            self.navigationBar.isRightButtonEnabled = false
+            
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
                 Toast.show(message: "일정 이름을 입력해주세요.")
                 return
