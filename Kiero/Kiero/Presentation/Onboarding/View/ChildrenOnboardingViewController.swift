@@ -156,9 +156,9 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     }
     
     private func navigateToChildrenTap() {
-        let nav = UINavigationController(rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: false))
+        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: false)
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+            sceneDelegate.changeRootViewController(tab)
         }
     }
     
