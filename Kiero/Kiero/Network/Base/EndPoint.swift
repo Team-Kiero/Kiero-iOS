@@ -40,6 +40,9 @@ enum EndPoint {
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
     
+    //NotificationFeed
+    case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
+    
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
@@ -79,12 +82,18 @@ enum EndPoint {
             return "/api/v1/coupons"
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
+        case .fetchFeeds(let childId, let size, let cursor):
+            var query: [String] = []
+            if let size { query.append("size=\(size)") }
+            if let cursor, !cursor.isEmpty { query.append("cursor=\(cursor)") }
+            let queryString = query.isEmpty ? "" : "?\(query.joined(separator: "&"))"
+            return "/api/v1/feeds/\(childId)\(queryString)"
         }
     }
 
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchFeeds:
             return "GET"
         case .purchaseCoupon:
             return "PATCH"
