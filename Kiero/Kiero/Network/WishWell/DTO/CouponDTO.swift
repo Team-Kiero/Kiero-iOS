@@ -8,7 +8,7 @@
 import Foundation
 
 struct CouponResponseDTO: Decodable {
-    let id: Int64
+    let couponId: Int64
     let name: String
     let price: Int
 }
@@ -21,6 +21,6 @@ struct Coupon: Decodable {
 
 extension CouponResponseDTO {
     func toEntity() -> Coupon {
-        .init(id: id, name: name, price: price)
+        .init(id: couponId, name: name, price: price)
     }
 }
