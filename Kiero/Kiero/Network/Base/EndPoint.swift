@@ -28,6 +28,7 @@ enum EndPoint {
     case logout
     case reissueAccessToken
     case reissueAllTokens
+    case deleteChildDummy
     
     // Child
     case fetchChildren
@@ -49,7 +50,7 @@ enum EndPoint {
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
     
-    //CoinMission
+    // CoinMission
     case fetchChildrenInfo
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
@@ -109,6 +110,8 @@ enum EndPoint {
             return "/api/v1/coupons/\(couponId)"
         case .fetchDefaultColor(let childId):
             return "/api/v1/schedules/\(childId)/default"
+        case .deleteChildDummy:
+            return "/api/v1/dummy"
         }
     }
     
@@ -118,6 +121,8 @@ enum EndPoint {
             return "GET"
         case .purchaseCoupon:
             return "PATCH"
+        case .deleteChildDummy:
+            return "DELETE"
         default:
             return "POST"
         }
