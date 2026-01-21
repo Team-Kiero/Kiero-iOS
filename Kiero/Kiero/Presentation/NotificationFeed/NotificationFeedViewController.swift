@@ -33,7 +33,8 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         contentView.onProfileTapped = { [weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                // TODO: 알림 API 합친 뒤 로그아웃 로직 추가
+//                self?.viewModel?.performLogout()
             }
         }
         
