@@ -47,12 +47,16 @@ enum EndPoint {
     // AIMission
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
+    //CoinMission
+    case fetchChildrenInfo
+    case fetchWishes
+    case purchaseCoupon(couponId: Int64)
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon:
             return .child
         default:
             return .parent
@@ -95,16 +99,23 @@ enum EndPoint {
             return "/api/v1/missions/suggestions"
         case .postBulkMissions(let childId, _):
             return "/api/v1/missions/\(childId)/bulk"
+        case .fetchChildrenInfo:
+            return "/api/v1/children/me"
+        case .fetchWishes:
+            return "/api/v1/coupons"
+        case .purchaseCoupon(let couponId):
+            return "/api/v1/coupons/\(couponId)"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection,
-                .fetchChildren, .fetchSchedules, .fetchMissions:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
             return "GET"
         case .postSchedule, .postMission, .postMissionSuggestions:
             return "POST"
+        case .purchaseCoupon:
+            return "PATCH"
         default:
             return "POST"
         }
