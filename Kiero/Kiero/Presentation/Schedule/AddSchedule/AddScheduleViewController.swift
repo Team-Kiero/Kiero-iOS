@@ -74,7 +74,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     private let selectedColorChip = ColorChip().then {
-        $0.isHidden = true
         $0.isUserInteractionEnabled = false
     }
     
@@ -307,7 +306,9 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
                     .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
                 ]
-                let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+                let colorName = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+                
+                let hexCode = self.currentSelectedColor?.toHexString() ?? "#FF5C5C"
                 
                 let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
                 let weekDates = self.baseDate.daysOfWeek
@@ -320,7 +321,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         isRecurring: isRecurring,
                         startTime: startTime,
                         endTime: endTime,
-                        scheduleColor: colorCode,
+                        scheduleColor: colorName,
+                        colorCode: hexCode,
                         dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
                         date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd")
                     )
@@ -342,9 +344,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         viewModel.defaultColor
             .receive(on: DispatchQueue.main)
             .sink { [weak self] color in
-                self?.currentSelectedColor = color
-                self?.selectedColorChip.isHidden = false
-                self?.selectedColorChip.configure(with: color, isSelected: false)
+                guard let self = self else { return }
+                
+                if self.currentSelectedColor == nil {
+                    self.currentSelectedColor = color
+                    self.selectedColorChip.isHidden = false
+                    self.selectedColorChip.configure(with: color, isSelected: false)
+                }
             }
             .store(in: &cancellables)
     }
@@ -474,9 +480,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         vc.initialSelectedColor = currentSelectedColor
         
         vc.onColorSelected = { [weak self] selectedColor in
-            self?.selectedColorChip.isHidden = false
-            self?.selectedColorChip.configure(with: selectedColor, isSelected: false)
-            self?.currentSelectedColor = selectedColor
+            guard let self = self else { return }
+            self.selectedColorChip.isHidden = false
+            self.selectedColorChip.configure(with: selectedColor, isSelected: false)
+            self.currentSelectedColor = selectedColor
         }
         
         self.present(vc, animated: false)

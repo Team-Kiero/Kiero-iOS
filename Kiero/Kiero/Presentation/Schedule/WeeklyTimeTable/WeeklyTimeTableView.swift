@@ -184,21 +184,10 @@ final class WeeklyTimeTableView: BaseUIView {
         
         let topOffset = CGFloat(startFloat - Double(startHour)) * hourHeight
         let cardHeight = CGFloat(duration) * hourHeight
-        
-        let actualColor: UIColor = {
-            switch schedule.scheduleColor {
-            case "SCHEDULE1": return .schedule1
-            case "SCHEDULE2": return .schedule2
-            case "SCHEDULE3": return .schedule3
-            case "SCHEDULE4": return .schedule4
-            case "SCHEDULE5": return .schedule5
-            default: return .schedule1
-            }
-        }()
+        let actualColor = UIColor(hex: schedule.colorCode)
         
         dayIndices.forEach { dayIndex in
             let card = ScheduleCardView(name: schedule.name, color: actualColor)
-            
             cardContainerView.addSubview(card)
             
             card.snp.makeConstraints {
