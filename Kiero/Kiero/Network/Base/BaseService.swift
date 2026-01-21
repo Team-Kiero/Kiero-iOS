@@ -108,7 +108,7 @@ final class BaseService {
         // 디코딩
         do {
             if Response.self == EmptyResponse.self {
-                let decoded = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
+                _ = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
                 return EmptyResponse() as! Response
             }
             
