@@ -25,6 +25,8 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        contentView.updateProfile()
         refreshSubject.send(())
     }
     
@@ -51,22 +53,10 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         let output = viewModel.transform(input: input)
         
-        output.childName
-            .receive(on: RunLoop.main)
-            .sink { name in
-                self.contentView.configureProfile(name: name)
-            }
-            .store(in: &cancellables)
-        
         output.sections
             .receive(on: RunLoop.main)
-            .sink { [weak self] sections in
-                guard let self else { return }
-                
-                let isEmpty = sections.isEmpty
-                self.contentView.tableView.backgroundView = isEmpty ? self.emptyView : nil
-                
-                self.contentView.tableView.reloadData()
+            .sink { [weak self] _ in
+                self?.contentView.applySnapshot()
             }
             .store(in: &cancellables)
         

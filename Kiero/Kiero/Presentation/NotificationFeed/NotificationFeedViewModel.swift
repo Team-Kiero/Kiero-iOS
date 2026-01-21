@@ -19,14 +19,12 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
         set { UserDefaults.standard.set(newValue, forKey: "selectedChildId") }
     }
     
-    private let childNameSubject = CurrentValueSubject<String, Never>("")
     private let itemsSubject = CurrentValueSubject<[FeedItem], Never>([])
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
     private let isLoadingMoreSubject = CurrentValueSubject<Bool, Never>(false)
     private let sectionsSubject = CurrentValueSubject<[FeedSection], Never>([])
     
     private(set) var sections: [FeedSection] = []
-    
     private var nextCursor: String? = nil
     private var canLoadMore: Bool { nextCursor != nil }
     
@@ -48,7 +46,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     }
     
     struct Output {
-        let childName: AnyPublisher<String, Never>
         let sections: AnyPublisher<[FeedSection], Never>
         let isLoading: AnyPublisher<Bool, Never>
         let isLoadingMore: AnyPublisher<Bool, Never>
@@ -80,7 +77,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                     .eraseToAnyPublisher()
             }
             .share()
-
+        
         idTrigger
             .filter { $0 != 0 }
             .flatMap { [weak self] id -> AnyPublisher<FeedPage, Never> in
@@ -94,7 +91,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .sink { [weak self] page in
                 guard let self = self else { return }
-                self.childNameSubject.send(page.childName)
                 self.itemsSubject.send(page.items)
                 self.nextCursor = page.nextCursor
                 
@@ -131,8 +127,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 current.append(contentsOf: page.items)
                 self.itemsSubject.send(current)
                 
-                let childName = self.childNameSubject.value
-                let newSections = self.makeSections(items: current, childName: childName)
+                let newSections = self.makeSections(items: current, childName: page.childName)
                 self.sections = newSections
                 self.sectionsSubject.send(newSections)
                 
@@ -142,7 +137,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
         
         return Output(
-            childName: childNameSubject.eraseToAnyPublisher(),
             sections: sectionsSubject.eraseToAnyPublisher(),
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
             isLoadingMore: isLoadingMoreSubject.eraseToAnyPublisher()
