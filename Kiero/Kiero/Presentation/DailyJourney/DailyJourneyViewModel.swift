@@ -17,6 +17,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private let wishWellService = WishWellService()
     private var currentScheduleDetailId: Int?
+    private(set) var currentStoneType: StoneType? // 다음 화면으로 넘겨줄 StoneType 저장소
     
     // MARK: - Input & Output
     
@@ -65,7 +66,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     // MARK: - Network Logic
     
     private func fetchDailyJourney() {
-        // Zip을 사용하여 일정 정보와 아이 정보를 병렬로 호출
         Publishers.Zip(
             DailyJourneyService.shared.updateDailyJourney(),
             self.wishWellService.fetchMyInfo()
@@ -80,6 +80,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             
             // 1. ID 저장
             self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
+            self.currentStoneType = scheduleDTO.stoneType
             
             // 2. 두 데이터를 합쳐서 Model 변환
             let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
@@ -143,7 +144,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 bubbleText: "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!",
                 highlightKeywords: [],
                 journeyTimeText: "-",
-                isMissionActive: false, 
+                isMissionActive: false,
                 kidName: kidName,
                 dateText: todayDateText,
                 coinCount: coinCount,
@@ -151,7 +152,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
-                speechFieldType: .no
+                speechFieldType: .no,
+                chipItemType: .inProgressChip
             )
             
         case .nowScheduleExist, .nextScheduleExist, .firstSchedule:
@@ -167,10 +169,11 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: .gray
+                speechFieldType: .gray,
+                chipItemType: .inProgressChip
             )
             
-        case .fireNotLit, .fireLit:
+        case .fireNotLit:
             return DailyJourneyModel(
                 bubbleText: "모든 여정을 마쳤어!\n이제 불을 피우러 가볼까?",
                 highlightKeywords: ["불 피우기"],
@@ -183,7 +186,25 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
-                speechFieldType: .no
+                speechFieldType: .no,
+                chipItemType: .highlightChip
+            )
+            
+        case .fireLit:
+            return DailyJourneyModel(
+                bubbleText: "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!",
+                highlightKeywords: [],
+                journeyTimeText: "-",
+                isMissionActive: false,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: "",
+                speechFieldType: .no,
+                chipItemType: .completedChip
             )
         }
     }
