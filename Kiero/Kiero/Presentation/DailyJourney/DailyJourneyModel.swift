@@ -20,4 +20,5 @@ struct DailyJourneyModel {
     let scheduleOrder: Int
     let scheduleOrderText: String
     let speechFieldType: SpeechField.fieldType
+    let chipItemType: ChipItem.ChipStyle
 }
