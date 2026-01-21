@@ -114,6 +114,10 @@ final class AIMissionResultView: BaseUIView {
     private func dismissKeyboard() {
         self.endEditing(true)
     }
+    
+    func updateReward(to value: Int) {
+        rewardView.selectReward(value)
+    }
 }
 
 extension AIMissionResultView: UITextFieldDelegate {

@@ -70,7 +70,10 @@ extension AppDIContainer {
     }
     
     func makeAddScheduleViewController() -> UIViewController {
-        let viewModel = AddScheduleViewModel()
+        let service = AddScheduleService()
+        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
+        let viewModel = AddScheduleViewModel(service: service, childId: selectedChildId)
         return AddScheduleViewController(viewModel: viewModel, diContainer: self)
     }
 }
@@ -87,13 +90,25 @@ extension AppDIContainer {
 // MARK: - Mission
 
 extension AppDIContainer {
+    func makeMissionService() -> MissionServiceType {
+        return MissionService()
+    }
+    
+    func makeAIMissionService() -> AIMissionServiceType {
+        return AIMissionService()
+    }
+    
     func makeMissionViewController() -> UIViewController {
-        let viewModel = MissionViewModel()
+        let service = makeMissionService()
+        let viewModel = MissionViewModel(service: service)
         return MissionViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeWriteMissionViewController() -> UIViewController {
-        let viewModel = WriteMissionViewModel()
+        let service = WriteMissionService()
+        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
+        let viewModel = WriteMissionViewModel(service: service, childId: selectedChildId)
         return WriteMissionViewController(viewModel: viewModel, diContainer: self)
     }
     
@@ -103,7 +118,8 @@ extension AppDIContainer {
     }
     
     func makeAIMissionViewController() -> UIViewController {
-        let viewModel = AIMissionViewModel()
+        let service = makeAIMissionService()
+        let viewModel = AIMissionViewModel(service: service)
         return AIMissionViewController(viewModel: viewModel, diContainer: self)
     }
 }

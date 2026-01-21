@@ -36,6 +36,20 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
+    // AddSchedule
+    case postSchedule(childId: Int, request: AddScheduleRequestDTO)
+    case fetchDefaultColor(childId: Int)
+    
+    // Mission
+    case fetchMissions(childId: Int?)
+    
+    // WriteMission
+    case postMission(childId: Int, request: WriteMissionRequestDTO)
+    
+    // AIMission
+    case postMissionSuggestions(request: MissionSuggestionRequestDTO)
+    case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
+    
     //CoinMission
     case fetchChildrenInfo
     case fetchWishes
@@ -76,18 +90,34 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .postSchedule(let childId, _):
+            return "/api/v1/schedules/\(childId)"
+        case .fetchMissions(let childId):
+            var path = "/api/v1/missions"
+            if let id = childId {
+                path += "?childId=\(id)"
+            }
+            return path
+        case .postMission(let childId, _):
+            return "/api/v1/missions/\(childId)"
+        case .postMissionSuggestions:
+            return "/api/v1/missions/suggestions"
+        case .postBulkMissions(let childId, _):
+            return "/api/v1/missions/\(childId)/bulk"
         case .fetchChildrenInfo:
             return "/api/v1/children/me"
         case .fetchWishes:
             return "/api/v1/coupons"
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
+        case .fetchDefaultColor(let childId):
+            return "/api/v1/schedules/\(childId)/default"
         }
     }
-
+    
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor:
             return "GET"
         case .purchaseCoupon:
             return "PATCH"
@@ -95,7 +125,7 @@ enum EndPoint {
             return "POST"
         }
     }
-
+    
     var header: [String: String] {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken:

@@ -13,6 +13,7 @@ struct Schedule: Codable {
     let startTime: String
     let endTime: String
     let scheduleColor: String
+    let colorCode: String
     let dayOfWeek: String?
     let date: String?
     
