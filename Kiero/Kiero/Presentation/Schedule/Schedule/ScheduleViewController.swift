@@ -32,13 +32,13 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     // MARK: - UI Components
     
     private lazy var profileBox = ProfileBox(
-        name: "신키로",
-        profileURL: "",
+        name: TokenManager.shared.getUserName() ?? "신키로",
+        profileURL: TokenManager.shared.getProfile() ?? "",
         backgroundColor: .clear
     ).then {
         $0.onTap = {[weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                self?.viewModel?.performLogout()
             }
         }
     }
@@ -64,6 +64,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     override func viewDidLoad() {
         super.viewDidLoad()
         setAction()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        viewModel?.refreshSchedules()
     }
     
     // MARK: - Setup Methods
@@ -149,13 +155,9 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         addScheduleVC.viewModel?.scheduleList = viewModel.scheduleList.value
         addScheduleVC.baseDate = targetDate
         
-        addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, finalDate: Date) in
-            guard let self = self else { return }
-            
-            self.viewModel?.addSchedule(newSchedule)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.viewModel?.currentReferenceDate.send(finalDate)
-            }
+        addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in
+            guard let self = self else { return }            
+            self.viewModel?.currentReferenceDate.send(targetDate)
         }
         
         let nav = UINavigationController(rootViewController: addScheduleVC)
@@ -237,6 +239,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] dates in
                 self?.scheduleChildVC.updateWeeklyDates(dates)
+            }.store(in: &cancellables)
+        
+        viewModel.logoutSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToPickRole()
             }.store(in: &cancellables)
     }
 }

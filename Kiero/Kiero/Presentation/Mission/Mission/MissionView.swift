@@ -16,6 +16,7 @@ final class MissionView: BaseUIView {
     
     private var groupedMissions: [String: [Mission]] = [:]
     private var sortedDates: [String] = []
+    private var missionGroups: [MissionGroupDTO] = []
     
     // MARK: - UI Components
     
@@ -56,6 +57,11 @@ final class MissionView: BaseUIView {
         tableView.reloadData()
     }
     
+    func updateMissionGroups(_ groups: [MissionGroupDTO]) {
+        self.missionGroups = groups
+        self.tableView.reloadData()
+    }
+    
     func scrollToTop() {
         tableView.setContentOffset(CGPoint.zero, animated: false)
     }
@@ -65,24 +71,21 @@ final class MissionView: BaseUIView {
 
 extension MissionView: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return sortedDates.count
+        return missionGroups.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let dateKey = sortedDates[section]
-        return groupedMissions[dateKey]?.count ?? 0
+        return missionGroups[section].missions.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: MissionTableViewCell.identifier, for: indexPath) as? MissionTableViewCell else { return UITableViewCell() }
-        
-        let dateKey = sortedDates[indexPath.section]
-        if let mission = groupedMissions[dateKey]?[indexPath.row] {
-            cell.configure(name: mission.name, reward: mission.reward)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: MissionTableViewCell.identifier, for: indexPath) as? MissionTableViewCell else {
+            return UITableViewCell()
         }
         
-        cell.selectionStyle = .none
-        cell.backgroundColor = .clear
+        let mission = missionGroups[indexPath.section].missions[indexPath.row]
+        cell.configure(name: mission.name, reward: mission.reward)
+        
         return cell
     }
 }
@@ -91,7 +94,8 @@ extension MissionView: UITableViewDataSource {
 
 extension MissionView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let dateString = sortedDates[section]
+        let group = missionGroups[section]
+        let dateString = group.dueAt
         
         guard let headerDate = dateString.toDate(format: "yyyy-MM-dd") else { return nil }
         
@@ -107,7 +111,6 @@ extension MissionView: UITableViewDelegate {
         
         let titleLabel = UILabel().then {
             $0.textColor = .gray300
-            
             if headerDate.isToday {
                 $0.setTypo(.title4_14_SB, text: "오늘")
                 $0.isHidden = false
@@ -120,7 +123,7 @@ extension MissionView: UITableViewDelegate {
         }
         
         let dateLabel = UILabel().then {
-            $0.text = headerDate.toString(format: "yyyy.MM.dd.(E)")
+            $0.text = "\(headerDate.toString(format: "yyyy.MM.dd."))(\(group.dayOfWeek))"
             $0.font = .body3_14_R
             $0.textColor = .gray500
         }

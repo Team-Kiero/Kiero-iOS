@@ -86,8 +86,8 @@ final class ScheduleCardView: BaseUIView {
         contentStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(8)
             $0.centerX.equalToSuperview()
-            $0.leading.lessThanOrEqualToSuperview().inset(8)
-            $0.trailing.lessThanOrEqualToSuperview().inset(6)
+            $0.leading.greaterThanOrEqualToSuperview().inset(3)
+            $0.trailing.lessThanOrEqualToSuperview().inset(3)
             $0.bottom.lessThanOrEqualToSuperview().inset(2)
         }
     }
@@ -98,7 +98,7 @@ final class ScheduleCardView: BaseUIView {
         
         if cardHeight < 20 {
             titleLabel.isHidden = true
-            dotView.isHidden = false
+            dotView.isHidden = true
             return
         }
         

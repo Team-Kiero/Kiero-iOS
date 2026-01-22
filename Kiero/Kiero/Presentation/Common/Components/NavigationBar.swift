@@ -23,6 +23,13 @@ final class NavigationBar: UIView {
     var leftButtonAction: (() -> Void)?
     var rightButtonAction: (() -> Void)?
     
+    var isRightButtonEnabled: Bool = true {
+        didSet {
+            rightButton.isEnabled = isRightButtonEnabled
+            rightButton.alpha = isRightButtonEnabled ? 1.0 : 0.5
+        }
+    }
+    
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {

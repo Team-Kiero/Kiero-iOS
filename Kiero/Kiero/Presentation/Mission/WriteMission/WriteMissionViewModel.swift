@@ -9,5 +9,30 @@ import Foundation
 import Combine
 
 final class WriteMissionViewModel: BaseViewModel {
+    
+    private let service: WriteMissionServiceType
+    let childId: Int
+    
+    let isMissionAddSuccess = PassthroughSubject<Mission, Never>()
 
+    init(service: WriteMissionServiceType, childId: Int) {
+        self.service = service
+        self.childId = childId
+        super.init()
+    }
+    
+    func createMission(name: String, reward: Int, dueAt: String) {
+        let request = WriteMissionRequestDTO(name: name, reward: reward, dueAt: dueAt)
+        
+        service.postMission(childId: childId, request: request)
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    print("❌ 미션 생성 실패: \(error)")
+                }
+            } receiveValue: { [weak self] response in
+                let newMission = Mission(name: response.name, reward: response.reward, dueAt: response.dueAt)
+                self?.isMissionAddSuccess.send(newMission)
+            }
+            .store(in: &cancellables)
+    }
 }

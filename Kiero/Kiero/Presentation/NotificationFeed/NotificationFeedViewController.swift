@@ -5,6 +5,7 @@
 //  Created by 정윤아 on 1/16/26.
 //
 
+import Combine
 import UIKit
 
 final class NotificationFeedViewController: BaseViewController<NotificationFeedViewModel> {
@@ -14,10 +15,19 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     private let contentView = NotificationFeedView()
     private let emptyView = EmptyView(text: "아직 아이로부터 도착한 알림이 없어요!")
     
+    private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private let refreshSubject = PassthroughSubject<Void, Never>()
+    private let loadMoreSubject = PassthroughSubject<Void, Never>()
+    
     // MARK: - Life Cycle
     
-    override func loadView() {
-        view = contentView
+    override func loadView() { view = contentView }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        contentView.updateProfile()
+        refreshSubject.send(())
     }
     
     // MARK: - Setup Methods
@@ -33,25 +43,27 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         contentView.onProfileTapped = { [weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                // TODO: 알림 API 합친 뒤 로그아웃 로직 추가
+//                self?.viewModel?.performLogout()
             }
         }
         
-        viewModel.onDataUpdated = { [weak self] in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                
-                let isEmpty = self.viewModel?.sections.isEmpty ?? true
-                
-                if isEmpty {
-                    self.contentView.tableView.backgroundView = self.emptyView
-                } else {
-                    self.contentView.tableView.backgroundView = nil
-                }
-                self.contentView.tableView.reloadData()
+        let input = NotificationFeedViewModel.Input(
+            viewDidload: viewDidLoadSubject.eraseToAnyPublisher(),
+            refresh: refreshSubject.eraseToAnyPublisher(),
+            loadMore: loadMoreSubject.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.sections
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.contentView.applySnapshot()
             }
-        }
-        viewModel.fetchNotifications()
+            .store(in: &cancellables)
+        
+        viewDidLoadSubject.send(())
     }
 }
 
@@ -100,6 +112,15 @@ extension NotificationFeedViewController: UITableViewDelegate {
         return header
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let lastSectionIndex = tableView.numberOfSections - 1
+        let lastRowIndex = tableView.numberOfRows(inSection: lastSectionIndex) - 1
+        
+        if indexPath.section == lastSectionIndex && indexPath.row == lastRowIndex {
+            loadMoreSubject.send(())
+        }
+    }
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return UITableView.automaticDimension
     }
@@ -115,10 +136,4 @@ extension NotificationFeedViewController: ScrollToTopAvailable {
             contentView.tableView.setContentOffset(.zero, animated: false)
         }
     }
-}
-
-#Preview {
-    NotificationFeedViewController(
-        viewModel: NotificationFeedViewModel(),
-        diContainer: AppDIContainer.shared)
 }

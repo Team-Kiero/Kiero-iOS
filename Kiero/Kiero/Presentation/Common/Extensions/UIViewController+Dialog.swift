@@ -35,7 +35,7 @@ extension UIViewController {
         }
     }
     
-    func performLogout() {
+    func navigateToPickRole() {
         let roleSelectionVC = PickRoleViewController(viewModel: PickRoleViewModel(), diContainer: AppDIContainer.shared)
         let nav = UINavigationController(rootViewController: roleSelectionVC)
         
