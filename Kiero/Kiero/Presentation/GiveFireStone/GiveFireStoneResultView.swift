@@ -92,24 +92,23 @@ final class GiveFireStoneResultView: BaseUIView {
     // MARK: - Configuration
     
     func configure(coin: Int, stones: [String]) {
-        let firstStoneKey = stones.first ?? ""
-        let stoneKoreanName = mapStoneName(firstStoneKey)
+//        let stoneNames = stones.map { mapStoneName($0) }.joined(separator: ", ")
         
         let lines: [String]
         let highlightKeywords: [String]
         
         if coin > 0 {
             lines = [
-                "덕분에 \(stoneKoreanName)이 커졌어!",
+                "덕분에 영웅의 불꽃 이 커졌어!",
                 "선물로 금화 \(coin)개를 줄게"
             ]
-            highlightKeywords = [stoneKoreanName, "\(coin)"]
+            highlightKeywords = ["영웅의 불꽃"]
         } else {
             lines = [
-                "덕분에 \(stoneKoreanName)이 커졌어!",
+                "덕분에 영웅의 불꽃 이 커졌어!",
                 "오늘도 도와줘서 고마워"
             ]
-            highlightKeywords = [stoneKoreanName]
+            highlightKeywords = ["영웅의 불꽃"]
         }
         
         speechField.configure(
@@ -118,6 +117,15 @@ final class GiveFireStoneResultView: BaseUIView {
             lines: lines,
             highlightKeywords: highlightKeywords
         )
+    }
+    
+    private func mapStoneName(_ key: String) -> String {
+        switch key {
+        case "COURAGE": return "용기의 불꽃"
+        case "WISDOM": return "지혜의 불꽃"
+        case "GRIT": return "인내의 불꽃"
+        default: return "영웅의 불꽃"
+        }
     }
     
     func playGif() {
@@ -158,14 +166,5 @@ final class GiveFireStoneResultView: BaseUIView {
             }
         }
         return totalDuration
-    }
-    
-    private func mapStoneName(_ key: String) -> String {
-        switch key {
-        case "COURAGE": return "용기의 불꽃"
-        case "WISDOM": return "지혜의 불꽃"
-        case "GRIT": return "끈기의 불꽃"
-        default: return "영웅의 불꽃"
-        }
     }
 }

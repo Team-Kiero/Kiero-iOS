@@ -130,7 +130,8 @@ final class DailyJourneyView: BaseUIView {
             date: data.dateText,
             coinCount: data.coinCount,
             fireStoneCount: data.fireStoneCount,
-            maxFireStoneCount: data.maxFireStoneCount
+            maxFireStoneCount: data.maxFireStoneCount,
+            chipType: data.chipItemType
         )
         
         journeyTimeView.isHidden = !data.isTimeViewActive
@@ -162,7 +163,7 @@ final class DailyJourneyView: BaseUIView {
         case .lightFire:
             verifyPhotoButton.isHidden = false
             verifyPhotoButton.configure(
-                title: "마음의 불꽃 피우기",
+                title: "마음의 불꽃 피워주기",
                 icon: nil
             )
             

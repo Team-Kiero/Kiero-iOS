@@ -53,7 +53,6 @@ final class DailyJourneyService {
             Task {
                 do {
                     guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                        print("❌ 이미지 인코딩 실패")
                         promise(.failure(.unknownError))
                         return
                     }
@@ -70,7 +69,7 @@ final class DailyJourneyService {
                     )
                     
                     let s3UrlString = presignedData.presignedUrl
-                    let finalFileName = presignedData.fileName
+                    let cleanImageUrl = s3UrlString.components(separatedBy: "?").first ?? s3UrlString
                     
                     guard let s3Url = URL(string: s3UrlString) else {
                         promise(.failure(.invalidURL))
@@ -82,7 +81,6 @@ final class DailyJourneyService {
                     s3Request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
                     
                     print("📤 S3 업로딩 시작")
-                    
                     let (data, response) = try await URLSession.shared.upload(for: s3Request, from: imageData)
                     
                     guard let s3HttpRes = response as? HTTPURLResponse else {
@@ -92,30 +90,23 @@ final class DailyJourneyService {
                     
                     NetworkLogger.shared.responseLog(s3HttpRes, data: data)
                     
-                    switch s3HttpRes.statusCode {
-                    case 200...299:
-                        break
-                    case 400...499:
+                    if !(200...299).contains(s3HttpRes.statusCode) {
                         throw NetworkError.clientError(statusCode: s3HttpRes.statusCode)
-                    case 500...599:
-                        throw NetworkError.internalServerError
-                    default:
-                        throw NetworkError.unknownError
                     }
                     
-                    let requestBody = JourneyVerificationDTO.CompleteRequest(imageUrl: finalFileName)
+                    let requestBody = JourneyVerificationDTO.CompleteRequest(imageUrl: cleanImageUrl)
+                    
                     let _: String? = try await BaseService.shared.request(
                         endPoint: .completeSchedule(scheduleDetailId: scheduleDetailId),
                         body: requestBody
                     )
                     
-                    print("✅ 모든 과정 성공")
+                    print("✅ 모든 과정 성공 (DB 저장 URL: \(cleanImageUrl))")
                     promise(.success(()))
                     
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {
-                    print("❌ [Verify] Unexpected Error: \(error)")
                     promise(.failure(.unknownError))
                 }
             }

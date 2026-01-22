@@ -21,6 +21,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private(set) var currentStoneType: StoneType?
     private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
     public var currentEarnedStoneCount: Int = 0
+    private var hasHadScheduleToday: Bool = false
     
     // MARK: - Input & Output
     
@@ -91,8 +92,12 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         } receiveValue: { [weak self] (scheduleDTO, childInfo) in
             guard let self = self else { return }
             
+            if scheduleDTO.totalSchedule > 0 {
+                self.hasHadScheduleToday = true
+            }
+            
             print("🔍 서버 응답 상태: \(scheduleDTO.scheduleStatus)")
-            print("🔍 획득한 돌 개수: \(scheduleDTO.earnedStones ?? -1)")
+            print("🔍 플래그 상태 (hasHadScheduleToday): \(self.hasHadScheduleToday)")
             
             self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
             self.currentStoneType = scheduleDTO.stoneType
@@ -130,6 +135,12 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
         
+        print("--- 🏁 여정 진행도 체크 ---")
+        print("현재 여정 순서 (scheduleOrder): \(schedule.scheduleOrder)")
+        print("전체 여정 개수 (totalSchedule): \(schedule.totalSchedule)")
+        print("플래그 상태 (hasHadScheduleToday): \(self.hasHadScheduleToday)")
+        print("------------------------")
+        
         let kidName = child.firstName
         let coinCount = child.coinAmount
         let todayDateText = child.today
@@ -140,8 +151,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
         let isTimeViewActive = (timeText != "-")
         
-        let buttonType: DailyJourneyModel.ActionButtonType
+        let isLastJourney = (schedule.scheduleOrder > 0 && schedule.totalSchedule == 1)
         
+        let buttonType: DailyJourneyModel.ActionButtonType
         let isScheduleActive = (schedule.scheduleStatus == .nowScheduleExist ||
                                 schedule.scheduleStatus == .firstSchedule ||
                                 schedule.scheduleStatus == .nextScheduleExist)
@@ -149,11 +161,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         if isScheduleActive && !schedule.isNowScheduleVerified {
             buttonType = .verify
         }
-        
         else if schedule.scheduleStatus == .fireNotLit && (schedule.earnedStones ?? 0) > 0 {
             buttonType = .lightFire
         }
-        
         else {
             buttonType = .hidden
         }
@@ -162,14 +172,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         switch schedule.scheduleStatus {
         case .firstSchedule, .nowScheduleExist, .nextScheduleExist:
-            
             let bubbleText: String
             switch schedule.scheduleStatus {
             case .firstSchedule:
-                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName) 야!"
+                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName)!"
             case .nowScheduleExist:
                 bubbleText = "지금은 \(scheduleName)의 시간이야!\n여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
-            default:
+            default: // .nextScheduleExist
                 bubbleText = "다음은 \(scheduleName)의 시간이야!\n다음 여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
             }
             
@@ -185,15 +194,19 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: .gray,
+                speechFieldType: isLastJourney ? .no : .gray,
                 chipItemType: .inProgressChip,
                 isTimeViewActive: isTimeViewActive,
                 actionButtonType: buttonType
             )
             
         case .noSchedule:
+            let bubbleText = self.hasHadScheduleToday
+            ? "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!"
+            : "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!"
+            
             return DailyJourneyModel(
-                bubbleText: "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!",
+                bubbleText: bubbleText,
                 highlightKeywords: [],
                 journeyTimeText: "-",
                 isMissionActive: false,
@@ -205,7 +218,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                chipItemType: .inProgressChip,
+                chipItemType: self.hasHadScheduleToday ? .completedChip : .inProgressChip,
                 isTimeViewActive: false,
                 actionButtonType: buttonType
             )
@@ -269,8 +282,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private func convertStoneTypeToKorean(_ type: StoneType?) -> String {
         guard let type = type else { return "" }
         switch type {
-        case .grit: return "용기의 불조각"
-        case .courage: return "인내의 불조각"
+        case .grit: return "인내의 불조각"
+        case .courage: return "용기의 불조각"
         case .wisdom: return "지혜의 불조각"
         }
     }

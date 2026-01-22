@@ -74,7 +74,14 @@ final class DailyJourneyHeaderView: BaseUIView {
     
     // MARK: - Configure
     
-    func configure(kidName: String, date: String, coinCount: Int, fireStoneCount: Int, maxFireStoneCount: Int) {
+    func configure(
+        kidName: String,
+        date: String,
+        coinCount: Int,
+        fireStoneCount: Int,
+        maxFireStoneCount: Int,
+        chipType: ChipItem.ChipStyle
+    ) {
         nameLabel.setTypo(.title3_16_SB, text: kidName)
         dateLabel.setTypo(.body3_14_R, text: date)
         
@@ -82,6 +89,6 @@ final class DailyJourneyHeaderView: BaseUIView {
         let stoneImg = UIImage(resource: .ic3DBluestone)
         
         coinChip.configure(style: .currentCoinChip, icon: coinImg, text: "\(coinCount) 개")
-        fireStoneChip.configure(style: .inProgressChip, icon: stoneImg, text: "\(fireStoneCount) / \(maxFireStoneCount) 개")
+        fireStoneChip.configure(style: chipType, icon: stoneImg, text: "\(fireStoneCount) / \(maxFireStoneCount) 개")
     }
 }

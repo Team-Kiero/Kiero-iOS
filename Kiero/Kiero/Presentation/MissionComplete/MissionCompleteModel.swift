@@ -7,14 +7,21 @@
 
 import UIKit
 
-enum MissionCompleteModel: Int, CaseIterable {
-    case courage = 0
-    case grit
-    case wisdom
+enum MissionCompleteModel: String, CaseIterable {
+    case courage = "COURAGE"
+    case grit = "GRIT"
+    case wisdom = "WISDOM"
     
-    static func from(scheduleDetailId: Int) -> MissionCompleteModel {
-        let index = (scheduleDetailId - 1) % 3
-        return MissionCompleteModel(rawValue: index) ?? .courage
+    static func from(stoneType: StoneType) -> MissionCompleteModel {
+        switch stoneType {
+        case .courage: return .courage
+        case .grit:    return .grit
+        case .wisdom:  return .wisdom
+        }
+    }
+    
+    static func from(serverStrings: [String]) -> [MissionCompleteModel] {
+        return serverStrings.compactMap { MissionCompleteModel(rawValue: $0) }
     }
     
     var name: String {
@@ -33,21 +40,11 @@ enum MissionCompleteModel: Int, CaseIterable {
         }
     }
     
-    var message: String {
-        return "우와! \(self.name)의 불조각 을 손에 넣었어!"
+    func getMessage() -> String {
+        return "우와! \(self.name)의 불조각을 손에 넣었어!"
     }
     
     var highlightKeyword: String {
         return "\(self.name)의 불조각"
-    }
-}
-
-extension MissionCompleteModel {
-    static func from(stoneType: StoneType) -> MissionCompleteModel {
-        switch stoneType {
-        case .courage: return .courage
-        case .grit:    return .grit
-        case .wisdom:  return .wisdom 
-        }
     }
 }

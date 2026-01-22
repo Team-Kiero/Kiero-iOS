@@ -132,9 +132,9 @@ final class GiveFireStoneAnimationView: BaseUIView {
         case "COURAGE":
             return UIImage(resource: .ic3DBluestone)
         case "WISDOM":
-            return UIImage(resource: .ic3DRedstone)
-        case "GRIT":
             return UIImage(resource: .ic3DGreenstone)
+        case "GRIT":
+            return UIImage(resource: .ic3DRedstone)
         default:
             return UIImage(resource: .ic3DBluestone)
         }
