@@ -166,7 +166,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             let bubbleText: String
             switch schedule.scheduleStatus {
             case .firstSchedule:
-                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName) 야!"
+                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName)!"
             case .nowScheduleExist:
                 bubbleText = "지금은 \(scheduleName)의 시간이야!\n여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
             default:
