@@ -63,7 +63,14 @@ final class MissionView: BaseUIView {
     }
     
     func scrollToTop() {
-        tableView.setContentOffset(CGPoint.zero, animated: false)
+        guard !missionGroups.isEmpty else { return }
+        let indexPath = IndexPath(row: 0, section: 0)
+        
+        if tableView.numberOfSections > 0 && tableView.numberOfRows(inSection: 0) > 0 {
+            tableView.scrollToRow(at: indexPath, at: .top, animated: false)
+        } else {
+            tableView.setContentOffset(.zero, animated: false)
+        }
     }
 }
 

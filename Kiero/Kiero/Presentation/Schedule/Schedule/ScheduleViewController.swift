@@ -50,10 +50,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         $0.onIndexChanged = { [weak self] index in
             guard let self = self else { return }
             self.currentTabIndex = index
-            
-            if index == 0 {
-                self.viewModel?.currentReferenceDate.send(Date())
-            }
+            self.scrollToTopCurrentTab()
         }
     }
     

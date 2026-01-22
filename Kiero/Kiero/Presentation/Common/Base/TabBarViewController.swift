@@ -91,13 +91,19 @@ public final class TabBarViewController: UITabBarController {
         customTabBar.onTabSelected = { [weak self] index in
             guard let self = self else { return }
             
+            let isReclick = (self.selectedIndex == index)
             self.selectedIndex = index
             
             if let selectedVC = self.viewControllers?[index] {
-                self.handleScrollToTop(for: selectedVC)
+                let targetVC = (selectedVC as? UINavigationController)?.topViewController ?? selectedVC
+                
+                if isReclick {
+                    if let scheduleVC = targetVC as? ScheduleViewController {
+                        scheduleVC.viewModel?.currentReferenceDate.send(Date())
+                    }
+                    self.scrollToTop(viewController: targetVC)
+                }
             }
-            
-            self.selectedIndex = index
         }
     }
     

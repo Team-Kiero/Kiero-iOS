@@ -60,6 +60,9 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
                 
                 if hasData {
                     self.missionView.updateMissionGroups(groups)
+                    DispatchQueue.main.async {
+                        self.missionView.scrollToTop()
+                    }
                 }
             }
             .store(in: &cancellables)
