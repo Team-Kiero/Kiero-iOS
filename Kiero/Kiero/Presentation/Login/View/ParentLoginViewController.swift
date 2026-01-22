@@ -90,8 +90,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
                 switch route {
                 case let .parentOnboarding(name, url):
                     self.navigateToParentOnboarding(name: name, url: url)
-                case .childOnboarding:
-                    self.kakaoLoginButtonTapped()
+                case let .toast(message):
+                    Toast.show(message: message, bottomInset: 83)
                 }
             }
             .store(in: &cancellables)
@@ -99,6 +99,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     @objc
     private func kakaoLoginButtonTapped() {
+        view.endEditing(true)
         kakaoTap.send(())
     }
     

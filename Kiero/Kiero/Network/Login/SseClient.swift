@@ -108,9 +108,7 @@ final class SseClient: NSObject {
         let dataString = dataLines.joined(separator: "\n")
         let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // 1) connected 이벤트 처리 (JSON 아니어도 여기서 잡힘)
         if eventName == "connected" {
-            // 보통 trimmed == "subscribed"
             print("✅ [SSEClient] CONNECTED event received:", trimmed)
             onConnected?()
             return
@@ -121,7 +119,6 @@ final class SseClient: NSObject {
             return
         }
 
-        // 2) JSON payload만 디코딩
         guard trimmed.hasPrefix("{"),
               let jsonData = trimmed.data(using: .utf8) else {
             return

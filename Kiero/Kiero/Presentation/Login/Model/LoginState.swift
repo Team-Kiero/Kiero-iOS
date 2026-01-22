@@ -13,5 +13,5 @@ enum LoginState: Equatable {
 
 enum LoginRoute {
     case parentOnboarding(name: String, url: String)
-    case childOnboarding
+    case toast(String)
 }

@@ -8,23 +8,23 @@
 import Foundation
 
 final class SseStreamManager {
-
+    
     var onRefreshWillStart: (() -> Void)?
     var onReconnected: (() -> Void)?
-
+    
     private let sseURL: URL
     private var client: SseClient?
-
+    
     private var sseAccessToken: String?
     private var refreshTask: Task<Void, Never>?
     private var isRunning = false
-
+    
     private var isConnecting = false
-
+    
     init(sseURL: URL) {
         self.sseURL = sseURL
     }
-
+    
     /// 최초 토큰으로 즉시 연결 + 이후 5분마다 토큰 재발급/재연결
     func startIfNeeded(
         initialToken: String,
@@ -37,30 +37,30 @@ final class SseStreamManager {
         }
         isRunning = true
         sseAccessToken = initialToken
-
+        
         // 최초 연결
         Task { @MainActor [weak self] in
             guard let self else { return }
             print("✅ [SSEManager] connect() will be called (initial)")
             self.connect(onEvent: onEvent)
         }
-
+        
         // 5분마다 토큰 갱신 + 재연결
         refreshTask?.cancel()
         refreshTask = Task { [weak self] in
             guard let self else { return }
-
+            
             while !Task.isCancelled {
                 // ✅ 서버 스펙: 5분마다 재발급 필요
                 try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000)
-
+                
                 // ✅ (3번 방식) 재발급 시작 훅 — “공백 중 이벤트 유실” 대비 조회를 여기서 1회
                 self.onRefreshWillStart?()
-
+                
                 do {
                     let newToken = try await BaseService.shared.reissueSseAccessToken()
                     self.sseAccessToken = newToken
-
+                    
                     await MainActor.run { [weak self] in
                         guard let self else { return }
                         print("✅ [SSEManager] connect() will be called (refresh)")
@@ -74,7 +74,7 @@ final class SseStreamManager {
             }
         }
     }
-
+    
     @MainActor
     private func connect(onEvent: @escaping (SseEventPayload) -> Void) {
         guard isRunning else { return }
@@ -83,10 +83,10 @@ final class SseStreamManager {
             return
         }
         isConnecting = true
-
+        
         // 기존 연결 종료
         client?.disconnect()
-
+        
         // 새 클라이언트 생성
         client = SseClient(
             url: sseURL,
@@ -104,110 +104,21 @@ final class SseStreamManager {
                 self?.isConnecting = false
             }
         )
-
+        
         client?.connect()
     }
-
-    func stop() {
-        isRunning = false
-        isConnecting = false
-
-        refreshTask?.cancel()
-        refreshTask = nil
-
+    
+    func pause() {
         client?.disconnect()
         client = nil
-
+        isRunning = false
+        isConnecting = false
+    }
+    
+    func stop() {
+        pause()
+        refreshTask?.cancel()
+        refreshTask = nil
         sseAccessToken = nil
     }
 }
-
-//import Foundation
-//
-//final class SseStreamManager {
-//    
-//    var onRefreshWillStart: (() -> Void)?
-//    var onReconnected: (() -> Void)?
-//
-//    private let sseURL: URL
-//    private var client: SseClient?
-//
-//    private var sseAccessToken: String?
-//    private var refreshTask: Task<Void, Never>?
-//    private var isRunning = false
-//
-//    init(sseURL: URL) {
-//        self.sseURL = sseURL
-//    }
-//
-//    /// 최초 토큰으로 바로 연결 + 이후 5분마다 토큰 재발급/재연결
-//    func startIfNeeded(
-//        initialToken: String,
-//        onEvent: @escaping (SseEventPayload) -> Void
-//    ) {
-//        print("✅ [SSEManager] startIfNeeded called, isRunning:", isRunning)
-//        guard !isRunning else {
-//            print("⚠️ [SSEManager] already running")
-//            return
-//        }
-//        isRunning = true
-//
-//        sseAccessToken = initialToken
-//
-//        Task { @MainActor in
-//            print("✅ [SSEManager] connect() will be called")
-//            self.connect(onEvent: onEvent)
-//        }
-//
-//        refreshTask?.cancel()
-//        refreshTask = Task { [weak self] in
-//            guard let self else { return }
-//
-//            while !Task.isCancelled {
-//                try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000)
-//
-//                self.onRefreshWillStart?()
-//                
-//                do {
-//                    let newToken = try await BaseService.shared.reissueSseAccessToken()
-//                    self.sseAccessToken = newToken
-//
-//                    await MainActor.run {
-//                        self.connect(onEvent: onEvent) 
-//                    }
-//                } catch {
-//                    // 재발급 실패 정책: 로그/재시도/stop 등
-//                    // 여기서는 다음 루프에서 재시도하도록 둠
-//                }
-//            }
-//        }
-//    }
-//
-//    @MainActor
-//    private func connect(onEvent: @escaping (SseEventPayload) -> Void) {
-//        client?.disconnect()
-//
-//        client = SseClient(
-//            url: sseURL,
-//            tokenProvider: { [weak self] in self?.sseAccessToken },
-//            onEvent: onEvent,
-//            onConnected: { [weak self] in
-//                self?.onReconnected?()
-//            },
-//            onError: { error in
-//                // 필요하면 재연결/backoff
-//                // print("SSE error:", error)
-//            }
-//        )
-//        client?.connect()
-//    }
-//
-//    func stop() {
-//        isRunning = false
-//        refreshTask?.cancel()
-//        refreshTask = nil
-//        client?.disconnect()
-//        client = nil
-//        sseAccessToken = nil
-//    }
-//}

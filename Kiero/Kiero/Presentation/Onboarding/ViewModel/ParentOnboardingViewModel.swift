@@ -18,6 +18,8 @@ final class ParentOnboardingViewModel: BaseViewModel {
 
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<ParentOnboardingRoute, Never>()
+    
+    private let sseManager: SseStreamManager
 
     let lastName = CurrentValueSubject<String, Never>("")
     let firstName = CurrentValueSubject<String, Never>("")
@@ -35,8 +37,6 @@ final class ParentOnboardingViewModel: BaseViewModel {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-
-    private let sseManager: SseStreamManager
 
     init(
         name: String,
