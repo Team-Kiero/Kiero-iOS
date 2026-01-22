@@ -16,7 +16,6 @@ final class EmptyView: BaseUIView {
     
     private let descriptionLabel = UILabel().then {
         $0.textColor = .gray400
-        $0.textAlignment = .center
         $0.numberOfLines = 0
     }
     
@@ -27,7 +26,7 @@ final class EmptyView: BaseUIView {
     
     private let containerStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.alignment = .center
+        $0.alignment = .fill
         $0.distribution = .fill
         $0.spacing = 0
     }
@@ -37,6 +36,7 @@ final class EmptyView: BaseUIView {
     init(text: String) {
         super.init(frame: .zero)
         self.descriptionLabel.setTypo(.title3_16_SB, text: text)
+        self.descriptionLabel.textAlignment = .center
     }
     
     override init(frame: CGRect) {

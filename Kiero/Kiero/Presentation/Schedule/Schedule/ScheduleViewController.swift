@@ -50,10 +50,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         $0.onIndexChanged = { [weak self] index in
             guard let self = self else { return }
             self.currentTabIndex = index
-            
-            if index == 0 {
-                self.viewModel?.currentReferenceDate.send(Date())
-            }
+            self.scrollToTopCurrentTab()
         }
     }
     
@@ -163,6 +160,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek) ? now : viewModel.currentReferenceDate.value
         
         addScheduleVC.viewModel?.scheduleList = viewModel.scheduleList.value
+        addScheduleVC.viewModel?.isFireLit = viewModel.isFireLit
         addScheduleVC.baseDate = targetDate
         
         addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in

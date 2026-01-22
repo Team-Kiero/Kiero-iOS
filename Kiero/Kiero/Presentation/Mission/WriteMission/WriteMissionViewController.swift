@@ -111,8 +111,10 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         viewModel?.isMissionAddSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] mission in
-                self?.onMissionAdded?(mission)
-                self?.dismiss(animated: true)
+                guard let self = self else { return }
+                Toast.show(message: "미션이 등록되었어요.")
+                self.onMissionAdded?(mission)
+                self.dismiss(animated: true)
             }
             .store(in: &cancellables)
     }

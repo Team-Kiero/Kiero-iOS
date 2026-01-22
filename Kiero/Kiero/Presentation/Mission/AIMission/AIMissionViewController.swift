@@ -162,7 +162,9 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         viewModel.bulkCreateSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                self?.dismiss(animated: true)
+                guard let self = self else { return }
+                Toast.show(message: "미션이 등록되었어요.")
+                self.dismiss(animated: true)
             }
             .store(in: &cancellables)
         

@@ -198,11 +198,9 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.leftButtonAction = { [weak self] in
             self?.dismiss(animated: true)
         }
-        
+
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
-            
-            self.navigationBar.isRightButtonEnabled = false
             
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
                 Toast.show(message: "일정 이름을 입력해주세요.")
@@ -216,12 +214,16 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
             
             let calendar = Calendar.current
-            _ = calendar.startOfDay(for: Date())
+            let now = Date()
+            let today = calendar.startOfDay(for: now)
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
+            let isFireLit = self.viewModel?.isFireLit ?? false
             
-            let start = self.currentStartTime ?? Date()
-            let end = self.currentEndTime ?? Date()
+            let start = self.currentStartTime ?? now
+            let end = self.currentEndTime ?? now
+            
+            let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
             let startMin = calendar.component(.hour, from: start) * 60 + calendar.component(.minute, from: start)
             let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
             
@@ -230,42 +232,66 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
+            let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+            let isCurrentWeek = calendar.isDate(self.baseDate, inSameDayAs: today) || (weekDates.first! <= today && weekDates.last! >= today)
+            
+            var startDateToSend: String? = nil
+            
+            if isRecurring {
+                let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
+                let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
+                
+                if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
+                    if let nextMonday = calendar.date(byAdding: .day, value: 7 - currentWeekDayIndex, to: today) {
+                        startDateToSend = nextMonday.toString(format: "yyyy-MM-dd")
+                    }
+                    Toast.show(message: "일정이 등록되었어요. (오늘 일정은 마감되어 다음 주부터 적용돼요!)")
+                } else {
+                    Toast.show(message: "일정이 등록되었어요.")
+                }
+            } else {
+                let hasToday = selectedIndices.contains { index in
+                    calendar.isDate(weekDates[index], inSameDayAs: today)
+                }
+                
+                if hasToday {
+                    if isFireLit || startMin < currentTimeMin {
+                        Toast.show(message: "오늘 일정은 마감되어 등록되지 않았습니다.")
+                        return
+                    }
+                }
+                
+                let hasPastDate = selectedIndices.contains { index in
+                    calendar.startOfDay(for: weekDates[index]) < today
+                }
+                
+                if hasPastDate {
+                    Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
+                    return
+                }
+                
+                Toast.show(message: "일정이 등록되었어요.")
+            }
+            
+            self.navigationBar.isRightButtonEnabled = false
+            
             let colorMapping: [UIColor: String] = [
                 .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
                 .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
             ]
             let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
-            let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
             
             let startTimeStr = start.toString(format: "HH:mm:ss")
             let endTimeStr = end.toString(format: "HH:mm:ss")
             
             if isRecurring {
+                let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
-                
-                viewModel?.addSchedule(
-                    name: title,
-                    isRecurring: true,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    color: colorCode,
-                    dayOfWeek: dayOfWeekStr,
-                    dates: nil
-                )
+                viewModel?.addSchedule(name: title, isRecurring: true, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: dayOfWeekStr, dates: nil)
             } else {
-                let datesStr = selectedIndices.map {
-                    weekDates[$0].toString(format: "yyyy-MM-dd")
-                }.joined(separator: ", ")
-                
-                viewModel?.addSchedule(
-                    name: title,
-                    isRecurring: false,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    color: colorCode,
-                    dayOfWeek: nil,
-                    dates: datesStr
-                )
+                let datesStr = selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
+                viewModel?.addSchedule(name: title, isRecurring: false, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: nil, dates: datesStr)
             }
             
             self.view.endEditing(true)
@@ -336,8 +362,9 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         viewModel.errorMessage
             .receive(on: DispatchQueue.main)
-            .sink { message in
+            .sink { [weak self] message in
                 Toast.show(message: message)
+                self?.navigationBar.isRightButtonEnabled = true
             }
             .store(in: &cancellables)
         
@@ -466,8 +493,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         
-        if text.count > 10 {
-            let index = text.index(text.startIndex, offsetBy: 10)
+        if text.count > 8 {
+            let index = text.index(text.startIndex, offsetBy: 8)
             let newString = String(text[..<index])
             textField.text = newString
         }
@@ -494,7 +521,7 @@ extension AddScheduleViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.count + string.count - range.length
-        return newLength <= 10
+        return newLength <= 8
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

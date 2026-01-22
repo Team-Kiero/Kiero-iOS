@@ -64,70 +64,39 @@ final class TimePickerViewController: BaseBottomSheetViewController {
     private func setAction() {
         navigationBar.leftButtonAction = { [weak self] in
             self?.onDismiss?()
-            self?.hideSheet()
+            self?.dismissSheetWithoutSaving()
         }
         
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
             let calendar = Calendar.current
-            var components = calendar.dateComponents([.hour, .minute], from: self.datePicker.date)
-            let hour = components.hour ?? 0
-            
+            let hour = calendar.component(.hour, from: self.datePicker.date)
             var finalDate = self.datePicker.date
-            var isAdjusted = false
             
             if hour < 8 {
-                components.hour = 8
-                components.minute = 0
-                if let minDate = calendar.date(from: components) {
+                if let minDate = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: finalDate) {
                     finalDate = minDate
-                    isAdjusted = true
                 }
                 Toast.show(message: "시각은 08:00AM부터 설정가능합니다.")
-            }
-            
-            else if hour >= 22 {
-                components.hour = 22
-                components.minute = 0
-                if let maxDate = calendar.date(from: components) {
+            } else if hour >= 22 {
+                if let maxDate = calendar.date(bySettingHour: 22, minute: 0, second: 0, of: finalDate) {
                     finalDate = maxDate
-                    isAdjusted = true
                 }
                 Toast.show(message: "시각은 10:00PM까지 설정가능합니다.")
             }
             
-            if isAdjusted {
-                self.datePicker.setDate(finalDate, animated: true)
-            }
-            
-            let formatter = DateFormatter()
-            formatter.dateFormat = "hh : mm a"
-            _ = formatter.string(from: finalDate)
-            
             self.onTimeSelected?(finalDate)
-            self.onDismiss?()
             self.hideSheet()
         }
     }
     
     override func hideSheet() {
-        let calendar = Calendar.current
-        let hour = calendar.component(.hour, from: datePicker.date)
-        var finalDate = datePicker.date
-        
-        if hour < 8 {
-            if let minDate = calendar.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) {
-                finalDate = minDate
-            }
-        } else if hour >= 22 {
-            if let maxDate = calendar.date(bySettingHour: 22, minute: 0, second: 0, of: Date()) {
-                finalDate = maxDate
-            }
-        }
-        
-        self.onTimeSelected?(finalDate)
         self.onDismiss?()
+        super.hideSheet()
+    }
+    
+    private func dismissSheetWithoutSaving() {
         super.hideSheet()
     }
     

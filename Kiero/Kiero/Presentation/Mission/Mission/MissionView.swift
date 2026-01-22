@@ -63,7 +63,14 @@ final class MissionView: BaseUIView {
     }
     
     func scrollToTop() {
-        tableView.setContentOffset(CGPoint.zero, animated: false)
+        guard !missionGroups.isEmpty else { return }
+        let indexPath = IndexPath(row: 0, section: 0)
+        
+        if tableView.numberOfSections > 0 && tableView.numberOfRows(inSection: 0) > 0 {
+            tableView.scrollToRow(at: indexPath, at: .top, animated: false)
+        } else {
+            tableView.setContentOffset(.zero, animated: false)
+        }
     }
 }
 
@@ -123,7 +130,8 @@ extension MissionView: UITableViewDelegate {
         }
         
         let dateLabel = UILabel().then {
-            $0.text = "\(headerDate.toString(format: "yyyy.MM.dd."))(\(group.dayOfWeek))"
+            let dayOfWeekShort = String(group.dayOfWeek.prefix(1))
+                $0.text = "\(headerDate.toString(format: "yyyy.MM.dd."))(\(dayOfWeekShort))"
             $0.font = .body3_14_R
             $0.textColor = .gray500
         }
