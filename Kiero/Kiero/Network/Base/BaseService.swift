@@ -146,7 +146,7 @@ final class BaseService {
         }
     }
     
-    
+
     // accessToken 재발급
     private func refreshAccessToken() async throws {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
@@ -219,6 +219,37 @@ final class BaseService {
             throw NetworkError.responseDecodingError
         }
         TokenManager.shared.saveRefreshToken(newRefresh)
+    }
+    
+    func reissueSseAccessToken() async throws -> String {
+        guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
+            throw NetworkError.clientError(statusCode: 401)
+        }
+        
+        let urlString = Config.baseURL + EndPoint.sseToken.url
+        guard let url = URL(string: urlString) else { throw NetworkError.invalidURL }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("refreshToken=\(refresh)", forHTTPHeaderField: "Cookie")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw NetworkError.unknownError }
+        
+        NetworkLogger.shared.responseLog(http, data: data)
+        
+        if (400...499).contains(http.statusCode) { throw NetworkError.clientError(statusCode: http.statusCode) }
+        if (500...599).contains(http.statusCode) { throw NetworkError.internalServerError }
+        guard (200...299).contains(http.statusCode) else { throw NetworkError.unknownError }
+        
+        do {
+            let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
+            guard let tokenData = decoded.data else { throw NetworkError.noData }
+            return tokenData.accessToken
+        } catch {
+            throw NetworkError.responseDecodingError
+        }
     }
     
     private func extractCookieValue(from response: HTTPURLResponse, cookieName: String) -> String? {

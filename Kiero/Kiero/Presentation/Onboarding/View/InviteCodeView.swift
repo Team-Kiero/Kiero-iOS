@@ -14,7 +14,7 @@ final class InviteCodeView: UIView {
     
     // MARK: - Properties
     
-    var copyButtonTapped: (() -> Void)?
+    var refreshDidTap: (() -> Void)?
     
     // MARK: - UI Components
     
@@ -35,8 +35,25 @@ final class InviteCodeView: UIView {
         $0.configure(title: "복사하기", icon: .icCopy)
     }
     
+    private let timeStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 4
+        $0.alignment = .center
+        $0.distribution = .fill
+        $0.isUserInteractionEnabled = true
+    }
+    
+    private let refreshIconImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.image = .icRefresh.resized(to: CGSize(width: 13, height: 13)).withTintColor(.point)
+        $0.isUserInteractionEnabled = true
+        $0.isHidden = true
+    }
+    
     private let timeLimitLabel = UILabel().then {
         $0.textColor = .schedule1
+        $0.textAlignment = .center
+        $0.isUserInteractionEnabled = true
     }
     
     private let noticeLabel = UILabel().then {
@@ -77,8 +94,13 @@ final class InviteCodeView: UIView {
         addSubviews(
             inviteView,
             copyButton,
-            timeLimitLabel,
+            timeStackView,
             noticeLabel
+        )
+        
+        timeStackView.addArrangedSubviews(
+            refreshIconImageView,
+            timeLimitLabel
         )
         
         inviteView.addSubviews(
@@ -111,42 +133,59 @@ final class InviteCodeView: UIView {
             $0.height.equalTo(45)
         }
         
-        timeLimitLabel.snp.makeConstraints {
+        timeStackView.snp.makeConstraints {
             $0.top.equalTo(copyButton.snp.bottom).offset(19)
             $0.centerX.equalToSuperview()
         }
         
+        refreshIconImageView.snp.makeConstraints {
+            $0.size.equalTo(13)
+        }
+        
         noticeLabel.snp.makeConstraints {
-            $0.top.equalTo(timeLimitLabel.snp.bottom).offset(9)
+            $0.top.equalTo(timeStackView.snp.bottom).offset(9)
             $0.centerX.equalToSuperview()
         }
     }
     
     private func addTarget() {
         copyButton.addTarget(self, action: #selector(copyButtonDidTap), for: .touchUpInside)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(refreshButtonDidTap))
+        timeStackView.addGestureRecognizer(tap)
     }
     
     func configure(code: String, remainingTime: String, isExpired: Bool) {
         codeLabel.text = code
-            if isExpired {
-                timeLimitLabel.setTypo(.body4_12_R, text: "코드 재발급하기")
-                timeLimitLabel.textColor = .point
-                copyButton.alpha = 0.3
-                copyButton.isEnabled = false
-            } else {
-                timeLimitLabel.setTypo(
-                    .body4_12_R,
-                    text: "유효기간 \(remainingTime)"
-                )
-                timeLimitLabel.textColor = .schedule1
-                copyButton.alpha = 1.0
-                copyButton.isEnabled = true
-            }
+
+        if isExpired {
+            timeLimitLabel.setTypo(.body4_12_R, text: "코드 재발급하기")
+            timeLimitLabel.textColor = .point
+
+            refreshIconImageView.isHidden = false
+            timeStackView.isUserInteractionEnabled = isExpired
+
+            copyButton.alpha = 0.3
+            copyButton.isEnabled = false
+        } else {
+            timeLimitLabel.setTypo(.body4_12_R, text: "유효기간 \(remainingTime)")
+            timeLimitLabel.textColor = .schedule1
+
+            refreshIconImageView.isHidden = true
+            timeStackView.isUserInteractionEnabled = isExpired
+
+            copyButton.alpha = 1.0
+            copyButton.isEnabled = true
         }
+    }
     
     @objc
     private func copyButtonDidTap() {
         UIPasteboard.general.string = codeLabel.text
         Toast.show(message: "초대코드가 복사되었습니다.", bottomInset: 83)
+    }
+    
+    @objc
+    private func refreshButtonDidTap() {
+        refreshDidTap?()
     }
 }

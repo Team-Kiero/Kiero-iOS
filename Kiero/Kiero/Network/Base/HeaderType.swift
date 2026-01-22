@@ -11,6 +11,7 @@ enum HeaderType {
     case none
     case auth
     case refreshCookie
+    case sseSubscribe
 
     var type: [String: String] {
         switch self {
@@ -29,6 +30,13 @@ enum HeaderType {
             return [
                 "Content-Type": "application/json",
                 "Cookie": "refreshToken=\(refresh)"
+            ]
+            
+        case .sseSubscribe:
+            let sseToken = TokenManager.shared.getSseToken() ?? ""
+            return [
+                "Content-Type": "application/json",
+                "Authorization": "Bearer \(sseToken)"
             ]
         }
     }

@@ -18,3 +18,8 @@ struct ChildSignupData: Decodable {
     let accessToken: String
     let refreshToken: String
 }
+
+struct ChildRegistrationStatusDTO: Codable {
+    let isRegistered: Bool
+    let childId: Int?
+}

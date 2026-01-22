@@ -89,6 +89,8 @@ final class TextField: UIView {
     
     weak var externalDelegate: UITextFieldDelegate?
     
+    var onValidationChanged: ((Bool) -> Void)?
+    
     var innerTextField: UITextField { textField }
     
     // MARK: - UI Components
@@ -204,10 +206,12 @@ final class TextField: UIView {
         textField.layer.borderWidth = 0
         textField.layer.borderColor = UIColor.clear.cgColor
         
-        guard let regex = type.regex else { return }
+        guard let regex = type.regex else {
+                onValidationChanged?(true)
+                return
+            }
         
-        let text = (textField.text ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = (textField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         
         if textField.text == nil || textField.text == ""{
             textField.layer.borderColor = UIColor.white.cgColor
@@ -225,6 +229,17 @@ final class TextField: UIView {
         ).evaluate(with: text)
         
         updateErrorUI(isValid: isValid)
+        onValidationChanged?(isValid)
+    }
+    
+    private func isValidInput(_ raw: String) -> Bool {
+        guard let regex = type.regex else { return true }
+
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !text.isEmpty else { return false }
+
+        return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: text)
     }
     
     private func updateErrorUI(isValid: Bool) {
@@ -290,7 +305,7 @@ extension TextField: UITextFieldDelegate {
 
         let externalOK = externalDelegate?
             .textField?(textField, shouldChangeCharactersIn: range, replacementString: string) ?? true
-
+        
         return externalOK
     }
 

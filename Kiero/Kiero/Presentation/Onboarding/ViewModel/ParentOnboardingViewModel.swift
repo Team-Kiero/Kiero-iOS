@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 enum ParentOnboardingRoute {
-    case invite(childFullName: String, inviteCode: String, issuedAt: Date)
+    case invite(childLastName: String, childFirstName: String, inviteCode: String, issuedAt: Date)
 }
 
 final class ParentOnboardingViewModel: BaseViewModel {
@@ -19,12 +19,33 @@ final class ParentOnboardingViewModel: BaseViewModel {
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<ParentOnboardingRoute, Never>()
 
+    let lastName = CurrentValueSubject<String, Never>("")
+    let firstName = CurrentValueSubject<String, Never>("")
+
     var state: AnyPublisher<LoginState, Never> { stateSubject.eraseToAnyPublisher() }
     var route: AnyPublisher<ParentOnboardingRoute, Never> { routeSubject.eraseToAnyPublisher() }
 
-    init(name: String, profileURL: String) {
+    var isGenerateEnabled: AnyPublisher<Bool, Never> {
+        Publishers.CombineLatest(lastName, firstName)
+            .map { last, first in
+                let l = last.trimmingCharacters(in: .whitespacesAndNewlines)
+                let f = first.trimmingCharacters(in: .whitespacesAndNewlines)
+                return !l.isEmpty && !f.isEmpty
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    private let sseManager: SseStreamManager
+
+    init(
+        name: String,
+        profileURL: String,
+        sseManager: SseStreamManager = AppDIContainer.shared.sseManager
+    ) {
         self.name = name
         self.profileURL = profileURL
+        self.sseManager = sseManager
         super.init()
     }
 
@@ -42,23 +63,39 @@ final class ParentOnboardingViewModel: BaseViewModel {
         Task { [weak self] in
             guard let self else { return }
             do {
+                // 1) 초대 코드 생성
                 let req = InviteCodeRequest(childLastName: last, childFirstName: first)
-
                 let data: InviteCodeData = try await BaseService.shared.request(
                     endPoint: .postInviteCode,
                     body: req
                 )
 
-                let fullName = "\(data.childLastName)\(data.childFirstName)"
+                print("✅ [VM] 2) reissueSseAccessToken() 호출 직전")
 
+                let sseToken = try await BaseService.shared.reissueSseAccessToken()
+
+                print("✅ [VM] 2) sseToken 발급 성공:", sseToken.prefix(10))
+
+                await MainActor.run {
+                    print("✅ [VM] 3) startIfNeeded 호출 직전")
+                    self.sseManager.startIfNeeded(initialToken: sseToken) { payload in
+                        print("✅ [VM] SSE payload 수신:", payload.eventType)
+                        NotificationCenter.default.post(name: .didReceiveSseEvent, object: payload)
+                    }
+                    print("✅ [VM] 3) startIfNeeded 호출 완료")
+                }
+
+                // 4) 라우팅
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     self.routeSubject.send(.invite(
-                        childFullName: fullName,
+                        childLastName: data.childLastName,
+                        childFirstName: data.childFirstName,
                         inviteCode: data.code,
                         issuedAt: Date()
                     ))
                 }
+
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))

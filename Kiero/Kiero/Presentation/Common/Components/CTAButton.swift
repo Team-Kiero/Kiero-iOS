@@ -67,7 +67,19 @@ final class CTAButton: UIButton {
         }
     }
     
-    private let style: Style
+    override var isEnabled: Bool {
+        didSet {
+            if let enabledStyle, let disabledStyle {
+                applyStyle(isEnabled ? enabledStyle : disabledStyle)
+            } else {
+                self.alpha = isEnabled ? 1.0 : 0.4
+            }
+        }
+    }
+    
+    private var style: Style
+    private var enabledStyle: Style?
+    private var disabledStyle: Style?
     
     private let contentStackView = UIStackView().then {
         $0.axis = .horizontal
@@ -91,7 +103,14 @@ final class CTAButton: UIButton {
         super.init(frame: .zero)
         setUI()
         setLayout(height: style.buttonHeight)
-        setStyle()
+        applyStyle(style)
+    }
+    
+    convenience init(enabledStyle: Style, disabledStyle: Style) {
+        self.init(style: enabledStyle)
+        self.enabledStyle = enabledStyle
+        self.disabledStyle = disabledStyle
+        self.isEnabled = true
     }
     
     required init?(coder: NSCoder) {
@@ -124,6 +143,14 @@ final class CTAButton: UIButton {
         self.backgroundColor = style.backgroundColor
         self.mainLabel.textColor = style.titleColor
         self.iconImageView.tintColor = style.titleColor
+    }
+    
+    private func applyStyle(_ style: Style) {
+        self.style = style
+        self.backgroundColor = style.backgroundColor
+        self.mainLabel.textColor = style.titleColor
+        self.iconImageView.tintColor = style.titleColor
+        self.mainLabel.font = style.typo.font
     }
     
     // MARK: - Configuration
