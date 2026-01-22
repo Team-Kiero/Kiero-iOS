@@ -13,6 +13,10 @@ import Moya
 final class AppDIContainer: ViewControllerFactory, ServiceFactory{
     static let shared = AppDIContainer()
     private init() {}
+    
+    lazy var sseManager: SseStreamManager = {
+        SseStreamManager(sseURL: Config.sseURL)
+    }()
 }
 
 // MARK: - Login
