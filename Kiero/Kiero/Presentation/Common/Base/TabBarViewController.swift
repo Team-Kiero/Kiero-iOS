@@ -14,6 +14,10 @@ protocol ScrollToTopAvailable {
     func scrollToTop()
 }
 
+protocol TabBarReselectRefreshable {
+    func refreshOnTabReselect()
+}
+
 public final class TabBarViewController: UITabBarController {
     
     private let factory: ViewControllerFactory
@@ -36,6 +40,11 @@ public final class TabBarViewController: UITabBarController {
         setStyle()
         setViewControllers()
         setCustomTabBarUI()
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.delegate = self
     }
     
     private func setStyle() {
@@ -95,12 +104,13 @@ public final class TabBarViewController: UITabBarController {
             self.selectedIndex = index
             
             if let selectedVC = self.viewControllers?[index] {
-                let targetVC = (selectedVC as? UINavigationController)?.topViewController ?? selectedVC
+                let targetVC = (selectedVC as? UINavigationController)?.viewControllers.first ?? selectedVC
                 
                 if isReclick {
                     if let scheduleVC = targetVC as? ScheduleViewController {
                         scheduleVC.viewModel?.currentReferenceDate.send(Date())
                     }
+                    self.refreshOnReselect(targetVC)
                     self.scrollToTop(viewController: targetVC)
                 }
             }
@@ -128,6 +138,9 @@ extension TabBarViewController: UITabBarControllerDelegate {
         }
         
         scrollToTop(viewController: targetVC)
+        if tabBarController.selectedViewController === viewController {
+            (targetVC as? TabBarReselectRefreshable)?.refreshOnTabReselect()
+        }
     }
     
     private func scrollToTop(viewController: UIViewController) {
@@ -137,6 +150,15 @@ extension TabBarViewController: UITabBarControllerDelegate {
         }
         
         findScrollViewAndScrollToTop(in: viewController.view)
+    }
+    
+    private func refreshOnReselect(_ viewController: UIViewController) {
+        let target = (viewController as? UINavigationController)?.viewControllers.first ?? viewController
+        
+        if let refreshable = target as? TabBarReselectRefreshable {
+            refreshable.refreshOnTabReselect()
+            return
+        }
     }
     
     private func findScrollViewAndScrollToTop(in view: UIView) {
@@ -166,8 +188,4 @@ extension TabBarViewController: UINavigationControllerDelegate {
             self.customTabBar.alpha = 1
         }
     }
-}
-
-#Preview {
-    TabBarViewController(factory: AppDIContainer.shared, isParent: true)
 }

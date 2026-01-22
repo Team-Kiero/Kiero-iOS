@@ -79,6 +79,10 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         contentView.tableView.backgroundView = isEmpty ? emptyView : nil
         contentView.tableView.separatorStyle = isEmpty ? .none : .none
     }
+    
+    func triggerRefresh() {
+        refreshSubject.send(())
+    }
 }
 
 // MARK: - DataSource
@@ -153,6 +157,12 @@ extension NotificationFeedViewController: ScrollToTopAvailable {
         if viewModel?.sections.isEmpty == false {
             contentView.tableView.setContentOffset(.zero, animated: true)
         }
+    }
+}
+
+extension NotificationFeedViewController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        triggerRefresh()
     }
 }
 

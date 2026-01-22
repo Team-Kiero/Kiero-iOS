@@ -140,3 +140,9 @@ extension CoinMissionViewController: ScrollToTopAvailable {
         }
     }
 }
+
+extension CoinMissionViewController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        viewWillAppearSubject.send(())
+    }
+}
