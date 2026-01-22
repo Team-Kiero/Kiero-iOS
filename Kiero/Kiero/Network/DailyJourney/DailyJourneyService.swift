@@ -5,8 +5,8 @@
 //  Created by Hyunseo Han on 1/20/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 final class DailyJourneyService {
     static let shared = DailyJourneyService()

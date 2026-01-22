@@ -35,7 +35,7 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
-    //CoinMission
+    // CoinMission
     case fetchChildrenInfo
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
@@ -58,10 +58,10 @@ enum EndPoint {
     // Presigned URL 요청
     case getPresignedURL
     
-    // 인증 완료 요청
-    case completeSchedule(scheduleDetailId: Int) // 바디는 서비스에서 넘겨줌
+    // MissionComplete
+    case completeSchedule(scheduleDetailId: Int)
     
-    // 불 피우기
+    // GiveFireStone
     case fireLit
     
     var url: String {
