@@ -50,7 +50,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         $0.onIndexChanged = { [weak self] index in
             guard let self = self else { return }
             self.currentTabIndex = index
-            self.scrollToTopCurrentTab()
         }
     }
     
@@ -65,7 +64,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.tabBarController?.delegate = self
         viewModel?.refreshSchedules()
     }
     
@@ -110,16 +108,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
                 self.presentAddSchedule()
             } else {
                 self.presentAddMission()
-            }
-        }
-    }
-    
-    private func scrollToTopCurrentTab() {
-        if currentTabIndex == 0 {
-            scheduleChildVC.scrollToTop()
-        } else {
-            if let missionVC = missionVC as? ScrollToTopAvailable {
-                missionVC.scrollToTop()
             }
         }
     }
@@ -255,22 +243,4 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
                 self?.navigateToPickRole()
             }.store(in: &cancellables)
     }
-}
-
-extension ScheduleViewController: UITabBarControllerDelegate {
-    
-    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
-        let targetVC = (viewController as? UINavigationController)?.topViewController ?? viewController
-        
-        if targetVC === self {
-            if tabBarController.selectedViewController === viewController {
-                scrollToTopCurrentTab()
-            }
-        }
-        return true
-    }
-}
-
-#Preview {
-    AppDIContainer.shared.makeScheduleViewController()
 }
