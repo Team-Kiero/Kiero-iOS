@@ -269,8 +269,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private func convertStoneTypeToKorean(_ type: StoneType?) -> String {
         guard let type = type else { return "" }
         switch type {
-        case .grit: return "용기의 불조각"
-        case .courage: return "인내의 불조각"
+        case .grit: return "인내의 불조각"
+        case .courage: return "용기의 불조각"
         case .wisdom: return "지혜의 불조각"
         }
     }
