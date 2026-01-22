@@ -68,7 +68,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.tabBarController?.delegate = self
         viewModel?.refreshSchedules()
     }
     
@@ -113,6 +113,16 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
                 self.presentAddSchedule()
             } else {
                 self.presentAddMission()
+            }
+        }
+    }
+    
+    private func scrollToTopCurrentTab() {
+        if currentTabIndex == 0 {
+            scheduleChildVC.scrollToTop()
+        } else {
+            if let missionVC = missionVC as? ScrollToTopAvailable {
+                missionVC.scrollToTop()
             }
         }
     }
@@ -249,11 +259,17 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     }
 }
 
-extension ScheduleChildViewController: ScrollToTopAvailable {
-    func scrollToTop() {
-        DispatchQueue.main.async { [weak self] in
-            self?.scheduleView.timeTableView.scrollToTop()
+extension ScheduleViewController: UITabBarControllerDelegate {
+    
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        let targetVC = (viewController as? UINavigationController)?.topViewController ?? viewController
+        
+        if targetVC === self {
+            if tabBarController.selectedViewController === viewController {
+                scrollToTopCurrentTab()
+            }
         }
+        return true
     }
 }
 
