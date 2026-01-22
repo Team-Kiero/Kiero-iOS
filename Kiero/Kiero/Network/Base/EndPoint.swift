@@ -49,16 +49,19 @@ enum EndPoint {
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
     
-    //CoinMission
+    // WishWell
     case fetchChildrenInfo
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
+    
+    // CoinMission
+    case completeMission(missionId: Int64)
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission:
             return .child
         default:
             return .parent
@@ -109,6 +112,8 @@ enum EndPoint {
             return "/api/v1/coupons/\(couponId)"
         case .fetchDefaultColor(let childId):
             return "/api/v1/schedules/\(childId)/default"
+        case .completeMission(let missionId):
+            return "/api/v1/missions/\(missionId)/complete"
         }
     }
     
@@ -116,7 +121,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor:
             return "GET"
-        case .purchaseCoupon:
+        case .purchaseCoupon, .completeMission:
             return "PATCH"
         default:
             return "POST"
