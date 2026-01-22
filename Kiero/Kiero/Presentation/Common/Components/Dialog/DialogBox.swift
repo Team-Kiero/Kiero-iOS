@@ -36,7 +36,7 @@ final class DialogBox: UIView {
         var message: String {
             switch self {
             case .missionComplete:
-                return "미션을 완료했다면\n아래 버튼을 눌러줘"
+                return "미션을 완료했다면\n아래 버튼을 눌러줘!"
             case .logout:
                 return "로그아웃 하시겠습니까?"
             case .wishWell:
