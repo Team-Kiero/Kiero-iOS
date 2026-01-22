@@ -167,7 +167,7 @@ final class GiveFireStoneView: BaseUIView {
         }
         
         kkubiImageView.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(11)
+            $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-350)
             $0.size.equalTo(272)
         }
@@ -216,6 +216,10 @@ final class GiveFireStoneView: BaseUIView {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일 EEEE"
         dateLabel.setTypo(.body3_14_R, text: formatter.string(from: Date()))
+    }
+    
+    func configure(count: Int) {
+        fireCountLabel.setTypo(.body2_16_R, text: "\(count)개")
     }
     
     @objc
