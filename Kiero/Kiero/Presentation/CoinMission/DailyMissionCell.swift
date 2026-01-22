@@ -64,9 +64,9 @@ class DailyMissionCell: UICollectionViewCell {
     
     // MARK: - Configuration
     
-    func configure(date: Date, missions: [(id: Int64, name: String, reward: Int, isCompleted: Bool)]) {
-        dateLabel.setTypo(.body4_12_R, text: date.toMissionDateString())
-        missionStack.arrangedSubviews.forEach { $0.removeFromSuperview()}
+    func configure(dueAt: String, dayOfWeek: String, missions: [MissionItemDTO]) {
+        dateLabel.setTypo(.body4_12_R, text: dueAt.toMissionDateString(dayOfWeek: dayOfWeek))
+        missionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
         for mission in missions {
             let missionView = createMissionView(from: mission)
@@ -74,13 +74,13 @@ class DailyMissionCell: UICollectionViewCell {
         }
     }
     
-    private func createMissionView(from mission: (id: Int64, name: String, reward: Int, isCompleted: Bool)) -> MissionBoxChild {
+    private func createMissionView(from mission: MissionItemDTO) -> MissionBoxChild {
         let missionView = MissionBoxChild()
         let state: MissionBoxChild.State = mission.isCompleted ? .completed : .inProgress
         
         missionView.configure(name: mission.name, reward: mission.reward, state: state)
         missionView.onTap = { [weak self] in
-            self?.missionTapHandler?(mission.id, mission.name)
+            self?.missionTapHandler?(Int64(mission.id), mission.name)
         }
         return missionView
     }
@@ -91,16 +91,35 @@ class DailyMissionCell: UICollectionViewCell {
     }
 }
 
-extension Date {
-    func toMissionDateString() -> String {
-        let calendar = Calendar.current
-        if calendar.isDateInToday(self) { return "오늘까지"}
-        else if calendar.isDateInTomorrow(self) { return "내일까지" }
-        else {
+extension String {
+    
+    func toMissionDateString(dayOfWeek: String) -> String {
+        let parsed = self.toDateFlexible()
+        
+        if let date = parsed {
+            let calendar = Calendar.current
+            if calendar.isDateInToday(date) { return "오늘까지" }
+            if calendar.isDateInTomorrow(date) { return "내일까지" }
+            
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "ko_KR")
-            formatter.dateFormat = "M월 d일 E요일까지"
-            return formatter.string(from: self)
+            formatter.dateFormat = "M월 d일 \(dayOfWeek)까지"
+            return formatter.string(from: date)
         }
+        
+        return "\(self) \(dayOfWeek)까지"
+    }
+    
+    private func toDateFlexible() -> Date? {
+        let fmts = ["yyyy.MM.dd", "yyyy-MM-dd", "yyyy/MM/dd"]
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "ko_KR")
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        
+        for fmt in fmts {
+            f.dateFormat = fmt
+            if let d = f.date(from: self) { return d }
+        }
+        return nil
     }
 }
