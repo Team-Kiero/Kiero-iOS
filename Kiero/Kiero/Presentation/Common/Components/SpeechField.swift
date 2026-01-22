@@ -80,7 +80,6 @@ final class SpeechField: UIView {
         setStyle()
         setUI()
         setLayout()
-        addTarget()
         updateGestures()
     }
     
@@ -156,22 +155,11 @@ final class SpeechField: UIView {
         }
     }
     
-    private func addTarget() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(labelButtonDidTap))
-        switch type {
-        case .main:
-            addGestureRecognizer(tap)
-        case .no:
-            return
-        case .gray:
-            buttonContainerView.addGestureRecognizer(tap)
-            buttonContainerView.isUserInteractionEnabled = true
-        }
-    }
-    
     private func updateGestures() {
         self.gestureRecognizers?.forEach { removeGestureRecognizer($0) }
         buttonContainerView.gestureRecognizers?.forEach { buttonContainerView.removeGestureRecognizer($0) }
+        
+        if type == .no { return }
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(labelButtonDidTap))
         
@@ -179,11 +167,11 @@ final class SpeechField: UIView {
         case .main:
             addGestureRecognizer(tap)
             buttonContainerView.isUserInteractionEnabled = false
-        case .no:
-            return
         case .gray:
             buttonContainerView.addGestureRecognizer(tap)
             buttonContainerView.isUserInteractionEnabled = true
+        case .no:
+            break
         }
     }
     
