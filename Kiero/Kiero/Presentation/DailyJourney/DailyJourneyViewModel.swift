@@ -26,6 +26,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let viewWillAppear: AnyPublisher<Void, Never>
+        let viewWillDisappear: AnyPublisher<Void, Never>
         let nextJourneyButtonTap: AnyPublisher<Void, Never>
         let verifyButtonTap: AnyPublisher<Void, Never>
         let skipConfirmTap: AnyPublisher<Void, Never>
@@ -45,7 +46,14 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     func transform(input: Input) -> Output {
         input.viewWillAppear
-            .sink { [weak self] in self?.fetchDailyJourney() }
+            .sink { [weak self] in 
+                self?.fetchDailyJourney()
+                self?.startSseConnection()
+            }
+            .store(in: &cancellables)
+        
+        input.viewWillDisappear
+            .sink { [weak self] in self?.pauseSseConnection() }
             .store(in: &cancellables)
         
         input.nextJourneyButtonTap
@@ -126,6 +134,42 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
     
     
+    
+    // MARK: - SSE Logic
+    
+    func startSseConnection() {
+        print("✅ [DailyJourneyViewModel] startSseConnection called")
+        
+        Task {
+            var token = TokenManager.shared.getSseToken()
+            
+            if token == nil {
+                print("⚠️ [DailyJourneyViewModel] No SSE Token found. Reissuing...")
+                do {
+                    token = try await BaseService.shared.reissueSseAccessToken()
+                    print("✅ [DailyJourneyViewModel] SSE Token reissued successfully.")
+                } catch {
+                    print("❌ [DailyJourneyViewModel] Failed to reissue SSE Token: \(error)")
+                    return
+                }
+            }
+            
+            guard let validToken = token else { return }
+            
+            await MainActor.run {
+                SseStreamManager.shared.startIfNeeded(initialToken: validToken) { [weak self] payload in
+                    print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
+                    // 이벤트 수신 시 데이터 갱신
+                    self?.fetchDailyJourney()
+                }
+            }
+        }
+    }
+    
+    func pauseSseConnection() {
+        print("⏸ [DailyJourneyViewModel] pauseSseConnection called")
+        SseStreamManager.shared.pause()
+    }
     
     // MARK: - Converter
     
