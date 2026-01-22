@@ -69,7 +69,6 @@ final class GiveFireStoneAnimationView: BaseUIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
         backgroundMaskView.frame = backgroundImageView.bounds
         
         if let gradientLayer = backgroundMaskView.layer.sublayers?.first as? CAGradientLayer {
@@ -128,18 +127,39 @@ final class GiveFireStoneAnimationView: BaseUIView {
     
     // MARK: - Animation Methods
     
-    func playAnimation(completion: (() -> Void)? = nil) {
+    private func stoneImage(for key: String) -> UIImage {
+        switch key {
+        case "COURAGE":
+            return UIImage(resource: .ic3DBluestone)
+        case "WISDOM":
+            return UIImage(resource: .ic3DRedstone)
+        case "GRIT":
+            return UIImage(resource: .ic3DGreenstone)
+        default:
+            return UIImage(resource: .ic3DBluestone)
+        }
+    }
+    
+    
+    func playAnimation(stones: [String], completion: (() -> Void)? = nil) {
         self.layoutIfNeeded()
+        
+        guard !stones.isEmpty else {
+            completion?()
+            return
+        }
         
         let startY = kkubiImageView.frame.maxY > 0 ? kkubiImageView.frame.maxY : 500
         let targetY = fireStoneImageView.frame.midY
         let distanceY = (startY - targetY) * 0.2
+        let images = stones.map { stoneImage(for: $0) }
         
-        runAnimationLoop(count: 3, distanceY: distanceY, currentIndex: 0, completion: completion)
+        runAnimationLoop(images: images, distanceY: distanceY, currentIndex: 0, completion: completion)
     }
     
-    private func runAnimationLoop(count: Int, distanceY: CGFloat, currentIndex: Int, completion: (() -> Void)?) {
-        guard count > 0 else {
+    
+    private func runAnimationLoop(images: [UIImage], distanceY: CGFloat, currentIndex: Int, completion: (() -> Void)?) {
+        guard currentIndex < images.count else {
             UIView.animate(withDuration: 0.3) {
                 self.fireStoneImageView.alpha = 0
             } completion: { _ in
@@ -148,8 +168,7 @@ final class GiveFireStoneAnimationView: BaseUIView {
             return
         }
         
-        let imageIndex = currentIndex % stoneImages.count
-        self.fireStoneImageView.image = stoneImages[imageIndex]
+        self.fireStoneImageView.image = images[currentIndex]
         
         let rotation = CGAffineTransform(rotationAngle: -30 * .pi / 180)
         let translation = CGAffineTransform(translationX: 0, y: distanceY)
@@ -161,10 +180,11 @@ final class GiveFireStoneAnimationView: BaseUIView {
         UIView.animate(withDuration: 1, delay: 0, options: .curveEaseOut) {
             self.fireStoneImageView.transform = .identity
         } completion: { _ in
-            self.runAnimationLoop(count: count - 1,
+            self.runAnimationLoop(images: images,
                                   distanceY: distanceY,
                                   currentIndex: currentIndex + 1,
                                   completion: completion)
         }
     }
+    
 }
