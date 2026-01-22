@@ -5,15 +5,16 @@
 //  Created by Hyunseo Han on 1/16/26.
 //
 
-import UIKit
 import Combine
-
-struct FireStoneResponse: Decodable {
-    let gotStones: [String]
-    let earnedCoinAmount: Int
-}
+import UIKit
 
 final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
+    
+    let earnedStoneCount: Int
+    
+    init(count: Int) {
+        self.earnedStoneCount = count
+    }
     
     // MARK: - Input & Output
     
@@ -46,7 +47,7 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
         
         input.processViewDidAppear
             .sink { [weak self] in
-                self?.setDummyResultData()
+                self?.requestLightFire()
             }
             .store(in: &cancellables)
         
@@ -56,11 +57,24 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
             showError: errorSubject.eraseToAnyPublisher()
         )
     }
+    
+    // MARK: - Network Logic
+    
+    private func requestLightFire() {
+        print("🚀 [GiveFireStoneVM] 마음의 불 피우기 API 요청 시작")
         
-    private func setDummyResultData() {
-        let coin = 10
-        let stones = ["WISDOM"]
-        
-        self.resultSubject.send((coin, stones))
+        DailyJourneyService.shared.lightFire()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                if case .failure(let error) = completion {
+                    print("❌ [GiveFireStoneVM] 불꽃 피우기 실패: \(error)")
+                    self?.errorSubject.send("불꽃을 전달하는 중 문제가 발생했어요.")
+                }
+            } receiveValue: { [weak self] data in
+                print("✅ [GiveFireStoneVM] 성공! 획득 코인: \(data.earnedCoinAmount), 불조각: \(data.gotStones)")
+                
+                self?.resultSubject.send((data.earnedCoinAmount, data.gotStones))
+            }
+            .store(in: &cancellables)
     }
 }

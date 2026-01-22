@@ -5,8 +5,8 @@
 //  Created by Hyunseo Han on 1/15/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 import SnapKit
 import Then
@@ -73,6 +73,7 @@ final class MissionCompleteView: BaseUIView {
         self.fireStoneImageView.image = rewardImage
         
         speechField.configure(
+            fieldType: .no,
             name: "꾸비",
             lines: [message],
             highlightKeywords: [keyword]

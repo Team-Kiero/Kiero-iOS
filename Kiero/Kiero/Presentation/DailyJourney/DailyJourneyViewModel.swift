@@ -5,15 +5,22 @@
 //  Created by Hyunseo Han on 1/13/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 enum DailyJourneyRoute {
     case showNextJourneyDialogBox
     case showCamera
+    case tryLightFire
 }
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
+    
+    private let wishWellService = WishWellService()
+    public var currentScheduleDetailId: Int?
+    private(set) var currentStoneType: StoneType?
+    private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
+    public var currentEarnedStoneCount: Int = 0
     
     // MARK: - Input & Output
     
@@ -21,6 +28,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let viewWillAppear: AnyPublisher<Void, Never>
         let nextJourneyButtonTap: AnyPublisher<Void, Never>
         let verifyButtonTap: AnyPublisher<Void, Never>
+        let skipConfirmTap: AnyPublisher<Void, Never>
     }
     
     struct Output {
@@ -31,111 +39,240 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     // MARK: - Properties
     
     private let routeSubject = PassthroughSubject<DailyJourneyRoute, Never>()
+    private let viewDataSubject = PassthroughSubject<DailyJourneyModel, Never>()
     
     // MARK: - Transform
     
     func transform(input: Input) -> Output {
+        input.viewWillAppear
+            .sink { [weak self] in self?.fetchDailyJourney() }
+            .store(in: &cancellables)
         
         input.nextJourneyButtonTap
-            .sink { [weak self] in
-                self?.routeSubject.send(.showNextJourneyDialogBox)
-            }
+            .sink { [weak self] in self?.routeSubject.send(.showNextJourneyDialogBox) }
             .store(in: &cancellables)
         
         input.verifyButtonTap
             .sink { [weak self] in
-                self?.routeSubject.send(.showCamera)
+                guard let self = self else { return }
+                switch self.currentButtonType {
+                case .verify:
+                    self.routeSubject.send(.showCamera)
+                case .lightFire:
+                    self.routeSubject.send(.tryLightFire)
+                case .hidden:
+                    break
+                }
             }
             .store(in: &cancellables)
         
-        let viewDataOutput = input.viewWillAppear
-            .map { [weak self] _ -> DailyJourneyModel in
-                guard let self = self else { return self!.makeErrorViewData() }
-                return self.makeScheduleExistData()
-            }
-            .eraseToAnyPublisher()
+        input.skipConfirmTap
+            .sink { [weak self] in self?.skipSchedule() }
+            .store(in: &cancellables)
         
         return Output(
-            viewData: viewDataOutput,
+            viewData: viewDataSubject.eraseToAnyPublisher(),
             route: routeSubject.eraseToAnyPublisher()
         )
     }
     
-    // MARK: - Mock Data Helper Methods
+    // MARK: - Network Logic
     
-    // TODO: - 명세서의 로직을 여기에 구현
+    private func fetchDailyJourney() {
+        Publishers.Zip(
+            DailyJourneyService.shared.updateDailyJourney(),
+            self.wishWellService.fetchMyInfo()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { completion in
+            if case .failure(let error) = completion {
+                print("❌ Fetch Error: \(error)")
+            }
+        } receiveValue: { [weak self] (scheduleDTO, childInfo) in
+            guard let self = self else { return }
+            
+            print("🔍 서버 응답 상태: \(scheduleDTO.scheduleStatus)")
+            print("🔍 획득한 돌 개수: \(scheduleDTO.earnedStones ?? -1)")
+            
+            self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
+            self.currentStoneType = scheduleDTO.stoneType
+            self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
+            
+            let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
+            self.viewDataSubject.send(model)
+        }
+        .store(in: &cancellables)
+    }
     
-    private func makeScheduleExistData() -> DailyJourneyModel {
-        let scheduleOrder = 4
-        let name = "피아노 학원 가기"
-        let stoneType = "용기의 불조각"
-        let orderText = convertToKoreanOrdinal(scheduleOrder)
+    private func skipSchedule() {
+        print("📢 skipSchedule() 함수 호출됨")
         
-        return DailyJourneyModel(
-            kkubiImageName: "intro_1",
-            bubbleText: "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(name) 야!",
-            highlightKeywords: [name, stoneType],
-            journeyTimeText: "오후 02:00 ~ 오후 04:00",
-            isMissionActive: true,
-            kidName: "현서",
-            dateText: "12월 5일 목요일",
-            coinCount: 350,
-            fireStoneCount: 1,
-            maxFireStoneCount: 7,
-            scheduleOrder: scheduleOrder,
-            scheduleOrderText: orderText
-        )
+        guard let id = currentScheduleDetailId else { return }
+        
+        DailyJourneyService.shared.skipJourney(scheduleDetailId: id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("⚠️ 건너뛰기 결과(에러 포함): \(error)")
+                    print("✅ 서버 처리는 완료되었으므로 다음 여정 불러오기 실행")
+                    self.fetchDailyJourney()
+                }
+            } receiveValue: { [weak self] _ in
+                self?.fetchDailyJourney()
+            }
+            .store(in: &cancellables)
     }
     
-    private func makeNoScheduleData() -> DailyJourneyModel {
-        return DailyJourneyModel(
-            kkubiImageName: "gif_intro",
-            bubbleText: "오늘은 예정된 여정이 없어.\n푹 쉬고 내일 만나자!",
-            highlightKeywords: [],
-            journeyTimeText: "-",
-            isMissionActive: false,
-            kidName: "근영",
-            dateText: "12월 5일 목요일",
-            coinCount: 350,
-            fireStoneCount: 1,
-            maxFireStoneCount: 7,
-            scheduleOrder: 9,
-            scheduleOrderText: ""
-        )
+    private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
+        
+        let kidName = child.firstName
+        let coinCount = child.coinAmount
+        let todayDateText = child.today
+        
+        let orderText = convertToKoreanOrdinal(schedule.scheduleOrder)
+        let scheduleName = schedule.name ?? ""
+        let stoneTypeName = convertStoneTypeToKorean(schedule.stoneType)
+        let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
+        let isTimeViewActive = (timeText != "-")
+        
+        let buttonType: DailyJourneyModel.ActionButtonType
+        
+        let isScheduleActive = (schedule.scheduleStatus == .nowScheduleExist ||
+                                schedule.scheduleStatus == .firstSchedule ||
+                                schedule.scheduleStatus == .nextScheduleExist)
+        
+        if isScheduleActive && !schedule.isNowScheduleVerified {
+            buttonType = .verify
+        }
+        
+        else if schedule.scheduleStatus == .fireNotLit && (schedule.earnedStones ?? 0) > 0 {
+            buttonType = .lightFire
+        }
+        
+        else {
+            buttonType = .hidden
+        }
+        
+        self.currentButtonType = buttonType
+        
+        switch schedule.scheduleStatus {
+        case .firstSchedule, .nowScheduleExist, .nextScheduleExist:
+            
+            let bubbleText: String
+            switch schedule.scheduleStatus {
+            case .firstSchedule:
+                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName) 야!"
+            case .nowScheduleExist:
+                bubbleText = "지금은 \(scheduleName)의 시간이야!\n여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
+            default:
+                bubbleText = "다음은 \(scheduleName)의 시간이야!\n다음 여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
+            }
+            
+            return DailyJourneyModel(
+                bubbleText: bubbleText,
+                highlightKeywords: [scheduleName, stoneTypeName],
+                journeyTimeText: timeText,
+                isMissionActive: true,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: orderText,
+                speechFieldType: .gray,
+                chipItemType: .inProgressChip,
+                isTimeViewActive: isTimeViewActive,
+                actionButtonType: buttonType
+            )
+            
+        case .noSchedule:
+            return DailyJourneyModel(
+                bubbleText: "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!",
+                highlightKeywords: [],
+                journeyTimeText: "-",
+                isMissionActive: false,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: "",
+                speechFieldType: .no,
+                chipItemType: .inProgressChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
+            )
+            
+        case .fireNotLit:
+            return DailyJourneyModel(
+                bubbleText: "고마워 \(kidName)!\n오늘의 조각들이 모두 모였어! 영웅의 불꽃 을 피워줘!",
+                highlightKeywords: ["영웅의 불꽃"],
+                journeyTimeText: "-",
+                isMissionActive: false,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: "",
+                speechFieldType: .no,
+                chipItemType: .highlightChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
+            )
+            
+        case .fireLit:
+            return DailyJourneyModel(
+                bubbleText: "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!",
+                highlightKeywords: [],
+                journeyTimeText: "-",
+                isMissionActive: false,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: "",
+                speechFieldType: .no,
+                chipItemType: .completedChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
+            )
+        }
     }
     
-    private func makeFireNotLitData() -> DailyJourneyModel {
-        return DailyJourneyModel(
-            kkubiImageName: "gif_intro",
-            bubbleText: "모든 여정을 마쳤어!\n이제 불을 피우러 가볼까?",
-            highlightKeywords: ["불 피우기"],
-            journeyTimeText: "-",
-            isMissionActive: false,
-            kidName: "근영",
-            dateText: "12월 5일 목요일",
-            coinCount: 350,
-            fireStoneCount: 1,
-            maxFireStoneCount: 7,
-            scheduleOrder: 9,
-            scheduleOrderText: ""
-        )
+    // MARK: - Helper Methods
+    
+    private func formatTimeRange(start: String?, end: String?) -> String {
+        guard let start = start, let end = end else { return "-" }
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "HH:mm:ss"
+        let outputFormatter = DateFormatter()
+        outputFormatter.locale = Locale(identifier: "ko_KR")
+        outputFormatter.dateFormat = "a hh:mm"
+        if let startDate = inputFormatter.date(from: start),
+           let endDate = inputFormatter.date(from: end) {
+            return "\(outputFormatter.string(from: startDate)) ~ \(outputFormatter.string(from: endDate))"
+        }
+        return "-"
     }
     
-    private func makeErrorViewData() -> DailyJourneyModel {
-        return DailyJourneyModel(
-            kkubiImageName: "gif_intro",
-            bubbleText: "데이터를 불러오지 못했어요.",
-            highlightKeywords: [],
-            journeyTimeText: "-",
-            isMissionActive: false,
-            kidName: "근영",
-            dateText: "12월 5일 목요일",
-            coinCount: 350,
-            fireStoneCount: 1,
-            maxFireStoneCount: 7,
-            scheduleOrder: 9,
-            scheduleOrderText: ""
-        )
+    private func convertStoneTypeToKorean(_ type: StoneType?) -> String {
+        guard let type = type else { return "" }
+        switch type {
+        case .grit: return "용기의 불조각"
+        case .courage: return "인내의 불조각"
+        case .wisdom: return "지혜의 불조각"
+        }
     }
     
     private func convertToKoreanOrdinal(_ number: Int) -> String {
