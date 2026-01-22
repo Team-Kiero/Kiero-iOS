@@ -133,19 +133,41 @@ final class DailyJourneyView: BaseUIView {
             maxFireStoneCount: data.maxFireStoneCount
         )
         
-        journeyTimeView.configure(
-            title: "\(data.scheduleOrderText)번째 여정 시간",
-            time: data.journeyTimeText
-        )
+        journeyTimeView.isHidden = !data.isTimeViewActive
+        
+        if data.isTimeViewActive {
+            journeyTimeView.configure(
+                title: "\(data.scheduleOrderText)번째 여정 시간",
+                time: data.journeyTimeText
+            )
+        }
         
         let lines = data.bubbleText.components(separatedBy: "\n")
         
         speechField.configure(
+            fieldType: data.speechFieldType,
             name: "꾸비",
             lines: lines,
             highlightKeywords: data.highlightKeywords
         )
         
-        verifyPhotoButton.isHidden = !data.isMissionActive
+        switch data.actionButtonType {
+        case .verify:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "인증하고 불조각 받기",
+                icon: UIImage(resource: .icCamera)
+            )
+            
+        case .lightFire:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "마음의 불꽃 피우기",
+                icon: nil
+            )
+            
+        case .hidden:
+            verifyPhotoButton.isHidden = true
+        }
     }
 }
