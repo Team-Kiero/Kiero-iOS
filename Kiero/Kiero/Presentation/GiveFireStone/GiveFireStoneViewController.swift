@@ -5,8 +5,8 @@
 //  Created by Hyunseo Han on 1/16/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 import SnapKit
 import Then
@@ -52,7 +52,7 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
         }
         
         resultView.didTapClose = { [weak self] in
-            self?.navigationController?.popViewController(animated: true)
+            self?.navigateToDailyJourney()
         }
     }
     
@@ -103,6 +103,17 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
             .sink { message in
                 print("message: \(message)")    }
             .store(in: &cancellables)
+    }
+    
+    private func navigateToDailyJourney() {
+        if let navigationController = self.presentingViewController as? UINavigationController {
+            self.dismiss(animated: true) {
+                navigationController.popToRootViewController(animated: true)
+            }
+        }
+        else {
+            self.navigationController?.popToRootViewController(animated: true)
+        }
     }
     
     // MARK: - Animation Logic

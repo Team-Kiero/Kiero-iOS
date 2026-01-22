@@ -25,7 +25,7 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
     
     struct Output {
         let showProcessView: AnyPublisher<Void, Never>
-        let showResultView: AnyPublisher<(Int, [String]), Never> 
+        let showResultView: AnyPublisher<(Int, [String]), Never>
         let showError: AnyPublisher<String, Never>
     }
     
