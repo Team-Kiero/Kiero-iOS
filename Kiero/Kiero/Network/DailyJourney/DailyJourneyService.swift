@@ -12,12 +12,10 @@ final class DailyJourneyService {
     static let shared = DailyJourneyService()
     private init() {}
     
-    // 1. 오늘의 여정 조회
     func updateDailyJourney() -> AnyPublisher<DailyJourneyDTO, NetworkError> {
         return Future<DailyJourneyDTO, NetworkError> { promise in
             Task {
                 do {
-                    // BaseService가 async 기반이라면 await로 호출
                     let response: DailyJourneyDTO = try await BaseService.shared.request(
                         endPoint: .updateDailyJourney,
                         body: nil
@@ -32,7 +30,6 @@ final class DailyJourneyService {
         }.eraseToAnyPublisher()
     }
     
-    // 2. 건너뛰기
     func skipJourney(scheduleDetailId: Int) -> AnyPublisher<DailyJourneyDTO, NetworkError> {
         return Future<DailyJourneyDTO, NetworkError> { promise in
             Task {
@@ -51,37 +48,30 @@ final class DailyJourneyService {
         }.eraseToAnyPublisher()
     }
     
-    // MARK: - 3. 인증하기 (Presigned URL -> S3 Upload -> Complete)
-    
     func verifyJourney(scheduleDetailId: Int, image: UIImage) -> AnyPublisher<Void, NetworkError> {
         return Future<Void, NetworkError> { promise in
             Task {
                 do {
-                    // -----------------------------------------------------
-                    // 0. 이미지 압축
-                    // -----------------------------------------------------
                     guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                        print("❌ [Image] Encoding Failed")
+                        print("❌ 이미지 인코딩 실패")
                         promise(.failure(.unknownError))
                         return
                     }
                     
+                    let uniqueFileName = "\(UUID().uuidString).jpg"
+                    let presignedRequestBody = JourneyVerificationDTO.PresignedURLRequest(
+                        fileName: uniqueFileName,
+                        contentType: "image/jpeg"
+                    )
                     
-                    // -----------------------------------------------------
-                    // Step 1: Presigned URL 발급
-                    // -----------------------------------------------------
-                    // BaseService가 로그와 에러 처리를 자동으로 수행
                     let presignedData: JourneyVerificationDTO.PresignedResult = try await BaseService.shared.request(
-                        endPoint: .getPresignedURL
+                        endPoint: .getPresignedURL,
+                        body: presignedRequestBody
                     )
                     
                     let s3UrlString = presignedData.presignedUrl
                     let finalFileName = presignedData.fileName
                     
-                    
-                    // -----------------------------------------------------
-                    // Step 2: S3 업로드 (직접 URLSession 이용)
-                    // -----------------------------------------------------
                     guard let s3Url = URL(string: s3UrlString) else {
                         promise(.failure(.invalidURL))
                         return
@@ -91,7 +81,7 @@ final class DailyJourneyService {
                     s3Request.httpMethod = "PUT"
                     s3Request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
                     
-                    print("📤 [S3 Upload] Start uploading...")
+                    print("📤 S3 업로딩 시작")
                     
                     let (data, response) = try await URLSession.shared.upload(for: s3Request, from: imageData)
                     
@@ -100,13 +90,11 @@ final class DailyJourneyService {
                         return
                     }
                     
-                    // ★ [추가됨] S3 응답 로그 찍기
                     NetworkLogger.shared.responseLog(s3HttpRes, data: data)
                     
-                    // ★ [추가됨] 상태 코드별 정확한 NetworkError 매핑
                     switch s3HttpRes.statusCode {
                     case 200...299:
-                        break // 성공
+                        break
                     case 400...499:
                         throw NetworkError.clientError(statusCode: s3HttpRes.statusCode)
                     case 500...599:
@@ -115,20 +103,13 @@ final class DailyJourneyService {
                         throw NetworkError.unknownError
                     }
                     
-                    
-                    // -----------------------------------------------------
-                    // Step 3: 서버에 완료 요청
-                    // -----------------------------------------------------
                     let requestBody = JourneyVerificationDTO.CompleteRequest(imageUrl: finalFileName)
-                    
-                    // 응답 data가 null이므로 'EmptyResponse' 타입 지정
-                    let _: EmptyResponse = try await BaseService.shared.request(
+                    let _: String? = try await BaseService.shared.request(
                         endPoint: .completeSchedule(scheduleDetailId: scheduleDetailId),
                         body: requestBody
                     )
                     
-                    // 모든 과정 성공
-                    print("✅ [Verify] Process Completed Successfully")
+                    print("✅ 모든 과정 성공")
                     promise(.success(()))
                     
                 } catch let error as NetworkError {
@@ -139,6 +120,26 @@ final class DailyJourneyService {
                 }
             }
         }.eraseToAnyPublisher()
+    }
+    
+    func lightFire() -> AnyPublisher<FireLitData, NetworkError> {
+        return Future<FireLitData, NetworkError> { promise in
+            Task {
+                do {
+                    let data: FireLitData = try await BaseService.shared.request(
+                        endPoint: .fireLit,
+                        body: nil
+                    )
+                    promise(.success(data))
+                } catch let error as NetworkError {
+                    promise(.failure(error))
+                } catch {
+                    print("❌ [LightFire] Unexpected Error: \(error)")
+                    promise(.failure(.unknownError))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
     }
 }
 
