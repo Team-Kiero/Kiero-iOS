@@ -13,19 +13,21 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     // MARK: - Properties
     
     private let rootView = CoinMissionView()
-    private var dataSource: [DailyMissionData] = []
+    private var dataSource: [MissionGroupDTO] = []
+    
+    private let completeMissionSubject = PassthroughSubject<Int64, Never>()
+    private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     
     // MARK: - Life Cycle
     
     override func loadView() { view = rootView }
     
-    // MARK: - Setup Methods
-    
-    override func setUI() {
-        if let vm = viewModel {
-            rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
-        }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewWillAppearSubject.send(())
     }
+    
+    // MARK: - Setup Methods
     
     override func setDelegate() {
         rootView.missionCollectionView.delegate = self
@@ -36,21 +38,29 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     
     override func bind(viewModel: CoinMissionViewModel) {
         let input = CoinMissionViewModel.Input(
-            viewDidLoad: Just(()).eraseToAnyPublisher()
+            viewDidLoad: Just(()).eraseToAnyPublisher(),
+            viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
+            completeMission: completeMissionSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)
-        output.missionData
+        
+        output.userInfo
             .receive(on: RunLoop.main)
-            .sink { [weak self] data in
-                guard let self = self else { return }
+            .sink { [weak self] info in
+                self?.rootView.configureUserInfo(name: info.firstName, price: info.coinAmount)
+            }
+            .store(in: &cancellables)
+        
+        output.missions
+            .receive(on: RunLoop.main)
+            .sink { [weak self] groups in
+                guard let self else { return }
                 
-                self.dataSource = data
-                let isEmpty = data.isEmpty
+                self.dataSource = groups
+                let isEmpty = groups.isEmpty
                 self.rootView.updateEmptyState(isEmpty: isEmpty)
-                if !isEmpty {
-                    self.rootView.missionCollectionView.reloadData()
-                }
+                self.rootView.missionCollectionView.reloadData()
             }
             .store(in: &cancellables)
     }
@@ -69,13 +79,16 @@ extension CoinMissionViewController: UICollectionViewDataSource {
             for: indexPath
         ) as? DailyMissionCell else { return UICollectionViewCell() }
         
-        let data = dataSource[indexPath.item]
+        let group = dataSource[indexPath.item]
+        
         cell.configure(
-            date: data.date,
-            missions: data.missions
+            dueAt: group.dueAt,
+            dayOfWeek: group.dayOfWeek,
+            missions: group.missions
         )
-        cell.missionTapHandler = { [weak self] id, name in
-            self?.handleMissionTap(id: id, name: name)
+        
+        cell.missionTapHandler = { [weak self] missionId, name in
+            self?.handleMissionTap(id: missionId, name: name)
         }
         return cell
     }
@@ -98,40 +111,22 @@ private extension CoinMissionViewController {
         view.showDialog(state: dialogState) { [weak self] in
             guard let self = self else { return }
             
-            var rewardAmount = 0
-            for data in self.dataSource {
-                if let mission = data.missions.first(where: { $0.id == id }) {
-                    rewardAmount = mission.reward
-                    break
-                }
-            }
+            let rewardAmount = self.findRewardAmount(missionId: id)
             self.view.showConfirm(state: .coinMission(count: rewardAmount)) {
-                self.completeMissionDirectly(id: id, reward: rewardAmount)
+                self.completeMissionSubject.send(id)
             }
         }
     }
     
-    private func completeMissionDirectly(id: Int64, reward: Int) {
-        viewModel?.getCoin(reward: reward)
+    func findRewardAmount(missionId: Int64) -> Int {
+        let targetId = Int(missionId) // MissionItemDTO.id가 Int
         
-        for (sectionIndex, dayDate) in dataSource.enumerated() {
-            if let missionIndex = dayDate.missions.firstIndex(where: {$0.id == id}) {
-                var updatedMissions = dayDate.missions
-                updatedMissions[missionIndex].isCompleted = true
-                
-                dataSource[sectionIndex] = DailyMissionData(
-                    date: dayDate.date,
-                    missions: updatedMissions
-                )
-                break
+        for group in dataSource {
+            if let mission = group.missions.first(where: { $0.id == targetId }) {
+                return mission.reward
             }
         }
-        
-        if let vm = viewModel {
-            rootView.configureUserInfo(name: vm.userName, price: vm.currentCoinCount)
-        }
-        rootView.missionCollectionView.reloadData()
-        // TODO: 서버에게 변경된 금화, 상태 데이터 전송
+        return 0
     }
 }
 
