@@ -132,9 +132,6 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
                 self?.generateButton.isEnabled = enabled
             }
             .store(in: &cancellables)
-
-        // TODO: - state 구독해서 로딩/에러 UI 처리
-        // viewModel.state.sink { ... }.store(in: &cancellables)
         
         textDidChange()
     }
