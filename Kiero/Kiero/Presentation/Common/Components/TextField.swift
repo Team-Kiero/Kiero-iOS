@@ -213,11 +213,17 @@ final class TextField: UIView {
         
         let text = (textField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         
-        if textField.text == nil || textField.text == ""{
-            textField.layer.borderColor = UIColor.white.cgColor
-            textField.layer.borderWidth = 0
+//        if textField.text == nil || textField.text == ""{
+//            textField.layer.borderColor = UIColor.white.cgColor
+//            textField.layer.borderWidth = 0
+//            errorLabel.alpha = 0
+//            errorImage.alpha = 0
+//        }
+        guard !text.isEmpty else {
             errorLabel.alpha = 0
             errorImage.alpha = 0
+            onValidationChanged?(false)
+            return
         }
         
         guard hasInteracted else { return }

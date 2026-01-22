@@ -12,6 +12,13 @@ import SnapKit
 import Then
 
 final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewModel> {
+    
+    // MARK: - Properties
+    
+    private var isLastValid = false
+    private var isFirstValid = false
+    private var isCodeValid = false
+
 
     // MARK: - UI Components
 
@@ -26,8 +33,9 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     private let firstNameTextField = TextField(type: .child(.firstName))
     private let codeTextField = TextField(type: .child(.inviteCode))
 
-    private let startButton = CTAButton(style: .main).then {
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
         $0.configure(title: "여정 시작하기")
+        $0.isEnabled = false
     }
 
     // MARK: - Life Cycle
@@ -99,9 +107,24 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
         firstNameTextField.externalDelegate = self
         codeTextField.externalDelegate = self
     }
-
+    
     override func bind(viewModel: ChildrenLoginViewModel) {
         super.bind(viewModel: viewModel)
+        
+        lastNameTextField.onValidationChanged = { [weak self] isValid in
+            self?.isLastValid = isValid
+            self?.updateStartButton()
+        }
+        
+        firstNameTextField.onValidationChanged = { [weak self] isValid in
+            self?.isFirstValid = isValid
+            self?.updateStartButton()
+        }
+        
+        codeTextField.onValidationChanged = { [weak self] isValid in
+            self?.isCodeValid = isValid
+            self?.updateStartButton()
+        }
 
         viewModel.route
             .receive(on: DispatchQueue.main)
@@ -136,19 +159,27 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                 }
             }
             .store(in: &cancellables)
+        updateStartButton()
     }
 
     // MARK: - Actions
 
     @objc
     private func startButtonDidTap() {
+        view.endEditing(true)
+        
         let last = lastNameTextField.innerTextField.text ?? ""
         let first = firstNameTextField.innerTextField.text ?? ""
         let code = codeTextField.innerTextField.text ?? ""
 
         viewModel?.signup(lastName: last, firstName: first, inviteCode: code)
     }
-
+    
+    private func updateStartButton() {
+        let enabled = isLastValid && isFirstValid && isCodeValid
+        startButton.isEnabled = enabled
+    }
+    
     private func navigateToChildOnboarding() {
         let vc = AppDIContainer.shared.makeChildOnboardingViewController()
         navigationController?.pushViewController(vc, animated: true)
