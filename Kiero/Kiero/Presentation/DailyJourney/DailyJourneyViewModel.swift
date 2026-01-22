@@ -149,11 +149,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         if isScheduleActive && !schedule.isNowScheduleVerified {
             buttonType = .verify
         }
-        
         else if schedule.scheduleStatus == .fireNotLit && (schedule.earnedStones ?? 0) > 0 {
             buttonType = .lightFire
         }
-        
         else {
             buttonType = .hidden
         }
@@ -173,6 +171,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 bubbleText = "다음은 \(scheduleName)의 시간이야!\n다음 여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
             }
             
+            let isLastJourney = (schedule.scheduleOrder == schedule.totalSchedule)
+            
             return DailyJourneyModel(
                 bubbleText: bubbleText,
                 highlightKeywords: [scheduleName, stoneTypeName],
@@ -185,7 +185,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: .gray,
+                speechFieldType: isLastJourney ? .no : .gray,
                 chipItemType: .inProgressChip,
                 isTimeViewActive: isTimeViewActive,
                 actionButtonType: buttonType
