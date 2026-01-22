@@ -16,6 +16,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
+    private let skipConfirmSubject = PassthroughSubject<Void, Never>()
     
     // MARK: - Life Cycle
     
@@ -46,7 +47,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         let input = DailyJourneyViewModel.Input(
             viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
             nextJourneyButtonTap: nextButtonTapSubject.eraseToAnyPublisher(),
-            verifyButtonTap: verifyButtonTapSubject.eraseToAnyPublisher()
+            verifyButtonTap: verifyButtonTapSubject.eraseToAnyPublisher(),
+            skipConfirmTap: skipConfirmSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)
@@ -80,17 +82,25 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         switch route {
         case .showNextJourneyDialogBox:
             showNextJourneyDialog()
-            print("다음 여정 다이어로그")
             
         case .showCamera:
             openCamera()
+            
+        case .tryLightFire:
+            print("🔥 마음의 불꽃 피우기 화면(GiveFireStoneView)으로 이동")
+            
+            let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
+            let viewModel = GiveFireStoneViewModel(count: stoneCount)
+            let vc = GiveFireStoneViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
+            
+            self.navigationController?.pushViewController(vc, animated: true)
         }
     }
     
     private func showNextJourneyDialog() {
-        self.view.showDialog(state: .nextJourney) {
+        self.view.showDialog(state: .nextJourney) { [weak self] in
             print("유저가 다음 여정으로 넘어가기를 확정")
-            // TODO: ViewModel의 다음 여정 로직 연결
+            self?.skipConfirmSubject.send(())
         }
     }
     
@@ -111,8 +121,11 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     
     private func moveToMissionCompleteView(with image: UIImage) {
         let completeViewModel = MissionCompleteViewModel()
-        let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
+        completeViewModel.capturedImage = image
+        completeViewModel.receivedStoneType = self.viewModel?.currentStoneType
+        completeViewModel.scheduleDetailId = self.viewModel?.currentScheduleDetailId
         
+        let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
         completeVC.initialImage = image
         
         self.navigationController?.pushViewController(completeVC, animated: true)
@@ -135,8 +148,4 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true)
     }
-}
-
-#Preview {
-    DailyJourneyViewController(viewModel: DailyJourneyViewModel(), diContainer: AppDIContainer.shared)
 }

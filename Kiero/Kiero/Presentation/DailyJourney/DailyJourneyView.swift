@@ -72,6 +72,8 @@ final class DailyJourneyView: BaseUIView {
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
         }
+        
+        loadIntroGif()
     }
     
     override func setLayout() {
@@ -112,6 +114,14 @@ final class DailyJourneyView: BaseUIView {
         }
     }
     
+    private func loadIntroGif() {
+        if let url = Bundle.main.url(forResource: "intro_1", withExtension: "gif") {
+            kkubiCharacterImageView.kf.setImage(with: url)
+        } else {
+            print("⚠️ gif 파일을 Bundle에서 찾을 수 없습니다.")
+        }
+    }
+    
     // MARK: - Update Methods
     
     func updateData(with data: DailyJourneyModel) {
@@ -123,30 +133,41 @@ final class DailyJourneyView: BaseUIView {
             maxFireStoneCount: data.maxFireStoneCount
         )
         
-        journeyTimeView.configure(
-            title: "\(data.scheduleOrderText)번째 여정 시간",
-            time: data.journeyTimeText
-        )
+        journeyTimeView.isHidden = !data.isTimeViewActive
         
-        kkubiCharacterImageView.stopAnimating()
-        kkubiCharacterImageView.image = nil
-        
-        if let url = Bundle.main.url(forResource: data.kkubiImageName, withExtension: "gif") {
-            kkubiCharacterImageView.kf.setImage(with: url)
-        } else {
-            kkubiCharacterImageView.image = UIImage(resource: .imgGoblinKid)
-            print("gif 경로 못 찾음: \(data.kkubiImageName)")
+        if data.isTimeViewActive {
+            journeyTimeView.configure(
+                title: "\(data.scheduleOrderText)번째 여정 시간",
+                time: data.journeyTimeText
+            )
         }
         
         let lines = data.bubbleText.components(separatedBy: "\n")
         
         speechField.configure(
+            fieldType: data.speechFieldType,
             name: "꾸비",
             lines: lines,
             highlightKeywords: data.highlightKeywords
         )
         
-        verifyPhotoButton.isEnabled = data.isMissionActive
-        verifyPhotoButton.backgroundColor = data.isMissionActive ? .gray900 : .gray400
+        switch data.actionButtonType {
+        case .verify:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "인증하고 불조각 받기",
+                icon: UIImage(resource: .icCamera)
+            )
+            
+        case .lightFire:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "마음의 불꽃 피우기",
+                icon: nil
+            )
+            
+        case .hidden:
+            verifyPhotoButton.isHidden = true
+        }
     }
 }

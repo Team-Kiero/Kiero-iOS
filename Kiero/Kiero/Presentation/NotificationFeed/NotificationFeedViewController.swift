@@ -5,6 +5,7 @@
 //  Created by 정윤아 on 1/16/26.
 //
 
+import Combine
 import UIKit
 
 final class NotificationFeedViewController: BaseViewController<NotificationFeedViewModel> {
@@ -14,10 +15,19 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     private let contentView = NotificationFeedView()
     private let emptyView = EmptyView(text: "아직 아이로부터 도착한 알림이 없어요!")
     
+    private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private let refreshSubject = PassthroughSubject<Void, Never>()
+    private let loadMoreSubject = PassthroughSubject<Void, Never>()
+    
     // MARK: - Life Cycle
     
-    override func loadView() {
-        view = contentView
+    override func loadView() { view = contentView }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.tabBarController?.delegate = self
+        contentView.updateProfile()
+        refreshSubject.send(())
     }
     
     // MARK: - Setup Methods
@@ -33,25 +43,33 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         contentView.onProfileTapped = { [weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                self?.viewModel?.performLogout()
             }
         }
         
-        viewModel.onDataUpdated = { [weak self] in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                
-                let isEmpty = self.viewModel?.sections.isEmpty ?? true
-                
-                if isEmpty {
-                    self.contentView.tableView.backgroundView = self.emptyView
-                } else {
-                    self.contentView.tableView.backgroundView = nil
-                }
-                self.contentView.tableView.reloadData()
+        let input = NotificationFeedViewModel.Input(
+            viewDidload: viewDidLoadSubject.eraseToAnyPublisher(),
+            refresh: refreshSubject.eraseToAnyPublisher(),
+            loadMore: loadMoreSubject.eraseToAnyPublisher()
+        )
+        
+        let output = viewModel.transform(input: input)
+        
+        output.sections
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.contentView.applySnapshot()
             }
-        }
-        viewModel.fetchNotifications()
+            .store(in: &cancellables)
+        
+        viewDidLoadSubject.send(())
+        
+        viewModel.logoutSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToPickRole()
+            }
+            .store(in: &cancellables)
     }
 }
 
@@ -100,6 +118,15 @@ extension NotificationFeedViewController: UITableViewDelegate {
         return header
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let lastSectionIndex = tableView.numberOfSections - 1
+        let lastRowIndex = tableView.numberOfRows(inSection: lastSectionIndex) - 1
+        
+        if indexPath.section == lastSectionIndex && indexPath.row == lastRowIndex {
+            loadMoreSubject.send(())
+        }
+    }
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return UITableView.automaticDimension
     }
@@ -112,13 +139,20 @@ extension NotificationFeedViewController: UITableViewDelegate {
 extension NotificationFeedViewController: ScrollToTopAvailable {
     func scrollToTop() {
         if viewModel?.sections.isEmpty == false {
-            contentView.tableView.setContentOffset(.zero, animated: false)
+            contentView.tableView.setContentOffset(.zero, animated: true)
         }
     }
 }
 
-#Preview {
-    NotificationFeedViewController(
-        viewModel: NotificationFeedViewModel(),
-        diContainer: AppDIContainer.shared)
+extension NotificationFeedViewController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        let targetVC = (viewController as? UINavigationController)?.viewControllers.first ?? viewController
+        
+        if targetVC === self {
+            if tabBarController.selectedViewController === viewController {
+                self.scrollToTop()
+            }
+        }
+        return true
+    }
 }

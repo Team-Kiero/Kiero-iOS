@@ -8,7 +8,12 @@
 import Foundation
 
 struct DailyJourneyModel {
-    let kkubiImageName: String
+    enum ActionButtonType {
+        case verify
+        case lightFire
+        case hidden 
+    }
+    
     let bubbleText: String
     let highlightKeywords: [String]
     let journeyTimeText: String
@@ -20,4 +25,8 @@ struct DailyJourneyModel {
     let maxFireStoneCount: Int
     let scheduleOrder: Int
     let scheduleOrderText: String
+    let speechFieldType: SpeechField.fieldType
+    let chipItemType: ChipItem.ChipStyle
+    let isTimeViewActive: Bool
+    let actionButtonType: ActionButtonType
 }

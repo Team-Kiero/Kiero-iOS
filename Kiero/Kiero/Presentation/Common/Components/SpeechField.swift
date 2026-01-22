@@ -40,7 +40,7 @@ final class SpeechField: UIView {
         }
     }
     
-    private let type: fieldType
+    private var type: fieldType
     
     var onTap: (() -> Void)?
     
@@ -80,7 +80,7 @@ final class SpeechField: UIView {
         setStyle()
         setUI()
         setLayout()
-        addTarget()
+        updateGestures()
     }
     
     required init?(coder: NSCoder) {
@@ -155,24 +155,36 @@ final class SpeechField: UIView {
         }
     }
     
-    private func addTarget() {
+    private func updateGestures() {
+        self.gestureRecognizers?.forEach { removeGestureRecognizer($0) }
+        buttonContainerView.gestureRecognizers?.forEach { buttonContainerView.removeGestureRecognizer($0) }
+        
+        if type == .no { return }
+        
         let tap = UITapGestureRecognizer(target: self, action: #selector(labelButtonDidTap))
+        
         switch type {
         case .main:
             addGestureRecognizer(tap)
-        case .no:
-            return
+            buttonContainerView.isUserInteractionEnabled = false
         case .gray:
             buttonContainerView.addGestureRecognizer(tap)
             buttonContainerView.isUserInteractionEnabled = true
+        case .no:
+            break
         }
     }
     
     // MARK: - Configuration
     
-    func configure(name: String, lines: [String], highlightKeywords: [String] = []) {
+    func configure(fieldType: fieldType, name: String, lines: [String], highlightKeywords: [String] = []) {
+        
+        self.type = fieldType
+        
+        updateGestures()
         nameLabel.setTypo(.body5_10_R, text: name)
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
         buttonLabel.setTypo(.body5_10_R, text: type.buttonTitle)
         buttonLabel.textColor = type.textColor
         buttonImage.tintColor = type.textColor
@@ -185,7 +197,7 @@ final class SpeechField: UIView {
             
             label.setTypo(.body3_14_R, text: line)
             
-            if let currentAttr = label.attributedText{
+            if let currentAttr = label.attributedText {
                 let mutableString = NSMutableAttributedString(attributedString: currentAttr)
                 for keyword in highlightKeywords {
                     let range = (line as NSString).range(of: keyword)
@@ -202,11 +214,5 @@ final class SpeechField: UIView {
     @objc
     private func labelButtonDidTap() {
         onTap?()
-    }
-}
-
-#Preview {
-    SpeechField(type: .main).then {
-        $0.configure(name: "꾸삐삐", lines: ["다른 도깨비들은 장난치는 걸 좋아하지만,", "난 '영웅의 불씨'를 품고 태어난 특별한 도깨비야!", "너의 노력을 멋진 소원으로 바꾸는 꼬마 히어로 지"], highlightKeywords: ["꼬마 히어로"])
     }
 }
