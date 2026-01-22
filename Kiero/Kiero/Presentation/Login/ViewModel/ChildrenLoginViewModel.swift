@@ -70,6 +70,7 @@ final class ChildrenLoginViewModel: BaseViewModel {
                 TokenManager.shared.saveRefreshToken(data.refreshToken)
                 TokenManager.shared.saveUserRole(data.role)
                 TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
+                TokenManager.shared.saveFirstName(data.firstName)
 
                 await MainActor.run {
                     self.stateSubject.send(.idle)

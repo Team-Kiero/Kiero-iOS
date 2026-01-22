@@ -21,6 +21,8 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     private var latestItem: SpeechItem?
     
+    private var currentFieldType: SpeechField.fieldType = .main
+    
     // MARK: - UI Components
     
     private let storyImageView = UIImageView().then {
@@ -91,7 +93,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                 self.storyImageView.image = item.image
 
                 self.currentSpeech?.configure(
-                    fieldType: .main,
+                    fieldType: self.currentFieldType,
                     name: item.name,
                     lines: item.lines,
                     highlightKeywords: item.highlightKeywords
@@ -103,6 +105,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
             .receive(on: DispatchQueue.main)
             .sink { [weak self] type in
                 guard let self else { return }
+                self.currentFieldType = type
                 
                 let nextSpeech = (type == .no) ? self.noSF : self.mainSF
                 
@@ -122,7 +125,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                     
                     if let item = self.latestItem {
                         nextSpeech.configure(
-                            fieldType: .main,
+                            fieldType: type,
                             name: item.name,
                             lines: item.lines,
                             highlightKeywords: item.highlightKeywords
@@ -166,6 +169,12 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     @objc
     private func startButtonDidTap() {
-        navigateToChildrenTap()
+        let loadingVC = AppDIContainer.shared.makeChildLoadingViewController()
+        loadingVC.modalPresentationStyle = .fullScreen
+        present(loadingVC, animated: false)
+        
+        DispatchQueue.main.asyncAfter (deadline: .now() + 4) { [weak self] in
+            self?.navigateToChildrenTap()
+        }
     }
 }

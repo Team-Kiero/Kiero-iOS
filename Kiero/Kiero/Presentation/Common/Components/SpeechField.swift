@@ -181,6 +181,8 @@ final class SpeechField: UIView {
         
         self.type = fieldType
         
+        buttonContainerView.isHidden = (fieldType == .no)
+        
         updateGestures()
         nameLabel.setTypo(.body5_10_R, text: name)
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
