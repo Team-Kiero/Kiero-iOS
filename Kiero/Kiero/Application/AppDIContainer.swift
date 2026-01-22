@@ -53,6 +53,15 @@ extension AppDIContainer {
     }
 }
 
+// MARK: - Onboarding
+
+extension AppDIContainer {
+    func makeChildLoadingViewController() -> UIViewController {
+        let viewModel = BaseViewModel()
+        return ChildrenLoadingViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
 // MARK: - Schedule
 
 extension AppDIContainer {

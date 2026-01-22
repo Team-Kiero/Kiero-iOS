@@ -169,6 +169,12 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     @objc
     private func startButtonDidTap() {
-        navigateToChildrenTap()
+        let loadingVC = AppDIContainer.shared.makeChildLoadingViewController()
+        loadingVC.modalPresentationStyle = .fullScreen
+        present(loadingVC, animated: false)
+        
+        DispatchQueue.main.asyncAfter (deadline: .now() + 4) { [weak self] in
+            self?.navigateToChildrenTap()
+        }
     }
 }
