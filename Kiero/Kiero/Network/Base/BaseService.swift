@@ -116,14 +116,12 @@ final class BaseService {
         
         //  디코딩
         do {
-            // Response 타입이 EmptyResponse인 경우 실제 디코딩 없이 반환
             if Response.self == EmptyResponse.self {
                 return EmptyResponse() as! Response
             }
             
             let decoded = try JSONDecoder().decode(BaseResponse<Response>.self, from: data)
             
-            // 데이터가 존재하면 반환
             if let data = decoded.data {
                 return data
             }
