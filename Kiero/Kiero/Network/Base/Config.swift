@@ -44,4 +44,11 @@ extension Config {
         }
         return key
     }()
+    
+    static let sseURL: URL = {
+        guard let url = URL(string: baseURL + "/api/v1/subscribe") else {
+            fatalError("구성된 SSE_URL이 유효한 URL 형식이 아닙니다: \(baseURL)")
+        }
+        return url
+    }()
 }
