@@ -10,6 +10,7 @@ import Foundation
 
 enum ChildLoginRoute {
     case childOnboarding
+    case toast(String)
 }
 
 enum ChildLoginState: Equatable {
@@ -79,6 +80,7 @@ final class ChildrenLoginViewModel: BaseViewModel {
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))
+                    self.routeSubject.send(.toast(error.errorDescription))
                 }
             } catch {
                 await MainActor.run {
