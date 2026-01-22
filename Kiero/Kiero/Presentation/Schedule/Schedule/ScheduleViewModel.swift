@@ -17,6 +17,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
     let currentReferenceDate = CurrentValueSubject<Date, Never>(Date())
+    let logoutSuccess = PassthroughSubject<Void, Never>()
     
     // MARK: - Input / Output
     
@@ -46,9 +47,15 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             .sink { _ in } receiveValue: { [weak self] children in
                 if let firstChildId = children.first?.childId {
                     self?.childId.send(firstChildId)
+                    UserDefaults.standard.set(firstChildId, forKey: "selectedChildId")
+                    print("📍 [저장 완료] childId \(firstChildId)를 UserDefaults에 저장했습니다.")
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    func refreshSchedules() {
+        self.childId.send(self.childId.value)
     }
     
     func transform(input: Input) -> Output {
@@ -105,10 +112,12 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                 let calendar = Calendar.current
                 let currentWeekRange = refDate.daysOfWeek
                 
+                print("🔍 [필터링 시작] 전체 일정 개수: \(schedules.count)")
+                
                 guard let lastDayOfCurrentWeek = currentWeekRange.last else { return [] }
                 let endOfCurrentWeek = calendar.startOfDay(for: lastDayOfCurrentWeek)
                 
-                return schedules.filter { schedule in
+                let filtered = schedules.filter { schedule in
                     if schedule.isRecurring {
                         if let startDateStr = schedule.date,
                            let startDate = startDateStr.toDate(format: "yyyy-MM-dd") {
@@ -118,12 +127,20 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                         return true
                     }
                     
-                    if let dateStr = schedule.date,
-                       let scheduleDate = dateStr.toDate(format: "yyyy-MM-dd") {
-                        return currentWeekRange.contains { calendar.isDate($0, inSameDayAs: scheduleDate) }
+                    if let dateStr = schedule.date {
+                        let weekDateStrings = currentWeekRange.map { $0.toString(format: "yyyy-MM-dd") }
+                        let isIncluded = weekDateStrings.contains(dateStr)
+                        
+                        if !isIncluded {
+                            print("📌 일정 제외됨: \(schedule.name) (날짜: \(dateStr)) - 현재 주차 범위에 없음")
+                        }
+                        return isIncluded
                     }
                     return false
                 }
+                
+                print("🎯 [필터링 완료] 화면에 그려질 일정 개수: \(filtered.count)")
+                return filtered
             }.eraseToAnyPublisher()
         
         return Output(
@@ -162,5 +179,31 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         var current = scheduleList.value
         current.append(schedule)
         scheduleList.send(current)
+    }
+    
+    func performLogout() {
+        service.deleteChildDummyData()
+            .handleEvents(receiveSubscription: { _ in
+                print("📡 [1단계] 아이 데이터 삭제 API 구독 시작")
+            })
+            .catch { error in
+                print("⚠️ [1단계 에러] 삭제 실패(무시하고 진행): \(error)")
+                return Just(())
+            }
+            .flatMap { [weak self] _ -> AnyPublisher<Void, NetworkError> in
+                print("🚀 [2단계] 부모 로그아웃 API 요청 전송")
+                guard let self = self else { return Fail(error: .unknownError).eraseToAnyPublisher() }
+                return self.service.logout()
+            }
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    print("❌ 최종 로그아웃 실패: \(error)")
+                }
+            } receiveValue: { [weak self] _ in
+                print("✅ 서버 로그아웃 응답 성공")
+                TokenManager.shared.clearAll()
+                self?.logoutSuccess.send(())
+            }
+            .store(in: &cancellables)
     }
 }

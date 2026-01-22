@@ -22,8 +22,8 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
         $0.distribution = .fill
     }
     
-    private let characterImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
+    private let characterImageView = AnimatedImageView().then {
+        $0.contentMode = .scaleAspectFit
     }
     
     private let descriptionLabel = UILabel().then {
@@ -66,19 +66,24 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
         }
     }
     
+    override func bindViewModel() {
+        guard let viewModel = viewModel else { return }
+        
+        viewModel.timeoutTrigger
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                Toast.show(message: "잠시 후 다시 시도해주세요")
+                self?.dismiss(animated: false)
+            }
+            .store(in: &cancellables)
+    }
+    
     private func setGIFImage() {
         if let url = Bundle.main.url(forResource: "parent", withExtension: "gif") {
-                let resource = LocalFileImageDataProvider(fileURL: url)
-                
-                characterImageView.kf.setImage(
-                    with: resource,
-                    options: [
-                        .cacheOriginalImage,
-                        .transition(.fade(0.2))
-                    ]
-                )
-            }
+            let resource = LocalFileImageDataProvider(fileURL: url)
+            characterImageView.kf.setImage(with: resource)
         }
+    }
 }
 
 #Preview {

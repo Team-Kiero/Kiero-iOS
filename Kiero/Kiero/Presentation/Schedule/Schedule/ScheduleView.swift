@@ -40,14 +40,19 @@ final class ScheduleView: BaseUIView {
     
     func updateSchedules(_ schedules: [Schedule]) {
         self.currentSchedules = schedules
-        timeTableView.clearSchedules()
         
-        schedules.forEach { schedule in
-            timeTableView.addSchedule(schedule: schedule)
+        UIView.performWithoutAnimation {
+            timeTableView.clearSchedules()
+            
+            schedules.forEach { schedule in
+                timeTableView.addSchedule(schedule: schedule)
+            }
+            
+            self.timeTableView.setNeedsLayout()
+            self.timeTableView.layoutIfNeeded()
         }
         
-        self.timeTableView.setNeedsLayout()
-        self.timeTableView.layoutIfNeeded()
+        timeTableView.updateEmptyState(isEmpty: schedules.isEmpty)
     }
 }
 

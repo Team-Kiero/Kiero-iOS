@@ -21,6 +21,7 @@ final class CalendarCell: UICollectionViewCell {
     }
     
     private let dateLabel = UILabel().then {
+        $0.font = .body3_14_R
         $0.textColor = .kBlack
         $0.textAlignment = .center
     }
@@ -52,7 +53,7 @@ final class CalendarCell: UICollectionViewCell {
     }
     
     func configure(date: Int, isCurrentMonth: Bool, isSelected: Bool, isToday: Bool, isEnabled: Bool) {
-        dateLabel.setTypo(.body3_14_R, text: "\(date)")
+        dateLabel.text = "\(date)"
         
         if !isEnabled {
             dateLabel.textColor = .gray700

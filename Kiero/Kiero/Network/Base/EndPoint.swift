@@ -28,6 +28,7 @@ enum EndPoint {
     case logout
     case reissueAccessToken
     case reissueAllTokens
+    case deleteChildDummy
     
     // Child
     case fetchChildren
@@ -35,10 +36,27 @@ enum EndPoint {
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     
+    // AddSchedule
+    case postSchedule(childId: Int, request: AddScheduleRequestDTO)
+    case fetchDefaultColor(childId: Int)
+    
+    // Mission
+    case fetchMissions(childId: Int?)
+    
+    // WriteMission
+    case postMission(childId: Int, request: WriteMissionRequestDTO)
+    
+    // AIMission
+    case postMissionSuggestions(request: MissionSuggestionRequestDTO)
+    case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
+    
     // CoinMission
     case fetchChildrenInfo
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
+    
+    //NotificationFeed
+    case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
@@ -86,6 +104,20 @@ enum EndPoint {
             return "/api/v1/tokens/reissue/tokens"
         case .fetchSchedules(let childId, let start, let end):
             return "/api/v1/schedules/\(childId)?startDate=\(start)&endDate=\(end)"
+        case .postSchedule(let childId, _):
+            return "/api/v1/schedules/\(childId)"
+        case .fetchMissions(let childId):
+            var path = "/api/v1/missions"
+            if let id = childId {
+                path += "?childId=\(id)"
+            }
+            return path
+        case .postMission(let childId, _):
+            return "/api/v1/missions/\(childId)"
+        case .postMissionSuggestions:
+            return "/api/v1/missions/suggestions"
+        case .postBulkMissions(let childId, _):
+            return "/api/v1/missions/\(childId)/bulk"
         case .fetchChildrenInfo:
             return "/api/v1/children/me"
         case .fetchWishes:
@@ -102,15 +134,27 @@ enum EndPoint {
             return "/api/v1/schedules/\(scheduleDetailId)"
         case .fireLit:
             return "/api/v1/schedules/fire-lit"
+        case .fetchDefaultColor(let childId):
+            return "/api/v1/schedules/\(childId)/default"
+        case .deleteChildDummy:
+            return "/api/v1/dummy"
+        case .fetchFeeds(let childId, let size, let cursor):
+            var query: [String] = []
+            if let size { query.append("size=\(size)") }
+            if let cursor, !cursor.isEmpty { query.append("cursor=\(cursor)") }
+            let queryString = query.isEmpty ? "" : "?\(query.joined(separator: "&"))"
+            return "/api/v1/feeds/\(childId)\(queryString)"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit:
             return "PATCH"
+        case .deleteChildDummy:
+            return "DELETE"
         default:
             return "POST"
         }

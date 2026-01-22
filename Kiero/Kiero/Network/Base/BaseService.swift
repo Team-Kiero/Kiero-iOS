@@ -105,33 +105,52 @@ final class BaseService {
             throw NetworkError.unknownError
         }
         
-        // 디코딩
-        do {
+        // Empty Body 대응 (데이터가 아예 없는 경우)
+        if data.isEmpty {
             if Response.self == EmptyResponse.self {
-                _ = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
+                return EmptyResponse() as! Response
+            } else {
+                throw NetworkError.noData
+            }
+        }
+        
+        //  디코딩 처리
+        do {
+            // Response 타입이 EmptyResponse인 경우 실제 디코딩 없이 반환
+            if Response.self == EmptyResponse.self {
                 return EmptyResponse() as! Response
             }
             
             let decoded = try JSONDecoder().decode(BaseResponse<Response>.self, from: data)
             
+            // 데이터가 존재하면 반환
             if let data = decoded.data {
                 return data
-            } else if let emptyResponse = EmptyResponse() as? Response {
-                return emptyResponse
-            } else if let nilValue = (decoded.data as Any?) as? Response {
+            }
+            // 데이터가 없지만 Response가 EmptyResponse인 경우
+            else if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            }
+            // 데이터가 nil인 경우 (Optional Response 대응이 필요하다면 여기서 처리)
+            else if let nilValue = (decoded.data as Any?) as? Response {
                 return nilValue
-            } else {
+            }
+            else {
                 throw NetworkError.noData
             }
             
-        }
-        catch let error as NetworkError {
+        } catch let error as NetworkError {
             throw error
         } catch {
+            // 디코딩 실패 시에도 Response가 EmptyResponse라면 성공으로 간주할지 결정 (일반적으로는 에러 처리)
+            if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            }
             print("❌ Decoding Error 상세: \(error)")
             throw NetworkError.responseDecodingError
         }
     }
+    
     
     // accessToken 재발급
     private func refreshAccessToken() async throws {
