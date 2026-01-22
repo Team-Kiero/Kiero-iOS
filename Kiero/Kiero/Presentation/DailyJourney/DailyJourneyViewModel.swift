@@ -11,13 +11,16 @@ import UIKit
 enum DailyJourneyRoute {
     case showNextJourneyDialogBox
     case showCamera
+    case tryLightFire
 }
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private let wishWellService = WishWellService()
-    private var currentScheduleDetailId: Int?
-    private(set) var currentStoneType: StoneType? // 다음 화면으로 넘겨줄 StoneType 저장소
+    public var currentScheduleDetailId: Int?
+    private(set) var currentStoneType: StoneType?
+    private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
+    public var currentEarnedStoneCount: Int = 0
     
     // MARK: - Input & Output
     
@@ -50,7 +53,17 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
         
         input.verifyButtonTap
-            .sink { [weak self] in self?.routeSubject.send(.showCamera) }
+            .sink { [weak self] in
+                guard let self = self else { return }
+                switch self.currentButtonType {
+                case .verify:
+                    self.routeSubject.send(.showCamera)
+                case .lightFire:
+                    self.routeSubject.send(.tryLightFire)
+                case .hidden:
+                    break
+                }
+            }
             .store(in: &cancellables)
         
         input.skipConfirmTap
@@ -78,11 +91,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         } receiveValue: { [weak self] (scheduleDTO, childInfo) in
             guard let self = self else { return }
             
-            // 1. ID 저장
+            print("🔍 서버 응답 상태: \(scheduleDTO.scheduleStatus)")
+            print("🔍 획득한 돌 개수: \(scheduleDTO.earnedStones ?? -1)")
+            
             self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
             self.currentStoneType = scheduleDTO.stoneType
+            self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
             
-            // 2. 두 데이터를 합쳐서 Model 변환
             let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
             self.viewDataSubject.send(model)
         }
@@ -90,55 +105,92 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
     
     private func skipSchedule() {
-        print("📢 [ViewModel] skipSchedule() 함수 호출됨")
+        print("📢 skipSchedule() 함수 호출됨")
         
-        guard let id = currentScheduleDetailId else {
-            print("⚠️ [ViewModel] 저장된 스케줄 ID가 없음 (fetch가 먼저 안 됐거나 실패함)")
-            return
-        }
+        guard let id = currentScheduleDetailId else { return }
         
-        print("🚀 [ViewModel] API 요청 시작 (ID: \(id))")
-        
-        Publishers.Zip(
-            DailyJourneyService.shared.skipJourney(scheduleDetailId: id),
-            self.wishWellService.fetchMyInfo()
-        )
-        .receive(on: DispatchQueue.main)
-        .sink { completion in
-            if case .failure(let error) = completion {
-                print("❌ Skip Error: \(error)")
+        DailyJourneyService.shared.skipJourney(scheduleDetailId: id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("⚠️ 건너뛰기 결과(에러 포함): \(error)")
+                    print("✅ 서버 처리는 완료되었으므로 다음 여정 불러오기 실행")
+                    self.fetchDailyJourney()
+                }
+            } receiveValue: { [weak self] _ in
+                self?.fetchDailyJourney()
             }
-        } receiveValue: { [weak self] (newScheduleDTO, childInfo) in
-            guard let self = self else { return }
-            
-            print("✅ 건너뛰기 성공! (서버 응답 받음)")
-            
-            // 1. 갱신된 ID 저장
-            self.currentScheduleDetailId = newScheduleDTO.scheduleDetailId
-            
-            // 2. 화면 갱신
-            let model = self.convertDTOToModel(schedule: newScheduleDTO, child: childInfo)
-            self.viewDataSubject.send(model)
-        }
-        .store(in: &cancellables)
+            .store(in: &cancellables)
     }
-    
-    // MARK: - Converter (DTO -> Model)
     
     private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
         
-        // 1. Child API 데이터 매핑
         let kidName = child.firstName
         let coinCount = child.coinAmount
         let todayDateText = child.today
         
-        // 2. Schedule 데이터 가공
         let orderText = convertToKoreanOrdinal(schedule.scheduleOrder)
         let scheduleName = schedule.name ?? ""
         let stoneTypeName = convertStoneTypeToKorean(schedule.stoneType)
         let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
+        let isTimeViewActive = (timeText != "-")
+        
+        let buttonType: DailyJourneyModel.ActionButtonType
+        
+        let isScheduleActive = (schedule.scheduleStatus == .nowScheduleExist ||
+                                schedule.scheduleStatus == .firstSchedule ||
+                                schedule.scheduleStatus == .nextScheduleExist)
+        
+        if isScheduleActive && !schedule.isNowScheduleVerified {
+            buttonType = .verify
+        }
+        
+        else if schedule.scheduleStatus == .fireNotLit && (schedule.earnedStones ?? 0) > 0 {
+            buttonType = .lightFire
+        }
+        
+        else {
+            buttonType = .hidden
+        }
+        
+        self.currentButtonType = buttonType
         
         switch schedule.scheduleStatus {
+        case .firstSchedule, .nowScheduleExist, .nextScheduleExist:
+            
+            let bubbleText: String
+            switch schedule.scheduleStatus {
+            case .firstSchedule:
+                bubbleText = "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName) 야!"
+            case .nowScheduleExist:
+                bubbleText = "지금은 \(scheduleName)의 시간이야!\n여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
+            default:
+                bubbleText = "다음은 \(scheduleName)의 시간이야!\n다음 여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
+            }
+            
+            return DailyJourneyModel(
+                bubbleText: bubbleText,
+                highlightKeywords: [scheduleName, stoneTypeName],
+                journeyTimeText: timeText,
+                isMissionActive: true,
+                kidName: kidName,
+                dateText: todayDateText,
+                coinCount: coinCount,
+                fireStoneCount: schedule.earnedStones ?? 0,
+                maxFireStoneCount: schedule.totalSchedule,
+                scheduleOrder: schedule.scheduleOrder,
+                scheduleOrderText: orderText,
+                speechFieldType: .gray,
+                chipItemType: .inProgressChip,
+                isTimeViewActive: isTimeViewActive,
+                actionButtonType: buttonType
+            )
+            
         case .noSchedule:
             return DailyJourneyModel(
                 bubbleText: "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!",
@@ -153,30 +205,15 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                chipItemType: .inProgressChip
-            )
-            
-        case .nowScheduleExist, .nextScheduleExist, .firstSchedule:
-            return DailyJourneyModel(
-                bubbleText: "오늘도 내 불씨를 키워주러 왔구나!\n우리의 \(orderText)번째 여정은 \(scheduleName) 야!",
-                highlightKeywords: [scheduleName, stoneTypeName],
-                journeyTimeText: timeText,
-                isMissionActive: true,
-                kidName: kidName,
-                dateText: todayDateText,
-                coinCount: coinCount,
-                fireStoneCount: schedule.earnedStones ?? 0,
-                maxFireStoneCount: schedule.totalSchedule,
-                scheduleOrder: schedule.scheduleOrder,
-                scheduleOrderText: orderText,
-                speechFieldType: .gray,
-                chipItemType: .inProgressChip
+                chipItemType: .inProgressChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
             )
             
         case .fireNotLit:
             return DailyJourneyModel(
-                bubbleText: "모든 여정을 마쳤어!\n이제 불을 피우러 가볼까?",
-                highlightKeywords: ["불 피우기"],
+                bubbleText: "고마워 \(kidName)!\n오늘의 조각들이 모두 모였어! 영웅의 불꽃 을 피워줘!",
+                highlightKeywords: ["영웅의 불꽃"],
                 journeyTimeText: "-",
                 isMissionActive: false,
                 kidName: kidName,
@@ -187,7 +224,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                chipItemType: .highlightChip
+                chipItemType: .highlightChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
             )
             
         case .fireLit:
@@ -204,7 +243,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                chipItemType: .completedChip
+                chipItemType: .completedChip,
+                isTimeViewActive: false,
+                actionButtonType: buttonType
             )
         }
     }
