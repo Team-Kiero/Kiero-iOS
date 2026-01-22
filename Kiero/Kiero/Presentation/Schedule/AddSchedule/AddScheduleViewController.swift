@@ -466,8 +466,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         
-        if text.count > 10 {
-            let index = text.index(text.startIndex, offsetBy: 10)
+        if text.count > 8 {
+            let index = text.index(text.startIndex, offsetBy: 8)
             let newString = String(text[..<index])
             textField.text = newString
         }
@@ -494,7 +494,7 @@ extension AddScheduleViewController: UITextFieldDelegate {
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let text = textField.text else { return true }
         let newLength = text.count + string.count - range.length
-        return newLength <= 10
+        return newLength <= 8
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
