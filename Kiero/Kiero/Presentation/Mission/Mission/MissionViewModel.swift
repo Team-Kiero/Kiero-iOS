@@ -28,7 +28,27 @@ final class MissionViewModel: BaseViewModel {
                     print("❌ 미션 조회 실패: \(error)")
                 }
             } receiveValue: { [weak self] response in
-                self?.missionGroups = response.missionsByDate
+                guard let self = self else { return }
+                
+                let sortedGroups = response.missionsByDate.sorted { $0.dueAt < $1.dueAt }
+                
+                let finalGroups = sortedGroups.map { group -> MissionGroupDTO in
+                    let sortedMissions = group.missions.sorted { (m1, m2) -> Bool in
+                        if m1.id != m2.id {
+                            return m1.id < m2.id
+                        }
+                        
+                        return m1.name < m2.name
+                    }
+                    
+                    return MissionGroupDTO(
+                        dueAt: group.dueAt,
+                        dayOfWeek: group.dayOfWeek,
+                        missions: sortedMissions
+                    )
+                }
+                
+                self.missionGroups = finalGroups
             }
             .store(in: &cancellables)
     }
