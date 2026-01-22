@@ -91,6 +91,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                 self.storyImageView.image = item.image
 
                 self.currentSpeech?.configure(
+                    fieldType: .main,
                     name: item.name,
                     lines: item.lines,
                     highlightKeywords: item.highlightKeywords
@@ -121,6 +122,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                     
                     if let item = self.latestItem {
                         nextSpeech.configure(
+                            fieldType: .main,
                             name: item.name,
                             lines: item.lines,
                             highlightKeywords: item.highlightKeywords

@@ -73,6 +73,7 @@ final class MissionCompleteView: BaseUIView {
         self.fireStoneImageView.image = rewardImage
         
         speechField.configure(
+            fieldType: .no,
             name: "꾸비",
             lines: [message],
             highlightKeywords: [keyword]
