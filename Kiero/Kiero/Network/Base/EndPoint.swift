@@ -65,7 +65,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit:
             return .child
         default:
             return .parent
@@ -156,7 +156,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission:
             return "PATCH"
         case .deleteChildDummy:
             return "DELETE"
