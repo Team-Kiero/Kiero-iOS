@@ -43,8 +43,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         contentView.onProfileTapped = { [weak self] in
             self?.showLogoutDialog {
-                // TODO: 알림 API 합친 뒤 로그아웃 로직 추가
-//                self?.viewModel?.performLogout()
+                self?.viewModel?.performLogout()
             }
         }
         
@@ -64,6 +63,13 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
             .store(in: &cancellables)
         
         viewDidLoadSubject.send(())
+        
+        viewModel.logoutSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToPickRole()
+            }
+            .store(in: &cancellables)
     }
 }
 

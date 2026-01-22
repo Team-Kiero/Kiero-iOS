@@ -23,6 +23,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
     private let isLoadingMoreSubject = CurrentValueSubject<Bool, Never>(false)
     private let sectionsSubject = CurrentValueSubject<[FeedSection], Never>([])
+    let logoutSuccess = PassthroughSubject<Void, Never>()
     
     private(set) var sections: [FeedSection] = []
     private var nextCursor: String? = nil
@@ -141,6 +142,32 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
             isLoadingMore: isLoadingMoreSubject.eraseToAnyPublisher()
         )
+    }
+    
+    func performLogout() {
+        scheduleService.deleteChildDummyData()
+            .handleEvents(receiveSubscription: { _ in
+                print("📡 [1단계] 아이 데이터 삭제 API 구독 시작")
+            })
+            .catch { error in
+                print("⚠️ [1단계 에러] 삭제 실패(무시하고 진행): \(error)")
+                return Just(())
+            }
+            .flatMap { [weak self] _ -> AnyPublisher<Void, NetworkError> in
+                print("🚀 [2단계] 부모 로그아웃 API 요청 전송")
+                guard let self = self else { return Fail(error: .unknownError).eraseToAnyPublisher() }
+                return self.scheduleService.logout()
+            }
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    print("❌ 최종 로그아웃 실패: \(error)")
+                }
+            } receiveValue: { [weak self] _ in
+                print("✅ 서버 로그아웃 응답 성공")
+                TokenManager.shared.clearAll()
+                self?.logoutSuccess.send(())
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Helpers
