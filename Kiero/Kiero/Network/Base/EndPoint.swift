@@ -50,7 +50,7 @@ enum EndPoint {
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
     
-    // CoinMission
+    // WishWell
     case fetchChildrenInfo
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
@@ -58,11 +58,14 @@ enum EndPoint {
     //NotificationFeed
     case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
     
+    // CoinMission
+    case completeMission(missionId: Int64)
+    
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .fireLit:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit:
             return .child
         default:
             return .parent
@@ -144,6 +147,8 @@ enum EndPoint {
             if let cursor, !cursor.isEmpty { query.append("cursor=\(cursor)") }
             let queryString = query.isEmpty ? "" : "?\(query.joined(separator: "&"))"
             return "/api/v1/feeds/\(childId)\(queryString)"
+        case .completeMission(let missionId):
+            return "/api/v1/missions/\(missionId)/complete"
         }
     }
     
@@ -151,7 +156,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission:
             return "PATCH"
         case .deleteChildDummy:
             return "DELETE"
