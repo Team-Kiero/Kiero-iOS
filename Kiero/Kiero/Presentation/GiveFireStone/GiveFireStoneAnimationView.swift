@@ -140,7 +140,6 @@ final class GiveFireStoneAnimationView: BaseUIView {
         }
     }
     
-    
     func playAnimation(stones: [String], completion: (() -> Void)? = nil) {
         self.layoutIfNeeded()
         
