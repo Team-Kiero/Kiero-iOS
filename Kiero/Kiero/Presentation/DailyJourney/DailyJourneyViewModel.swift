@@ -92,7 +92,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         } receiveValue: { [weak self] (scheduleDTO, childInfo) in
             guard let self = self else { return }
             
-            // ✨ 로그 분석 결과에 따라, totalSchedule이 1 이상인 데이터를 한 번이라도 받으면 true로 고정
             if scheduleDTO.totalSchedule > 0 {
                 self.hasHadScheduleToday = true
             }
@@ -136,7 +135,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
         
-        // 🔍 디버깅을 위한 프린트문 (선택 사항)
         print("--- 🏁 여정 진행도 체크 ---")
         print("현재 여정 순서 (scheduleOrder): \(schedule.scheduleOrder)")
         print("전체 여정 개수 (totalSchedule): \(schedule.totalSchedule)")
@@ -153,7 +151,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
         let isTimeViewActive = (timeText != "-")
         
-        // 1. 버튼 타입 결정 로직
+        let isLastJourney = (schedule.scheduleOrder > 0 && schedule.totalSchedule == 1)
+        
         let buttonType: DailyJourneyModel.ActionButtonType
         let isScheduleActive = (schedule.scheduleStatus == .nowScheduleExist ||
                                 schedule.scheduleStatus == .firstSchedule ||
@@ -171,7 +170,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         self.currentButtonType = buttonType
         
-        // 2. 상태별 모델 생성 로직
         switch schedule.scheduleStatus {
         case .firstSchedule, .nowScheduleExist, .nextScheduleExist:
             let bubbleText: String
@@ -196,14 +194,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: .gray,
+                speechFieldType: isLastJourney ? .no : .gray,
                 chipItemType: .inProgressChip,
                 isTimeViewActive: isTimeViewActive,
                 actionButtonType: buttonType
             )
             
         case .noSchedule:
-            // ✨ 로컬 플래그를 사용하여 '스킵 후 종료'와 '원래 휴식일' 구분
             let bubbleText = self.hasHadScheduleToday
             ? "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!"
             : "오늘은 휴식의 날인가봐!\n푹 쉬면서 내일의 여정을 위한 힘을 모으자!"
@@ -221,7 +218,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                // 일정이 있었던 날이면 완료(.completedChip), 없던 날이면 기본(.inProgressChip) 스타일
                 chipItemType: self.hasHadScheduleToday ? .completedChip : .inProgressChip,
                 isTimeViewActive: false,
                 actionButtonType: buttonType
