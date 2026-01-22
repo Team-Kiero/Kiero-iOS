@@ -25,7 +25,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+        self.tabBarController?.delegate = self
         contentView.updateProfile()
         refreshSubject.send(())
     }
@@ -139,7 +139,20 @@ extension NotificationFeedViewController: UITableViewDelegate {
 extension NotificationFeedViewController: ScrollToTopAvailable {
     func scrollToTop() {
         if viewModel?.sections.isEmpty == false {
-            contentView.tableView.setContentOffset(.zero, animated: false)
+            contentView.tableView.setContentOffset(.zero, animated: true)
         }
+    }
+}
+
+extension NotificationFeedViewController: UITabBarControllerDelegate {
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        let targetVC = (viewController as? UINavigationController)?.viewControllers.first ?? viewController
+        
+        if targetVC === self {
+            if tabBarController.selectedViewController === viewController {
+                self.scrollToTop()
+            }
+        }
+        return true
     }
 }

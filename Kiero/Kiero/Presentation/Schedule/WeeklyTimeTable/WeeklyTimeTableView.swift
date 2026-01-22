@@ -172,7 +172,7 @@ final class WeeklyTimeTableView: BaseUIView {
     }
     
     func scrollToTop() {
-        scrollView.setContentOffset(CGPoint.zero, animated: false)
+        scrollView.setContentOffset(CGPoint.zero, animated: true)
     }
     
     func updateEmptyState(isEmpty: Bool) {
