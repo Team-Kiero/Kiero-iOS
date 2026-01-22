@@ -44,7 +44,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .fireLit:
             return .child
         default:
             return .parent
@@ -60,6 +60,9 @@ enum EndPoint {
     
     // 인증 완료 요청
     case completeSchedule(scheduleDetailId: Int) // 바디는 서비스에서 넘겨줌
+    
+    // 불 피우기
+    case fireLit
     
     var url: String {
         switch self {
@@ -97,6 +100,8 @@ enum EndPoint {
             return "/api/v1/presigned-url/schedules"
         case .completeSchedule(let scheduleDetailId):
             return "/api/v1/schedules/\(scheduleDetailId)"
+        case .fireLit:
+            return "/api/v1/schedules/fire-lit"
         }
     }
     
@@ -104,7 +109,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit:
             return "PATCH"
         default:
             return "POST"
