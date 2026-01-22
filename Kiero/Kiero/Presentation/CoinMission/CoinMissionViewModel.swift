@@ -8,52 +8,132 @@
 import Foundation
 import Combine
 
-struct DailyMissionData {
-    let date: Date
-    let missions: [(id: Int64, name: String, reward: Int, isCompleted: Bool)]
-}
-
 final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let viewDidLoad: AnyPublisher<Void, Never>
+        let viewWillAppear: AnyPublisher<Void, Never>
+        let completeMission: AnyPublisher<Int64, Never>
     }
     
     struct Output {
-        let missionData: AnyPublisher<[DailyMissionData], Never>
+        let userInfo: AnyPublisher<ChildrenInfo,Never>
+        let missions: AnyPublisher<[MissionGroupDTO], Never>
     }
     
-    let userName: String = "윤아"
-    var currentCoinCount: Int = 350
+    private let wishWellService: WishWellServiceType
+    private let missionService: MissionServiceType
+    private let coinMissionService: CoinMissionServiceType
     
-    private let missionDataSubject = CurrentValueSubject<[DailyMissionData], Never>([
-        DailyMissionData(date: Date(), missions: [
-            (1, "설거지하기", 50, false),
-            (2, "동생 숙제 도와주기", 50, false),
-            (3, "강아지 하리 산책시키기", 50, true)
-        ]),
-        DailyMissionData(date: Calendar.current.date(byAdding: .day, value: 1, to: Date())!, missions: [
-            (4, "방 청소하기", 30, false),
-            (5, "일기 쓰기", 20, false)
-        ]),
-        DailyMissionData(date: Calendar.current.date(byAdding: .day, value: 3, to: Date())!, missions: [
-            (6, "방 청소하기", 30, false),
-            (7, "일기 쓰기", 20, false)
-        ]),
-    ])
+    private let userInfoSubject =
+    CurrentValueSubject<ChildrenInfo, Never>(
+        .init(firstName: "", coinAmount: 0, today: "")
+    )
+    private let missionsSubject =
+    CurrentValueSubject<[MissionGroupDTO], Never>([])
+    
+    init(
+        wishWellService: WishWellServiceType = WishWellService(),
+        missionService: MissionServiceType = MissionService(),
+        coinMissionService: CoinMissionServiceType = CoinMissionService()
+    ) {
+        self.wishWellService = wishWellService
+        self.missionService = missionService
+        self.coinMissionService = coinMissionService
+        super.init()
+    }
     
     func transform(input: Input) -> Output {
         input.viewDidLoad
             .sink { [weak self] _ in
-                guard let self = self else { return }
-                self.missionDataSubject.send(self.missionDataSubject.value)
+                self?.fetchUserInfo()
+                self?.fetchMissions()
             }
             .store(in: &cancellables)
-            
-        return Output(missionData: missionDataSubject.eraseToAnyPublisher())
+        
+        input.viewWillAppear
+            .sink { [weak self] _ in
+                self?.fetchUserInfo()
+                self?.fetchMissions()
+            }
+            .store(in: &cancellables)
+        
+        input.completeMission
+            .flatMap { [weak self] missionId -> AnyPublisher<MissionCompleteResponseDTO, Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return self.coinMissionService.completeMission(missionId: missionId)
+                    .catch { error in
+                        print("❌ 미션 완료 실패:", error)
+                        return Empty<MissionCompleteResponseDTO, Never>()
+                    }
+                    .eraseToAnyPublisher()
+            }
+            .sink { [weak self] dto in
+                self?.applyComplete(dto)
+            }
+            .store(in: &cancellables)
+        
+        return Output (
+            userInfo: userInfoSubject.eraseToAnyPublisher(),
+            missions: missionsSubject.eraseToAnyPublisher()
+        )
     }
     
-    func getCoin(reward: Int) {
-        self.currentCoinCount += reward
+    private func fetchUserInfo() {
+        wishWellService.fetchMyInfo()
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: { [weak self] info in
+                self?.userInfoSubject.send(info)
+            })
+            .store(in: &cancellables)
+    }
+    
+    private func fetchMissions() {
+        missionService.fetchMissions(childId: nil)
+            .sink(receiveCompletion: { _ in },
+                  receiveValue: { [weak self] dto in
+                self?.missionsSubject.send(dto.missionsByDate)
+            })
+            .store(in: &cancellables)
+    }
+    
+    private func applyComplete(_ dto: MissionCompleteResponseDTO) {
+        var current = missionsSubject.value
+        
+        let completedId = Int(dto.id)
+        
+        for groupIdx in current.indices {
+            if let missionIdx = current[groupIdx].missions.firstIndex(where: { $0.id == completedId }) {
+                
+                var updatedMissions = current[groupIdx].missions
+                let old = updatedMissions[missionIdx]
+                
+                updatedMissions[missionIdx] = MissionItemDTO(
+                    id: old.id,
+                    name: old.name,
+                    reward: old.reward,
+                    isCompleted: true
+                )
+                
+                let oldGroup = current[groupIdx]
+                current[groupIdx] = MissionGroupDTO(
+                    dueAt: oldGroup.dueAt,
+                    dayOfWeek: oldGroup.dayOfWeek,
+                    missions: updatedMissions
+                )
+                
+                break
+            }
+        }
+        
+        missionsSubject.send(current)
+        
+        var user = userInfoSubject.value
+        user = ChildrenInfo(
+            firstName: user.firstName,
+            coinAmount: user.coinAmount + dto.reward,
+            today: user.today
+        )
+        userInfoSubject.send(user)
     }
 }
