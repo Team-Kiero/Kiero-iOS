@@ -23,7 +23,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     private let routeSubject = PassthroughSubject<LoginRoute, Never>()
 
     private let kakaoService: any KakaoAuthServiceType
-
+    private var isLoggingIn = false
+    
     init(kakaoService: any KakaoAuthServiceType = KakaoAuthService()) {
         self.kakaoService = kakaoService
         super.init()
@@ -43,10 +44,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     }
 
     private func requestKakaoLogin() {
+        guard !isLoggingIn else { return }
+        isLoggingIn = true
+        
         stateSubject.send(.loading)
 
         Task { [weak self] in
             guard let self else { return }
+            
+            defer { self.isLoggingIn = false }
 
             do {
                 let kakaoToken = try await kakaoService.loginWithKakao()
@@ -67,6 +73,17 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                     self.stateSubject.send(.idle)
                     self.routeSubject.send(.parentOnboarding(name: loginData.name, url: loginData.image))
                 }
+            } catch let error as KakaoLoginError {
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    switch error {
+                    case .cancelled:
+                        self.routeSubject.send(.toast("로그인이 취소되었습니다."))
+                    case .unknown:
+                        self.routeSubject.send(.toast("로그인이 취소되었습니다."))
+                    }
+                }
+
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))
