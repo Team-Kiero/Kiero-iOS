@@ -85,17 +85,6 @@ final class SseClient: NSObject {
         }
     }
     
-//    private func handleChunk(_ data: Data) {
-//        guard let chunk = String(data: data, encoding: .utf8) else { return }
-//        buffer += chunk
-//
-//        while let range = buffer.range(of: "\n\n") {
-//            let block = String(buffer[..<range.lowerBound])
-//            buffer.removeSubrange(..<range.upperBound)
-//            parseEventBlock(block)
-//        }
-//    }
-
     private func parseEventBlock(_ block: String) {
         let normalized = block.replacingOccurrences(of: "\r\n", with: "\n")
 
