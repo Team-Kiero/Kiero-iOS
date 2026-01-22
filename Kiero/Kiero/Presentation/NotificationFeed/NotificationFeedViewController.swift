@@ -57,8 +57,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         output.sections
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] sections in
                 self?.contentView.applySnapshot()
+                
+                let isEmpty = sections.isEmpty || sections.allSatisfy { $0.items.isEmpty }
+                self?.updateEmptyView(isEmpty: isEmpty)
             }
             .store(in: &cancellables)
         
@@ -70,6 +73,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                 self?.navigateToPickRole()
             }
             .store(in: &cancellables)
+    }
+    
+    private func updateEmptyView(isEmpty: Bool) {
+        contentView.tableView.backgroundView = isEmpty ? emptyView : nil
+        contentView.tableView.separatorStyle = isEmpty ? .none : .none
     }
 }
 
