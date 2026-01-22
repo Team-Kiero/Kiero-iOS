@@ -35,6 +35,7 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .kBlack
+        entryView.configure(count: viewModel?.earnedStoneCount ?? 0)
     }
     
     // MARK: - Setup Methods
@@ -85,9 +86,17 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
         output.showResultView
             .receive(on: DispatchQueue.main)
             .sink { [weak self] (coin, stones) in
-                self?.resultView.configure(coin: coin, stones: stones)
+                guard let self else { return }
+                
+                self.processView.playAnimation(stones: stones) { [weak self] in
+                    guard let self else { return }
+                    
+                    self.resultView.configure(coin: coin, stones: stones)
+                    self.animateToResultView()
+                }
             }
             .store(in: &cancellables)
+        
         
         output.showError
             .receive(on: DispatchQueue.main)
@@ -107,26 +116,18 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
         }) { _ in
             self.entryView.isHidden = true
             self.processViewDidAppearSubject.send(())
-            
-            self.processView.playAnimation { [weak self] in
-                self?.animateToResultView()
-            }
         }
     }
     
     private func animateToResultView() {
         resultView.isHidden = false
-        resultView.playGif()
         
         UIView.animate(withDuration: 0.5, animations: {
             self.processView.alpha = 0
             self.resultView.alpha = 1
         }) { _ in
             self.processView.isHidden = true
+            self.resultView.playGif()
         }
     }
-}
-
-#Preview {
-    GiveFireStoneViewController(viewModel: GiveFireStoneViewModel(), diContainer: AppDIContainer.shared)
 }
