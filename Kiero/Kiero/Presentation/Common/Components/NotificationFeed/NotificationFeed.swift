@@ -20,7 +20,7 @@ final class NotificationFeed: UIView {
             time: String,
             childName: String,
             schedule: String,
-            proofImage: UIImage?,
+            proofImageUrl: String?,
             isExpanded: Bool
         )
         case finishAllSchedule(
@@ -163,16 +163,27 @@ final class NotificationFeed: UIView {
         let style: UIFont.NotoSans = .title3_16_SB
         
         switch state {
-        case let .finishSchedule(time, childName, schedule, proofImage, isExpanded):
+        case let .finishSchedule(time, childName, schedule, proofImageUrl, isExpanded):
             timeLabel.setTypo(.body4_12_R, text: time)
             downButton.isHidden = false
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(schedule)에 도착했어요."
             messageLabel.attributedText = makeMessage(message: base, highlight: schedule, style: style)
-            
-            proofImageView.image = proofImage
+
             applyExpanded(isExpanded, animated: false)
             updateBottomAnchorForSchedule(isExpanded: isExpanded)
+            
+            if isExpanded, let urlString = proofImageUrl, let url = URL(string: urlString) {
+                proofImageView.kf.setImage(
+                    with: url,
+                    options: [
+                        .cacheOriginalImage
+                    ]
+                )
+            } else {
+                proofImageView.kf.cancelDownloadTask()
+                proofImageView.image = nil
+            }
             
         case let .finishAllSchedule(time, childName, coinEarned):
             timeLabel.setTypo(.body4_12_R, text: time)
@@ -273,5 +284,51 @@ final class NotificationFeed: UIView {
             attr.addAttributes([.foregroundColor: UIColor.main], range: range)
         }
         return attr
+    }
+}
+
+extension NotificationFeed {
+    func resetForReuse() {
+
+        downButton.setImage(UIImage(resource: .icDown), for: .normal)
+        proofImageView.isHidden = true
+        proofImageView.snp.updateConstraints { $0.height.equalTo(0) }
+
+
+        proofImageView.kf.cancelDownloadTask()
+        proofImageView.image = nil
+
+        coinChip.isHidden = true
+
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+}
+
+extension NotificationFeed.State {
+
+    mutating func toggleExpanded() {
+        switch self {
+        case let .finishSchedule(time, childName, schedule, url, isExpanded):
+            self = .finishSchedule(
+                time: time,
+                childName: childName,
+                schedule: schedule,
+                proofImageUrl: url,
+                isExpanded: !isExpanded
+            )
+        default:
+            break
+        }
+    }
+
+    var dateKey: String {
+        switch self {
+        case let .finishSchedule(time, _, _, _, _),
+             let .finishMission(time, _, _, _),
+             let .useCoupon(time, _, _, _),
+             let .finishAllSchedule(time, _, _):
+            return time.components(separatedBy: " ").first ?? ""
+        }
     }
 }

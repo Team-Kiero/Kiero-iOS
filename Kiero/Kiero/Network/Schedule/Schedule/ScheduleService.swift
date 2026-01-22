@@ -11,12 +11,13 @@ import Combine
 protocol ScheduleServiceType {
     func fetchChildren() -> AnyPublisher<[ChildResponseDTO], NetworkError>
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError>
+    func deleteChildDummyData() -> AnyPublisher<Void, NetworkError>
+    func logout() -> AnyPublisher<Void, NetworkError>
 }
 
 final class ScheduleService: ScheduleServiceType {
     func fetchChildren() -> AnyPublisher<[ChildResponseDTO], NetworkError> {
         let endPoint = EndPoint.fetchChildren
-        
         return Future<[ChildResponseDTO], NetworkError> { promise in
             Task {
                 do {
@@ -34,7 +35,6 @@ final class ScheduleService: ScheduleServiceType {
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<[Schedule], NetworkError> {
         let startStr = startDate.toString(format: "yyyy-MM-dd")
         let endStr = endDate.toString(format: "yyyy-MM-dd")
-        
         let endPoint = EndPoint.fetchSchedules(childId: childId, startDate: startStr, endDate: endStr)
         
         return Future<[Schedule], NetworkError> { promise in
@@ -48,7 +48,32 @@ final class ScheduleService: ScheduleServiceType {
                     promise(.failure(.unknownError))
                 }
             }
-        }
-        .eraseToAnyPublisher()
+        }.eraseToAnyPublisher()
+    }
+    
+    func deleteChildDummyData() -> AnyPublisher<Void, NetworkError> {
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let _: EmptyResponse = try await BaseService.shared.request(endPoint: .deleteChildDummy)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(error as? NetworkError ?? .unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func logout() -> AnyPublisher<Void, NetworkError> {
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let _: EmptyResponse = try await BaseService.shared.request(endPoint: .logout)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(error as? NetworkError ?? .unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
     }
 }

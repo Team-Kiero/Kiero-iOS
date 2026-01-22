@@ -112,3 +112,11 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
         scheduleView.timeTableView.updateDaysDates(dates)
     }
 }
+
+extension ScheduleChildViewController: ScrollToTopAvailable {
+    func scrollToTop() {
+        DispatchQueue.main.async { [weak self] in
+            self?.scheduleView.timeTableView.scrollToTop()
+        }
+    }
+}

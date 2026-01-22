@@ -165,6 +165,19 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                 self?.dismiss(animated: true)
             }
             .store(in: &cancellables)
+        
+        viewModel.errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in
+                guard let self = self else { return }
+                
+                if let presented = self.presentedViewController as? LoadingViewController {
+                    presented.dismiss(animated: false)
+                }
+                
+                Toast.show(message: message, bottomInset: 40)
+            }
+            .store(in: &cancellables)
     }
     
     @objc

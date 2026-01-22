@@ -105,10 +105,18 @@ final class BaseService {
             throw NetworkError.unknownError
         }
         
-        // 디코딩
+        // Empty Body 대응 (데이터가 아예 없는 경우)
+        if data.isEmpty {
+            if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            } else {
+                throw NetworkError.noData
+            }
+        }
+        
+        //  디코딩
         do {
             if Response.self == EmptyResponse.self {
-                _ = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
                 return EmptyResponse() as! Response
             }
             
@@ -116,20 +124,29 @@ final class BaseService {
             
             if let data = decoded.data {
                 return data
-            } else if let emptyResponse = EmptyResponse() as? Response {
-                return emptyResponse
-            } else {
+            }
+            else if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            }
+            else if let nilValue = (decoded.data as Any?) as? Response {
+                return nilValue
+            }
+            else {
                 throw NetworkError.noData
             }
             
         } catch let error as NetworkError {
             throw error
         } catch {
+            if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            }
             print("❌ Decoding Error 상세: \(error)")
             throw NetworkError.responseDecodingError
         }
     }
     
+
     // accessToken 재발급
     private func refreshAccessToken() async throws {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {

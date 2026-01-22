@@ -11,6 +11,7 @@ import KakaoSDKAuth
 import Moya
 
 final class AppDIContainer: ViewControllerFactory, ServiceFactory{
+    
     static let shared = AppDIContainer()
     private init() {}
     
@@ -36,10 +37,10 @@ extension AppDIContainer {
         return PickRoleViewController(viewModel: viewModel, diContainer: self)
     }
     
-//    func makeParentOnboardingViewController() -> UIViewController {
-//        let vm = ParentOnboardingViewModel(name: <#String#>, profileURL: <#String#>)
-//        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
-//    }
+    //    func makeParentOnboardingViewController() -> UIViewController {
+    //        let vm = ParentOnboardingViewModel(name: <#String#>, profileURL: <#String#>)
+    //        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
+    //    }
     
     func makeChildOnboardingViewController() -> UIViewController {
         let items: [SpeechItem] = [
@@ -85,8 +86,19 @@ extension AppDIContainer {
 // MARK: - Notification
 
 extension AppDIContainer {
+    func makeNotificationFeedService() -> FeedServiceType {
+        FeedService()
+    }
+    
+    func makeNotificationFeedViewModel() -> NotificationFeedViewModel {
+        return NotificationFeedViewModel(
+            feedService: makeNotificationFeedService(),
+            scheduleService: makeScheduleService()
+        )
+    }
+    
     func makeNotificationFeedViewController() -> UIViewController {
-        let viewModel = NotificationFeedViewModel()
+        let viewModel = makeNotificationFeedViewModel()
         return NotificationFeedViewController(viewModel: viewModel, diContainer: self)
     }
 }

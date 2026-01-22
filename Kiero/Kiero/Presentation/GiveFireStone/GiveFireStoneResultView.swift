@@ -5,8 +5,8 @@
 //  Created by Hyunseo Han on 1/16/26.
 //
 
-import UIKit
 import ImageIO
+import UIKit
 
 import Kingfisher
 import SnapKit
@@ -95,13 +95,28 @@ final class GiveFireStoneResultView: BaseUIView {
         let firstStoneKey = stones.first ?? ""
         let stoneKoreanName = mapStoneName(firstStoneKey)
         
+        let lines: [String]
+        let highlightKeywords: [String]
+        
+        if coin > 0 {
+            lines = [
+                "덕분에 \(stoneKoreanName)이 커졌어!",
+                "선물로 금화 \(coin)개를 줄게"
+            ]
+            highlightKeywords = [stoneKoreanName, "\(coin)"]
+        } else {
+            lines = [
+                "덕분에 \(stoneKoreanName)이 커졌어!",
+                "오늘도 도와줘서 고마워"
+            ]
+            highlightKeywords = [stoneKoreanName]
+        }
+        
         speechField.configure(
+            fieldType: .no,
             name: "꾸비",
-            lines: [
-                "덕분에 \(stoneKoreanName) 이 커졌어!",
-                "선물로 금화 \(coin) 개를 줄게"
-            ],
-            highlightKeywords: [stoneKoreanName, "\(coin)"]
+            lines: lines,
+            highlightKeywords: highlightKeywords
         )
     }
     

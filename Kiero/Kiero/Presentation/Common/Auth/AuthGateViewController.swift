@@ -44,16 +44,12 @@ final class AuthGateViewController: UIViewController {
             changeRoot(nav)
 
         case .parentTab:
-            let nav = UINavigationController(
-                rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-            )
-            changeRoot(nav)
+            let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
+            changeRoot(tab)
 
         case .childTab:
-            let nav = UINavigationController(
-                rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: false)
-            )
-            changeRoot(nav)
+            let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: false)
+            changeRoot(tab)
         }
     }
 

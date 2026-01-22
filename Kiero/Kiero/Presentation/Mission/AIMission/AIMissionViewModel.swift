@@ -14,6 +14,7 @@ final class AIMissionViewModel: BaseViewModel {
     let suggestionResult = PassthroughSubject<[SuggestedMissionDTO], Never>()
     let isLoading = CurrentValueSubject<Bool, Never>(false)
     let bulkCreateSuccess = PassthroughSubject<Void, Never>()
+    let errorMessage = PassthroughSubject<String, Never>()
 
     init(service: AIMissionServiceType) {
         self.service = service
@@ -24,13 +25,21 @@ final class AIMissionViewModel: BaseViewModel {
         isLoading.send(true)
         
         service.postMissionSuggestions(text: text)
+            .timeout(.seconds(15), scheduler: DispatchQueue.main, customError: {
+                return NetworkError.unknownError
+            })
             .sink { [weak self] completion in
                 self?.isLoading.send(false)
                 if case .failure(let error) = completion {
                     print("❌ 알림장 분석 에러: \(error)")
+                    self?.errorMessage.send("알림장 내용을 분석하지 못했어요.")
                 }
             } receiveValue: { [weak self] missions in
-                self?.suggestionResult.send(missions)
+                if missions.isEmpty {
+                    self?.errorMessage.send("알림장 내용을 분석하지 못했어요.")
+                } else {
+                    self?.suggestionResult.send(missions)
+                }
             }
             .store(in: &cancellables)
     }

@@ -10,6 +10,10 @@ import UIKit
 import SnapKit
 import Then
 
+protocol ScrollToTopAvailable {
+    func scrollToTop()
+}
+
 public final class TabBarViewController: UITabBarController {
     
     private let factory: ViewControllerFactory
@@ -141,10 +145,6 @@ extension TabBarViewController: UITabBarControllerDelegate {
             findScrollViewAndScrollToTop(in: subview)
         }
     }
-}
-
-protocol ScrollToTopAvailable {
-    func scrollToTop()
 }
 
 extension TabBarViewController: UINavigationControllerDelegate {

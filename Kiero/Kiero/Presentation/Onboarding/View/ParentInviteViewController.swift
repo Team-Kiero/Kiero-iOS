@@ -174,11 +174,9 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     }
 
     private func navigateToParentTap() {
-        let nav = UINavigationController(
-            rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-        )
+        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+            sceneDelegate.changeRootViewController(tab)
         }
     }
 }

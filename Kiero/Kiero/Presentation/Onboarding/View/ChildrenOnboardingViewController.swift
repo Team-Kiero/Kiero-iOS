@@ -91,6 +91,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                 self.storyImageView.image = item.image
 
                 self.currentSpeech?.configure(
+                    fieldType: .main,
                     name: item.name,
                     lines: item.lines,
                     highlightKeywords: item.highlightKeywords
@@ -121,6 +122,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
                     
                     if let item = self.latestItem {
                         nextSpeech.configure(
+                            fieldType: .main,
                             name: item.name,
                             lines: item.lines,
                             highlightKeywords: item.highlightKeywords
@@ -156,9 +158,9 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     }
     
     private func navigateToChildrenTap() {
-        let nav = UINavigationController(rootViewController: TabBarViewController(factory: AppDIContainer.shared, isParent: false))
+        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: false)
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+            sceneDelegate.changeRootViewController(tab)
         }
     }
     

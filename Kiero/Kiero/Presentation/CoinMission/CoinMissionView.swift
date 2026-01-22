@@ -130,6 +130,7 @@ final class CoinMissionView: BaseUIView {
         coinChip.configure(style: .currentCoinChip, icon: coinImg, text: "\(price) 개")
         
         speechField.configure(
+            fieldType: .no,
             name: "꾸비",
             lines: ["우리 함께 멋진 금화를 만들어볼까?"],
             highlightKeywords: ["멋진 금화"]

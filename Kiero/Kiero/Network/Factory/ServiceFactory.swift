@@ -13,6 +13,7 @@ protocol ServiceFactory {
     func makeScheduleService() -> ScheduleServiceType
     func makeAIMissionService() -> AIMissionServiceType
     func makeWishWellService() -> WishWellServiceType
+    func makeNotificationFeedService() -> FeedServiceType
 }
 
 protocol KakaoAuthServiceType {
