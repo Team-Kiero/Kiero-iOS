@@ -8,23 +8,23 @@
 import Foundation
 
 final class SseStreamManager {
-
+    
     var onRefreshWillStart: (() -> Void)?
     var onReconnected: (() -> Void)?
-
+    
     private let sseURL: URL
     private var client: SseClient?
-
+    
     private var sseAccessToken: String?
     private var refreshTask: Task<Void, Never>?
     private var isRunning = false
-
+    
     private var isConnecting = false
-
+    
     init(sseURL: URL) {
         self.sseURL = sseURL
     }
-
+    
     /// 최초 토큰으로 즉시 연결 + 이후 5분마다 토큰 재발급/재연결
     func startIfNeeded(
         initialToken: String,
@@ -37,30 +37,30 @@ final class SseStreamManager {
         }
         isRunning = true
         sseAccessToken = initialToken
-
+        
         // 최초 연결
         Task { @MainActor [weak self] in
             guard let self else { return }
             print("✅ [SSEManager] connect() will be called (initial)")
             self.connect(onEvent: onEvent)
         }
-
+        
         // 5분마다 토큰 갱신 + 재연결
         refreshTask?.cancel()
         refreshTask = Task { [weak self] in
             guard let self else { return }
-
+            
             while !Task.isCancelled {
                 // ✅ 서버 스펙: 5분마다 재발급 필요
                 try? await Task.sleep(nanoseconds: 5 * 60 * 1_000_000_000)
-
+                
                 // ✅ (3번 방식) 재발급 시작 훅 — “공백 중 이벤트 유실” 대비 조회를 여기서 1회
                 self.onRefreshWillStart?()
-
+                
                 do {
                     let newToken = try await BaseService.shared.reissueSseAccessToken()
                     self.sseAccessToken = newToken
-
+                    
                     await MainActor.run { [weak self] in
                         guard let self else { return }
                         print("✅ [SSEManager] connect() will be called (refresh)")
@@ -74,7 +74,7 @@ final class SseStreamManager {
             }
         }
     }
-
+    
     @MainActor
     private func connect(onEvent: @escaping (SseEventPayload) -> Void) {
         guard isRunning else { return }
@@ -83,10 +83,10 @@ final class SseStreamManager {
             return
         }
         isConnecting = true
-
+        
         // 기존 연결 종료
         client?.disconnect()
-
+        
         // 새 클라이언트 생성
         client = SseClient(
             url: sseURL,
@@ -104,20 +104,21 @@ final class SseStreamManager {
                 self?.isConnecting = false
             }
         )
-
+        
         client?.connect()
     }
-
-    func stop() {
-        isRunning = false
-        isConnecting = false
-
-        refreshTask?.cancel()
-        refreshTask = nil
-
+    
+    func pause() {
         client?.disconnect()
         client = nil
-
+        isRunning = false
+        isConnecting = false
+    }
+    
+    func stop() {
+        pause()
+        refreshTask?.cancel()
+        refreshTask = nil
         sseAccessToken = nil
     }
 }
