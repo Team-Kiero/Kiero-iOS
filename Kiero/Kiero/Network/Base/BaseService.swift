@@ -77,6 +77,7 @@ final class BaseService {
         // Request 준비
         var request = URLRequest(url: url)
         request.httpMethod = endPoint.method
+        request.timeoutInterval = 5.0
         endPoint.header.forEach { key, value in
             request.addValue(value, forHTTPHeaderField: key)
         }

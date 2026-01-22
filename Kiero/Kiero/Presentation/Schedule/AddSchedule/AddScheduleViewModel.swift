@@ -42,22 +42,25 @@ final class AddScheduleViewModel: BaseViewModel {
             dates: dates
         )
         
+        print("📡 [Service] 일정 저장 요청 시작")
+        
         service.postSchedule(childId: self.childId, request: request)
-            .sink { completion in
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                guard let self = self else { return }
+                
                 if case .failure(let error) = completion {
+                    print("❌ [VM 에러 발생]: \(error)")
+                    
                     switch error {
-                    case .clientError(let code):
-                        if code == 400 {
-                            self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
-                        } else {
-                            self.errorMessage.send("일정 추가에 실패했습니다.")
-                        }
+                    case .clientError(let code) where code == 400:
+                        self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
                     default:
-                        self.errorMessage.send("네트워크 연결을 확인해주세요.")
+                        self.errorMessage.send("일정 저장에 실패했어요. 잠시 후 다시 시도해주세요.")
                     }
                 }
             } receiveValue: { [weak self] _ in
-                print("✅ [VM] 서버 저장 성공 신호 보냄")
+                print("✅ [VM] 서버 저장 성공")
                 self?.isAddSuccess.send(())
             }
             .store(in: &cancellables)

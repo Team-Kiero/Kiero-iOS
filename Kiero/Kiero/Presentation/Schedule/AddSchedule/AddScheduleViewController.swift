@@ -202,8 +202,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
-            self.navigationBar.isRightButtonEnabled = false
-            
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
                 Toast.show(message: "일정 이름을 입력해주세요.")
                 return
@@ -216,9 +214,21 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
             
             let calendar = Calendar.current
-            _ = calendar.startOfDay(for: Date())
+            let today = calendar.startOfDay(for: Date())
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
+
+            if !isRecurring {
+                let hasPastDate = selectedIndices.contains { index in
+                    let targetDate = calendar.startOfDay(for: weekDates[index])
+                    return targetDate < today
+                }
+                
+                if hasPastDate {
+                    Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
+                    return
+                }
+            }
             
             let start = self.currentStartTime ?? Date()
             let end = self.currentEndTime ?? Date()
@@ -230,42 +240,24 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
+            self.navigationBar.isRightButtonEnabled = false
+            
             let colorMapping: [UIColor: String] = [
                 .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
                 .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
             ]
             let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
-            let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
             
             let startTimeStr = start.toString(format: "HH:mm:ss")
             let endTimeStr = end.toString(format: "HH:mm:ss")
-            
+
             if isRecurring {
+                let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
-                
-                viewModel?.addSchedule(
-                    name: title,
-                    isRecurring: true,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    color: colorCode,
-                    dayOfWeek: dayOfWeekStr,
-                    dates: nil
-                )
+                viewModel?.addSchedule(name: title, isRecurring: true, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: dayOfWeekStr, dates: nil)
             } else {
-                let datesStr = selectedIndices.map {
-                    weekDates[$0].toString(format: "yyyy-MM-dd")
-                }.joined(separator: ", ")
-                
-                viewModel?.addSchedule(
-                    name: title,
-                    isRecurring: false,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    color: colorCode,
-                    dayOfWeek: nil,
-                    dates: datesStr
-                )
+                let datesStr = selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
+                viewModel?.addSchedule(name: title, isRecurring: false, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: nil, dates: datesStr)
             }
             
             self.view.endEditing(true)
@@ -336,8 +328,9 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         viewModel.errorMessage
             .receive(on: DispatchQueue.main)
-            .sink { message in
+            .sink { [weak self] message in
                 Toast.show(message: message)
+                self?.navigationBar.isRightButtonEnabled = true
             }
             .store(in: &cancellables)
         
