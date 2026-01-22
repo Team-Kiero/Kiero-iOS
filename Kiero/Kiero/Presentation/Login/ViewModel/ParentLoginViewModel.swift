@@ -60,6 +60,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveProfile(loginData.image)
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                TokenManager.shared.saveUserName(loginData.name)
+                TokenManager.shared.saveProfile(loginData.image)
 
                 await MainActor.run {
                     self.stateSubject.send(.idle)

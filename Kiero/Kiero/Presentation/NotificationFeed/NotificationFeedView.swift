@@ -18,7 +18,16 @@ final class NotificationFeedView: BaseUIView {
     
     // MARK: - UI Components
     
-    private let profileView = ProfileBox(name: "윤아", profileURL: "")
+    private lazy var profileView = ProfileBox(
+        name: "사용자",
+        profileURL: "",
+        backgroundColor: .clear
+    ).then {
+        $0.onTap = { [weak self] in
+            self?.onProfileTapped?()
+        }
+    }
+    
     let tableView = UITableView(frame: .zero, style: .grouped).then {
         $0.backgroundColor = .clear
         $0.separatorStyle = .none
@@ -35,10 +44,7 @@ final class NotificationFeedView: BaseUIView {
     
     override func setUI() {
         addSubviews(profileView, tableView)
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        profileView.addGestureRecognizer(tap)
-        profileView.isUserInteractionEnabled = true
+        updateProfile()
     }
     
     override func setLayout() {
@@ -51,6 +57,18 @@ final class NotificationFeedView: BaseUIView {
             $0.top.equalTo(profileView.snp.bottom).offset(25)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().inset(100)
+        }
+    }
+    
+    func updateProfile() {
+         let name = TokenManager.shared.getUserName() ?? "사용자"
+         let profileURL = TokenManager.shared.getProfile()
+         profileView.configure(name: name, url: profileURL)
+     }
+    
+    func applySnapshot() {
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
         }
     }
     
