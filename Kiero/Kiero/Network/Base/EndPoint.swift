@@ -16,7 +16,7 @@ enum TokenRefreshPolicy {
 enum EndPoint {
     // Invite Code
     case postInviteCode
-    case checkConnection
+    case checkConnection(lastName: String, firstName: String)
     case subscribeConnection
     
     // Login
@@ -143,6 +143,11 @@ enum EndPoint {
             return [URLQueryItem(name: "accessToken", value: token)]
         case .kakaoLogin(let authCode):
             return [URLQueryItem(name: "authCode", value: authCode)]
+        case .checkConnection(let lastName, let firstName):
+            return [
+                URLQueryItem(name: "childLastName", value: lastName),
+                URLQueryItem(name: "childFirstName", value: firstName)
+            ]
         default:
             return nil
         }
