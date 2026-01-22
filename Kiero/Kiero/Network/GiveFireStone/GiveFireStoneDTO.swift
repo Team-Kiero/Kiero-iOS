@@ -7,13 +7,7 @@
 
 import Foundation
 
-//struct GiveFireStoneDTO: Decodable {
-//    let status: Int
-//    let message: String
-//    let data: FireLitData?
-//}
-
 struct FireLitData: Decodable {
-    let gotStones: [String] // 용인지
+    let gotStones: [String] 
     let earnedCoinAmount: Int
 }
