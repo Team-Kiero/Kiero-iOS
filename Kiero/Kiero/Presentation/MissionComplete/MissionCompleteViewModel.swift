@@ -52,12 +52,12 @@ final class MissionCompleteViewModel: BaseViewModel, ViewModelType {
                 }
                 
                 let stoneType = self.receivedStoneType ?? .courage
-                let completeModel = MissionCompleteModel.from(stoneType: stoneType)
+                let completeModel = MissionCompleteModel.from(serverStrings: [stoneType.rawValue]).first ?? .courage
                 
                 return MissionCompleteViewData(
                     capturedImage: self.capturedImage,
                     stoneImage: completeModel.image,
-                    message: completeModel.message,
+                    message: completeModel.getMessage(),
                     highlightKeyword: completeModel.highlightKeyword
                 )
             }
