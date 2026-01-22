@@ -132,7 +132,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                     self.startButton.isEnabled = true
                     self.startButton.alpha = 1.0
                     print("ChildSignup 실패:", message)
-                    // TODO: 토스트/알럿 붙이기
+                    Toast.show(message: "이름이나 초대코드를 다시 확인해줘!", bottomInset: 83)
                 }
             }
             .store(in: &cancellables)
