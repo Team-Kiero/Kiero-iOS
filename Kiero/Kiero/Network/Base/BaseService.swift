@@ -105,10 +105,18 @@ final class BaseService {
             throw NetworkError.unknownError
         }
         
+        // Empty Body 대응
+        if data.isEmpty {
+            if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            } else {
+                throw NetworkError.noData
+            }
+        }
+
         // 디코딩
         do {
             if Response.self == EmptyResponse.self {
-                _ = try JSONDecoder().decode(BaseResponse<EmptyResponse>.self, from: data)
                 return EmptyResponse() as! Response
             }
             
@@ -116,16 +124,16 @@ final class BaseService {
             
             if let data = decoded.data {
                 return data
-            } else if let emptyResponse = EmptyResponse() as? Response {
-                return emptyResponse
+            } else if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
             } else {
                 throw NetworkError.noData
             }
             
-        } catch let error as NetworkError {
-            throw error
         } catch {
-            print("❌ Decoding Error 상세: \(error)")
+            if Response.self == EmptyResponse.self {
+                return EmptyResponse() as! Response
+            }
             throw NetworkError.responseDecodingError
         }
     }

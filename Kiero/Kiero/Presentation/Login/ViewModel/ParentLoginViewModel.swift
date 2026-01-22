@@ -57,6 +57,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
 
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 TokenManager.shared.saveRefreshToken(loginData.refreshToken)
+                TokenManager.shared.saveProfile(loginData.image)
+                TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveProfile(loginData.image)

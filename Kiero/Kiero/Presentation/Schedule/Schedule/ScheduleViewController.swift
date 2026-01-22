@@ -32,13 +32,13 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     // MARK: - UI Components
     
     private lazy var profileBox = ProfileBox(
-        name: "신키로",
-        profileURL: "",
+        name: TokenManager.shared.getUserName() ?? "신키로",
+        profileURL: TokenManager.shared.getProfile() ?? "",
         backgroundColor: .clear
     ).then {
         $0.onTap = {[weak self] in
             self?.showLogoutDialog {
-                self?.performLogout()
+                self?.viewModel?.performLogout()
             }
         }
     }
@@ -239,6 +239,12 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] dates in
                 self?.scheduleChildVC.updateWeeklyDates(dates)
+            }.store(in: &cancellables)
+        
+        viewModel.logoutSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.navigateToPickRole()
             }.store(in: &cancellables)
     }
 }

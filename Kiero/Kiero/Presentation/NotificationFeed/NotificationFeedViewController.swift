@@ -42,7 +42,10 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         super.bind(viewModel: viewModel)
         
         contentView.onProfileTapped = { [weak self] in
-            self?.showLogoutDialog { self?.performLogout() }
+            self?.showLogoutDialog {
+                // TODO: 알림 API 합친 뒤 로그아웃 로직 추가
+//                self?.viewModel?.performLogout()
+            }
         }
         
         let input = NotificationFeedViewModel.Input(
