@@ -107,9 +107,13 @@ extension NotificationFeedViewController: UITableViewDataSource {
             guard let self, let tableView else { return }
             self.viewModel?.toggleExpansion(at: indexPath)
             
-            tableView.reloadRows(at: [indexPath], with: .automatic)
-            tableView.beginUpdates()
-            tableView.endUpdates()
+            UIView.performWithoutAnimation {
+                let offset = tableView.contentOffset
+                tableView.reloadRows(at: [indexPath], with: .none)
+                tableView.beginUpdates()
+                tableView.endUpdates()
+                tableView.setContentOffset(offset, animated: false)
+            }
         }
         return cell
     }
