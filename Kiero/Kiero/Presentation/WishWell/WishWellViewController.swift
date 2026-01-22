@@ -106,7 +106,7 @@ private extension WishWellViewController {
         let data = vm.coupons[indexPath.item]
         
         if vm.currentCoinCount < data.price {
-            Toast.show(message: "금화가 부족해! 미션을 더 하고 오자!")
+            Toast.show(message: "금화가 부족해! 미션을 더 하고 오자!", bottomInset: 117)
             return
         }
         let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
