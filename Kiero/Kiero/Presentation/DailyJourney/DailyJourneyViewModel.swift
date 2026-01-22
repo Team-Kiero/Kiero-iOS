@@ -130,6 +130,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
         
+        // 🔍 디버깅을 위한 프린트문 추가
+        print("--- 🏁 여정 진행도 체크 ---")
+        print("현재 여정 순서 (scheduleOrder): \(schedule.scheduleOrder)")
+        print("전체 여정 개수 (totalSchedule): \(schedule.totalSchedule)")
+        print("마지막 일정 여부: \(schedule.scheduleOrder == schedule.totalSchedule ? "✅ 마지막임" : "❌ 아직 더 남음")")
+        print("------------------------")
+        
         let kidName = child.firstName
         let coinCount = child.coinAmount
         let todayDateText = child.today
@@ -171,8 +178,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 bubbleText = "다음은 \(scheduleName)의 시간이야!\n다음 여정을 진행하면 \(stoneTypeName)의 불조각을 줄게."
             }
             
-            let isLastJourney = (schedule.scheduleOrder == schedule.totalSchedule)
-            
             return DailyJourneyModel(
                 bubbleText: bubbleText,
                 highlightKeywords: [scheduleName, stoneTypeName],
@@ -185,7 +190,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: schedule.totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: isLastJourney ? .no : .gray,
+                speechFieldType: .gray,
                 chipItemType: .inProgressChip,
                 isTimeViewActive: isTimeViewActive,
                 actionButtonType: buttonType
@@ -211,23 +216,43 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             )
             
         case .fireNotLit:
-            return DailyJourneyModel(
-                bubbleText: "고마워 \(kidName)!\n오늘의 조각들이 모두 모였어! 영웅의 불꽃 을 피워줘!",
-                highlightKeywords: ["영웅의 불꽃"],
-                journeyTimeText: "-",
-                isMissionActive: false,
-                kidName: kidName,
-                dateText: todayDateText,
-                coinCount: coinCount,
-                fireStoneCount: schedule.earnedStones ?? 0,
-                maxFireStoneCount: schedule.totalSchedule,
-                scheduleOrder: schedule.scheduleOrder,
-                scheduleOrderText: "",
-                speechFieldType: .no,
-                chipItemType: .highlightChip,
-                isTimeViewActive: false,
-                actionButtonType: buttonType
-            )
+            if (schedule.earnedStones ?? 0) == 0 {
+                return DailyJourneyModel(
+                    bubbleText: "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!",
+                    highlightKeywords: [],
+                    journeyTimeText: "-",
+                    isMissionActive: false,
+                    kidName: kidName,
+                    dateText: todayDateText,
+                    coinCount: coinCount,
+                    fireStoneCount: 0,
+                    maxFireStoneCount: schedule.totalSchedule,
+                    scheduleOrder: schedule.scheduleOrder,
+                    scheduleOrderText: "",
+                    speechFieldType: .no,
+                    chipItemType: .completedChip,
+                    isTimeViewActive: false,
+                    actionButtonType: .hidden
+                )
+            } else {
+                return DailyJourneyModel(
+                    bubbleText: "고마워 \(kidName)!\n오늘의 조각들이 모두 모였어! 영웅의 불꽃 을 피워줘!",
+                    highlightKeywords: ["영웅의 불꽃"],
+                    journeyTimeText: "-",
+                    isMissionActive: false,
+                    kidName: kidName,
+                    dateText: todayDateText,
+                    coinCount: coinCount,
+                    fireStoneCount: schedule.earnedStones ?? 0,
+                    maxFireStoneCount: schedule.totalSchedule,
+                    scheduleOrder: schedule.scheduleOrder,
+                    scheduleOrderText: "",
+                    speechFieldType: .no,
+                    chipItemType: .highlightChip,
+                    isTimeViewActive: false,
+                    actionButtonType: buttonType
+                )
+            }
             
         case .fireLit:
             return DailyJourneyModel(
