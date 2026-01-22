@@ -12,6 +12,7 @@ final class SseClient: NSObject {
     private let url: URL
     private let tokenProvider: () -> String?
     private let onEvent: (SseEventPayload) -> Void
+    private let onConnected: (() -> Void)?
     private let onError: (Error) -> Void
 
     private var session: URLSession!
@@ -22,11 +23,13 @@ final class SseClient: NSObject {
         url: URL,
         tokenProvider: @escaping () -> String?,
         onEvent: @escaping (SseEventPayload) -> Void,
+        onConnected: (() -> Void)? = nil,
         onError: @escaping (Error) -> Void
     ) {
         self.url = url
         self.tokenProvider = tokenProvider
         self.onEvent = onEvent
+        self.onConnected = onConnected
         self.onError = onError
         super.init()
 
@@ -97,21 +100,32 @@ final class SseClient: NSObject {
             } else if line.hasPrefix("data:") {
                 let v = line.dropFirst("data:".count).trimmingCharacters(in: .whitespaces)
                 dataLines.append(v)
-            } else {
-
             }
         }
 
         guard !dataLines.isEmpty else { return }
 
         let dataString = dataLines.joined(separator: "\n")
-
         let trimmed = dataString.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.hasPrefix("{") {
+
+        // 1) connected 이벤트 처리 (JSON 아니어도 여기서 잡힘)
+        if eventName == "connected" {
+            // 보통 trimmed == "subscribed"
+            print("✅ [SSEClient] CONNECTED event received:", trimmed)
+            onConnected?()
             return
         }
 
-        guard let jsonData = trimmed.data(using: .utf8) else { return }
+        if eventName == "heartbeat" {
+            print("💓 [SSEClient] heartbeat:", trimmed)
+            return
+        }
+
+        // 2) JSON payload만 디코딩
+        guard trimmed.hasPrefix("{"),
+              let jsonData = trimmed.data(using: .utf8) else {
+            return
+        }
 
         do {
             let payload = try JSONDecoder().decode(SseEventPayload.self, from: jsonData)
