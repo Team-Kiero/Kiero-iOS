@@ -45,9 +45,9 @@ enum MissionCompleteModel: Int, CaseIterable {
 extension MissionCompleteModel {
     static func from(stoneType: StoneType) -> MissionCompleteModel {
         switch stoneType {
-        case .courage: return .courage // 용기
-        case .grit:    return .grit    // 인내
-        case .wisdom:  return .wisdom  // 지혜
+        case .courage: return .courage
+        case .grit:    return .grit
+        case .wisdom:  return .wisdom 
         }
     }
 }
