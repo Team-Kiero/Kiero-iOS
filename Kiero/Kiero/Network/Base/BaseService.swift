@@ -20,30 +20,30 @@ struct AnyEncodable: Encodable {
 final class BaseService {
     static let shared = BaseService()
     private init() { }
-
+    
     func request<Response: Decodable>(
         endPoint: EndPoint,
         body: Encodable? = nil,
         didRetry: Bool = false
     ) async throws -> Response {
-
+        
         do {
             return try await perform(endPoint: endPoint, body: body)
         } catch let error as NetworkError {
-
+            
             guard case .clientError(let statusCode) = error, statusCode == 401, didRetry == false else {
                 throw error
             }
-
+            
             switch endPoint.refreshPolicy {
             case .none:
                 throw error
-
+                
             case .child:
                 // 자녀: 항상 allTokens
                 try await refreshAllTokens()
                 return try await request(endPoint: endPoint, body: body, didRetry: true)
-
+                
             case .parent:
                 // 부모: accessOnly 먼저 → 실패하면 allTokens
                 do {
@@ -56,12 +56,12 @@ final class BaseService {
             }
         }
     }
-
+    
     private func perform<Response: Decodable>(
         endPoint: EndPoint,
         body: Encodable?
     ) async throws -> Response {
-
+        
         // URL 구성
         let urlString = Config.baseURL + endPoint.url
         guard var components = URLComponents(string: urlString) else {
@@ -73,30 +73,30 @@ final class BaseService {
         guard let url = components.url else {
             throw NetworkError.invalidURL
         }
-
+        
         // Request 준비
         var request = URLRequest(url: url)
         request.httpMethod = endPoint.method
         endPoint.header.forEach { key, value in
             request.addValue(value, forHTTPHeaderField: key)
         }
-
+        
         // Body가 있다면 JSON 인코딩
         if let body = body {
             request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
         }
-
+        
         // Network 호출
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw NetworkError.unknownError
         }
-
+        
         NetworkLogger.shared.responseLog(httpResponse, data: data)
-
+        
         // 상태 코드 체크
         let statusCode = httpResponse.statusCode
-
+        
         if (400...499).contains(statusCode) {
             throw NetworkError.clientError(statusCode: statusCode)
         } else if (500...599).contains(statusCode) {
@@ -129,32 +129,32 @@ final class BaseService {
             throw NetworkError.responseDecodingError
         }
     }
-
+    
     // accessToken 재발급
     private func refreshAccessToken() async throws {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
             TokenManager.shared.clearTokens()
             throw NetworkError.clientError(statusCode: 401)
         }
-
+        
         let urlString = Config.baseURL + EndPoint.reissueAccessToken.url
         guard let url = URL(string: urlString) else { throw NetworkError.invalidURL }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("refreshToken=\(refresh)", forHTTPHeaderField: "Cookie")
-
+        
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw NetworkError.unknownError }
-
+        
         NetworkLogger.shared.responseLog(http, data: data)
-
+        
         guard (200...299).contains(http.statusCode) else {
             TokenManager.shared.clearAll()
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
-
+        
         //  응답에서 accessToken 추출
         do {
             let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
@@ -170,25 +170,25 @@ final class BaseService {
             TokenManager.shared.clearAll()
             throw NetworkError.clientError(statusCode: 401)
         }
-
+        
         let urlString = Config.baseURL + EndPoint.reissueAllTokens.url
         guard let url = URL(string: urlString) else { throw NetworkError.invalidURL }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("refreshToken=\(refresh)", forHTTPHeaderField: "Cookie")
-
+        
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse else { throw NetworkError.unknownError }
-
+        
         NetworkLogger.shared.responseLog(http, data: data)
-
+        
         guard (200...299).contains(http.statusCode) else {
             TokenManager.shared.clearAll()
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
-
+        
         do {
             let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
             guard let tokenData = decoded.data else { throw NetworkError.noData }
@@ -196,7 +196,7 @@ final class BaseService {
         } catch {
             throw NetworkError.responseDecodingError
         }
-
+        
         guard let newRefresh = extractCookieValue(from: http, cookieName: "refreshToken") else {
             TokenManager.shared.clearAll()
             throw NetworkError.responseDecodingError
@@ -204,13 +204,44 @@ final class BaseService {
         TokenManager.shared.saveRefreshToken(newRefresh)
     }
     
+    func reissueSseAccessToken() async throws -> String {
+        guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
+            throw NetworkError.clientError(statusCode: 401)
+        }
+        
+        let urlString = Config.baseURL + EndPoint.sseToken.url
+        guard let url = URL(string: urlString) else { throw NetworkError.invalidURL }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.addValue("refreshToken=\(refresh)", forHTTPHeaderField: "Cookie")
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw NetworkError.unknownError }
+        
+        NetworkLogger.shared.responseLog(http, data: data)
+        
+        if (400...499).contains(http.statusCode) { throw NetworkError.clientError(statusCode: http.statusCode) }
+        if (500...599).contains(http.statusCode) { throw NetworkError.internalServerError }
+        guard (200...299).contains(http.statusCode) else { throw NetworkError.unknownError }
+        
+        do {
+            let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
+            guard let tokenData = decoded.data else { throw NetworkError.noData }
+            return tokenData.accessToken
+        } catch {
+            throw NetworkError.responseDecodingError
+        }
+    }
+    
     private func extractCookieValue(from response: HTTPURLResponse, cookieName: String) -> String? {
         let headers = response.allHeaderFields
-
+        
         if let setCookie = headers["Set-Cookie"] as? String {
             return parseCookie(from: setCookie, cookieName: cookieName)
         }
-
+        
         if let setCookies = headers["Set-Cookie"] as? [String] {
             for item in setCookies {
                 if let value = parseCookie(from: item, cookieName: cookieName) {
@@ -218,14 +249,14 @@ final class BaseService {
                 }
             }
         }
-
+        
         for (k, v) in headers {
             guard let key = (k as? String)?.lowercased(), key == "set-cookie" else { continue }
-
+            
             if let str = v as? String, let value = parseCookie(from: str, cookieName: cookieName) {
                 return value
             }
-
+            
             if let arr = v as? [String] {
                 for item in arr {
                     if let value = parseCookie(from: item, cookieName: cookieName) {
@@ -234,20 +265,20 @@ final class BaseService {
                 }
             }
         }
-
+        
         return nil
     }
-
+    
     private func parseCookie(from setCookie: String, cookieName: String) -> String? {
         // 예: "refreshToken=abc123; Path=/; HttpOnly; Secure"
         let parts = setCookie
             .split(separator: ";")
             .map { $0.trimmingCharacters(in: .whitespaces) }
-
+        
         for part in parts where part.hasPrefix("\(cookieName)=") {
             return String(part.dropFirst("\(cookieName)=".count))
         }
-
+        
         return nil
     }
 }
