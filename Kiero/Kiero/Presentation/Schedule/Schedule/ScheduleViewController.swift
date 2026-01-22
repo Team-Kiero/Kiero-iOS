@@ -160,6 +160,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek) ? now : viewModel.currentReferenceDate.value
         
         addScheduleVC.viewModel?.scheduleList = viewModel.scheduleList.value
+        addScheduleVC.viewModel?.isFireLit = viewModel.isFireLit
         addScheduleVC.baseDate = targetDate
         
         addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in

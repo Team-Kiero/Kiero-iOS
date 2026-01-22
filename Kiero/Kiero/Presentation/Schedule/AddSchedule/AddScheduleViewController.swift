@@ -198,7 +198,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.leftButtonAction = { [weak self] in
             self?.dismiss(animated: true)
         }
-        
+
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
@@ -214,30 +214,64 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
             
             let calendar = Calendar.current
-            let today = calendar.startOfDay(for: Date())
+            let now = Date()
+            let today = calendar.startOfDay(for: now)
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
-
-            if !isRecurring {
-                let hasPastDate = selectedIndices.contains { index in
-                    let targetDate = calendar.startOfDay(for: weekDates[index])
-                    return targetDate < today
-                }
-                
-                if hasPastDate {
-                    Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
-                    return
-                }
-            }
+            let isFireLit = self.viewModel?.isFireLit ?? false
             
-            let start = self.currentStartTime ?? Date()
-            let end = self.currentEndTime ?? Date()
+            let start = self.currentStartTime ?? now
+            let end = self.currentEndTime ?? now
+            
+            let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
             let startMin = calendar.component(.hour, from: start) * 60 + calendar.component(.minute, from: start)
             let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
             
             if startMin >= endMin {
                 Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
                 return
+            }
+            
+            let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+            let isCurrentWeek = calendar.isDate(self.baseDate, inSameDayAs: today) || (weekDates.first! <= today && weekDates.last! >= today)
+            
+            var startDateToSend: String? = nil
+            
+            if isRecurring {
+                let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
+                let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
+                
+                if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
+                    if let nextMonday = calendar.date(byAdding: .day, value: 7 - currentWeekDayIndex, to: today) {
+                        startDateToSend = nextMonday.toString(format: "yyyy-MM-dd")
+                    }
+                    Toast.show(message: "일정이 등록되었어요. (오늘 일정은 마감되어 다음 주부터 적용돼요!)")
+                } else {
+                    Toast.show(message: "일정이 등록되었어요.")
+                }
+            } else {
+                let hasToday = selectedIndices.contains { index in
+                    calendar.isDate(weekDates[index], inSameDayAs: today)
+                }
+                
+                if hasToday {
+                    if isFireLit || startMin < currentTimeMin {
+                        Toast.show(message: "오늘 일정은 마감되어 등록되지 않았습니다.")
+                        return
+                    }
+                }
+                
+                let hasPastDate = selectedIndices.contains { index in
+                    calendar.startOfDay(for: weekDates[index]) < today
+                }
+                
+                if hasPastDate {
+                    Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
+                    return
+                }
+                
+                Toast.show(message: "일정이 등록되었어요.")
             }
             
             self.navigationBar.isRightButtonEnabled = false
@@ -250,7 +284,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             
             let startTimeStr = start.toString(format: "HH:mm:ss")
             let endTimeStr = end.toString(format: "HH:mm:ss")
-
+            
             if isRecurring {
                 let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")

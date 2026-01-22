@@ -12,6 +12,7 @@ final class AddScheduleViewModel: BaseViewModel {
     private let service: AddScheduleServiceType
     private let childId: Int
     var scheduleList: [Schedule] = []
+    var isFireLit: Bool = false
     
     let isAddSuccess = PassthroughSubject<Void, Never>()
     let errorMessage = PassthroughSubject<String, Never>()

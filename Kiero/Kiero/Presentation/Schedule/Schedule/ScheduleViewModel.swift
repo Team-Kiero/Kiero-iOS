@@ -19,6 +19,8 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     let currentReferenceDate = CurrentValueSubject<Date, Never>(Date())
     let logoutSuccess = PassthroughSubject<Void, Never>()
     
+    var isFireLit: Bool = false
+    
     // MARK: - Input / Output
     
     struct Input {
@@ -61,19 +63,24 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     func transform(input: Input) -> Output {
         Publishers.CombineLatest(childId, currentReferenceDate)
             .filter { id, _ in id != 0 }
-            .flatMap { [weak self] (id, date) -> AnyPublisher<[Schedule], Never> in
-                guard let self = self else { return Just([]).eraseToAnyPublisher() }
+            .flatMap { [weak self] (id, date) -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), Never> in
+                guard let self = self else {
+                    return Just((isFireLit: false, schedules: [Schedule]())).eraseToAnyPublisher()
+                }
                 
                 let days = date.daysOfWeek
                 guard let startDate = days.first, let endDate = days.last else {
-                    return Just([]).eraseToAnyPublisher()
+                    return Just((isFireLit: false, schedules: [Schedule]())).eraseToAnyPublisher()
                 }
                 
                 return self.service.fetchSchedules(childId: id, startDate: startDate, endDate: endDate)
-                    .replaceError(with: [])
+                    .replaceError(with: (isFireLit: false, schedules: [Schedule]()))
                     .eraseToAnyPublisher()
             }
-            .subscribe(scheduleList)
+            .sink { [weak self] result in
+                self?.isFireLit = result.isFireLit
+                self?.scheduleList.send(result.schedules)
+            }
             .store(in: &cancellables)
         
         input.prevWeekTapped
@@ -106,41 +113,42 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         let weeklyDates = currentReferenceDate
             .map { $0.daysOfWeek }
             .eraseToAnyPublisher()
-        
+
         let filteredSchedules = Publishers.CombineLatest(scheduleList, currentReferenceDate)
             .map { (schedules, refDate) -> [Schedule] in
                 let calendar = Calendar.current
+                let now = Date()
                 let currentWeekRange = refDate.daysOfWeek
-                
-                print("🔍 [필터링 시작] 전체 일정 개수: \(schedules.count)")
-                
-                guard let lastDayOfCurrentWeek = currentWeekRange.last else { return [] }
-                let endOfCurrentWeek = calendar.startOfDay(for: lastDayOfCurrentWeek)
-                
-                let filtered = schedules.filter { schedule in
+                let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+
+                return schedules.filter { schedule in
                     if schedule.isRecurring {
-                        if let startDateStr = schedule.date,
-                           let startDate = startDateStr.toDate(format: "yyyy-MM-dd") {
-                            let startDayOfRecurring = calendar.startOfDay(for: startDate)
-                            return endOfCurrentWeek >= startDayOfRecurring
+                        let isViewingCurrentWeek = calendar.isDate(refDate, inSameDayAs: now) ||
+                                                  (currentWeekRange.first! <= now && currentWeekRange.last! >= now)
+                        
+                        if isViewingCurrentWeek {
+                            let scheduleIndices = schedule.dayIndices
+                            
+                            let isAllPast = scheduleIndices.allSatisfy { dayIndex in
+                                if dayIndex < currentWeekDayIndex { return true }
+                                if dayIndex == currentWeekDayIndex {
+                                    if let scheduleTime = schedule.startTime.toDate(format: "HH:mm:ss") {
+                                        let nowMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+                                        let scheduleMin = calendar.component(.hour, from: scheduleTime) * 60 + calendar.component(.minute, from: scheduleTime)
+                                        return scheduleMin < nowMin
+                                    }
+                                }
+                                return false
+                            }
+                            
+                            if isAllPast { return false }
                         }
                         return true
+                    } else {
+                        guard let dateStr = schedule.date else { return false }
+                        return currentWeekRange.map { $0.toString(format: "yyyy-MM-dd") }.contains(dateStr)
                     }
-                    
-                    if let dateStr = schedule.date {
-                        let weekDateStrings = currentWeekRange.map { $0.toString(format: "yyyy-MM-dd") }
-                        let isIncluded = weekDateStrings.contains(dateStr)
-                        
-                        if !isIncluded {
-                            print("📌 일정 제외됨: \(schedule.name) (날짜: \(dateStr)) - 현재 주차 범위에 없음")
-                        }
-                        return isIncluded
-                    }
-                    return false
                 }
-                
-                print("🎯 [필터링 완료] 화면에 그려질 일정 개수: \(filtered.count)")
-                return filtered
             }.eraseToAnyPublisher()
         
         return Output(
