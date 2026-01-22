@@ -99,16 +99,16 @@ final class GiveFireStoneResultView: BaseUIView {
         
         if coin > 0 {
             lines = [
-                "덕분에 \(stoneNames)이 커졌어!",
+                "덕분에 영웅의 불꽃 이 커졌어!",
                 "선물로 금화 \(coin)개를 줄게"
             ]
-            highlightKeywords = [stoneNames, "\(coin)"]
+            highlightKeywords = ["영웅의 불꽃"]
         } else {
             lines = [
-                "덕분에 \(stoneNames)이 커졌어!",
+                "덕분에 영웅의 불꽃 이 커졌어!",
                 "오늘도 도와줘서 고마워"
             ]
-            highlightKeywords = [stoneNames]
+            highlightKeywords = ["영웅의 불꽃"]
         }
         
         speechField.configure(
