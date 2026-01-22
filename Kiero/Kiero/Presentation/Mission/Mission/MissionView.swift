@@ -123,7 +123,8 @@ extension MissionView: UITableViewDelegate {
         }
         
         let dateLabel = UILabel().then {
-            $0.text = "\(headerDate.toString(format: "yyyy.MM.dd."))(\(group.dayOfWeek))"
+            let dayOfWeekShort = String(group.dayOfWeek.prefix(1))
+                $0.text = "\(headerDate.toString(format: "yyyy.MM.dd."))(\(dayOfWeekShort))"
             $0.font = .body3_14_R
             $0.textColor = .gray500
         }
