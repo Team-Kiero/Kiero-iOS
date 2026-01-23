@@ -39,7 +39,7 @@
 
 ## ⚒️ 기술 스택
 
-<img src="https://img.shields.io/badge/swift-%23FA7343.svg?&style=for-the-badge&logo=swift&logoColor=white" /><img src="https://img.shields.io/badge/uikit-%232396F3.svg?&style=for-the-badge&logo=uikit&logoColor=white" />
+<img src="https://img.shields.io/badge/ios-%23000000.svg?&style=for-the-badge&logo=ios&logoColor=white" /><img src="https://img.shields.io/badge/xcode-%231575F9.svg?&style=for-the-badge&logo=xcode&logoColor=white" /><img src="https://img.shields.io/badge/swift-%23FA7343.svg?&style=for-the-badge&logo=swift&logoColor=white" /><img src="https://img.shields.io/badge/uikit-%232396F3.svg?&style=for-the-badge&logo=uikit&logoColor=white" />
 | 구분 | 기술 | 사용 이유 |
 |------|------|-----------|
 | UI 프레임워크 | UIKit | 안정적이고 풍부한 레퍼런스를 기반으로 한 실무 적합성 |
@@ -147,10 +147,22 @@ Kiero
 <br>
 
 ## 🚀 트러블 슈팅
+  📝 트러블 슈팅은 Notion에 정리되어있습니다.<br>
+  <p align="left">
+    <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f808ea923c53631d739ba?source=copy_link>
+    Notion 바로가기
+    </a>
+  </p>
 <br>
 <br>
 
 ## 😂 실패 경험
+  📝 실패 경험은 Notion에 정리되어있습니다.<br>  
+  <p align="left">
+    <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f8099bb06d1f13e551929?source=copy_link>
+    Notion 바로가기
+    </a>
+  </p>
 <br>
 <br>
 
