@@ -13,13 +13,13 @@ enum ParentOnboardingRoute {
 }
 
 final class ParentOnboardingViewModel: BaseViewModel {
-    let name: String
-    let profileURL: String
 
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<ParentOnboardingRoute, Never>()
     
-    private let sseManager: SseStreamManager
+    private let name = TokenManager.shared.getUserName()
+    private let profileURL = TokenManager.shared.getProfile()
+    private let sseManager = AppDIContainer.shared.sseManager
 
     let lastName = CurrentValueSubject<String, Never>("")
     let firstName = CurrentValueSubject<String, Never>("")
@@ -38,17 +38,6 @@ final class ParentOnboardingViewModel: BaseViewModel {
             .eraseToAnyPublisher()
     }
 
-    init(
-        name: String,
-        profileURL: String,
-        sseManager: SseStreamManager = AppDIContainer.shared.sseManager
-    ) {
-        self.name = name
-        self.profileURL = profileURL
-        self.sseManager = sseManager
-        super.init()
-    }
-
     func generateInviteCode(childLastName: String, childFirstName: String) {
         let last = childLastName.trimmingCharacters(in: .whitespacesAndNewlines)
         let first = childFirstName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -63,7 +52,6 @@ final class ParentOnboardingViewModel: BaseViewModel {
         Task { [weak self] in
             guard let self else { return }
             do {
-                // 1) 초대 코드 생성
                 let req = InviteCodeRequest(childLastName: last, childFirstName: first)
                 let data: InviteCodeData = try await BaseService.shared.request(
                     endPoint: .postInviteCode,
