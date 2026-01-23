@@ -168,24 +168,24 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     }
     
     // MARK: - SSE
-
+    
     private func startSSEIfNeeded() {
         guard !sseStarted else { return }
         sseStarted = true
-
+        
         Task { [weak self] in
             guard let self else { return }
-
+            
             do {
                 let initialToken = try await BaseService.shared.reissueSseAccessToken()
-
+                
                 await MainActor.run { [weak self] in
                     guard let self else { return }
-
+                    
                     SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
                         self?.handleSse(payload: payload)
                     }
-
+                    
                     print("✅ [FeedVM] SSE started")
                 }
             } catch {
@@ -198,42 +198,41 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private func stopSSE() {
         SseStreamManager.shared.stop()
         sseStarted = false
-        print("🛑 [FeedVM] SSE stopped")
     }
-
+    
     private func handleSse(payload: SseEventPayload) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-
+            
             let eventType = self.mapServerEventType(payload.eventType)
             let occurredAt = payload.occurredAt ?? ""
-
+            
             let metadata = FeedMetadata(
                 content: payload.metadata?.content,
                 imageUrl: payload.metadata?.imageUrl,
                 amount: payload.metadata?.amount
             )
-
+            
             let key = self.makeDedupKey(eventType: eventType, occurredAt: occurredAt, metadata: metadata)
             guard !self.seenKeys.contains(key) else { return }
             self.seenKeys.insert(key)
-
+            
             let newItem = FeedItem(
                 eventType: eventType,
                 occurredAt: occurredAt,
                 metadata: metadata
             )
-
+            
             var current = self.itemsSubject.value
             current.insert(newItem, at: 0)
             self.itemsSubject.send(current)
-
+            
             let newSections = self.makeSections(items: current, childName: self.cachedChildName)
             self.sections = newSections
             self.sectionsSubject.send(newSections)
         }
     }
-
+    
     private func makeDedupKey(
         eventType: FeedEventType,
         occurredAt: String,
@@ -247,7 +246,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             String(metadata.amount ?? -1)
         ].joined(separator: "|")
     }
-
+    
     private func mapServerEventType(_ raw: String) -> FeedEventType {
         switch raw {
         case "MISSION_COMPLETED": return .mission
@@ -291,7 +290,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             let parts = occurredAt.split(separator: "T", maxSplits: 1)
             var date = parts.first.map(String.init) ?? occurredAt
             date = date.replacingOccurrences(of: "-", with: ".")
-
+            
             let timePart = parts.count > 1 ? String(parts[1]) : ""
             let beforeDot = String(timePart.split(separator: ".", maxSplits: 1).first ?? Substring(timePart))
             
@@ -299,13 +298,13 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 .split(separator: ":", maxSplits: 2)
                 .prefix(2)
                 .joined(separator: ":")
-
+            
             return (date, time)
         }
-
+        
         let parts = occurredAt.split(separator: " ")
         if parts.count >= 2 { return (String(parts[0]), String(parts[1])) }
-
+        
         return (occurredAt, "")
     }
     
