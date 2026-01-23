@@ -21,8 +21,10 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
     
     var initialImage: UIImage?
     
-    private let viewDidAppearSubject = PassthroughSubject<Void, Never>()
+    private var isAnimationFinished = false
+    private var isApiSuccess = false
     
+    private let viewDidAppearSubject = PassthroughSubject<Void, Never>()
     private let completeButtonTapSubject = PassthroughSubject<Void, Never>()
     
     // MARK: - Init
@@ -61,16 +63,30 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             guard let self = self else { return }
             
-            self.mainView.startFloatingAnimation { }
+            self.mainView.startFloatingAnimation { [weak self] in
+                print("✨ 애니메이션 종료 (4초)")
+                self?.isAnimationFinished = true
+                self?.checkAndPopViewController()
+            }
             
-            print("화면 진입 -> 자동으로 인증 프로세스 시작")
+            print("🚀 화면 진입 -> 인증 프로세스 시작")
             self.didTapCompleteButton()
         }
     }
     
-    @objc
+    // MARK: - Logic
+    
     private func didTapCompleteButton() {
         completeButtonTapSubject.send(())
+    }
+    
+    private func checkAndPopViewController() {
+        if isAnimationFinished && isApiSuccess {
+            print("✅ 모든 조건 충족 (애니메이션 끝 + 인증 성공) -> 화면 이동")
+            self.navigationController?.popViewController(animated: true)
+        } else {
+            print("⏳ 대기 중... (애니메이션 완료: \(isAnimationFinished), API 성공: \(isApiSuccess))")
+        }
     }
     
     // MARK: - Bind
@@ -109,13 +125,16 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
         output.event
             .receive(on: DispatchQueue.main)
             .sink { [weak self] event in
+                guard let self = self else { return }
+                
                 switch event {
                 case .success:
-                    print("인증 완료! 이전 화면으로 이동합니다.")
-                    self?.navigationController?.popViewController(animated: true)
+                    print("🎉 서버 인증 성공~~ 룰루~~")
+                    self.isApiSuccess = true
+                    self.checkAndPopViewController()
                     
                 case .failure(let errorMessage):
-                    print("인증 실패: \(errorMessage)")
+                    print("❌ 인증 실패: \(errorMessage)")
                 }
             }
             .store(in: &cancellables)

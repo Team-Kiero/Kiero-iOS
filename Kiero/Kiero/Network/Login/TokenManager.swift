@@ -93,6 +93,7 @@ final class TokenManager {
     func clearAll() {
         clearTokens()
         clearUserInfo()
+        SseStreamManager.shared.stop()
     }
 
     var isLoggedIn: Bool {

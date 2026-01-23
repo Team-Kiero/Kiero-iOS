@@ -264,6 +264,7 @@ final class BaseService {
         do {
             let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
             guard let tokenData = decoded.data else { throw NetworkError.noData }
+            TokenManager.shared.saveSseToken(tokenData.accessToken)
             return tokenData.accessToken
         } catch {
             throw NetworkError.responseDecodingError

@@ -16,7 +16,7 @@ final class AppDIContainer: ViewControllerFactory, ServiceFactory{
     private init() {}
     
     lazy var sseManager: SseStreamManager = {
-        SseStreamManager(sseURL: Config.sseURL)
+        SseStreamManager.shared
     }()
 }
 

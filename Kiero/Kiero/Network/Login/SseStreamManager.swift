@@ -12,6 +12,8 @@ final class SseStreamManager {
     var onRefreshWillStart: (() -> Void)?
     var onReconnected: (() -> Void)?
     
+    static let shared = SseStreamManager(sseURL: Config.sseURL)
+    
     private let sseURL: URL
     private var client: SseClient?
     

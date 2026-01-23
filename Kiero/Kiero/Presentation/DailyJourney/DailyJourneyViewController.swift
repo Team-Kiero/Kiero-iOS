@@ -14,6 +14,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     
     private let mainView = DailyJourneyView()
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
+    private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
@@ -33,6 +34,11 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         viewWillAppearSubject.send(())
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewWillDisappearSubject.send(())
+    }
+    
     override func addTarget() {
         super.addTarget()
         mainView.onNextJourneyTap = { [weak self] in
@@ -46,6 +52,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         
         let input = DailyJourneyViewModel.Input(
             viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
+            viewWillDisappear: viewWillDisappearSubject.eraseToAnyPublisher(),
             nextJourneyButtonTap: nextButtonTapSubject.eraseToAnyPublisher(),
             verifyButtonTap: verifyButtonTapSubject.eraseToAnyPublisher(),
             skipConfirmTap: skipConfirmSubject.eraseToAnyPublisher()
