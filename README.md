@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="1029" height="573" alt="웹페이지 소개" src="https://github.com/user-attachments/assets/6047df01-957f-408c-b9ea-ddfa4bdbb57c" />
+  <img width="1000" alt="웹페이지 소개" src="https://github.com/user-attachments/assets/6047df01-957f-408c-b9ea-ddfa4bdbb57c" />
 </p>
 <br>
 
@@ -15,6 +15,13 @@
 
 
 ## 📱 프로젝트 소개
+### ⭐ 핵심 기능
+
+- 📅 일정 관리 & 미션 기반 루틴 형성
+- 📸 카메라 미션 인증
+- 🤖 AI 미션 생성
+- 🔔 SSE 기반 실시간 알림
+- 🪙 보상 시스템(금화)과 소원의 우물
 <img width="1920" height="1080" alt="16" src="https://github.com/user-attachments/assets/c1f581be-5fc5-4de9-9130-232c82c5d945" />
 <img width="1920" height="1080" alt="17" src="https://github.com/user-attachments/assets/70fa7be7-0f83-4fc9-b6a2-954ab786636c" />
 <img width="1920" height="1080" alt="18" src="https://github.com/user-attachments/assets/dca0842e-6341-4018-9033-dc0e2c8d5048" />
@@ -34,6 +41,7 @@
 | <img width="200" alt="신혜연사원증" src="https://github.com/user-attachments/assets/5872ffbd-9493-412b-8576-93ecf3c13289" />|<img width="200" alt="안치욱사원증" src="https://github.com/user-attachments/assets/e5c0b6aa-cfa1-47fb-8565-3bcbce594e29" />|<img width="200" alt="한현서사원증" src="https://github.com/user-attachments/assets/dbd52a09-d044-47a6-a0a1-3469728c171d" />| <img width="200" alt="정윤아사원증" src="https://github.com/user-attachments/assets/d9d118aa-c1c1-44be-9f66-6f948d16572d" />| 
 |  `iOS Developer Lead` |    `iOS Developer`   |  `iOS Developer`    |    `iOS Developer`   |
 | 스케줄 관리 <br>[일정(시간표), 미션(AI)] |    온보딩, <br>소셜 로그인(카카오 로그인)   | 오늘의 여정(카메라)   |   알림(SSE), 금화 미션, <br>소원의 우물, 로그아웃  |
+> 각 팀원은 하나 이상의 주요 기능을 책임지고 설계부터 구현까지 수행했습니다.
 <br>
 <br>
 
@@ -70,7 +78,10 @@
 <br>
 
 ## 📁 프로젝트 구조
-> Presentation 내에 뷰 기능 단위로 폴더링하여, 폴더 안에서 MVVM을 구현합니다.
+### 🧱 Architecture
+
+Kiero iOS는 **UIKit + MVVM + DIContainer** 구조를 기반으로  
+Presentation 계층에서 화면 단위로 MVVM을 구성합니다.
 ```bash
 Kiero
 ├── 📁 Application
@@ -150,7 +161,7 @@ Kiero
   📝 트러블 슈팅은 Notion에 정리되어있습니다.<br>
   <p align="left">
     <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f808ea923c53631d739ba?source=copy_link>
-    Notion 바로가기
+    ↘️ Notion 바로가기
     </a>
   </p>
 <br>
@@ -160,7 +171,7 @@ Kiero
   📝 실패 경험은 Notion에 정리되어있습니다.<br>  
   <p align="left">
     <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f8099bb06d1f13e551929?source=copy_link>
-    Notion 바로가기
+    ↘️ Notion 바로가기
     </a>
   </p>
 <br>
