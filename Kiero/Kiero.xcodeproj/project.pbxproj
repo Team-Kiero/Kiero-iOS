@@ -34,7 +34,6 @@
 		2455DCEE2F23629000836E3D /* Exceptions for "Kiero" folder in "Kiero_Child" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"/Users/shinhyeyeon/Desktop/Kiero-iOS/Kiero/Kiero/ChildInfo.plist",
 				Config.xcconfig,
 				ParentInfo.plist,
 			);
@@ -43,9 +42,8 @@
 		24DF50DD2F0A5174007146AC /* Exceptions for "Kiero" folder in "Kiero_Parent" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"/Users/shinhyeyeon/Desktop/Kiero-iOS/Kiero/Kiero/ChildInfo.plist",
+				ChildInfo.plist,
 				Config.xcconfig,
-				ParentInfo.plist,
 			);
 			target = 24DF50CA2F0A5173007146AC /* Kiero_Parent */;
 		};
@@ -270,7 +268,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K3CQFPAA9A;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
@@ -303,7 +301,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K3CQFPAA9A;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
@@ -335,7 +333,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K3CQFPAA9A;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ParentInfo.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
@@ -367,7 +365,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K3CQFPAA9A;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ParentInfo.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
