@@ -159,7 +159,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             await MainActor.run {
                 SseStreamManager.shared.startIfNeeded(initialToken: validToken) { [weak self] payload in
                     print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
-                    // 이벤트 수신 시 데이터 갱신
                     self?.fetchDailyJourney()
                 }
             }
@@ -264,7 +263,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: "",
                 speechFieldType: .no,
-                // 하나라도 했으면 완료 칩(파란색), 아니면 대기 칩(회색/진행중)
                 chipItemType: hasCompletedAnySchedule ? .completedChip : .inProgressChip,
                 isTimeViewActive: false,
                 actionButtonType: buttonType
