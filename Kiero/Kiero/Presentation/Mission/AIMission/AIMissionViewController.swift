@@ -177,7 +177,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                     presented.dismiss(animated: false)
                 }
                 
-                Toast.show(message: message, sideInset: 32, bottomInset: 180)
+                Toast.show(message: message, bottomInset: 40)
             }
             .store(in: &cancellables)
     }
