@@ -127,6 +127,8 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
             .receive(on: DispatchQueue.main)
             .sink { [weak self] route in
                 guard let self else { return }
+                print("✅ [VC] route received:", route)
+                print("nav:", self.navigationController as Any)
                 switch route {
                 case .invite(let last, let first, let inviteCode, let issuedAt):
                     self.navigateToInviteView(childLastName: last,
@@ -181,7 +183,10 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         )
         
         let vc = ParentInviteViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-        navigationController?.pushViewController(vc, animated: true)
+        let nav = UINavigationController(rootViewController: vc)
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(nav)
+        }
     }
 }
 
