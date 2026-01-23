@@ -235,17 +235,12 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
             let isCurrentWeek = calendar.isDate(self.baseDate, inSameDayAs: today) || (weekDates.first! <= today && weekDates.last! >= today)
             
-            var startDateToSend: String? = nil
-            
             if isRecurring {
                 let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
                 let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
                 let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
                 
                 if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
-                    if let nextMonday = calendar.date(byAdding: .day, value: 7 - currentWeekDayIndex, to: today) {
-                        startDateToSend = nextMonday.toString(format: "yyyy-MM-dd")
-                    }
                     Toast.show(message: "일정이 등록되었어요. (오늘 일정은 마감되어 다음 주부터 적용돼요!)")
                 } else {
                     Toast.show(message: "일정이 등록되었어요.")
@@ -288,10 +283,27 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             if isRecurring {
                 let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
-                viewModel?.addSchedule(name: title, isRecurring: true, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: dayOfWeekStr, dates: nil)
+                
+                viewModel?.addSchedule(
+                    name: title,
+                    isRecurring: true,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    color: colorCode,
+                    dayOfWeek: dayOfWeekStr,
+                    dates: nil
+                )
             } else {
                 let datesStr = selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
-                viewModel?.addSchedule(name: title, isRecurring: false, startTime: startTimeStr, endTime: endTimeStr, color: colorCode, dayOfWeek: nil, dates: datesStr)
+                viewModel?.addSchedule(
+                    name: title,
+                    isRecurring: false,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    color: colorCode,
+                    dayOfWeek: nil,
+                    dates: datesStr
+                )
             }
             
             self.view.endEditing(true)
