@@ -72,8 +72,8 @@ final class WeeklyTimeTableView: BaseUIView {
     override func setLayout() {
         headerStackView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(27)
-            $0.trailing.equalToSuperview().inset(5)
+            $0.leading.equalTo(gridBackgroundView.snp.leading)
+            $0.trailing.equalTo(gridBackgroundView.snp.trailing)
             $0.height.equalTo(25)
         }
         
@@ -149,7 +149,8 @@ final class WeeklyTimeTableView: BaseUIView {
     
     private func updateHeaderLabels() {
         headerStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
+        headerStackView.isLayoutMarginsRelativeArrangement = true
+        headerStackView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: -9)
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         
