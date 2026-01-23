@@ -106,7 +106,7 @@ final class GiveFireStoneResultView: BaseUIView {
         } else {
             lines = [
                 "덕분에 영웅의 불꽃 이 커졌어!",
-                "오늘도 도와줘서 고마워"
+                "오늘도 도와줘서 고마워."
             ]
             highlightKeywords = ["영웅의 불꽃"]
         }

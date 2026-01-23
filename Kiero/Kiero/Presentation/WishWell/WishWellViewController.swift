@@ -130,3 +130,9 @@ extension WishWellViewController: ScrollToTopAvailable {
         rootView.wishCollectionView.setContentOffset(.zero, animated: true)
     }
 }
+
+extension WishWellViewController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        refreshSubject.send(())
+    }
+}

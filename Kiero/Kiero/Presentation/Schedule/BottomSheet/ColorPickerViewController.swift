@@ -77,18 +77,12 @@ final class ColorPickerViewController: BaseBottomSheetViewController {
     }
     
     private func setAction() {
-        navigationBar.leftButtonAction = { [weak self] in
-            self?.hideSheet()
+        navigationBar.leftButtonAction = {
+            super.hideSheet()
         }
         
         navigationBar.rightButtonAction = { [weak self] in
-            guard let self = self, let color = self.selectedColor else {
-                self?.hideSheet()
-                return
-            }
-            
-            self.onColorSelected?(color)
-            self.hideSheet()
+            self?.hideSheet()
         }
     }
     
@@ -118,6 +112,10 @@ final class ColorPickerViewController: BaseBottomSheetViewController {
     }
     
     override func hideSheet() {
+        if let color = self.selectedColor {
+            self.onColorSelected?(color)
+        }
+        
         self.onDismiss?()
         super.hideSheet()
     }

@@ -33,6 +33,7 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
+        self.hidesBottomBarWhenPushed = true
         super.viewDidLoad()
         view.backgroundColor = .kBlack
         entryView.configure(count: viewModel?.earnedStoneCount ?? 0)

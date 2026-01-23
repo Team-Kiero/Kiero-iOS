@@ -13,7 +13,7 @@ import Then
 enum UserRole {
     case parent(ParentField)
     case child(ChildField)
-
+    
     enum ParentField {
         case lastName
         case firstName
@@ -37,7 +37,7 @@ extension UserRole {
         case .child(.inviteCode): return "초대 코드"
         }
     }
-
+    
     var placeholder: String {
         switch self {
         case .parent(.lastName): return "성"
@@ -48,7 +48,7 @@ extension UserRole {
         case .child(.inviteCode): return "부모님께 받은 비밀 암호를 입력해줘!"
         }
     }
-
+    
     var regex: String? {
         switch self {
         case .parent(.lastName), .child(.lastName), .parent(.firstName), .parent(.totalName), .child(.firstName):
@@ -57,7 +57,7 @@ extension UserRole {
             return nil
         }
     }
-
+    
     var errorAppear: UIColor {
         switch self {
         case .parent(.lastName), .child(.lastName), .parent(.firstName), .child(.firstName):
@@ -189,13 +189,13 @@ final class TextField: UIView {
             .withTintColor(.point)
             .resized(to: CGSize(width: 11, height: 11))
         textField.attributedPlaceholder = NSAttributedString(
-                string: type.placeholder,
-                attributes: [
-                    .kern: -0.005,
-                    .font: UIFont.body4_12_R,
-                    .foregroundColor: UIColor.gray700
-                ]
-            )
+            string: type.placeholder,
+            attributes: [
+                .kern: -0.005,
+                .font: UIFont.body4_12_R,
+                .foregroundColor: UIColor.gray700
+            ]
+        )
     }
     
     func setText(text: String) {
@@ -206,19 +206,13 @@ final class TextField: UIView {
         textField.layer.borderWidth = 0
         textField.layer.borderColor = UIColor.clear.cgColor
         
-        guard let regex = type.regex else {
-                onValidationChanged?(true)
-                return
-            }
-        
         let text = (textField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         
-//        if textField.text == nil || textField.text == ""{
-//            textField.layer.borderColor = UIColor.white.cgColor
-//            textField.layer.borderWidth = 0
-//            errorLabel.alpha = 0
-//            errorImage.alpha = 0
-//        }
+        guard let regex = type.regex else {
+            onValidationChanged?(!text.isEmpty)
+            return
+        }
+        
         guard !text.isEmpty else {
             errorLabel.alpha = 0
             errorImage.alpha = 0
@@ -240,11 +234,11 @@ final class TextField: UIView {
     
     private func isValidInput(_ raw: String) -> Bool {
         guard let regex = type.regex else { return true }
-
+        
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-
+        
         guard !text.isEmpty else { return false }
-
+        
         return NSPredicate(format: "SELF MATCHES %@", regex).evaluate(with: text)
     }
     
@@ -267,28 +261,28 @@ final class TextField: UIView {
 }
 
 extension TextField: UITextFieldDelegate {
-
+    
     func textFieldDidBeginEditing(_ textField: UITextField) {
         hasInteracted = true
         textField.layer.borderColor = UIColor.gray100.cgColor
         textField.layer.borderWidth = 1
         errorLabel.alpha = 0
         errorImage.alpha = 0
-
+        
         externalDelegate?.textFieldDidBeginEditing?(textField)
     }
-
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
         validate()
         externalDelegate?.textFieldDidEndEditing?(textField)
     }
-
+    
     func textField(
         _ textField: UITextField,
         shouldChangeCharactersIn range: NSRange,
         replacementString string: String
     ) -> Bool {
-
+        
         let currentText = textField.text ?? ""
         guard let textRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: textRange, with: string)
@@ -296,25 +290,25 @@ extension TextField: UITextFieldDelegate {
         if string.contains(where: { $0.isWhitespace }) {
             return false
         }
-
+        
         let lengthOK: Bool = {
             switch type {
             case .parent(.firstName), .parent(.lastName), .parent(.totalName),
-                 .child(.firstName), .child(.lastName):
+                    .child(.firstName), .child(.lastName):
                 return updatedText.count <= 5
             case .child(.inviteCode):
                 return updatedText.count <= 25
             }
         }()
-
+        
         guard lengthOK else { return false }
-
+        
         let externalOK = externalDelegate?
             .textField?(textField, shouldChangeCharactersIn: range, replacementString: string) ?? true
         
         return externalOK
     }
-
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         let externalOK = externalDelegate?.textFieldShouldReturn?(textField) ?? true
         if externalOK { textField.resignFirstResponder() }

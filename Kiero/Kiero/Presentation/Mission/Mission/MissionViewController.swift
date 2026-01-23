@@ -26,7 +26,9 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        viewModel?.fetchMissions()
+        if viewModel?.missionGroups.isEmpty ?? true {
+            viewModel?.fetchMissions()
+        }
     }
     
     override func viewDidLoad() {
@@ -60,23 +62,8 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
                 
                 if hasData {
                     self.missionView.updateMissionGroups(groups)
-                    DispatchQueue.main.async {
-                        self.missionView.scrollToTop()
-                    }
                 }
             }
             .store(in: &cancellables)
     }
-}
-
-extension MissionViewController: ScrollToTopAvailable {
-    func scrollToTop() {
-        DispatchQueue.main.async { [weak self] in
-            self?.missionView.scrollToTop()
-        }
-    }
-}
-
-#Preview {
-    AppDIContainer.shared.makeMissionViewController()
 }

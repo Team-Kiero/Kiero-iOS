@@ -28,6 +28,9 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private(set) var sections: [FeedSection] = []
     private var nextCursor: String? = nil
     private var canLoadMore: Bool { nextCursor != nil }
+    private var cachedChildName: String = ""
+    private var seenKeys = Set<String>()
+    private var sseStarted = false
     
     init(
         feedService: FeedServiceType,
@@ -42,6 +45,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let viewDidload: AnyPublisher<Void, Never>
+        let viewWillDisappear: AnyPublisher<Void, Never>
         let refresh: AnyPublisher<Void, Never>
         let loadMore: AnyPublisher<Void, Never>
     }
@@ -92,6 +96,9 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .sink { [weak self] page in
                 guard let self = self else { return }
+                
+                self.cachedChildName = page.childName
+                
                 self.itemsSubject.send(page.items)
                 self.nextCursor = page.nextCursor
                 
@@ -100,6 +107,14 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 self.sectionsSubject.send(newSections)
                 
                 self.isLoadingSubject.send(false)
+            }
+            .store(in: &cancellables)
+        
+        idTrigger
+            .filter { $0 != 0 }
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.startSSEIfNeeded()
             }
             .store(in: &cancellables)
         
@@ -124,6 +139,8 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             .sink { [weak self] page in
                 guard let self = self else { return }
                 
+                self.cachedChildName = page.childName
+                
                 var current = self.itemsSubject.value
                 current.append(contentsOf: page.items)
                 self.itemsSubject.send(current)
@@ -137,11 +154,105 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
+        input.viewWillDisappear
+            .sink (receiveValue:{ [weak self] _ in
+                self?.stopSSE()
+            })
+            .store(in: &cancellables)
+        
         return Output(
             sections: sectionsSubject.eraseToAnyPublisher(),
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
             isLoadingMore: isLoadingMoreSubject.eraseToAnyPublisher()
         )
+    }
+    
+    // MARK: - SSE
+    
+    private func startSSEIfNeeded() {
+        guard !sseStarted else { return }
+        sseStarted = true
+        
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let initialToken = try await BaseService.shared.reissueSseAccessToken()
+                
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
+                        self?.handleSse(payload: payload)
+                    }
+                    print("✅ [FeedVM] SSE started")
+                }
+            } catch {
+                print("❌ [FeedVM] SSE initial token reissue failed:", error)
+                self.sseStarted = false
+            }
+        }
+    }
+    
+    private func stopSSE() {
+        SseStreamManager.shared.stop()
+        sseStarted = false
+    }
+    
+    private func handleSse(payload: SseEventPayload) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            
+            let eventType = self.mapServerEventType(payload.eventType)
+            let occurredAt = payload.occurredAt ?? ""
+            
+            let metadata = FeedMetadata(
+                content: payload.metadata?.content,
+                imageUrl: payload.metadata?.imageUrl,
+                amount: payload.metadata?.amount
+            )
+            
+            let key = self.makeDedupKey(eventType: eventType, occurredAt: occurredAt, metadata: metadata)
+            guard !self.seenKeys.contains(key) else { return }
+            self.seenKeys.insert(key)
+            
+            let newItem = FeedItem(
+                eventType: eventType,
+                occurredAt: occurredAt,
+                metadata: metadata
+            )
+            
+            var current = self.itemsSubject.value
+            current.insert(newItem, at: 0)
+            self.itemsSubject.send(current)
+            
+            let newSections = self.makeSections(items: current, childName: self.cachedChildName)
+            self.sections = newSections
+            self.sectionsSubject.send(newSections)
+        }
+    }
+    
+    private func makeDedupKey(
+        eventType: FeedEventType,
+        occurredAt: String,
+        metadata: FeedMetadata
+    ) -> String {
+        [
+            eventType.rawValue,
+            occurredAt,
+            metadata.content ?? "",
+            metadata.imageUrl ?? "",
+            String(metadata.amount ?? -1)
+        ].joined(separator: "|")
+    }
+    
+    private func mapServerEventType(_ raw: String) -> FeedEventType {
+        switch raw {
+        case "MISSION_COMPLETED": return .mission
+        case "SCHEDULE_COMPLETED": return .schedule
+        case "COUPON_PURCHASED": return .coupon
+        case "FIRE_LIT": return .complete
+        default: return .mission
+        }
     }
     
     func performLogout() {
@@ -173,10 +284,25 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     // MARK: - Helpers
     
     private func splitOccurredAt(_ occurredAt: String) -> (date: String, time: String) {
-        let parts = occurredAt.split(separator: " ")
-        if parts.count >= 2 {
-            return (String(parts[0]), String(parts[1]))
+        if occurredAt.contains("T") {
+            let parts = occurredAt.split(separator: "T", maxSplits: 1)
+            var date = parts.first.map(String.init) ?? occurredAt
+            date = date.replacingOccurrences(of: "-", with: ".")
+            
+            let timePart = parts.count > 1 ? String(parts[1]) : ""
+            let beforeDot = String(timePart.split(separator: ".", maxSplits: 1).first ?? Substring(timePart))
+            
+            let time = beforeDot
+                .split(separator: ":", maxSplits: 2)
+                .prefix(2)
+                .joined(separator: ":")
+            
+            return (date, time)
         }
+        
+        let parts = occurredAt.split(separator: " ")
+        if parts.count >= 2 { return (String(parts[0]), String(parts[1])) }
+        
         return (occurredAt, "")
     }
     
@@ -223,7 +349,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             let state = makeState(from: item, childName: childName)
             dict[date, default: []].append(state)
         }
-        
         let sortedDates = dict.keys.sorted(by: >)
         return sortedDates.map { date in
             FeedSection(date: date, items: dict[date] ?? [])

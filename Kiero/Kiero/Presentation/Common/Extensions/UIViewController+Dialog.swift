@@ -4,6 +4,8 @@ import Then
 
 extension UIViewController {
     func showLogoutDialog(onConfirm: @escaping () -> Void) {
+        let targetView: UIView = self.tabBarController?.view ?? self.navigationController?.view ?? self.view
+        
         let dimmedView = UIView().then {
             $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.75)
             $0.alpha = 1
@@ -14,7 +16,7 @@ extension UIViewController {
             $0.alpha = 1
         }
         
-        view.addSubviews(dimmedView, dialogBox)
+        targetView.addSubviews(dimmedView, dialogBox)
         
         dimmedView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -24,6 +26,9 @@ extension UIViewController {
             $0.center.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(16)
         }
+        
+        targetView.bringSubviewToFront(dimmedView)
+        targetView.bringSubviewToFront(dialogBox)
         
         dialogBox.onTapCancel = { [weak self] in
             self?.dismissDialog(dimmedView, dialogBox)

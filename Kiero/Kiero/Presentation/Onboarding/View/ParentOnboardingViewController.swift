@@ -17,35 +17,37 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     
     private var isLastValid = false
     private var isFirstValid = false
-
+    private let userName = TokenManager.shared.getUserName() ?? ""
+    private let profileURL = TokenManager.shared.getProfile() ?? ""
+    
     // MARK: - UI Components
-
-    private let profileBox = ProfileBox(name: "스꾸삐", profileURL: "")
-
+    
+    private let profileBox = ProfileBox(name: "사용자", profileURL: "")
+    
     private let titleLabel = UILabel().then {
         $0.textColor = .white
         $0.textAlignment = .left
         $0.numberOfLines = 0
     }
-
+    
     private let lastNameTextField = TextField(type: .parent(.lastName))
     private let firstNameTextField = TextField(type: .parent(.firstName))
-
+    
     private let generateButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
         $0.configure(title: "초대코드 생성")
         $0.isEnabled = false
     }
-
+    
     // MARK: - Life Cycle
-
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         view.endEditing(true)
     }
-
+    
     override func setStyle() {
         titleLabel.setTypo(.title2_20_SB, text: "아직 연결된 자녀 계정이 없어요\n자녀를 추가해주세요!")
     }
-
+    
     override func setUI() {
         view.addSubviews(
             profileBox,
@@ -55,36 +57,36 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
             generateButton
         )
     }
-
+    
     override func setLayout() {
         profileBox.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(15)
             $0.trailing.equalToSuperview()
         }
-
+        
         titleLabel.snp.makeConstraints {
             $0.top.equalTo(profileBox.snp.bottom).offset(18)
             $0.leading.equalToSuperview().inset(16)
         }
-
+        
         lastNameTextField.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(17)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(91)
         }
-
+        
         firstNameTextField.snp.makeConstraints {
             $0.top.equalTo(lastNameTextField.snp.bottom).offset(18)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(91)
         }
-
+        
         generateButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
         }
     }
-
+    
     override func addTarget() {
         generateButton.addTarget(self, action: #selector(generateButtonDidTap), for: .touchUpInside)
         
@@ -97,16 +99,19 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
             }
         }
     }
-
+    
     override func setDelegate() {
         lastNameTextField.externalDelegate = self
         firstNameTextField.externalDelegate = self
     }
-
+    
     override func bind(viewModel: ParentOnboardingViewModel) {
         super.bind(viewModel: viewModel)
-
-        profileBox.configure(name: viewModel.name, url: viewModel.profileURL)
+        
+        profileBox.configure(
+            name: TokenManager.shared.getUserName() ?? "",
+            url: TokenManager.shared.getProfile() ?? ""
+        )
         
         lastNameTextField.onValidationChanged = { [weak self] isValid in
             self?.isLastValid = isValid
@@ -117,7 +122,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
             self?.isFirstValid = isValid
             self?.updateGenerateButton()
         }
-
+        
         viewModel.route
             .receive(on: DispatchQueue.main)
             .sink { [weak self] route in
@@ -143,7 +148,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         
         textDidChange()
     }
-
+    
     @objc
     private func generateButtonDidTap() {
         let last = lastNameTextField.innerTextField.text ?? ""
@@ -161,7 +166,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         let enabled = isLastValid && isFirstValid
         generateButton.isEnabled = enabled
     }
-
+    
     private func navigateToInviteView(
         childLastName: String,
         childFirstName: String,
@@ -169,14 +174,12 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         issuedAt: Date
     ) {
         let vm = ParentInviteViewModel(
-            parentName: viewModel?.name ?? "",
-            profileURL: viewModel?.profileURL ?? "",
             childLastName: childLastName,
             childFirstName: childFirstName,
             inviteCode: inviteCode,
             issuedAt: issuedAt
         )
-
+        
         let vc = ParentInviteViewController(viewModel: vm, diContainer: AppDIContainer.shared)
         navigationController?.pushViewController(vc, animated: true)
     }
