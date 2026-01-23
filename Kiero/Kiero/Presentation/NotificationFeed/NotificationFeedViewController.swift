@@ -16,8 +16,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     private let emptyView = EmptyView(text: "아직 아이로부터 도착한 알림이 없어요!")
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
+    private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
     private let refreshSubject = PassthroughSubject<Void, Never>()
     private let loadMoreSubject = PassthroughSubject<Void, Never>()
+    
+    private var renderedSections: [FeedSection] = []
     
     // MARK: - Life Cycle
     
@@ -28,6 +31,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         self.tabBarController?.delegate = self
         contentView.updateProfile()
         refreshSubject.send(())
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewWillDisappearSubject.send(())
     }
     
     // MARK: - Setup Methods
@@ -49,6 +57,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         
         let input = NotificationFeedViewModel.Input(
             viewDidload: viewDidLoadSubject.eraseToAnyPublisher(),
+            viewWillDisappear: viewWillDisappearSubject.eraseToAnyPublisher(),
             refresh: refreshSubject.eraseToAnyPublisher(),
             loadMore: loadMoreSubject.eraseToAnyPublisher()
         )
@@ -58,10 +67,13 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         output.sections
             .receive(on: RunLoop.main)
             .sink { [weak self] sections in
-                self?.contentView.applySnapshot()
+                guard let self else { return }
+                
+                self.renderedSections = sections
+                self.contentView.tableView.reloadData()
                 
                 let isEmpty = sections.isEmpty || sections.allSatisfy { $0.items.isEmpty }
-                self?.updateEmptyView(isEmpty: isEmpty)
+                self.updateEmptyView(isEmpty: isEmpty)
             }
             .store(in: &cancellables)
         
@@ -90,11 +102,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
 extension NotificationFeedViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return viewModel?.sections.count ?? 0
+        return renderedSections.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel?.sections[section].items.count ?? 0
+        return renderedSections[section].items.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -103,9 +115,8 @@ extension NotificationFeedViewController: UITableViewDataSource {
             for: indexPath
         ) as? NotificationFeedCell else { return UITableViewCell() }
         
-        if let state = viewModel?.sections[indexPath.section].items[indexPath.row] {
-            cell.configure(with: state)
-        }
+        let state = renderedSections[indexPath.section].items[indexPath.row]
+        cell.configure(with: state)
         
         cell.onToggleExpand = { [weak self, weak tableView] in
             guard let self, let tableView else { return }
@@ -128,9 +139,7 @@ extension NotificationFeedViewController: UITableViewDataSource {
 extension NotificationFeedViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let header = NotificationSectionHeaderView()
-        if let date = viewModel?.sections[section].date {
-            header.configure(date: date)
-        }
+        header.configure(date: renderedSections[section].date)
         return header
     }
     
