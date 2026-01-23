@@ -1,52 +1,124 @@
 <p align="center">
-  <img width="500" alt="image" src="https://github.com/user-attachments/assets/6a196306-e48d-403e-af1a-26ad4340b0c5" />
+  <img width="1000" alt="웹페이지 소개" src="https://github.com/user-attachments/assets/6047df01-957f-408c-b9ea-ddfa4bdbb57c" />
 </p>
+<br>
 
-# Kiero 키어로
-초등학생 자녀의 일정 관리와 자기주도적 습관 형성을 동시에 돕는
-게이미피케이션 기반 성장 플랫폼입니다. 
+
+# <img width="40" height="40" alt="로고" src="https://github.com/user-attachments/assets/2b10c798-e649-4275-9712-7f2b8659c0d9" />  Kiero 키어로
+
+> 프로젝트 기간 | 2025.12.20 ~ ing
+
+초등학생 자녀의 **일정 관리**와 **자기주도적 습관 형성**을 동시에 돕는  
+게이미피케이션 기반 성장 플랫폼입니다.
+<br>
+<br>
+
+
+## 📱 프로젝트 소개
+### ⭐ 핵심 기능
+
+- 📅 일정 관리 & 미션 기반 루틴 형성
+- 📸 카메라 미션 인증
+- 🤖 AI 미션 생성
+- 🔔 SSE 기반 실시간 알림
+- 🪙 보상 시스템(금화)과 소원의 우물
+<img width="1920" height="1080" alt="16" src="https://github.com/user-attachments/assets/c1f581be-5fc5-4de9-9130-232c82c5d945" />
+<img width="1920" height="1080" alt="17" src="https://github.com/user-attachments/assets/70fa7be7-0f83-4fc9-b6a2-954ab786636c" />
+<img width="1920" height="1080" alt="18" src="https://github.com/user-attachments/assets/dca0842e-6341-4018-9033-dc0e2c8d5048" />
+<img width="1920" height="1080" alt="19" src="https://github.com/user-attachments/assets/b997759b-855e-455e-822d-0ae7ef4fdd2f" />
+<img width="1920" height="1080" alt="20" src="https://github.com/user-attachments/assets/b0a2d9c9-e28d-4eb4-a6c5-8205365ca125" />
+<img width="1920" height="1080" alt="21" src="https://github.com/user-attachments/assets/3051ab5f-7776-4660-9ecf-5a1c6d94d76c" />
+<img width="1920" height="1080" alt="22" src="https://github.com/user-attachments/assets/8ba524fc-964f-4219-946d-7a4c1f913c9b" />
+<img width="1920" height="1080" alt="23" src="https://github.com/user-attachments/assets/8ee83aa2-4fc7-49a4-8b97-5fd5e31fb259" />
+<img width="1920" height="1080" alt="24" src="https://github.com/user-attachments/assets/87cdb273-1f1f-46b2-b6ee-7becd3ed1cf2" />
+<img width="1920" height="1080" alt="30" src="https://github.com/user-attachments/assets/24e6bc5e-fc7a-4078-a0e7-d69113c7fee0" />
 <br>
 <br>
 
 ## 🍎 iOS 파트
 |    신혜연   |    안치욱   |   한현서   |    정윤아    |
 | :-------------: | :----------: | :----------: |:----------: |
-| <img src = "https://github.com/hyeyeonie.png" width ="200"> | <img src = "https://github.com/w0o0kgit.png" width ="200">  | <img src = "https://github.com/hyunseo-han.png" width ="200"> | <img src = "https://github.com/laura-jung.png" width ="200"> | 
+| <img width="200" alt="신혜연사원증" src="https://github.com/user-attachments/assets/5872ffbd-9493-412b-8576-93ecf3c13289" />|<img width="200" alt="안치욱사원증" src="https://github.com/user-attachments/assets/e5c0b6aa-cfa1-47fb-8565-3bcbce594e29" />|<img width="200" alt="한현서사원증" src="https://github.com/user-attachments/assets/dbd52a09-d044-47a6-a0a1-3469728c171d" />| <img width="200" alt="정윤아사원증" src="https://github.com/user-attachments/assets/d9d118aa-c1c1-44be-9f66-6f948d16572d" />| 
 |  `iOS Developer Lead` |    `iOS Developer`   |  `iOS Developer`    |    `iOS Developer`   |
+| 스케줄 관리 <br>[일정(시간표), 미션(AI)] |    온보딩, <br>소셜 로그인(카카오 로그인)   | 오늘의 여정(카메라)   |   알림(SSE), 금화 미션, <br>소원의 우물, 로그아웃  |
+> 각 팀원은 하나 이상의 주요 기능을 책임지고 설계부터 구현까지 수행했습니다.
 <br>
-
-## 📁 프로젝트 구조
-> Presentation 내에 뷰 기능 단위로 폴더링하여, 폴더 안에서 MVVM을 구현합니다.
-```bash
-Kiero
-├── Kiero
-│   ├── Application
-│   │   └── AppDelegate
-│   │   └── SceneDelegate
-│   ├── Network
-│   ├── Presentation
-│   │   ├── Common
-│   │   │   ├── Components
-│   │   │   ├── Extensions
-│   │   │   └── Resources
-│   │   │       ├── Font
-│   │   │       └── Assets
-```
 <br>
 
 ## ⚒️ 기술 스택
-| 태그 | 기술 | 설명 |
-|:---:|:---:|:---:|
-| `UI 프레임워크` | UIKit | 안정적이고 풍부한 레퍼런스, 실무 적합성 |
-|`아키텍처`| MVVM | 비즈니스 로직과 UI 로직 분리, 유지보수성 및 테스트 용이성 향상 |
-|`네트워크`| Moya | Alamofire 기반의 네트워크 추상화, 열거형을 활용한 안전한 API 관리 |
-| `애니메이션` | Lottie | JSON 기반의 가볍고 고품질인 벡터 애니메이션 렌더링 |
-| `버전 관리`| Git, GitHub | 분산 버전 관리 시스템을 통한 형상 관리 및 협업 |
-| `협업 도구`| Figma, Notion| UI/UX 디자인 리소스 공유 및 프로젝트 문서화, 태스크 관리 |
+
+<img src="https://img.shields.io/badge/ios-%23000000.svg?&style=for-the-badge&logo=ios&logoColor=white" /><img src="https://img.shields.io/badge/xcode-%231575F9.svg?&style=for-the-badge&logo=xcode&logoColor=white" /><img src="https://img.shields.io/badge/swift-%23FA7343.svg?&style=for-the-badge&logo=swift&logoColor=white" /><img src="https://img.shields.io/badge/uikit-%232396F3.svg?&style=for-the-badge&logo=uikit&logoColor=white" />
+| 구분 | 기술 | 사용 이유 |
+|------|------|-----------|
+| UI 프레임워크 | UIKit | 안정적이고 풍부한 레퍼런스를 기반으로 한 실무 적합성 |
+| 아키텍처 | MVVM | View와 비즈니스 로직을 분리하여 유지보수성과 테스트 용이성 확보 |
+| 비동기 / 반응형 | Combine | 데이터 흐름을 선언적으로 처리하고 상태 바인딩을 효율적으로 관리 |
+| 실시간 알림 | SSE (Server-Sent Events) | 서버 이벤트를 단방향 스트림으로 수신하여 실시간 알림 및 상태 변경을 즉시 반영 |
+| 카메라 | AVFoundation / UIImagePickerController | 자녀의 미션 수행 결과를 촬영하여 증빙 이미지로 활용 |
+| AI 연동 | AI API (LLM / Image Processing) | 촬영된 이미지 및 입력 데이터를 기반으로 미션 검증 및 콘텐츠 처리 |
+| 이미지 처리 | Kingfisher | 이미지 캐싱을 통해 불필요한 네트워크 트래픽을 줄이고 메모리 효율성 극대화 |
+| 레이아웃 | SnapKit | 복잡한 Auto Layout 코드를 간결하고 직관적으로 작성 |
+| UI 유틸리티 | Then | UI 초기화 코드의 가독성과 응집도 향상 |
+| 로컬 저장소 | UserDefaults | 간단한 유저 설정 및 사용자 정보 유지 |
+| 의존성 주입 | DIContainer | 모듈 간 결합도를 최소화하여 테스트 편의성 및 확장성 확보 |
+| 로그인 | KakaoOpenSDK | 카카오 소셜 로그인을 통한 간편한 사용자 인증 |
+| 버전 관리| Git, GitHub | 분산 버전 관리 시스템을 통한 형상 관리 및 협업 |
+| 협업 도구| Figma, Notion| UI/UX 디자인 리소스 공유 및 프로젝트 문서화, 태스크 관리 |
+<br>
+<br>
+
+## ➡️ 플로우차트 설계
+<img width="5568" height="3952" alt="아요키커-피그잼" src="https://github.com/user-attachments/assets/33130cfb-25a8-42ab-8412-924acc2ef78c" />
+<p align="left">
+  🔗 <a href="https://www.figma.com/board/xP2mDkxcngQ3mGeQz2RgGF/%EC%95%84%EC%9A%94%ED%82%A4%EC%BB%A4-%ED%94%BC%EA%B7%B8%EC%9E%BC?node-id=0-1&t=BEaF3KB8w9TOykvk-1">
+    FigJam 보드 바로가기
+  </a>
+</p>
+<br>
+<br>
+
+## 📁 프로젝트 구조
+### 🧱 Architecture
+
+Kiero iOS는 **UIKit + MVVM + DIContainer** 구조를 기반으로  
+Presentation 계층에서 화면 단위로 MVVM을 구성합니다.
+```bash
+Kiero
+├── 📁 Application
+│   ├── AppDelegate.swift
+│   └── AppDIContainer.swift
+│   └── SceneDelegate.swift
+│
+├── 📁 Network                         # 네트워크 계층
+│
+└── 📁 Presentation                    # 프레젠테이션 계층
+    │
+    ├── 📁 Common                      # 전역적으로 사용하는 공통 요소
+    │   ├── 📁 Base                    # BaseViewController, BaseViewModel 등
+    │   ├── 📁 Components              # 공통 UI 컴포넌트
+    │   ├── 📁 Extensions              # UIKit, Foundation 확장
+    │   ├── 📁 Factory                 # DI Container, Coordinator Factory 등
+    │   └── 📁 Resources               # 리소스 관리
+    │       ├── 📁 Font                # 커스텀 폰트 파일 및 등록 로직
+    │       └── 🖼️ Assets               # 공통 이미지, 컬러셋 (xcassets)
+    │
+    ├── 📁 CoinMission                 # 금화 미션 화면
+    ├── 📁 DailyJourney                # 오늘의 레시피 화면
+    ├── 📁 GiveFireStone               # 불 피우기 화면
+    ├── 📁 Login                       # 로그인 화면
+    ├── 📁 Mission                     # 미션 화면
+    ├── 📁 MissionComplete             # 불 조각 획득 화면
+    ├── 📁 NotificationFeed            # 알림 피드 화면
+    ├── 📁 Onboarding                  # 온보딩 화면
+    ├── 📁 PickRole                    # 화면
+    ├── 📁 Schedule                    # 일정 화면
+    └── 📁 WishWell                    # 소원의 우물 화면
+```
+<br>
 <br>
 
 ## 💬 Commit Message 규칙
-### 태그 컨벤션
+### - 태그 컨벤션
 
 | 태그 | 설명 |
 |:---:|:---:|
@@ -62,114 +134,55 @@ Kiero
 | `hotfix` | 긴급 수정 (배포 또는 개발 중 발생한 치명적 이슈 해결) |
 <br>
 
-### 커밋 컨벤션
+### - 커밋 컨벤션
 
 1. 태그는 반드시 **소문자**로 작성합니다. 
 2. 내용은 **한글**로 작성합니다.  
 3. 제목은 **50자**를 넘지 않도록, 간단하게 **명령조**로 작성합니다.
 4. 설명이 필요한 경우 **description**에 작성합니다.
-
-* **커밋**: `[type] 작업내용`
-  * ex) `[feat] 로그인 UI 구현`
-
-
-* **이슈**: `[type] ~ 구현`
-  * ex) `[feat] 로그인 UI 구현`
-
-
-* **PR**: `[type] #이슈번호 작업내용`
-  * ex) `[feat] #1 로그인 UI 구현`
-
-
-* **머지**: `[merge] PR 제목`
+```swift
+- 커밋: `[feat] 로그인 UI 구현`
+- 이슈: `[feat] 로그인 UI 구현`
+- PR: `[feat] #1 로그인 UI 구현`
+- 머지: `[merge] PR 제목`
+```
 <br>
 
-### 브랜치 컨벤션
+### - 브랜치 컨벤션
 
 * `type/#이슈번호-작업할뷰` 세팅 관련 작업 등 특정 뷰가 없는 경우 뒤에는 생략 가능
+```swift
   * ex) `feat/#1-DetailView`
+```
+<br>
 <br>
 
-## 🌊 Git Flow 전략
-
-> **main 브랜치 보호 전략**: `main` 브랜치는 실제 배포 기준 브랜치로 사용하며, 직접적인 작업이나 커밋은 원칙적으로 금지합니다. 모든 변경 사항은 `develop` 브랜치를 거쳐 PR을 통해서만 `main`에 병합합니다.
+## 🚀 트러블 슈팅
+  📝 트러블 슈팅은 Notion에 정리되어있습니다.<br>
+  <p align="left">
+    <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f808ea923c53631d739ba?source=copy_link>
+    ↘️ Notion 바로가기
+    </a>
+  </p>
+<br>
 <br>
 
-### 작업 순서
-
-1. **Issue 생성**: 작업할 내역에 대한 Issue를 생성합니다.
-2. **Branch 생성**: 해당 이슈와 관련된 새 브랜치를 생성합니다.
-3. **기능 구현**: 이슈 내용을 기반으로 기능을 구현하고 커밋합니다.
-    * 커밋은 가능한 **기능 단위**로 쪼개서 진행합니다.
-    * 작업이 끝나면 PR을 올리지 않더라도 항상 원격 저장소에 push 해둡니다.
-4. **PR (Pull Request)**: `add` - `commit` - `push` 후 PR을 생성합니다.
-5. **코드 리뷰**: PR 작성자 외의 팀원들이 코드를 리뷰합니다.
-    * 필수 리뷰어: 2명 **(Lead 포함 필수)**
-    * 리뷰 반영 사항이 있다면 수정 후 다시 Push 합니다. (자동으로 PR에 반영됨)
-6. **Merge**: PR 작성자가 본인의 브랜치를 Merge 합니다.
-    * merge 전후 상황을 팀원들에게 반드시 공유합니다.
-7. **Pull**: Merge 후 로컬에서 `main`으로 이동하여 반드시 `git pull`을 받아 최신 상태를 유지합니다.
+## 😂 실패 경험
+  📝 실패 경험은 Notion에 정리되어있습니다.<br>  
+  <p align="left">
+    <a href=https://ruddy-adapter-e98.notion.site/2f18ff4aed3f8099bb06d1f13e551929?source=copy_link>
+    ↘️ Notion 바로가기
+    </a>
+  </p>
+<br>
 <br>
 
-## 📏 코딩 컨벤션
-
-### 네이밍
-
-* **약어 사용 금지**, Full Name 지향
-* **Class, Struct, Protocol**: `UpperCamelCase`
-* **Variable, Constant**: `lowerCamelCase`
-* **Function**: `lowerCamelCase` (동사로 시작)
-* **Enum**: 각 Case에는 `lowerCamelCase`
-
-### 코드 레이아웃 & 포맷
-
-* **Colon(:)**: 콜론의 오른쪽에만 공백을 둡니다. (`let names: [String: String]?`)
-* **줄바꿈 규칙**: 파라미터가 많을 경우 줄바꿈(Xcode `Ctrl+M` 스타일)을 지향합니다.
-* **파라미터에 클로저가 2개 이상** 존재할 경우 **무조건 내려쓰기**를 적용합니다.
-* **빈 줄**: 빈 줄에는 공백이 포함되지 않도록 합니다.
-* **Import 순서**:
-```swift
-import UIKit
-
-import SnapKit
-import Then
-```
-
-### 코드 구조
-
-* **메서드 순서**: `setStyle` → `setUI` → `setLayout` → `setAddTarget` → `setDelegate`
-  * `setStyle()`: backgroundColor 등 속성 지정
-  * `setUI()`: addSubview (계층 설정)
-  * `setLayout()`: SnapKit 제약조건 설정
-* **MARK 주석**: MARK 구문 위와 아래에는 공백을 둡니다.
-```swift
-// MARK: - Properties
-
-// MARK: - UI Components
-
-// MARK: - Life Cycle
-
-// MARK: - Setup Methods
-
-// MARK: - Bind
-
-// MARK: - Action
-
-```
-
-### 프로그래밍 가이드라인
-
-* **Type Annotation 필수 사용**:
-```swift
-// Good
-let name: String = "철수"
-let height: Float = 10.0
-
-// Bad
-let name = "철수"
-```
-* **Delegate Pattern**: `UICollectionViewDelegate` 등 시스템 프로토콜은 **Extension**으로 분리하여 관리합니다.
-* **기타 규칙**: `self` 키워드 사용 지향 (필요한 경우 제외)
-* **Force Unwrapping (`!`) 절대 금지**
-* `viewDidLoad()`, `init()` 내부에서는 구체적인 로직 대신 **함수 호출**만 작성
-* 불필요한 주석 및 공백 제거
+## 📸 단체 사진
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/d8ffeeac-3f6c-4965-b586-f828bfc1a4c9"
+    alt="단체 사진"
+    width="500"
+  />
+<br>
+<br>
