@@ -10,9 +10,6 @@ import Foundation
 
 final class ParentInviteViewModel: BaseViewModel {
 
-    let parentName: String
-    let profileURL: String
-
     let childLastName: String
     let childFirstName: String
     var childName: String { "\(childLastName)\(childFirstName)" }
@@ -40,16 +37,12 @@ final class ParentInviteViewModel: BaseViewModel {
     var isReissuing: AnyPublisher<Bool, Never> { isReissuingSubject.eraseToAnyPublisher() }
 
     init(
-        parentName: String,
-        profileURL: String,
         childLastName: String,
         childFirstName: String,
         inviteCode: String,
         issuedAt: Date,
         expiresIn: TimeInterval = 10 * 60
     ) {
-        self.parentName = parentName
-        self.profileURL = profileURL
         self.childLastName = childLastName
         self.childFirstName = childFirstName
 

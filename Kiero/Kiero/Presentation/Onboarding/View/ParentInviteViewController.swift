@@ -16,7 +16,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     private var isChildJoined = false
     private var isChecking = false
 
-    private let profileBox = ProfileBox(name: "스꾸삐", profileURL: "")
+    private let profileBox = ProfileBox(name: "사용자", profileURL: "")
     private let titleLabel = UILabel().then {
         $0.textColor = .white
         $0.textAlignment = .left
@@ -81,7 +81,11 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     override func bind(viewModel: ParentInviteViewModel) {
         super.bind(viewModel: viewModel)
 
-        profileBox.configure(name: viewModel.parentName, url: viewModel.profileURL)
+        profileBox.configure(
+            name: TokenManager.shared.getUserName() ?? "",
+            url: TokenManager.shared.getProfile() ?? ""
+        )
+        
         textField.setText(text: viewModel.childName)
 
         Publishers.CombineLatest3(viewModel.inviteCode, viewModel.remainingText, viewModel.isExpired)
