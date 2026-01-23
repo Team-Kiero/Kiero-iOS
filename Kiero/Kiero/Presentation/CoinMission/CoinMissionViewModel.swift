@@ -2,35 +2,33 @@
 //  CoinMissionViewModel.swift
 //  Kiero
 //
-//  Created by 정윤아 on 1/13/26.
-//
 
 import Foundation
 import Combine
+import UIKit
 
 final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let viewDidLoad: AnyPublisher<Void, Never>
         let viewWillAppear: AnyPublisher<Void, Never>
+        let viewWillDisappear: AnyPublisher<Void, Never>
         let completeMission: AnyPublisher<Int64, Never>
     }
     
     struct Output {
-        let userInfo: AnyPublisher<ChildrenInfo,Never>
+        let userInfo: AnyPublisher<ChildrenInfo, Never>
         let missions: AnyPublisher<[MissionGroupDTO], Never>
     }
     
     private let wishWellService: WishWellServiceType
     private let missionService: MissionServiceType
     private let coinMissionService: CoinMissionServiceType
-    
-    private let userInfoSubject =
-    CurrentValueSubject<ChildrenInfo, Never>(
+    private let userInfoSubject = CurrentValueSubject<ChildrenInfo, Never>(
         .init(firstName: "", coinAmount: 0, today: "")
     )
-    private let missionsSubject =
-    CurrentValueSubject<[MissionGroupDTO], Never>([])
+    private let missionsSubject = CurrentValueSubject<[MissionGroupDTO], Never>([])
+    private var sseStarted = false
     
     init(
         wishWellService: WishWellServiceType = WishWellService(),
@@ -55,6 +53,13 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
             .sink { [weak self] _ in
                 self?.fetchUserInfo()
                 self?.fetchMissions()
+                self?.startSSEIfNeeded()
+            }
+            .store(in: &cancellables)
+        
+        input.viewWillDisappear
+            .sink { [weak self] _ in
+                self?.stopSSE()
             }
             .store(in: &cancellables)
         
@@ -73,7 +78,7 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        return Output (
+        return Output(
             userInfo: userInfoSubject.eraseToAnyPublisher(),
             missions: missionsSubject.eraseToAnyPublisher()
         )
@@ -99,7 +104,6 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     
     private func applyComplete(_ dto: MissionCompleteResponseDTO) {
         var current = missionsSubject.value
-        
         let completedId = Int(dto.id)
         
         for groupIdx in current.indices {
@@ -121,7 +125,6 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
                     dayOfWeek: oldGroup.dayOfWeek,
                     missions: updatedMissions
                 )
-                
                 break
             }
         }
@@ -135,5 +138,42 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
             today: user.today
         )
         userInfoSubject.send(user)
+    }
+    
+    // MARK: - SSE
+    
+    private func startSSEIfNeeded() {
+        guard !sseStarted else { return }
+        sseStarted = true
+        
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let initialToken = try await BaseService.shared.reissueSseAccessToken()
+                
+                await MainActor.run { [weak self] in
+                    guard let self else { return }
+                    
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
+                        self?.handleMissionSse(payload: payload)
+                    }
+                    print("✅ [CoinMissionVM] SSE started")
+                }
+            } catch {
+                print("❌ [CoinMissionVM] SSE token reissue failed:", error)
+                self.sseStarted = false
+            }
+        }
+    }
+    
+    private func stopSSE() {
+        SseStreamManager.shared.stop()
+        sseStarted = false
+    }
+    
+    private func handleMissionSse(payload: SseEventPayload) {
+        guard payload.eventType == "MISSION_CREATED" else { return }
+        fetchMissions()
     }
 }

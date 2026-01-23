@@ -156,3 +156,9 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
         picker.dismiss(animated: true)
     }
 }
+
+extension DailyJourneyViewController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        viewWillAppearSubject.send(())
+    }
+}

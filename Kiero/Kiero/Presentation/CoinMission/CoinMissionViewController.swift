@@ -2,8 +2,6 @@
 //  CoinMissionViewController.swift
 //  Kiero
 //
-//  Created by 정윤아 on 1/13/26.
-//
 
 import UIKit
 import Combine
@@ -17,7 +15,7 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     
     private let completeMissionSubject = PassthroughSubject<Int64, Never>()
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
-    
+    private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
     // MARK: - Life Cycle
     
     override func loadView() { view = rootView }
@@ -25,6 +23,11 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewWillAppearSubject.send(())
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewWillDisappearSubject.send(())
     }
     
     // MARK: - Setup Methods
@@ -40,6 +43,7 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
         let input = CoinMissionViewModel.Input(
             viewDidLoad: Just(()).eraseToAnyPublisher(),
             viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
+            viewWillDisappear: viewWillDisappearSubject.eraseToAnyPublisher(),
             completeMission: completeMissionSubject.eraseToAnyPublisher()
         )
         
@@ -119,8 +123,7 @@ private extension CoinMissionViewController {
     }
     
     func findRewardAmount(missionId: Int64) -> Int {
-        let targetId = Int(missionId) // MissionItemDTO.id가 Int
-        
+        let targetId = Int(missionId)
         for group in dataSource {
             if let mission = group.missions.first(where: { $0.id == targetId }) {
                 return mission.reward
@@ -138,5 +141,11 @@ extension CoinMissionViewController: ScrollToTopAvailable {
         } else {
             collectionView.setContentOffset(.zero, animated: true)
         }
+    }
+}
+
+extension CoinMissionViewController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        viewWillAppearSubject.send(())
     }
 }
