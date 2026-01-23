@@ -80,7 +80,7 @@ final class ChildrenLoginViewModel: BaseViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                    self.stateSubject.send(.failure("네트워크 연결상태를 확인해주세요."))
                 }
             }
         }
