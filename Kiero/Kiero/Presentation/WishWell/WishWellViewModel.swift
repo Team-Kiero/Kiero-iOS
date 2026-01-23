@@ -99,17 +99,21 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
             .flatMap { [weak self] _ -> AnyPublisher<(ChildrenInfo, [Coupon]), Never> in
                 guard let self = self else {
                     return Just((ChildrenInfo(firstName: "", coinAmount: 0, today: ""), []))
-                    .eraseToAnyPublisher()}
+                        .eraseToAnyPublisher()
+                }
+                
                 let me = self.service.fetchMyInfo()
                     .catch { [weak self] err -> Just<ChildrenInfo> in
                         self?.errorMessageSubject.send(err.errorDescription)
                         return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
                     }
+                
                 let coupons = self.service.fetchCoupons()
                     .catch { [weak self] err -> Just<[Coupon]> in
                         self?.errorMessageSubject.send(err.errorDescription)
                         return Just([])
                     }
+                
                 return Publishers.Zip(me, coupons).eraseToAnyPublisher()
             }
             .sink { [weak self] me, coupons in

@@ -24,12 +24,10 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     private let wishWellService: WishWellServiceType
     private let missionService: MissionServiceType
     private let coinMissionService: CoinMissionServiceType
-    
     private let userInfoSubject = CurrentValueSubject<ChildrenInfo, Never>(
         .init(firstName: "", coinAmount: 0, today: "")
     )
     private let missionsSubject = CurrentValueSubject<[MissionGroupDTO], Never>([])
-    
     private var sseStarted = false
     
     init(
@@ -44,7 +42,6 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     }
     
     func transform(input: Input) -> Output {
-        
         input.viewDidLoad
             .sink { [weak self] _ in
                 self?.fetchUserInfo()
@@ -161,7 +158,6 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
                     SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
                         self?.handleMissionSse(payload: payload)
                     }
-                    
                     print("✅ [CoinMissionVM] SSE started")
                 }
             } catch {

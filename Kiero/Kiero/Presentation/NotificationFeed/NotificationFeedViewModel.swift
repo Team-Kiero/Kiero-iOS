@@ -181,11 +181,9 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 
                 await MainActor.run { [weak self] in
                     guard let self else { return }
-                    
                     SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
                         self?.handleSse(payload: payload)
                     }
-                    
                     print("✅ [FeedVM] SSE started")
                 }
             } catch {
@@ -351,7 +349,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             let state = makeState(from: item, childName: childName)
             dict[date, default: []].append(state)
         }
-        
         let sortedDates = dict.keys.sorted(by: >)
         return sortedDates.map { date in
             FeedSection(date: date, items: dict[date] ?? [])
