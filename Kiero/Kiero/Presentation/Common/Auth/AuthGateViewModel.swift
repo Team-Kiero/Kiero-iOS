@@ -10,30 +10,58 @@ import Foundation
 
 enum AuthGateRoute {
     case pickRole
+    case parentOnboarding
     case parentTab
     case childTab
 }
 
 final class AuthGateViewModel {
-
+    
     private let routeSubject = PassthroughSubject<AuthGateRoute, Never>()
     var route: AnyPublisher<AuthGateRoute, Never> { routeSubject.eraseToAnyPublisher() }
-
+    
     func decideRoute() {
-
+        
         guard TokenManager.shared.getAccessToken() != nil else {
             routeSubject.send(.pickRole)
             return
         }
-
+        
+        
         let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
-
+        
         if role.contains("parent") {
-            routeSubject.send(.parentTab)
-        } else if role.contains("child") {
+            decideParentRoute()
+            return
+        }
+        
+        if role.contains("child") {
             routeSubject.send(.childTab)
-        } else {
-            routeSubject.send(.pickRole)
+            return
+        }
+        
+        routeSubject.send(.pickRole)
+    }
+    
+    private func decideParentRoute() {
+        Task {
+            do {
+                let children: [ChildrenData] = try await BaseService.shared.request(
+                    endPoint: .fetchChildren
+                )
+                
+                await MainActor.run {
+                    if children.isEmpty {
+                        self.routeSubject.send(.parentOnboarding)
+                    } else {
+                        self.routeSubject.send(.parentTab)
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.routeSubject.send(.parentOnboarding)
+                }
+            }
         }
     }
 }
