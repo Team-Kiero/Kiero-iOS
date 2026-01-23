@@ -14,6 +14,7 @@ enum NetworkError: Error {
     case unknownError
     case internalServerError
     case clientError(statusCode: Int)
+    case codeError(String)
     
     var errorDescription: String {
         switch self {
@@ -29,6 +30,23 @@ enum NetworkError: Error {
             return "서버 에러"
         case .clientError(let code):
             return "클라이언트 요청 에러 (Code: \(code))"
+        case .codeError:
+            return "코드 에러"
+        }
+    }
+    
+    var toastMessage: String {
+        switch self {
+        case .invalidURL, .unknownError:
+            return "네트워크 연결 상태를 확인해주세요."
+        case .internalServerError:
+            return "일시적인 오류입니다. 잠시 후 다시 시도해주세요."
+        case .responseDecodingError, .noData:
+            return "일시적인 오류입니다. 잠시 후 다시 시도해주세요."
+        case .clientError:
+            return "요청에 실패했어요. 다시 시도해주세요."
+        case .codeError(let message):
+            return message
         }
     }
 }

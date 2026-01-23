@@ -17,6 +17,12 @@ struct AnyEncodable: Encodable {
     }
 }
 
+
+struct ErrorResponse: Decodable {
+    let status: Int
+    let message: String
+}
+
 final class BaseService {
     static let shared = BaseService()
     private init() { }
@@ -55,6 +61,13 @@ final class BaseService {
                 return try await request(endPoint: endPoint, body: body, didRetry: true)
             }
         }
+    }
+    
+    func decodeServerMessage(from data: Data) -> String? {
+        guard let error = try? JSONDecoder().decode(ErrorResponse.self, from: data) else {
+            return nil
+        }
+        return error.message
     }
     
     private func perform<Response: Decodable>(
@@ -99,7 +112,11 @@ final class BaseService {
         let statusCode = httpResponse.statusCode
         
         if (400...499).contains(statusCode) {
-            throw NetworkError.clientError(statusCode: statusCode)
+            if let message = decodeServerMessage(from: data) {
+                throw NetworkError.codeError(message)
+            } else {
+                throw NetworkError.clientError(statusCode: statusCode)
+            }
         } else if (500...599).contains(statusCode) {
             throw NetworkError.internalServerError
         } else if !(200...299).contains(statusCode) {
