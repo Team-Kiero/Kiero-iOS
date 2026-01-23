@@ -9,19 +9,19 @@ import Combine
 import Foundation
 
 final class ParentLoginViewModel: BaseViewModel, ViewModelType {
-
+    
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
     }
-
+    
     struct Output {
         let state: AnyPublisher<LoginState, Never>
         let route: AnyPublisher<LoginRoute, Never>
     }
-
+    
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<LoginRoute, Never>()
-
+    
     private let kakaoService: any KakaoAuthServiceType
     private var isLoggingIn = false
     
@@ -29,49 +29,57 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         self.kakaoService = kakaoService
         super.init()
     }
-
+    
     func transform(input: Input) -> Output {
         input.kakaoButtonTapped
             .sink { [weak self] in
                 self?.requestKakaoLogin()
             }
             .store(in: &cancellables)
-
+        
         return Output(
             state: stateSubject.eraseToAnyPublisher(),
             route: routeSubject.eraseToAnyPublisher()
         )
     }
-
+    
     private func requestKakaoLogin() {
         guard !isLoggingIn else { return }
         isLoggingIn = true
         
         stateSubject.send(.loading)
-
+        
         Task { [weak self] in
             guard let self else { return }
             
             defer { self.isLoggingIn = false }
-
+            
             do {
                 let kakaoToken = try await kakaoService.loginWithKakao()
-
+                
                 let loginData: LoginData = try await BaseService.shared.request(
                     endPoint: .kakaoAccessToken(token: kakaoToken)
                 )
-
+                
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 TokenManager.shared.saveRefreshToken(loginData.refreshToken)
                 TokenManager.shared.saveProfile(loginData.image)
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveProfile(loginData.image)
-
+                
+                let children: ChildListResponse = try await BaseService.shared.request(
+                    endPoint: .fetchChildren
+                )
+                
                 await MainActor.run {
                     self.stateSubject.send(.idle)
-                    self.routeSubject.send(.parentOnboarding(name: loginData.name, url: loginData.image))
+                    
+                    if children.isEmpty {
+                        self.routeSubject.send(.parentOnboarding)
+                    } else {
+                        self.routeSubject.send(.parentTab)
+                    }
                 }
             } catch let error as KakaoLoginError {
                 await MainActor.run {
@@ -83,7 +91,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                         self.routeSubject.send(.toast("로그인이 취소되었습니다."))
                     }
                 }
-
+                
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))

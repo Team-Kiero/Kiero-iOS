@@ -27,20 +27,20 @@ extension AppDIContainer {
         return KakaoAuthService()
     }
     
-    func makeParentLoginViewController() -> UIViewController {
-        let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService())
-        return ParentLoginViewController(viewModel: vm, diContainer: self)
-    }
-    
     func makePickRoleViewController() -> UIViewController {
         let viewModel = PickRoleViewModel()
         return PickRoleViewController(viewModel: viewModel, diContainer: self)
     }
     
-    //    func makeParentOnboardingViewController() -> UIViewController {
-    //        let vm = ParentOnboardingViewModel(name: <#String#>, profileURL: <#String#>)
-    //        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
-    //    }
+    func makeParentLoginViewController() -> UIViewController {
+        let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService())
+        return ParentLoginViewController(viewModel: vm, diContainer: self)
+    }
+    
+    func makeParentOnboardingViewController() -> UIViewController {
+        let vm = ParentOnboardingViewModel()
+        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
+    }
     
     func makeChildOnboardingViewController() -> UIViewController {
         let userName = TokenManager.shared.getFirstName() ?? "사용자"

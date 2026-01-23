@@ -16,6 +16,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     // MARK: - Properties
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
+    private var loadingVC: UIViewController?
     
     // MARK: - UI Components
     
@@ -83,32 +84,85 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             input: .init(kakaoButtonTapped: kakaoTap.eraseToAnyPublisher())
         )
         
-        output.route
+        output.state
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] route in
+            .sink { [weak self] state in
                 guard let self else { return }
-                switch route {
-                case let .parentOnboarding(name, url):
-                    self.navigateToParentOnboarding(name: name, url: url)
-                case let .toast(message):
+                
+                switch state {
+                case .idle:
+                    //self.hideLoading()
+                    self.kakaoLoginButton.isEnabled = true
+                    
+                case .loading:
+                    //self.showLoading()
+                    self.kakaoLoginButton.isEnabled = false
+                    
+                case .failure(let message):
+                    //self.hideLoading()
+                    self.kakaoLoginButton.isEnabled = true
                     Toast.show(message: message, bottomInset: 83)
                 }
             }
             .store(in: &cancellables)
+        
+        output.route
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] route in
+                guard let self else { return }
+                self.handle(by: route)
+            }
+            .store(in: &cancellables)
+    }
+    
+//    private func showLoading() {
+//        guard loadingVC == nil else { return }
+//        let vc = AppDIContainer.shared.makeChildLoadingViewController()
+//        vc.modalPresentationStyle = .overFullScreen
+//        vc.modalTransitionStyle = .crossDissolve
+//        loadingVC = vc
+//        present(vc, animated: false)
+//    }
+//    
+//    private func hideLoading() {
+//        guard let vc = loadingVC else { return }
+//        loadingVC = nil
+//        vc.dismiss(animated: false)
+//    }
+    
+    private func navigateToParentOnboarding() {
+        let vm = ParentOnboardingViewModel()
+        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
+        
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(onboardingVC)
+        }
+    }
+    
+    private func handle(by route: LoginRoute) {
+        switch route {
+        case .parentOnboarding:
+            let onboardingVC = AppDIContainer.shared.makeParentOnboardingViewController()
+            if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+                sceneDelegate.changeRootViewController(onboardingVC)
+            }
+        case .parentTab:
+            let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
+            changeRoot(tab)
+        case let .toast(message):
+            Toast.show(message: message, bottomInset: 83)
+        }
+    }
+    
+    private func changeRoot(_ vc: UIViewController) {
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+            sceneDelegate.changeRootViewController(vc)
+        }
     }
     
     @objc
     private func kakaoLoginButtonTapped() {
         view.endEditing(true)
         kakaoTap.send(())
-    }
-    
-    private func navigateToParentOnboarding(name: String, url: String) {
-        let vm = ParentOnboardingViewModel(name: name, profileURL: url)
-        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(onboardingVC)
-        }
     }
 }

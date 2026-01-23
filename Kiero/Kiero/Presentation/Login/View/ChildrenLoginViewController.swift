@@ -133,8 +133,6 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                 switch route {
                 case .childOnboarding:
                     self.navigateToChildOnboarding()
-                case .toast(let message):
-                    Toast.show(message: message, bottomInset: 83)
                 }
             }
             .store(in: &cancellables)
@@ -146,18 +144,14 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                 
                 switch state {
                 case .idle:
-                    self.startButton.isEnabled = true
-                    self.startButton.alpha = 1.0
-                    
+                    self.startButton.isEnabled = false
                 case .loading:
                     self.startButton.isEnabled = false
-                    self.startButton.alpha = 0.6
                     
                 case .failure(let message):
                     self.startButton.isEnabled = true
-                    self.startButton.alpha = 1.0
                     print("ChildSignup 실패:", message)
-                    Toast.show(message: "이름이나 초대코드를 다시 확인해줘!", bottomInset: 83)
+                    Toast.show(message: message, bottomInset: 83)
                 }
             }
             .store(in: &cancellables)

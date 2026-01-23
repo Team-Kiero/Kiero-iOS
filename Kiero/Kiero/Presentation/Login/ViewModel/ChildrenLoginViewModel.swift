@@ -10,7 +10,6 @@ import Foundation
 
 enum ChildLoginRoute {
     case childOnboarding
-    case toast(String)
 }
 
 enum ChildLoginState: Equatable {
@@ -41,10 +40,7 @@ final class ChildrenLoginViewModel: BaseViewModel {
         let first = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
         let code = inviteCode.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !last.isEmpty, !first.isEmpty, !code.isEmpty else {
-            stateSubject.send(.failure("성, 이름, 초대코드를 모두 입력해줘"))
-            return
-        }
+        guard !last.isEmpty, !first.isEmpty, !code.isEmpty else { return }
 
         stateSubject.send(.loading)
 
@@ -80,12 +76,11 @@ final class ChildrenLoginViewModel: BaseViewModel {
 
             } catch let error as NetworkError {
                 await MainActor.run {
-                    self.stateSubject.send(.failure(error.errorDescription))
-                    self.routeSubject.send(.toast(error.errorDescription))
+                    self.stateSubject.send(.failure(error.toastMessage))
                 }
             } catch {
                 await MainActor.run {
-                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                    self.stateSubject.send(.failure("네트워크 연결상태를 확인해주세요."))
                 }
             }
         }
