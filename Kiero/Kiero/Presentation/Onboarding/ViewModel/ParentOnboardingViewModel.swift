@@ -10,6 +10,7 @@ import Foundation
 
 enum ParentOnboardingRoute {
     case invite(childLastName: String, childFirstName: String, inviteCode: String, issuedAt: Date)
+    case logout
 }
 
 final class ParentOnboardingViewModel: BaseViewModel {
@@ -106,5 +107,9 @@ final class ParentOnboardingViewModel: BaseViewModel {
                 }
             }
         }
+    }
+    
+    func logout() {
+        routeSubject.send(.logout)
     }
 }

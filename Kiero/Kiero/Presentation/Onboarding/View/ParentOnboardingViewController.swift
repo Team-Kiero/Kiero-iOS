@@ -90,6 +90,12 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         
         lastNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         firstNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
+        
+        profileBox.onTap = {
+            self.showLogoutDialog {
+                self.viewModel?.logout()
+            }
+        }
     }
 
     override func setDelegate() {
@@ -122,6 +128,8 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
                                               childFirstName: first,
                                               inviteCode: inviteCode,
                                               issuedAt: issuedAt)
+                case .logout:
+                    LogoutHelper.logoutToPickRole()
                 }
             }
             .store(in: &cancellables)
