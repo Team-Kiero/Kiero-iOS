@@ -26,9 +26,7 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if viewModel?.missionGroups.isEmpty ?? true {
-            viewModel?.fetchMissions()
-        }
+        viewModel?.fetchMissions()
     }
     
     override func viewDidLoad() {
