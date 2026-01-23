@@ -14,3 +14,9 @@ struct MissionCompleteResponseDTO: Decodable {
     let dueAt: String       
     let isCompleted: Bool
 }
+
+struct MissionSsePayload: Decodable {
+    let eventType: String
+    let missionName: String?
+    let reward: Int?
+}
