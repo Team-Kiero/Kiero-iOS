@@ -30,7 +30,7 @@ extension Date {
         formatter.locale = Locale(identifier: "ko_KR")
         return formatter.string(from: self)
     }
-
+    
     var daysOfWeek: [Date] {
         let calendar = Calendar.current
         var calendarWithMonday = calendar
@@ -44,23 +44,36 @@ extension Date {
         }
     }
     
-    var weekOfMonth: Int {
-        let calendar = Calendar.current
-        let day = calendar.component(.day, from: self)
-        
-        let components = calendar.dateComponents([.year, .month], from: self)
-        guard let firstDayOfMonth = calendar.date(from: components) else { return 1 }
-        
-        let firstWeekday = calendar.component(.weekday, from: firstDayOfMonth)
-        let offset = (firstWeekday + 5) % 7
-        
-        return ((day + offset - 1) / 7) + 1
-    }
-    
     var weekOfMonthString: String {
         let calendar = Calendar.current
-        let month = calendar.component(.month, from: self)
-        return "\(month)월 \(self.weekOfMonth)주차"
+        let weekDates = self.daysOfWeek
+        
+        if let firstDayInWeek = weekDates.first(where: { calendar.component(.day, from: $0) == 1 }) {
+            if calendar.startOfDay(for: self) < calendar.startOfDay(for: firstDayInWeek) {
+                let dayBeforeFirst = calendar.date(byAdding: .day, value: -1, to: firstDayInWeek)!
+                return calculateWeekString(for: dayBeforeFirst)
+            } else {
+                let monthOfFirstDay = calendar.component(.month, from: firstDayInWeek)
+                return "\(monthOfFirstDay)월 1주차"
+            }
+        }
+        
+        return calculateWeekString(for: self)
+    }
+    
+    private func calculateWeekString(for date: Date) -> String {
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: date)
+        let day = calendar.component(.day, from: date)
+        
+        let components = calendar.dateComponents([.year, .month], from: date)
+        let firstDayOfMonth = calendar.date(from: components)!
+        let firstWeekday = calendar.component(.weekday, from: firstDayOfMonth)
+        
+        let offset = (firstWeekday + 5) % 7
+        let weekNumber = Int(ceil(Double(day + offset) / 7.0))
+        
+        return "\(month)월 \(weekNumber)주차"
     }
     
     func toString(format: String = "yyyy-MM-dd") -> String {
