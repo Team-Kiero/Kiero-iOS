@@ -54,8 +54,12 @@ final class AddScheduleViewModel: BaseViewModel {
                     print("❌ [VM 에러 발생]: \(error)")
                     
                     switch error {
+                    case .codeError(let message):
+                        self.errorMessage.send(message)
+                        
                     case .clientError(let code) where code == 400:
                         self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
+                        
                     default:
                         self.errorMessage.send("일정 저장에 실패했어요. 잠시 후 다시 시도해주세요.")
                     }

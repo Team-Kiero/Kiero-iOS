@@ -33,7 +33,7 @@ final class ScheduleView: BaseUIView {
         
         timeTableView.snp.makeConstraints {
             $0.top.equalTo(pagingHeader.snp.bottom).offset(18)
-            $0.horizontalEdges.equalToSuperview().inset(23)
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalToSuperview()
         }
     }
