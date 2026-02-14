@@ -38,7 +38,7 @@ final class MissionFloatingMenuView: UIView {
     
     private lazy var aiInputButton = createMenuButton(
         title: "알림장 한 번에 입력하기",
-        icon: .icRobot
+        icon: .icAi
     ).then {
         $0.tag = 1
         $0.addTarget(self, action: #selector(menuTapped(_:)), for: .touchUpInside)
