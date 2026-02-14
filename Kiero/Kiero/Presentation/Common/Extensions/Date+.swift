@@ -44,7 +44,7 @@ extension Date {
         }
     }
     
-    var WeekOfMonth: Int {
+    var weekOfMonth: Int {
         let calendar = Calendar.current
         let day = calendar.component(.day, from: self)
         
@@ -57,10 +57,10 @@ extension Date {
         return ((day + offset - 1) / 7) + 1
     }
     
-    var WeekOfMonthString: String {
+    var weekOfMonthString: String {
         let calendar = Calendar.current
         let month = calendar.component(.month, from: self)
-        return "\(month)월 \(self.WeekOfMonth)주차"
+        return "\(month)월 \(self.weekOfMonth)주차"
     }
     
     func toString(format: String = "yyyy-MM-dd") -> String {
