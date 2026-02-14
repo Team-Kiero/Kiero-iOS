@@ -46,10 +46,17 @@ extension Date {
     
     var weekOfMonthString: String {
         let calendar = Calendar.current
-        let weekDates = self.daysOfWeek
+        let now = Date()
         
+        let weekDates = self.daysOfWeek
         if let firstDayInWeek = weekDates.first(where: { calendar.component(.day, from: $0) == 1 }) {
-            if calendar.startOfDay(for: self) < calendar.startOfDay(for: firstDayInWeek) {
+            
+            if now < firstDayInWeek {
+                let dayBeforeFirst = calendar.date(byAdding: .day, value: -1, to: firstDayInWeek)!
+                return calculateWeekString(for: dayBeforeFirst)
+            }
+            
+            if self < firstDayInWeek {
                 let dayBeforeFirst = calendar.date(byAdding: .day, value: -1, to: firstDayInWeek)!
                 return calculateWeekString(for: dayBeforeFirst)
             } else {
