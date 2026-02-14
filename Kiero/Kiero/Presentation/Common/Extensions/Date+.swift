@@ -44,6 +44,25 @@ extension Date {
         }
     }
     
+    var WeekOfMonth: Int {
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: self)
+        
+        let components = calendar.dateComponents([.year, .month], from: self)
+        guard let firstDayOfMonth = calendar.date(from: components) else { return 1 }
+        
+        let firstWeekday = calendar.component(.weekday, from: firstDayOfMonth)
+        let offset = (firstWeekday + 5) % 7
+        
+        return ((day + offset - 1) / 7) + 1
+    }
+    
+    var WeekOfMonthString: String {
+        let calendar = Calendar.current
+        let month = calendar.component(.month, from: self)
+        return "\(month)월 \(self.WeekOfMonth)주차"
+    }
+    
     func toString(format: String = "yyyy-MM-dd") -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = format
@@ -57,12 +76,5 @@ extension Date {
     
     var isTomorrow: Bool {
         return Calendar.current.isDateInTomorrow(self)
-    }
-    
-    var weekOfMonthString: String {
-        let calendar = Calendar.current
-        let month = calendar.component(.month, from: self)
-        let week = calendar.component(.weekOfMonth, from: self)
-        return "\(month)월 \(week)주차"
     }
 }

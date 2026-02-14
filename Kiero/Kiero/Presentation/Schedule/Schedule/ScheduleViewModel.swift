@@ -159,17 +159,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     }
     
     private func formatWeekTitle(from date: Date) -> String {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
-        let day = components.day ?? 1
-        let month = components.month ?? 1
-        
-        if day == 1 {
-            return "\(month)월 1주차"
-        }
-        
-        let weekOfMonth = calendar.component(.weekOfMonth, from: date)
-        return "\(month)월 \(weekOfMonth)주차"
+        return date.WeekOfMonthString
     }
     
     private func isWithinRange(date: Date) -> Bool {
