@@ -16,7 +16,7 @@ final class WeeklyTimeTableView: BaseUIView {
     
     private let hourHeight: CGFloat = 38.0
     private let startHour = 8
-    private let endHour = 22
+    private let endHour = 21
     
     // TODO: 데이터 주입
     private var daysDates: [Date] = []
@@ -150,7 +150,7 @@ final class WeeklyTimeTableView: BaseUIView {
     private func updateHeaderLabels() {
         headerStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         headerStackView.isLayoutMarginsRelativeArrangement = true
-        headerStackView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: -9)
+        headerStackView.layoutMargins = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: -9)
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         

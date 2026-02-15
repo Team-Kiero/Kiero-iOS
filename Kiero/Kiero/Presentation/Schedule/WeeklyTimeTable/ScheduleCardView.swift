@@ -32,14 +32,14 @@ final class ScheduleCardView: BaseUIView {
     private let titleLabel = UILabel().then {
         $0.numberOfLines = 2
         $0.textColor = .white
-        $0.lineBreakMode = .byWordWrapping
+        $0.lineBreakMode = .byCharWrapping
         $0.textAlignment = .center
     }
     
     private lazy var contentStackView = UIStackView(arrangedSubviews: [dotView, titleLabel]).then {
         $0.axis = .horizontal
         $0.spacing = 2
-        $0.alignment = .center
+        $0.alignment = .top
         $0.distribution = .fill
     }
     
@@ -74,6 +74,14 @@ final class ScheduleCardView: BaseUIView {
     }
     
     override func setLayout() {
+        contentStackView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(8)
+            $0.centerX.equalToSuperview()
+            $0.leading.greaterThanOrEqualToSuperview().inset(3)
+            $0.trailing.lessThanOrEqualToSuperview().inset(3)
+            $0.bottom.lessThanOrEqualToSuperview().inset(2)
+        }
+        
         topBar.snp.makeConstraints {
             $0.top.horizontalEdges.equalToSuperview()
             $0.height.equalTo(4)
@@ -82,19 +90,10 @@ final class ScheduleCardView: BaseUIView {
         dotView.snp.makeConstraints {
             $0.size.equalTo(4)
         }
-        
-        contentStackView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(8)
-            $0.centerX.equalToSuperview()
-            $0.leading.greaterThanOrEqualToSuperview().inset(3)
-            $0.trailing.lessThanOrEqualToSuperview().inset(3)
-            $0.bottom.lessThanOrEqualToSuperview().inset(2)
-        }
     }
 
     private func applyDynamicTextLogic() {
         let cardHeight = bounds.height
-        _ = bounds.width
         
         if cardHeight < 20 {
             titleLabel.isHidden = true
@@ -103,20 +102,40 @@ final class ScheduleCardView: BaseUIView {
         }
         
         titleLabel.isHidden = false
-        titleLabel.text = originalText
+        dotView.isHidden = false
         
         if cardHeight < 38 {
             titleLabel.numberOfLines = 1
             if originalText.count >= 4 {
                 titleLabel.text = "\(originalText.prefix(2))..."
+            } else {
+                titleLabel.text = originalText
             }
-        }
-        else {
+        } else {
             titleLabel.numberOfLines = 2
+            
+            var processedText = originalText
+            
             if originalText.count >= 7 {
-                titleLabel.text = "\(originalText.prefix(5))..."
+                processedText = String(originalText.prefix(5)) + "..."
+            }
+            
+            if processedText.count == 4 {
+                let splitIndex = processedText.index(processedText.startIndex, offsetBy: 2)
+                let firstLine = processedText[..<splitIndex]
+                let secondLine = processedText[splitIndex...]
+                titleLabel.text = "\(firstLine)\n\(secondLine)"
+            } else if processedText.count >= 3 {
+                let splitIndex = processedText.index(processedText.startIndex, offsetBy: 3)
+                let firstLine = processedText[..<splitIndex]
+                let secondLine = processedText[splitIndex...]
+                titleLabel.text = "\(firstLine)\n\(secondLine)"
+            } else {
+                titleLabel.text = processedText
             }
         }
+        
+        dotView.transform = CGAffineTransform(translationX: 0, y: 5.5)
     }
 }
 
