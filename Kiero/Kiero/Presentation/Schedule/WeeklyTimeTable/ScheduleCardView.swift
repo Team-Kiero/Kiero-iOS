@@ -135,7 +135,6 @@ final class ScheduleCardView: BaseUIView {
             }
         }
         
-        
         dotView.transform = CGAffineTransform(translationX: 0, y: 5.5)
     }
 }
