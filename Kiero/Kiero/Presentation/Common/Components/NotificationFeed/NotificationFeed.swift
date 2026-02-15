@@ -64,9 +64,10 @@ final class NotificationFeed: UIView {
     }
     
     private let proofImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
         $0.isHidden = true
+        $0.layer.cornerRadius = 10
     }
     
     private let coinChip = ChipItem().then {
@@ -136,7 +137,7 @@ final class NotificationFeed: UIView {
         
         proofImageView.snp.makeConstraints {
             $0.top.equalTo(messageLabel.snp.bottom).offset(7)
-            $0.centerX.equalToSuperview()
+            $0.horizontalEdges.equalTo(container).inset(65)
             $0.height.equalTo(0)
         }
         
