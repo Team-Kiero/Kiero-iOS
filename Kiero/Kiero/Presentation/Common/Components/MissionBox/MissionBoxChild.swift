@@ -21,21 +21,21 @@ final class MissionBoxChild: UIView {
         var backgroundColor: UIColor {
             switch self {
             case .inProgress: return .gray900
-            case .completed: return UIColor.gray900.withAlphaComponent(0.6)
+            case .completed: return UIColor.gray900.withAlphaComponent(0.5)
             }
         }
         
         var titleColor: UIColor {
             switch self {
             case .inProgress: return .white
-            case .completed: return .white.withAlphaComponent(0.6)
+            case .completed: return .white.withAlphaComponent(0.5)
             }
         }
         
         var rewardColor: UIColor {
             switch self {
             case .inProgress: return .gray400
-            case .completed: return UIColor.gray400.withAlphaComponent(0.6)
+            case .completed: return UIColor.gray400.withAlphaComponent(0.5)
             }
         }
         
@@ -49,7 +49,7 @@ final class MissionBoxChild: UIView {
         var buttonTextColor: UIColor {
             switch self {
             case .inProgress: return .kBlack
-            case .completed: return .white.withAlphaComponent(0.6)
+            case .completed: return .white.withAlphaComponent(0.5)
             }
         }
         
