@@ -104,7 +104,7 @@ final class DailyJourneyView: BaseUIView {
     
     override func setLayout() {
         backgroundImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(106)
+            $0.top.equalToSuperview().offset(126)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(410)
             $0.height.equalTo(437)
@@ -137,7 +137,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         kkubiCharacterImageView.snp.makeConstraints {
-            $0.top.equalTo(journeyTimeView.snp.bottom).offset(20)
+            $0.top.equalTo(journeyTimeView.snp.bottom).offset(60)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(343)
