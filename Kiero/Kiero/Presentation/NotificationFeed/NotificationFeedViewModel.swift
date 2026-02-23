@@ -177,7 +177,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             guard let self else { return }
             
             do {
-                let initialToken = try await BaseService.shared.reissueSseAccessToken()
+                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
                 
                 await MainActor.run { [weak self] in
                     guard let self else { return }
