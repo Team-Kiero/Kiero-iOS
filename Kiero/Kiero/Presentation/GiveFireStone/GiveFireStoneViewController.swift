@@ -139,7 +139,7 @@ final class GiveFireStoneViewController: BaseViewController<GiveFireStoneViewMod
             self.resultView.alpha = 1
         }) { _ in
             self.processView.isHidden = true
-            self.resultView.playGif()
+            self.resultView.playWebP()
         }
     }
 }

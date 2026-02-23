@@ -9,6 +9,7 @@ import ImageIO
 import UIKit
 
 import Kingfisher
+import KingfisherWebP
 import SnapKit
 import Then
 
@@ -92,7 +93,7 @@ final class GiveFireStoneResultView: BaseUIView {
     // MARK: - Configuration
     
     func configure(coin: Int, stones: [String]) {
-//        let stoneNames = stones.map { mapStoneName($0) }.joined(separator: ", ")
+        //        let stoneNames = stones.map { mapStoneName($0) }.joined(separator: ", ")
         
         let lines: [String]
         let highlightKeywords: [String]
@@ -128,36 +129,45 @@ final class GiveFireStoneResultView: BaseUIView {
         }
     }
     
-    func playGif() {
+    func playWebP() {
         kkubiImageView.stopAnimating()
         kkubiImageView.image = nil
         
-        guard let url = Bundle.main.url(forResource: "kkubi_fire", withExtension: "gif") else { return }
+        guard let url = Bundle.main.url(forResource: "kkubi_fire", withExtension: "webp") else { return }
         
-        kkubiImageView.kf.setImage(with: url)
+        let processor = WebPProcessor.default
+        let serializer = WebPSerializer.default
+        
+        kkubiImageView.kf.setImage(
+            with: url,
+            options: [
+                .processor(processor),
+                .cacheSerializer(serializer)
+            ]
+        )
         kkubiImageView.repeatCount = .once
         
-        let gifDuration = getGifDuration(from: url)
+        let webpDuration = getWebPDuration(from: url)
         
-        print("GIF 재생 시간: \(gifDuration)초")
+        print("WebP 재생 시간: \(webpDuration)초")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + gifDuration + 0.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + webpDuration + 0.5) { [weak self] in
             print("애니메이션 종료! 닫기 신호 보냄")
             self?.didTapClose?()
         }
     }
     
-    private func getGifDuration(from url: URL) -> TimeInterval {
+    private func getWebPDuration(from url: URL) -> TimeInterval {
         guard let source = CGImageSourceCreateWithURL(url as CFURL, nil) else { return 0.0 }
         let count = CGImageSourceGetCount(source)
         var totalDuration: TimeInterval = 0.0
         
         for i in 0..<count {
             if let properties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [String: Any],
-               let gifProperties = properties[kCGImagePropertyGIFDictionary as String] as? [String: Any] {
+               let webpProperties = properties["{WEBP}"] as? [String: Any] {
                 
-                var delay = gifProperties[kCGImagePropertyGIFUnclampedDelayTime as String] as? Double
-                ?? gifProperties[kCGImagePropertyGIFDelayTime as String] as? Double
+                var delay = webpProperties["UnclampedDelayTime"] as? Double
+                ?? webpProperties["DelayTime"] as? Double
                 ?? 0.1
                 
                 if delay < 0.011 { delay = 0.1 }
