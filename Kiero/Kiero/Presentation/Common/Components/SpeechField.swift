@@ -115,12 +115,11 @@ final class SpeechField: UIView {
         nameContainerView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(15)
             $0.height.equalTo(21)
-            $0.width.greaterThanOrEqualTo(43)
             $0.leading.equalTo(containerView.snp.leading).offset(18)
         }
-        
+
         nameLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 2, left: 10, bottom: 2, right: 10))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 2, left: 10, bottom: 2, right: 12))
         }
         
         containerView.snp.makeConstraints {

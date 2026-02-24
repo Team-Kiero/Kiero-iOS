@@ -25,13 +25,39 @@ final class DailyJourneyView: BaseUIView {
         $0.clipsToBounds = true
     }
     
+    private let dimOverlayView = UIView().then {
+        $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.6)
+        $0.isUserInteractionEnabled = false
+    }
+    
     private let backgroundMaskView = UIView().then {
         let gradientLayer = CAGradientLayer()
         gradientLayer.type = .radial
-        gradientLayer.colors = [UIColor.black.cgColor, UIColor.clear.cgColor]
+        
+        gradientLayer.colors = [
+            UIColor(white: 1.0, alpha: 1.0).cgColor,
+            UIColor(white: 1.0, alpha: 1.0).cgColor,
+            UIColor(white: 1.0, alpha: 0.85).cgColor,
+            UIColor(white: 1.0, alpha: 0.65).cgColor,
+            UIColor(white: 1.0, alpha: 0.45).cgColor,
+            UIColor(white: 1.0, alpha: 0.25).cgColor,
+            UIColor(white: 1.0, alpha: 0.12).cgColor,
+            UIColor(white: 1.0, alpha: 0.0).cgColor
+        ]
+        
+        gradientLayer.locations = [
+            0.0,
+            0.75,
+            0.82,
+            0.88,
+            0.92,
+            0.95,
+            0.97,
+            1.0
+        ] as [NSNumber]
         gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
         gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
-        gradientLayer.locations = [0.0, 1.0]
+        
         $0.layer.addSublayer(gradientLayer)
     }
     
@@ -67,7 +93,7 @@ final class DailyJourneyView: BaseUIView {
     // MARK: - Setup Methods
     
     override func setUI() {
-        addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
+        addSubviews(backgroundImageView, dimOverlayView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
         
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
@@ -78,10 +104,14 @@ final class DailyJourneyView: BaseUIView {
     
     override func setLayout() {
         backgroundImageView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(126)
+            $0.centerX.equalToSuperview()
             $0.width.equalTo(410)
             $0.height.equalTo(437)
-            $0.top.equalToSuperview().offset(106)
-            $0.leading.equalToSuperview().offset(-17)
+        }
+        
+        dimOverlayView.snp.makeConstraints {
+            $0.edges.equalTo(backgroundImageView)
         }
         
         headerView.snp.makeConstraints {
@@ -107,7 +137,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         kkubiCharacterImageView.snp.makeConstraints {
-            $0.top.equalTo(journeyTimeView.snp.bottom).offset(20)
+            $0.top.equalTo(journeyTimeView.snp.bottom).offset(60)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(343)
