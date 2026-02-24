@@ -183,10 +183,10 @@ final class SpeechField: UIView {
         buttonContainerView.isHidden = (fieldType == .no)
         
         updateGestures()
-        nameLabel.setTypo(.body5_10_R, text: name)
+        nameLabel.setTypo(.body4_12_R, text: name)
         contentStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        buttonLabel.setTypo(.body5_10_R, text: type.buttonTitle)
+        buttonLabel.setTypo(.body6_10_R, text: type.buttonTitle)
         buttonLabel.textColor = type.textColor
         buttonImage.tintColor = type.textColor
         

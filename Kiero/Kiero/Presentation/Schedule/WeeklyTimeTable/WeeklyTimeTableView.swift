@@ -123,7 +123,7 @@ final class WeeklyTimeTableView: BaseUIView {
             }
             
             let timeLabel = UILabel().then {
-                $0.setTypo(.body5_10_R, text: "\(hour)")
+                $0.setTypo(.body6_10_R, text: "\(hour)")
                 $0.textColor = .gray600
                 $0.textAlignment = .center
             }

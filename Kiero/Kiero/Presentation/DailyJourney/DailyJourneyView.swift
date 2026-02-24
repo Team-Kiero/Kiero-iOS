@@ -72,10 +72,10 @@ final class DailyJourneyView: BaseUIView {
     
     private let speechField = SpeechField(type: .gray)
     
-    let verifyPhotoButton = CTAButton(style: .gray900).then {
+    let verifyPhotoButton = CTAButton(style: .gray100, size: .h49).then {
         $0.configure(
             title: "인증하고 불조각 받기",
-            icon: UIImage(resource: .icCamera)
+            icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)
         )
     }
     
@@ -205,7 +205,7 @@ final class DailyJourneyView: BaseUIView {
             verifyPhotoButton.isHidden = false
             verifyPhotoButton.configure(
                 title: "마음의 불꽃 피워주기",
-                icon: nil
+                icon: UIImage(resource: .icFire)
             )
             
         case .hidden:

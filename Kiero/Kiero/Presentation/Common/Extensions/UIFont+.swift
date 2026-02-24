@@ -48,7 +48,8 @@ extension UIFont {
         case body2_16_R
         case body3_14_R
         case body4_12_R
-        case body5_10_R
+        case body5_11_R
+        case body6_10_R
         
         var weight: NotoSansWeight {
             switch self {
@@ -56,7 +57,7 @@ extension UIFont {
                 return .bold
             case .title1_22_SB, .title2_20_SB, .title3_16_SB, .title4_14_SB:
                 return .semibold
-            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_10_R:
+            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_11_R, .body6_10_R:
                 return .regular
             }
         }
@@ -69,7 +70,8 @@ extension UIFont {
             case .head3_16_B, .title3_16_SB, .body2_16_R:    return 16
             case .head4_14_B, .title4_14_SB, .body3_14_R:    return 14
             case .body4_12_R:   return 12
-            case .body5_10_R:   return 10
+            case .body5_11_R:   return 11
+            case .body6_10_R:   return 10
             }
         }
         
@@ -79,7 +81,7 @@ extension UIFont {
         
         var letterSpacingPercent: CGFloat {
             switch self {
-            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_10_R:
+            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_11_R, .body6_10_R:
                 return -0.5
             default:
                 return -1.0
@@ -88,7 +90,7 @@ extension UIFont {
         
         var lineHeightPercent: CGFloat {
             switch self {
-            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_10_R:
+            case .body1_18_R, .body2_16_R, .body3_14_R, .body4_12_R, .body5_11_R, .body6_10_R:
                 return 130
             default:
                 return 140
@@ -110,5 +112,6 @@ extension UIFont {
     static var body2_16_R: UIFont { NotoSans.body2_16_R.font }
     static var body3_14_R: UIFont { NotoSans.body3_14_R.font }
     static var body4_12_R: UIFont { NotoSans.body4_12_R.font }
-    static var body5_10_R: UIFont { NotoSans.body5_10_R.font }
+    static var body5_11_R: UIFont { NotoSans.body5_11_R.font }
+    static var body6_10_R: UIFont { NotoSans.body6_10_R.font }
 }

@@ -26,7 +26,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     private let textField = TextField(type: .parent(.totalName))
     private let inviteView = InviteCodeView()
     
-    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
         $0.configure(title: "시작하기")
         $0.isEnabled = false
     }

@@ -78,7 +78,7 @@ final class DailyJourneyTimeView: BaseUIView {
             if text.contains("~") || text.contains(":") || text.rangeOfCharacter(from: .decimalDigits) != nil {
                 label.setTypo(.body3_14_R, text: text)
             } else {
-                label.setTypo(.body5_10_R, text: text)
+                label.setTypo(.body6_10_R, text: text)
             }
             timeStackView.addArrangedSubview(label)
         }

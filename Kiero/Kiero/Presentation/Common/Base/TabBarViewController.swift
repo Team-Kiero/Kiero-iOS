@@ -20,6 +20,18 @@ protocol TabBarReselectRefreshable {
 
 public final class TabBarViewController: UITabBarController {
     
+    public override var selectedIndex: Int {
+        didSet {
+            updateCustomTabBarSelection()
+        }
+    }
+    
+    public override var selectedViewController: UIViewController? {
+        didSet {
+            updateCustomTabBarSelection()
+        }
+    }
+    
     private let factory: ViewControllerFactory
     private let isParent: Bool
     
@@ -45,6 +57,13 @@ public final class TabBarViewController: UITabBarController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.delegate = self
+    }
+    
+    private func updateCustomTabBarSelection() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.customTabBar.updateSelection(self.selectedIndex)
+        }
     }
     
     private func setStyle() {

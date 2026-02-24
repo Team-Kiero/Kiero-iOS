@@ -33,7 +33,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private let lastNameTextField = TextField(type: .parent(.lastName))
     private let firstNameTextField = TextField(type: .parent(.firstName))
     
-    private let generateButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
+    private let generateButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
         $0.configure(title: "초대코드 생성")
         $0.isEnabled = false
     }

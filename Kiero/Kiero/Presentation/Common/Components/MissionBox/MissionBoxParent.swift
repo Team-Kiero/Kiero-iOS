@@ -90,6 +90,6 @@ final class MissionBoxParent: UIView {
     
     func configure(name: String, reward: Int) {
         titleLabel.setTypo(.title3_16_SB, text: name)
-        rewardLabel.setTypo(.body5_10_R, text: "\(reward) 개")
+        rewardLabel.setTypo(.body6_10_R, text: "\(reward) 개")
     }
 }

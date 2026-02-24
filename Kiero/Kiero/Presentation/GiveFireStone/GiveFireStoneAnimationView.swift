@@ -62,7 +62,7 @@ final class GiveFireStoneAnimationView: BaseUIView {
     private let nameLabel = UILabel().then {
         $0.textColor = .white
         $0.textAlignment = .center
-        $0.setTypo(.body5_10_R, text: "꾸비")
+        $0.setTypo(.body6_10_R, text: "꾸비")
     }
     
     // MARK: - Life Cycle

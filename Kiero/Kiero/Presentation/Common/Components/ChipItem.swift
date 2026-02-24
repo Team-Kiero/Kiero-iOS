@@ -46,7 +46,7 @@ final class ChipItem: UIView {
         var font: UIFont.NotoSans {
             switch self {
             case .usedCoinChip:
-                return .body5_10_R
+                return .body6_10_R
             default:
                 return .body3_14_R
             }

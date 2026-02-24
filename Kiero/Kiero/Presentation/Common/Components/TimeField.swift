@@ -23,7 +23,7 @@ final class TimeField: UIView {
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
-        $0.setTypo(.body5_10_R, text: "시작")
+        $0.setTypo(.body6_10_R, text: "시작")
     }
     
     private let timeLabel = UILabel().then {
