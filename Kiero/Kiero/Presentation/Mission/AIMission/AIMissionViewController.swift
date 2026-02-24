@@ -47,7 +47,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         $0.isHidden = true
     }
     
-    private let addMissionButton = CTAButton(style: .main).then {
+    private let addMissionButton = CTAButton(style: .main, size: .large).then {
         $0.configure(title: "분석하고 미션추가하기")
     }
     
