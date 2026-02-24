@@ -36,8 +36,7 @@ final class Toast {
         parentView.addSubview(toastView)
         
         toastView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(sideInset)
-            $0.height.equalTo(49)
+            $0.centerX.equalToSuperview()
             
             if useSafeArea {
                 $0.bottom.equalTo(parentView.safeAreaLayoutGuide).inset(bottomInset)
@@ -79,7 +78,7 @@ private final class ToastView: UIView {
     // MARK: - UI Components
     
     private let messageLabel = UILabel().then {
-        $0.textColor = .gray900
+        $0.textColor = .schedule1
         $0.textAlignment = .center
         $0.numberOfLines = 1
     }
@@ -100,8 +99,8 @@ private final class ToastView: UIView {
     // MARK: - Setup Methods
     
     private func setStyle() {
-        self.backgroundColor = .schedule1
-        self.layer.cornerRadius = 12
+        self.backgroundColor = .gray800
+        self.layer.cornerRadius = 18.5
         self.clipsToBounds = true
         self.alpha = 0.0
     }
@@ -113,7 +112,12 @@ private final class ToastView: UIView {
     private func setLayout() {
         messageLabel.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(16)
+            $0.top.bottom.equalToSuperview().inset(10)
             $0.centerY.equalToSuperview()
+        }
+        
+        self.snp.makeConstraints {
+            $0.height.equalTo(37)
         }
     }
     
