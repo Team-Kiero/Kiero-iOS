@@ -10,9 +10,26 @@ import Foundation
 final class TokenRefresher {
     
     static let shared = TokenRefresher()
+    private var refreshTask: Task<Void, Error>?
+    private var refreshAllTask: Task<Void, Error>?
     private init() {}
     
     func refreshAccessToken() async throws {
+        if let task = refreshTask {
+            return try await task.value
+        }
+        
+        let task = Task {
+            try await performRefreshAccessToken()
+        }
+        
+        refreshTask = task
+        defer { refreshTask = nil }
+        
+        try await task.value
+    }
+    
+    private func performRefreshAccessToken() async throws {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
             TokenManager.shared.clearTokens()
             throw NetworkError.clientError(statusCode: 401)
@@ -36,16 +53,28 @@ final class TokenRefresher {
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
         
-        do {
-            let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
-            guard let tokenData = decoded.data else { throw NetworkError.noData }
-            TokenManager.shared.saveAccessToken(tokenData.accessToken)
-        } catch {
-            throw NetworkError.responseDecodingError
-        }
+        let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
+        guard let tokenData = decoded.data else { throw NetworkError.noData }
+        
+        TokenManager.shared.saveAccessToken(tokenData.accessToken)
     }
     
     func refreshAllTokens() async throws {
+        if let task = refreshAllTask {
+            return try await task.value
+        }
+        
+        let task = Task {
+            try await performRefreshAllTokens()
+        }
+        
+        refreshAllTask = task
+        defer { refreshAllTask = nil }
+        
+        try await task.value
+    }
+    
+    private func performRefreshAllTokens() async throws {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
             TokenManager.shared.clearAll()
             throw NetworkError.clientError(statusCode: 401)
@@ -69,18 +98,16 @@ final class TokenRefresher {
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
         
-        do {
-            let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
-            guard let tokenData = decoded.data else { throw NetworkError.noData }
-            TokenManager.shared.saveAccessToken(tokenData.accessToken)
-        } catch {
-            throw NetworkError.responseDecodingError
-        }
+        let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
+        guard let tokenData = decoded.data else { throw NetworkError.noData }
+        
+        TokenManager.shared.saveAccessToken(tokenData.accessToken)
         
         guard let newRefresh = extractCookieValue(from: http, cookieName: "refreshToken") else {
             TokenManager.shared.clearAll()
             throw NetworkError.responseDecodingError
         }
+        
         TokenManager.shared.saveRefreshToken(newRefresh)
     }
     
