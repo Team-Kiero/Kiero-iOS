@@ -93,7 +93,6 @@ final class GiveFireStoneResultView: BaseUIView {
     // MARK: - Configuration
     
     func configure(coin: Int, stones: [String]) {
-        //        let stoneNames = stones.map { mapStoneName($0) }.joined(separator: ", ")
         
         let lines: [String]
         let highlightKeywords: [String]
