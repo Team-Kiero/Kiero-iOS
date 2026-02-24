@@ -18,6 +18,10 @@
 		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
+		AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B372F4C5C20007319A0 /* KingfisherWebP */; };
+		AEF67B3A2F4C5C46007319A0 /* KingfisherWebP in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B392F4C5C46007319A0 /* KingfisherWebP */; };
+		AEF67B502F4C6C41007319A0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B4F2F4C6C41007319A0 /* Lottie */; };
+		AEF67B522F4C6C53007319A0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B512F4C6C53007319A0 /* Lottie */; };
 		F689777E2F18102D004D5783 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D52F123F0D007B1EE4 /* KakaoSDK */; };
 		F689777F2F18102D004D5783 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */; };
 		F68977802F18102D004D5783 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F6B018512F136542007B1EE4 /* CombineMoya */; };
@@ -71,9 +75,11 @@
 				2455DCE22F23628F00836E3D /* KakaoSDKUser in Frameworks */,
 				2455DCE32F23628F00836E3D /* KakaoSDK in Frameworks */,
 				2455DCE42F23628F00836E3D /* SnapKit in Frameworks */,
+				AEF67B522F4C6C53007319A0 /* Lottie in Frameworks */,
 				2455DCE52F23628F00836E3D /* Then in Frameworks */,
 				2455DCE62F23628F00836E3D /* Moya in Frameworks */,
 				2455DCE72F23628F00836E3D /* KakaoSDKAuth in Frameworks */,
+				AEF67B3A2F4C5C46007319A0 /* KingfisherWebP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,9 +92,11 @@
 				F689777F2F18102D004D5783 /* KakaoSDKUser in Frameworks */,
 				F689777E2F18102D004D5783 /* KakaoSDK in Frameworks */,
 				24DF523F2F0A6487007146AC /* SnapKit in Frameworks */,
+				AEF67B502F4C6C41007319A0 /* Lottie in Frameworks */,
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
 				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 				F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */,
+				AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -148,6 +156,8 @@
 				2455DCDA2F23628F00836E3D /* KakaoSDKUser */,
 				2455DCDB2F23628F00836E3D /* CombineMoya */,
 				2455DCDC2F23628F00836E3D /* Kingfisher */,
+				AEF67B392F4C5C46007319A0 /* KingfisherWebP */,
+				AEF67B512F4C6C53007319A0 /* Lottie */,
 			);
 			productName = Kiero;
 			productReference = 2455DCEC2F23628F00836E3D /* Kiero_Child.app */;
@@ -178,6 +188,8 @@
 				F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */,
 				F6B018512F136542007B1EE4 /* CombineMoya */,
 				F6B01F162F1779EC007B1EE4 /* Kingfisher */,
+				AEF67B372F4C5C20007319A0 /* KingfisherWebP */,
+				AEF67B4F2F4C6C41007319A0 /* Lottie */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero_Parent.app */;
@@ -213,6 +225,8 @@
 				249C64182F0FA1F50016D6B7 /* XCRemoteSwiftPackageReference "Moya" */,
 				F6B015D42F123F0D007B1EE4 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
 				F6B01F152F1779EC007B1EE4 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */,
+				AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -612,6 +626,22 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yeatse/KingfisherWebP.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.2;
+			};
+		};
+		AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
 		F6B015D42F123F0D007B1EE4 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
@@ -685,6 +715,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */;
 			productName = Then;
+		};
+		AEF67B372F4C5C20007319A0 /* KingfisherWebP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */;
+			productName = KingfisherWebP;
+		};
+		AEF67B392F4C5C46007319A0 /* KingfisherWebP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */;
+			productName = KingfisherWebP;
+		};
+		AEF67B4F2F4C6C41007319A0 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		AEF67B512F4C6C53007319A0 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
 		};
 		F6B015D52F123F0D007B1EE4 /* KakaoSDK */ = {
 			isa = XCSwiftPackageProductDependency;

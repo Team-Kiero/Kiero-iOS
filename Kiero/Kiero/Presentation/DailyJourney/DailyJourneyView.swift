@@ -10,6 +10,7 @@ import Combine
 import ImageIO
 
 import Kingfisher
+import KingfisherWebP
 import SnapKit
 import Then
 
@@ -98,8 +99,8 @@ final class DailyJourneyView: BaseUIView {
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
         }
-        
-        loadIntroGif()
+
+        loadIntroWebP()
     }
     
     override func setLayout() {
@@ -144,11 +145,21 @@ final class DailyJourneyView: BaseUIView {
         }
     }
     
-    private func loadIntroGif() {
-        if let url = Bundle.main.url(forResource: "intro_1", withExtension: "gif") {
-            kkubiCharacterImageView.kf.setImage(with: url)
+    private func loadIntroWebP() {
+        if let url = Bundle.main.url(forResource: "kkubi_intro", withExtension: "webp") {
+            
+            let processor = WebPProcessor.default
+            let serializer = WebPSerializer.default
+            
+            kkubiCharacterImageView.kf.setImage(
+                with: url,
+                options: [
+                    .processor(processor),
+                    .cacheSerializer(serializer)
+                ]
+            )
         } else {
-            print("⚠️ gif 파일을 Bundle에서 찾을 수 없습니다.")
+            print("⚠️ webp 파일을 Bundle에서 찾을 수 없습니다.")
         }
     }
     

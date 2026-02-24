@@ -1,5 +1,5 @@
 {
-  "originHash" : "5becedac6bdf7808f4483132c4a3e13c0707bba6c94c8921d8142ca35d470466",
+  "originHash" : "315dc0a6e3159a261bb9b0622c8c19bd3bf2d299c3519f87e1dc4d312dd54c8a",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -26,6 +26,33 @@
       "state" : {
         "revision" : "d30a5fad881137e2267f96a8e3fc35c58999bb94",
         "version" : "8.6.2"
+      }
+    },
+    {
+      "identity" : "kingfisherwebp",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/yeatse/KingfisherWebP.git",
+      "state" : {
+        "revision" : "917513a49391052d94da59697aae0e65c68d35bc",
+        "version" : "1.7.2"
+      }
+    },
+    {
+      "identity" : "libwebp-xcode",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SDWebImage/libwebp-Xcode.git",
+      "state" : {
+        "revision" : "0d60654eeefd5d7d2bef3835804892c40225e8b2",
+        "version" : "1.5.0"
+      }
+    },
+    {
+      "identity" : "lottie-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/airbnb/lottie-ios.git",
+      "state" : {
+        "revision" : "0cb03fd7564d27345bcd96144b811e56212949c6",
+        "version" : "4.6.0"
       }
     },
     {

@@ -154,7 +154,7 @@ final class NotificationFeed: UIView {
         downButton.addTarget(self, action: #selector(didTapToggle), for: .touchUpInside)
     }
     
-    // MARK: - Congifuration
+    // MARK: - Configuration
     
     func configure(_ state: State) {
         downButton.isHidden = true

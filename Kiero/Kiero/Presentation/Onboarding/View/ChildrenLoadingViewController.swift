@@ -7,7 +7,7 @@
 
 import UIKit
 
-import Kingfisher
+import Lottie
 import SnapKit
 import Then
 
@@ -15,10 +15,14 @@ final class ChildrenLoadingViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     
-    private let skeletonView = UIImageView()
+    private let skeletonView = LottieAnimationView(name: "kieroSkeleton").then {
+        $0.contentMode = .scaleAspectFit
+        $0.loopMode = .loop
+        $0.animationSpeed = 1.0
+    }
     
     override func setStyle() {
-        skeletonView.kf.setImage(with: Bundle.main.url(forResource: "kieroSkeleton", withExtension: "gif"))
+        skeletonView.play()
     }
     
     override func setUI() {

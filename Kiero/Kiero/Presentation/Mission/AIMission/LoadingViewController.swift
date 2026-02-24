@@ -8,6 +8,7 @@
 import UIKit
 
 import Kingfisher
+import KingfisherWebP
 import SnapKit
 import Then
 
@@ -38,7 +39,7 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setGIFImage()
+        setWebPImage()
     }
     
     // MARK: - Setup Methods
@@ -78,11 +79,19 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
             .store(in: &cancellables)
     }
     
-    private func setGIFImage() {
-        if let url = Bundle.main.url(forResource: "parent", withExtension: "gif") {
-            let resource = LocalFileImageDataProvider(fileURL: url)
-            characterImageView.kf.setImage(with: resource)
-        }
+    private func setWebPImage() {
+        guard let url = Bundle.main.url(forResource: "parent", withExtension: "webp") else { return }
+        
+        let processor = WebPProcessor.default
+        let serializer = WebPSerializer.default
+        
+        characterImageView.kf.setImage(
+            with: url,
+            options: [
+                .processor(processor),
+                .cacheSerializer(serializer)
+            ]
+        )
     }
 }
 
