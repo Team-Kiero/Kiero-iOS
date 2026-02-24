@@ -29,6 +29,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private var nextCursor: String? = nil
     private var canLoadMore: Bool { nextCursor != nil }
     private var cachedChildName: String = ""
+    private var expandedKeys = Set<String>()
     private var seenKeys = Set<String>()
     private var sseStarted = false
     
@@ -318,12 +319,19 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 coinEarned: item.metadata.amount ?? 0
             )
         case .schedule:
+            let key = makeDedupKey(
+                eventType: item.eventType,
+                occurredAt: item.occurredAt,
+                metadata: item.metadata
+            )
+            
             return .finishSchedule(
+                key: key,
                 time: time,
                 childName: childName,
                 schedule: item.metadata.content ?? "",
                 proofImageUrl: item.metadata.imageUrl,
-                isExpanded: false
+                isExpanded: expandedKeys.contains(key)
             )
         case .coupon:
             return .useCoupon(
@@ -360,6 +368,15 @@ extension NotificationFeedViewModel {
     func toggleExpansion(at indexPath: IndexPath) {
         guard sections.indices.contains(indexPath.section),
               sections[indexPath.section].items.indices.contains(indexPath.row) else { return }
+        
+        let before = sections[indexPath.section].items[indexPath.row]
+        if case let .finishSchedule(key, _, _, _, _, isExpanded) = before{
+            if isExpanded {
+                expandedKeys.remove(key)
+            } else {
+                expandedKeys.insert(key)
+            }
+        }
         
         sections[indexPath.section].items[indexPath.row].toggleExpanded()
         sectionsSubject.send(sections)
