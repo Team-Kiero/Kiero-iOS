@@ -17,7 +17,7 @@ final class DayItem: BaseUIView {
     }
 
     func configure(day: String, isToday: Bool) {
-        dayLabel.setTypo(.body5_10_R, text: day)
+        dayLabel.setTypo(.body6_10_R, text: day)
         dayLabel.textColor = isToday ? .main : .gray100
     }
 
