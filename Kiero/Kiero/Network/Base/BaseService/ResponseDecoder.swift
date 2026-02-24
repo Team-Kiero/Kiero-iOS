@@ -14,6 +14,10 @@ struct ResponseDecoder {
         statusCode: Int
     ) throws -> Response {
         
+        if statusCode == 401 {
+            throw NetworkError.clientError(statusCode: 401)
+        }
+
         if (400...499).contains(statusCode) {
             if let message = try? JSONDecoder().decode(ErrorResponse.self, from: data).message {
                 throw NetworkError.codeError(message)
