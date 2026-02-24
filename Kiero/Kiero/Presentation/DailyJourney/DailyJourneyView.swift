@@ -56,7 +56,7 @@ final class DailyJourneyView: BaseUIView {
             1.0
         ] as [NSNumber]
         gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
-        gradientLayer.endPoint   = CGPoint(x: 1.0, y: 1.0)
+        gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
         
         $0.layer.addSublayer(gradientLayer)
     }
