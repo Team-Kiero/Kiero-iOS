@@ -33,7 +33,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     private let noSF = SpeechField(type: .no)
     
-    private let startButton = CTAButton(style: .main, size: .large).then {
+    private let startButton = CTAButton(style: .main, size: .h49).then {
         $0.configure(title: "시작해보자!")
         $0.alpha = 0
     }

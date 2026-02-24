@@ -71,7 +71,7 @@ final class DailyJourneyView: BaseUIView {
     
     private let speechField = SpeechField(type: .gray)
     
-    let verifyPhotoButton = CTAButton(style: .gray100, size: .large).then {
+    let verifyPhotoButton = CTAButton(style: .gray100, size: .h49).then {
         $0.configure(
             title: "인증하고 불조각 받기",
             icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)

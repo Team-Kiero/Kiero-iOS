@@ -34,22 +34,22 @@ final class CTAButton: UIButton {
     }
     
     enum Size {
-        case large
-        case medium
-        case small
+        case h49
+        case h45
+        case h40
         
         var height: CGFloat {
             switch self {
-            case .large: return 49
-            case .medium: return 45
-            case .small: return 40
+            case .h49: return 49
+            case .h45: return 45
+            case .h40: return 40
             }
         }
         
         var typo: UIFont.NotoSans {
             switch self {
-            case .large, .medium: return .title3_16_SB
-            case .small: return .title4_14_SB
+            case .h49, .h45: return .title3_16_SB
+            case .h40: return .title4_14_SB
             }
         }
     }

@@ -31,7 +31,7 @@ final class InviteCodeView: UIView {
         $0.textColor = .kBlack
     }
     
-    private let copyButton = CTAButton(style: .black, size: .medium).then {
+    private let copyButton = CTAButton(style: .black, size: .h45).then {
         $0.configure(title: "복사하기", icon: .icCopy)
     }
     
