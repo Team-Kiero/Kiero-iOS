@@ -119,8 +119,7 @@ final class SpeechField: UIView {
         }
 
         nameLabel.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(
-                UIEdgeInsets(top: 2, left: 10, bottom: 2, right: 12))
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 2, left: 10, bottom: 2, right: 12))
         }
         
         containerView.snp.makeConstraints {
