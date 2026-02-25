@@ -5,15 +5,26 @@
 //  Created by 안치욱 on 1/15/26.
 //
 
-import Combine
-import UIKit
+import Foundation
 
 protocol ServiceFactory {
+    // Auth
     func makeKakaoAuthService() -> KakaoAuthServiceType
+
+    // Schedule
     func makeScheduleService() -> ScheduleServiceType
-    func makeAIMissionService() -> AIMissionServiceType
-    func makeWishWellService() -> WishWellServiceType
+    func makeAddScheduleService() -> AddScheduleServiceType
+
+    // Notification
     func makeNotificationFeedService() -> FeedServiceType
+
+    // Mission
+    func makeMissionService() -> MissionServiceType
+    func makeWriteMissionService() -> WriteMissionServiceType
+    func makeAIMissionService() -> AIMissionServiceType
+
+    // WishWell
+    func makeWishWellService() -> WishWellServiceType
 }
 
 protocol KakaoAuthServiceType {
