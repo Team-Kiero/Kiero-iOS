@@ -5,24 +5,26 @@
 //  Created by 신혜연 on 1/15/26.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class WriteMissionViewModel: BaseViewModel {
     
     private let service: WriteMissionServiceType
-    let childId: Int
+    private let context: AppContextProviding
     
     let isMissionAddSuccess = PassthroughSubject<Mission, Never>()
 
-    init(service: WriteMissionServiceType, childId: Int) {
+    init(service: WriteMissionServiceType, context: AppContextProviding) {
         self.service = service
-        self.childId = childId
+        self.context = context
         super.init()
     }
     
     func createMission(name: String, reward: Int, dueAt: String) {
         let request = WriteMissionRequestDTO(name: name, reward: reward, dueAt: dueAt)
+        
+        let childId = context.selectedChildId
         
         service.postMission(childId: childId, request: request)
             .sink { completion in

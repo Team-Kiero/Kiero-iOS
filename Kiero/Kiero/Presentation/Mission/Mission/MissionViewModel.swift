@@ -11,15 +11,18 @@ import Combine
 final class MissionViewModel: BaseViewModel {
     
     @Published var missionGroups: [MissionGroupDTO] = []
-    private let service: MissionServiceType
     
-    init(service: MissionServiceType) {
+    private let service: MissionServiceType
+    private let context: AppContextProviding
+    
+    init(service: MissionServiceType, context: AppContextProviding) {
         self.service = service
+        self.context = context
         super.init()
     }
     
     func fetchMissions() {
-        let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let selectedChildId = context.selectedChildId
         let childId = selectedChildId == 0 ? nil : selectedChildId
         
         service.fetchMissions(childId: childId)
@@ -54,7 +57,7 @@ final class MissionViewModel: BaseViewModel {
     }
     
     func addMission(_ mission: Mission) {
-        print("🚀 새로운 미션 추가 시도: \(mission.name)")
         fetchMissions()
+        print("🚀 새로운 미션 추가 시도: \(mission.name)")
     }
 }

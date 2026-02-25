@@ -5,12 +5,13 @@
 //  Created by 신혜연 on 1/13/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 final class AddScheduleViewModel: BaseViewModel {
     private let service: AddScheduleServiceType
-    private let childId: Int
+    private let context: AppContextProviding
+
     var scheduleList: [Schedule] = []
     var isFireLit: Bool = false
     
@@ -18,9 +19,9 @@ final class AddScheduleViewModel: BaseViewModel {
     let errorMessage = PassthroughSubject<String, Never>()
     let defaultColor = PassthroughSubject<UIColor, Never>()
 
-    init(service: AddScheduleServiceType, childId: Int) {
+    init(service: AddScheduleServiceType, context: AppContextProviding) {
         self.service = service
-        self.childId = childId
+        self.context = context
         super.init()
     }
 
@@ -45,7 +46,7 @@ final class AddScheduleViewModel: BaseViewModel {
         
         print("📡 [Service] 일정 저장 요청 시작")
         
-        service.postSchedule(childId: self.childId, request: request)
+        service.postSchedule(childId: context.selectedChildId, request: request)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 guard let self = self else { return }
@@ -72,7 +73,7 @@ final class AddScheduleViewModel: BaseViewModel {
     }
     
     func fetchDefaultColor() {
-        service.fetchDefaultColor(childId: childId)
+        service.fetchDefaultColor(childId: context.selectedChildId)
             .sink { _ in } receiveValue: { [weak self] response in
                 let colorMapping: [String: UIColor] = [
                     "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,

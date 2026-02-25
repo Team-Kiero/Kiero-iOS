@@ -5,14 +5,16 @@
 //  Created by 신혜연 on 1/12/26.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Properties
     
     private let service: ScheduleServiceType
+    private let context: AppContextProviding
+    
     private let childId = CurrentValueSubject<Int, Never>(0)
     
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
@@ -37,11 +39,17 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Life Cycle
     
-    init(service: ScheduleServiceType, childId: Int) {
+    init(service: ScheduleServiceType, context: AppContextProviding) {
         self.service = service
+        self.context = context
         super.init()
         
-        fetchInitialChildId()
+        let saved = context.selectedChildId
+        if saved != 0 {
+            childId.send(saved)
+        } else {
+            fetchInitialChildId()
+        }
     }
     
     private func fetchInitialChildId() {
@@ -49,7 +57,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             .sink { _ in } receiveValue: { [weak self] children in
                 if let firstChildId = children.first?.childId {
                     self?.childId.send(firstChildId)
-                    UserDefaults.standard.set(firstChildId, forKey: "selectedChildId")
+                    self?.context.setSelectedChildId(firstChildId)
                     print("📍 [저장 완료] childId \(firstChildId)를 UserDefaults에 저장했습니다.")
                 }
             }
