@@ -127,7 +127,7 @@ final class ChipItem: UIView {
         
         contentStackView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(12)
+            $0.horizontalEdges.equalToSuperview().inset(8)
         }
         
         iconImageView.snp.makeConstraints {
