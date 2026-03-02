@@ -12,13 +12,17 @@ struct MyPageView: View {
     @StateObject private var viewModel = MyPageViewModel()
     
     @State private var showDialog: Bool = false
+<<<<<<< HEAD
     @State private var hasNotification: Bool = false
+=======
+>>>>>>> origin/feat/#194-myPage
     
     var body: some View {
         ZStack {
             Color.kBlack.ignoresSafeArea()
             
             VStack {
+<<<<<<< HEAD
                 NavigationBarWrapper(
                     type: .main(title: "마이페이지"),
                     isNotificationActive: hasNotification,
@@ -31,6 +35,9 @@ struct MyPageView: View {
                 .padding(.bottom, 16)
                 .padding(.top, 13)
                 .padding(.horizontal, -16)
+=======
+                //TODO: - 네비게이션 바 연결
+>>>>>>> origin/feat/#194-myPage
                 
                 HStack(spacing: 9) {
                     
