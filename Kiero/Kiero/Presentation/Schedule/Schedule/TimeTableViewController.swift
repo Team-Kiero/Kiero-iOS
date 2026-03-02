@@ -1,5 +1,5 @@
 //
-//  ScheduleChildViewController.swift
+//  TimeTableViewController.swift
 //  Kiero
 //
 //  Created by 신혜연 on 1/15/26.
@@ -11,7 +11,7 @@ import Combine
 import SnapKit
 import Then
 
-final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
+final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - Properties
     
@@ -113,7 +113,7 @@ final class ScheduleChildViewController: BaseViewController<ScheduleViewModel> {
     }
 }
 
-extension ScheduleChildViewController: ScrollToTopAvailable {
+extension TimeTableViewController: ScrollToTopAvailable {
     func scrollToTop() {
         DispatchQueue.main.async { [weak self] in
             self?.scheduleView.timeTableView.scrollToTop()

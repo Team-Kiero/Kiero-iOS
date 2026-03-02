@@ -77,8 +77,8 @@ extension AppDIContainer {
         return ScheduleViewController(viewModel: viewModel, diContainer: self)
     }
     
-    func makeScheduleChildViewController(viewModel: ScheduleViewModel) -> ScheduleChildViewController {
-        return ScheduleChildViewController(viewModel: viewModel, diContainer: self)
+    func makeTimeTableViewController(viewModel: ScheduleViewModel) -> TimeTableViewController {
+        return TimeTableViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeAddScheduleViewController() -> UIViewController {
