@@ -18,8 +18,8 @@ final class WeeklyTimeTableView: BaseUIView {
     private let startHour = 8
     private let endHour = 21
     
-    // TODO: 데이터 주입
     private var daysDates: [Date] = []
+    var onScheduleTap: ((Schedule) -> Void)?
     
     // MARK: - UI Components
     
@@ -239,15 +239,17 @@ final class WeeklyTimeTableView: BaseUIView {
         let cardWidth: CGFloat = 44
         let spacing: CGFloat = 3
         
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
         guard let dateString = schedule.date,
-              let scheduleDate = formatter.date(from: dateString) else { return }
+              let scheduleDate = dateString.toDate() else { return }
         
-        let calendar = Calendar.current
-        if let dayIndex = daysDates.firstIndex(where: { calendar.isDate($0, inSameDayAs: scheduleDate) }) {
+        if let dayIndex = daysDates.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: scheduleDate) }) {
             
             let card = ScheduleCardView(name: schedule.name, color: actualColor)
+            
+            card.tapAction = { [weak self] in
+                self?.onScheduleTap?(schedule)
+            }
+            
             cardContainerView.addSubview(card)
             
             card.snp.makeConstraints {

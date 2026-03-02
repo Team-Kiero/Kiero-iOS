@@ -55,6 +55,9 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         
         scheduleView.pagingHeader.onLeftButtonTapped = { prevWeek.send(()) }
         scheduleView.pagingHeader.onRightButtonTapped = { nextWeek.send(()) }
+        scheduleView.timeTableView.onScheduleTap = { [weak self] schedule in
+            self?.presentScheduleDetail(schedule)
+        }
         
         let input = ScheduleViewModel.Input(
             viewDidLoad: Just(()).eraseToAnyPublisher(),
@@ -110,6 +113,34 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
     
     func updateWeeklyDates(_ dates: [Date]) {
         scheduleView.timeTableView.updateDaysDates(dates)
+    }
+    
+    private func presentScheduleDetail(_ schedule: Schedule) {
+        let timeRange = "\(schedule.startTime.toShortTime) - \(schedule.endTime.toShortTime)"
+        
+        let detailData = DetailModel(
+            title: schedule.name,
+            type: .schedule(
+                isRecurring: schedule.isRecurring,
+                date: schedule.date,
+                days: schedule.dayOfWeek,
+                time: timeRange
+            )
+        )
+        
+        let bottomSheet = DetailBottomSheet(data: detailData)
+        
+        bottomSheet.onEditTap = { [weak self] in
+            print("수정하기 클릭됨: \(schedule.name)")
+            // self?.presentEditSchedule(schedule)
+        }
+        
+        bottomSheet.onDeleteTap = { [weak self] in
+            print("삭제하기 클릭됨: \(schedule.name)")
+            // self?.viewModel?.deleteSchedule(id: schedule.id)
+        }
+        
+        self.present(bottomSheet, animated: false)
     }
 }
 
