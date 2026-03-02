@@ -56,7 +56,7 @@ struct DailyJourneyScheduleTimeView: View {
 
 #Preview {
     ZStack {
-        Color.black
+        Color.kBlack
         VStack(spacing: 20) {
             DailyJourneyScheduleTimeView(startTime: "16:00", endTime: "17:00", isOngoing: true, status: "PENDING")
             DailyJourneyScheduleTimeView(startTime: "16:00", endTime: "17:00", isOngoing: false, status: "COMPLETE")
