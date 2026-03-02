@@ -9,24 +9,16 @@ import Foundation
 
 struct ScheduleResponseDTO: Decodable {
     let isFireLit: Bool
-    let recurringSchedules: [RecurringScheduleDTO]
-    let normalSchedules: [NormalScheduleDTO]
+    let items: [ScheduleItemDTO]
 }
 
-struct RecurringScheduleDTO: Decodable {
-    let startTime: String
-    let endTime: String
-    let name: String
-    let colorCode: String
-    let dayOfWeek: String
-}
-
-struct NormalScheduleDTO: Decodable {
-    let startTime: String
-    let endTime: String
-    let name: String
-    let colorCode: String
+struct ScheduleItemDTO: Decodable {
+    let scheduleId: Int
     let date: String
+    let startTime: String
+    let endTime: String
+    let name: String
+    let colorCode: String
 }
 
 struct ChildResponseDTO: Decodable {
@@ -34,24 +26,11 @@ struct ChildResponseDTO: Decodable {
     let childLastName: String
     let childFirstName: String
 }
-
 extension ScheduleResponseDTO {
     func toEntity() -> [Schedule] {
-        let recurring = recurringSchedules.map {
+        return items.map {
             Schedule(
-                name: $0.name,
-                isRecurring: true,
-                startTime: $0.startTime,
-                endTime: $0.endTime,
-                scheduleColor: "SCHEDULE1",
-                colorCode: $0.colorCode,
-                dayOfWeek: $0.dayOfWeek,
-                date: nil
-            )
-        }
-        
-        let normal = normalSchedules.map {
-            Schedule(
+                id: $0.scheduleId,
                 name: $0.name,
                 isRecurring: false,
                 startTime: $0.startTime,
@@ -62,7 +41,6 @@ extension ScheduleResponseDTO {
                 date: $0.date
             )
         }
-        
-        return recurring + normal
     }
 }
+

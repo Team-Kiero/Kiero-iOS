@@ -355,6 +355,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     let targetDate = weekDates[firstIndex]
                     
                     let actualSchedule = Schedule(
+                        id: Int(Date().timeIntervalSince1970 * 1000),
                         name: name,
                         isRecurring: isRecurring,
                         startTime: startTime,
