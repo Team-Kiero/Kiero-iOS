@@ -10,11 +10,26 @@ import SwiftUI
 struct DailyJourneyScheduleInfoView: View {
     let name: String
     let isOngoing: Bool
+    let status: String
+    
+    private var nameColor: Color {
+        switch (isOngoing, status) {
+        case (true, _),
+            (_, "PENDING"):
+            return .white
+        default:
+            return .white.opacity(0.5)
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 10) {
             Text(name)
                 .font(Font(UIFont.head3_16_B))
-                .foregroundStyle(isOngoing ? .white : .gray900)
+                .foregroundStyle(nameColor)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .layoutPriority(1)
             
             if isOngoing {
                 Text("진행중")
@@ -30,9 +45,8 @@ struct DailyJourneyScheduleInfoView: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(Color.main, lineWidth: 1)
                     )
+                    .fixedSize()
             }
-            
-            Spacer()
         }
     }
 }
@@ -41,10 +55,27 @@ struct DailyJourneyScheduleInfoView: View {
 
 #Preview {
     ZStack {
-        Color.black
+        Color.kBlack
+        
         VStack(spacing: 20) {
-            DailyJourneyScheduleInfoView(name: "꾸비 성수팝업 가기", isOngoing: true)
-            DailyJourneyScheduleInfoView(name: "임상헌 마라탕먹기", isOngoing: false)
+            DailyJourneyScheduleInfoView(
+                name: "수학 학원 가기",
+                isOngoing: true,
+                status: "ONGOING"
+            )
+            
+            DailyJourneyScheduleInfoView(
+                name: "영어 숙제 하기",
+                isOngoing: false,
+                status: "PENDING"
+            )
+            
+            DailyJourneyScheduleInfoView(
+                name: "미술 숙제 제출하기",
+                isOngoing: false,
+                status: "COMPLETED"
+            )
         }
+        .padding()
     }
 }
