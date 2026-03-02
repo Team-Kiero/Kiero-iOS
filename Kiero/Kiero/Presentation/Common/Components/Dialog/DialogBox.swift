@@ -19,6 +19,8 @@ final class DialogBox: UIView {
         case logout
         case wishWell(title: String, coin: String)
         case nextJourney
+        case deleteSchedule(title: String)
+        case editSchedule(title: String)
         
         var title: String {
             switch self {
@@ -30,6 +32,8 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
+            case .deleteSchedule(let title), .editSchedule(let title):
+                return title
             }
         }
         
@@ -43,6 +47,10 @@ final class DialogBox: UIView {
                 return "금화를 사용해 소원을 빌까?"
             case .nextJourney:
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
+            case .deleteSchedule:
+                return "삭제하시겠습니까?"
+            case .editSchedule:
+                return "저장하시겠습니까?"
             }
         }
         
@@ -78,6 +86,38 @@ final class DialogBox: UIView {
     
     private let closeButton = UIButton().then {
         $0.setImage(UIImage(resource: .icClose), for: .normal)
+    }
+    
+    private let onlyThisOption = UIButton(configuration: .plain()).then {
+        $0.configurationUpdateHandler = { button in
+            var config = button.configuration
+            let isSelected = button.isSelected
+            
+            config?.image = isSelected ? UIImage(resource: .btnCheck) : UIImage(resource: .btnUncheck)
+            config?.baseForegroundColor = isSelected ? .main : .gray400
+            config?.background.backgroundColor = .clear
+            button.configuration = config
+        }
+        $0.isSelected = true
+    }
+    
+    private let followingOption = UIButton(configuration: .plain()).then {
+        $0.configurationUpdateHandler = { button in
+            var config = button.configuration
+            let isSelected = button.isSelected
+            
+            config?.image = isSelected ? UIImage(resource: .btnCheck) : UIImage(resource: .btnUncheck)
+            config?.baseForegroundColor = isSelected ? .main : .gray400
+            
+            config?.background.backgroundColor = .clear
+            button.configuration = config
+        }
+    }
+    
+    private let optionStack = UIStackView().then {
+        $0.axis = .horizontal
+        $0.alignment = .center
+        $0.isHidden = true
     }
     
     private let titleLabel = UILabel().then {
@@ -161,7 +201,7 @@ final class DialogBox: UIView {
         addSubviews(container, closeButton)
         
         coinStack.addArrangedSubviews(coinIcon, coinLabel)
-        contentStack.addArrangedSubviews(titleLabel, coinStack, messageLabel)
+        contentStack.addArrangedSubviews(titleLabel, coinStack, messageLabel, optionStack)
         buttonStack.addArrangedSubviews(cancelButton, confirmButton)
         container.addArrangedSubviews(contentStack, buttonStack)
         
@@ -198,6 +238,10 @@ final class DialogBox: UIView {
             $0.height.equalTo(49)
         }
         
+        optionStack.snp.makeConstraints {
+            $0.width.equalToSuperview()
+        }
+        
         messageLabel.setContentCompressionResistancePriority(.required, for: .vertical)
         messageLabel.setContentHuggingPriority(.required, for: .vertical)
     }
@@ -208,6 +252,8 @@ final class DialogBox: UIView {
         closeButton.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
         cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
         confirmButton.addTarget(self, action: #selector(didTapConfirm), for: .touchUpInside)
+        onlyThisOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
+        followingOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
     }
     
     // MARK: - Configure
@@ -234,14 +280,70 @@ final class DialogBox: UIView {
             
             contentStack.setCustomSpacing(15, after: titleLabel)
         }
+        
+        switch state {
+        case .deleteSchedule:
+            optionStack.isHidden = false
+            optionStack.distribution = .equalSpacing
+            
+            let spacer = UIView()
+            followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
+            followingOption.isSelected = true
+            
+            optionStack.addArrangedSubviews(spacer, followingOption)
+            contentStack.setCustomSpacing(12, after: messageLabel)
+            
+        case .editSchedule:
+            optionStack.isHidden = false
+            optionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+            onlyThisOption.setConfigurationTypo(.body4_12_R, text: " 이번 일정만 포함")
+            followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 일정 포함")
+            optionStack.addArrangedSubviews(onlyThisOption, followingOption)
+            contentStack.setCustomSpacing(12, after: messageLabel)
+            
+        default:
+            optionStack.isHidden = true
+            contentStack.setCustomSpacing(0, after: messageLabel)
+        }
+        
+        updateOptionColors()
+    }
+    
+    private func updateOptionColors() {
+        if !onlyThisOption.isHidden {
+            let color: UIColor = onlyThisOption.isSelected ? .main : .gray400
+            onlyThisOption.setTitleColor(color, for: .normal)
+        }
+        
+        if !followingOption.isHidden {
+            let color: UIColor = followingOption.isSelected ? .main : .gray400
+            followingOption.setTitleColor(color, for: .normal)
+        }
     }
     
     // MARK: - Actions
     
     @objc
     private func didTapClose() { onTapClose?() }
+    
     @objc
     private func didTapCancel() { onTapCancel?() }
+    
     @objc
     private func didTapConfirm() { onTapConfirm?() }
+    
+    @objc
+    private func didTapOption(_ sender: UIButton) {
+        if optionStack.arrangedSubviews.contains(where: { !($0 is UIButton) }) {
+            sender.isSelected.toggle()
+        } else {
+            if sender == onlyThisOption {
+                onlyThisOption.isSelected = true
+                followingOption.isSelected = false
+            } else {
+                onlyThisOption.isSelected = false
+                followingOption.isSelected = true
+            }
+        }
+    }
 }

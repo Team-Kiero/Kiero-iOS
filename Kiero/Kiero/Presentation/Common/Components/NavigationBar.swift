@@ -14,6 +14,7 @@ enum NavigationBarType {
     case back(title: String)         // <
     case closeDone(title: String)    // x v
     case close(title: String)        // x
+    case main(title: String? = nil)
 }
 
 final class NavigationBar: UIView {
@@ -27,6 +28,13 @@ final class NavigationBar: UIView {
         didSet {
             rightButton.isEnabled = isRightButtonEnabled
             rightButton.alpha = isRightButtonEnabled ? 1.0 : 0.5
+        }
+    }
+    
+    var isNotificationActive: Bool = false {
+        didSet {
+            let icon = isNotificationActive ? UIImage(resource: .icAlarmPin) : UIImage(resource: .icAlarm)
+            rightButton.setImage(icon, for: .normal)
         }
     }
     
@@ -45,9 +53,15 @@ final class NavigationBar: UIView {
         $0.tintColor = .white
     }
     
+    private let logoImageView = UIImageView().then {
+        $0.image = UIImage(resource: .kieroLogo)
+        $0.contentMode = .scaleAspectFit
+        $0.isHidden = true
+    }
+    
     // MARK: - Life Cycle
     
-    init(type: NavigationBarType, backgroundColor: UIColor = .kBlack) {
+    init(type: NavigationBarType, backgroundColor: UIColor = .clear) {
         super.init(frame: .zero)
         self.backgroundColor = backgroundColor
         
@@ -64,7 +78,7 @@ final class NavigationBar: UIView {
     // MARK: - Setup Methods
     
     private func setUI() {
-        addSubviews(leftButton, titleLabel, rightButton)
+        addSubviews(leftButton, titleLabel, rightButton, logoImageView)
     }
     
     private func setLayout() {
@@ -83,9 +97,25 @@ final class NavigationBar: UIView {
             $0.centerY.equalToSuperview()
             $0.size.equalTo(24)
         }
+        
+        logoImageView.snp.makeConstraints {
+            $0.leading.equalToSuperview().offset(10)
+            $0.centerY.equalToSuperview()
+            $0.height.equalTo(23)
+        }
     }
     
     private func configure(with type: NavigationBarType) {
+        titleLabel.snp.remakeConstraints { $0.center.equalToSuperview() }
+        titleLabel.isHidden = false
+        logoImageView.isHidden = true
+        leftButton.isHidden = false
+        rightButton.isHidden = false
+        
+        rightButton.snp.updateConstraints {
+            $0.trailing.equalToSuperview().inset(8)
+        }
+        
         switch type {
         case .back(let title):
             titleLabel.setTypo(.head2_20_B, text: title)
@@ -102,6 +132,28 @@ final class NavigationBar: UIView {
             titleLabel.setTypo(.head2_20_B, text: title)
             leftButton.setImage(UIImage(resource: .icCloseLight), for: .normal)
             rightButton.isHidden = true
+            
+        case .main(let title):
+            leftButton.isHidden = true
+            
+            rightButton.snp.updateConstraints {
+                $0.trailing.equalToSuperview().inset(16)
+            }
+            
+            if let title = title {
+                titleLabel.setTypo(.head2_20_B, text: title)
+                titleLabel.snp.remakeConstraints {
+                    $0.leading.equalToSuperview().offset(16)
+                    $0.centerY.equalToSuperview()
+                }
+                logoImageView.isHidden = true
+            } else {
+                logoImageView.isHidden = false
+                titleLabel.isHidden = true
+            }
+            
+            let alarmIcon = isNotificationActive ? UIImage(resource: .icAlarmPin) : UIImage(resource: .icAlarm)
+            rightButton.setImage(alarmIcon, for: .normal)
         }
     }
     

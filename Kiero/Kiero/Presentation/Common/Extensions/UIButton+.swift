@@ -34,4 +34,32 @@ extension UIButton {
         
         self.setAttributedTitle(attributedString, for: state)
     }
+    
+    func setConfigurationTypo(_ style: UIFont.NotoSans, text: String) {
+        var container = AttributeContainer()
+        
+        let lineHeight = style.size * (style.lineHeightPercent / 100.0)
+        let baselineOffset = (lineHeight - style.font.lineHeight) / 4.0
+        let kernValue = style.size * (style.letterSpacingPercent / 100.0)
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = lineHeight
+        paragraphStyle.maximumLineHeight = lineHeight
+        paragraphStyle.alignment = .center
+        
+        container.font = style.font
+        container.baselineOffset = baselineOffset
+        container.kern = kernValue
+        
+        let attributedString = AttributedString(text, attributes: container)
+        
+        if var config = self.configuration {
+            config.attributedTitle = attributedString
+            self.configuration = config
+        } else {
+            var config = UIButton.Configuration.plain()
+            config.attributedTitle = attributedString
+            self.configuration = config
+        }
+    }
 }
