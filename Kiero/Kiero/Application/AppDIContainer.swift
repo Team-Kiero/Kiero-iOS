@@ -181,3 +181,30 @@ extension AppDIContainer {
         return WishWellViewController(viewModel: viewModel, diContainer: self)
     }
 }
+
+// MARK: - TodayStatus
+
+extension AppDIContainer {
+    func makeTodayStatusViewController() -> UIViewController {
+        let viewModel = TodayStatusViewModel()
+        return TodayStatusViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
+// MARK: - Reward
+
+extension AppDIContainer {
+    func makeRewardViewController() -> UIViewController {
+        let viewModel = RewardViewModel()
+        return RewardViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
+// MARK: - MyPage
+
+extension AppDIContainer {
+    func makeMyPageViewController() -> UIViewController {
+        let viewModel = MyPageViewModel()
+        return MyPageViewController(viewModel: viewModel, diContainer: self)
+    }
+}
