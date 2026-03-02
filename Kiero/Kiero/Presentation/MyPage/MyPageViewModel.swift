@@ -2,12 +2,16 @@
 //  MyPageViewModel.swift
 //  Kiero
 //
-//  Created by 신혜연 on 3/2/26.
+//  Created by 정윤아 on 3/2/26.
 //
 
-import UIKit
 import Combine
+import SwiftUI
 
-final class MyPageViewModel: BaseViewModel {
+final class MyPageViewModel: ObservableObject {
+    
+    @Published var userName: String = "꾸비"
+    @Published var userImage: String? = nil
+    @Published var connectedChild: Int = 0
     
 }
