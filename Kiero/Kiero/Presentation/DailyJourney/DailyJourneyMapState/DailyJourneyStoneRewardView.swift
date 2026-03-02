@@ -94,7 +94,7 @@ struct DailyJourneyStoneRewardView: View {
 
 #Preview {
     ZStack {
-        Color.black
+        Color.kBlack
         HStack(spacing: 24) {
             DailyJourneyStoneRewardView(stoneType: "COURAGE", status: "COMPLETE")
             DailyJourneyStoneRewardView(stoneType: "GRIT", status: "FAILED")
