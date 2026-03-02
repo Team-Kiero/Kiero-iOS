@@ -12,13 +12,25 @@ struct MyPageView: View {
     @StateObject private var viewModel = MyPageViewModel()
     
     @State private var showDialog: Bool = false
+    @State private var hasNotification: Bool = false
     
     var body: some View {
         ZStack {
             Color.kBlack.ignoresSafeArea()
             
             VStack {
-                //TODO: - 네비게이션 바 연결
+                NavigationBarWrapper(
+                    type: .main(title: "마이페이지"),
+                    isNotificationActive: hasNotification,
+                    onRightTap: {
+                        //TODO: - 알림 피드와 연결
+                        print("알림피드로 이동")
+                    }
+                )
+                .frame(height: 45)
+                .padding(.bottom, 16)
+                .padding(.top, 13)
+                .padding(.horizontal, -16)
                 
                 HStack(spacing: 9) {
                     
