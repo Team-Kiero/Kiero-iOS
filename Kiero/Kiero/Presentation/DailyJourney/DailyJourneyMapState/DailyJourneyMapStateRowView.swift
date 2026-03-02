@@ -63,7 +63,6 @@ struct DailyJourneyMapStateRowView: View {
         Color.kBlack
         VStack (spacing: 50) {
             
-            // 완료
             DailyJourneyMapStateRowView(
                 name: "임상헌 마라탕먹기",
                 startTime: "13:00",
@@ -73,7 +72,6 @@ struct DailyJourneyMapStateRowView: View {
                 status: "FAILED",
             )
             
-            // 진행중 + 획득
             DailyJourneyMapStateRowView(
                 name: "꾸비 성수팝업 가기",
                 startTime: "16:00",
@@ -83,7 +81,6 @@ struct DailyJourneyMapStateRowView: View {
                 status: "COMPLETE",
             )
             
-            // 예정
             DailyJourneyMapStateRowView(
                 name: "원준이 생일파티",
                 startTime: "19:00",
