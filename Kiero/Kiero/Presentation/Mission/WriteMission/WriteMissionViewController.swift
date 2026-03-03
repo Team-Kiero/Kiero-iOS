@@ -84,7 +84,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         navigationBar.leftButtonAction = { [weak self] in
-            self?.dismiss(animated: true)
+            self?.navigationController?.popViewController(animated: true)
         }
         
         navigationBar.rightButtonAction = { [weak self] in
@@ -114,7 +114,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
                 guard let self = self else { return }
                 Toast.show(message: "미션이 등록되었어요.", bottomInset: 90)
                 self.onMissionAdded?(mission)
-                self.dismiss(animated: true)
+                self.navigationController?.popViewController(animated: true)
             }
             .store(in: &cancellables)
     }
