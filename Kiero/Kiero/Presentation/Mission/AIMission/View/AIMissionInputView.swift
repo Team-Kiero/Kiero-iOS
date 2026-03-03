@@ -102,9 +102,13 @@ extension AIMissionInputView: UITextViewDelegate {
         onTextChanged?(textView.text)
         
         let fixedWidth = textView.frame.size.width
+        guard fixedWidth > 0 else { return }
+        
         let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
 
         let maxHeight = self.frame.height - 36 - titleLabel.frame.height - 12 - 16
+        guard maxHeight > 0 else { return }
+        
         let targetHeight = min(max(376, newSize.height), maxHeight)
         
         textViewHeightConstraint?.update(offset: targetHeight)
