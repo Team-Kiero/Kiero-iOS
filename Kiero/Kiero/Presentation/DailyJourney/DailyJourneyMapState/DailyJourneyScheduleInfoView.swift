@@ -50,32 +50,3 @@ struct DailyJourneyScheduleInfoView: View {
         }
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    ZStack {
-        Color.kBlack
-        
-        VStack(spacing: 20) {
-            DailyJourneyScheduleInfoView(
-                name: "수학 학원 가기",
-                isOngoing: true,
-                status: "ONGOING"
-            )
-            
-            DailyJourneyScheduleInfoView(
-                name: "영어 숙제 하기",
-                isOngoing: false,
-                status: "PENDING"
-            )
-            
-            DailyJourneyScheduleInfoView(
-                name: "미술 숙제 제출하기",
-                isOngoing: false,
-                status: "COMPLETED"
-            )
-        }
-        .padding()
-    }
-}

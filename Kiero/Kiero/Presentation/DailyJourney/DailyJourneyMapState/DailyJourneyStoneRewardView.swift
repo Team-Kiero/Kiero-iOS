@@ -89,16 +89,3 @@ struct DailyJourneyStoneRewardView: View {
         }
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    ZStack {
-        Color.kBlack
-        HStack(spacing: 24) {
-            DailyJourneyStoneRewardView(stoneType: "COURAGE", status: "COMPLETE")
-            DailyJourneyStoneRewardView(stoneType: "GRIT", status: "FAILED")
-            DailyJourneyStoneRewardView(stoneType: "WISDOM", status: "PENDING")
-        }
-    }
-}

@@ -51,16 +51,3 @@ struct DailyJourneyScheduleTimeView: View {
         + Text(" \(timeString)").font(Font(UIFont.body4_12_R))
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    ZStack {
-        Color.kBlack
-        VStack(spacing: 20) {
-            DailyJourneyScheduleTimeView(startTime: "16:00", endTime: "17:00", isOngoing: true, status: "PENDING")
-            DailyJourneyScheduleTimeView(startTime: "16:00", endTime: "17:00", isOngoing: false, status: "COMPLETE")
-            DailyJourneyScheduleTimeView(startTime: "19:00", endTime: "19:30", isOngoing: false, status: "PENDING")
-        }
-    }
-}

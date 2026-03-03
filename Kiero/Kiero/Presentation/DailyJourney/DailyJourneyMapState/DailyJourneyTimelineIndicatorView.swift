@@ -46,17 +46,3 @@ struct DailyJourneyTimelineIndicatorView: View {
         }
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    ZStack {
-        Color.kBlack
-        
-        VStack(spacing: 40) {
-            DailyJourneyTimelineIndicatorView(isOngoing: true, status: "PENDING")
-            DailyJourneyTimelineIndicatorView(isOngoing: false, status: "PENDING")
-            DailyJourneyTimelineIndicatorView(isOngoing: false, status: "COMPLETE")
-        }
-    }
-}

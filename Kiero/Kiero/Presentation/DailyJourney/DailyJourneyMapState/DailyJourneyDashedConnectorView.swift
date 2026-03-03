@@ -74,18 +74,3 @@ private struct Line: Shape {
         return path
     }
 }
-
-// MARK: - Preview
-
-#Preview {
-    ZStack {
-        Color.kBlack
-        
-        VStack(spacing: 40) {
-            DailyJourneyDashedConnectorView(
-                isOngoing: true,
-                status: "COMPLETE"
-            )
-        }
-    }
-}
