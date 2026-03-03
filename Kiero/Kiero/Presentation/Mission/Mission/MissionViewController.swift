@@ -111,7 +111,14 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         let bottomSheet = DetailBottomSheet(data: detailData)
         
         bottomSheet.onEditTap = { [weak self] in
-            print("미션 수정하기 클릭됨: \(mission.name)")
+            guard let self = self else { return }
+            guard let editVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else {
+                return
+            }
+
+            editVC.configureEditMode(with: mission, dueAt: dueAt)
+            editVC.hidesBottomBarWhenPushed = true
+            self.navigationController?.pushViewController(editVC, animated: true)
         }
         
         bottomSheet.onDeleteTap = { [weak self] in

@@ -15,11 +15,12 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     // MARK: - Properties
     
     private var currentSelectedDate: Date = Date()
+    private var editMissionId: Int?
     var onMissionAdded: ((Mission) -> Void)?
     
     // MARK: - UI Components
     
-    private let navigationBar = NavigationBar(type: .closeDone(title: "미션 추가"))
+    private lazy var navigationBar = NavigationBar(type: .closeDone(title: "미션 추가"))
     
     private let titleTextField = UITextField().then {
         $0.font = .body1_18_R
@@ -98,7 +99,11 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
             let rewardValue = self.rewardView.selectedReward
             let dueAtStr = self.currentSelectedDate.toString(format: "yyyy-MM-dd")
             
-            self.viewModel?.createMission(name: title, reward: rewardValue, dueAt: dueAtStr)
+            if let missionId = self.editMissionId {
+                self.viewModel?.updateMission(id: missionId, name: title, reward: rewardValue, dueAt: dueAtStr)
+            } else {
+                self.viewModel?.createMission(name: title, reward: rewardValue, dueAt: dueAtStr)
+            }
             self.view.endEditing(true)
         }
         
@@ -111,12 +116,21 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         viewModel?.isMissionAddSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] mission in
-                guard let self = self else { return }
-                Toast.show(message: "미션이 등록되었어요.", bottomInset: 90)
-                self.onMissionAdded?(mission)
-                self.navigationController?.popViewController(animated: true)
+                self?.handleSuccess(message: "미션이 등록되었어요.")
             }
             .store(in: &cancellables)
+
+        viewModel?.isMissionUpdateSuccess
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.handleSuccess(message: "미션이 수정되었어요.")
+            }
+            .store(in: &cancellables)
+    }
+
+    private func handleSuccess(message: String) {
+        Toast.show(message: message, bottomInset: 90)
+        self.navigationController?.popViewController(animated: true)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -153,6 +167,18 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     
     private func updateDeadlineDate(with date: Date) {
         deadlineView.dateLabel.text = date.toFullDateString
+    }
+    
+    func configureEditMode(with mission: MissionItemDTO, dueAt: String) {
+        self.editMissionId = mission.id
+        self.currentSelectedDate = dueAt.toDate(format: "yyyy-MM-dd") ?? Date()
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.navigationBar.setTitle("미션 수정")
+            self?.titleTextField.text = mission.name
+            self?.rewardView.selectReward(mission.reward)
+            self?.updateDeadlineDate(with: self?.currentSelectedDate ?? Date())
+        }
     }
 }
 
