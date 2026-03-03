@@ -28,6 +28,13 @@ final class RewardViewModel: ObservableObject {
         fetchRewards()
     }
     
+    func addReward(title: String, cost: Int) {
+        let nextId = (rewards.map { $0.id }.max() ?? 0) + 1
+        let newReward = Reward(id: nextId, title: title, cost: cost)
+        
+        self.rewards.insert(newReward, at: 0)
+    }
+    
     func fetchRewards() {
         // TODO: 서버 통신 로직
         self.rewards = [
@@ -36,11 +43,17 @@ final class RewardViewModel: ObservableObject {
             Reward(id: 3, title: "게임 1시간 추가", cost: 100),
             Reward(id: 4, title: "친구랑 놀러가기", cost: 500),
             Reward(id: 5, title: "새 신발 사기", cost: 3000),
-            Reward(id: 6, title: "새 신발 사기", cost: 3000),
-            Reward(id: 7, title: "새 신발 사기", cost: 3000),
-            Reward(id: 8, title: "새 신발 사기", cost: 3000),
-            Reward(id: 9, title: "새 신발 사기", cost: 3000)
+            Reward(id: 6, title: "새 신발 사기", cost: 300),
+            Reward(id: 7, title: "새 신발 사기", cost: 300),
+            Reward(id: 8, title: "새 신발 사기", cost: 300),
+            Reward(id: 9, title: "새 신발 사기", cost: 300)
         ]
+    }
+    
+    func updateReward(id: Int, title: String, cost: Int) {
+        if let index = rewards.firstIndex(where: { $0.id == id }) {
+            self.rewards[index] = Reward(id: id, title: title, cost: cost)
+        }
     }
     
     func deleteReward() {
