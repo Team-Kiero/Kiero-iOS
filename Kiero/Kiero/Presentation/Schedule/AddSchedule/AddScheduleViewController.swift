@@ -283,27 +283,33 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             if isRecurring {
                 let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
                 let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
+                let firstOrderDate = weekDates[selectedIndices[0]].toString(format: "yyyy-MM-dd")
                 
-                viewModel?.addSchedule(
+                let requestDTO = AddScheduleRequestDTO(
                     name: title,
                     isRecurring: true,
+                    firstOrderDate: firstOrderDate,
                     startTime: startTimeStr,
                     endTime: endTimeStr,
-                    color: colorCode,
+                    scheduleColor: colorCode,
                     dayOfWeek: dayOfWeekStr,
                     dates: nil
                 )
+                viewModel?.addSchedule(request: requestDTO)
             } else {
                 let datesStr = selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
-                viewModel?.addSchedule(
+                
+                let requestDTO = AddScheduleRequestDTO(
                     name: title,
                     isRecurring: false,
+                    firstOrderDate: nil,
                     startTime: startTimeStr,
                     endTime: endTimeStr,
-                    color: colorCode,
+                    scheduleColor: colorCode,
                     dayOfWeek: nil,
                     dates: datesStr
                 )
+                viewModel?.addSchedule(request: requestDTO)
             }
             
             self.view.endEditing(true)
