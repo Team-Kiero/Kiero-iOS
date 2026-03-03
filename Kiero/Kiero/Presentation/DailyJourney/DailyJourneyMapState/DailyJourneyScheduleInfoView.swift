@@ -13,11 +13,9 @@ struct DailyJourneyScheduleInfoView: View {
     let status: String
     
     private var nameColor: Color {
-        switch (isOngoing, status) {
-        case (true, _),
-            (_, "PENDING"):
+        if isOngoing || status == "PENDING" {
             return .white
-        default:
+        } else {
             return .white.opacity(0.5)
         }
     }
