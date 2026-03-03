@@ -10,6 +10,7 @@ import SwiftUI
 struct RewardView: View {
     @StateObject private var viewModel = RewardViewModel()
     @State private var hasNotification: Bool = false
+    @State private var isShowingAddView: Bool = false
     
     let columns = [
         GridItem(.flexible(), spacing: 13),
@@ -45,12 +46,17 @@ struct RewardView: View {
             FloatingButtonWrapper(
                 type: .schedule,
                 action: {
-                    print("보상 추가 버튼 클릭")
+                    isShowingAddView = true
                 }
             )
             .frame(width: 53, height: 53)
             .padding(.top, 596)
             .padding(.leading, 291)
+        }
+        .fullScreenCover(isPresented: $isShowingAddView) {
+            RewardEditView(mode: .add) { title, cost in
+                viewModel.addReward(title: title, cost: cost)
+            }
         }
     }
 }
