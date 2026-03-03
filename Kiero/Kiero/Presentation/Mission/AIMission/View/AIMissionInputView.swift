@@ -73,8 +73,7 @@ final class AIMissionInputView: BaseUIView {
         textView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(12)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.bottom.lessThanOrEqualTo(self.snp.bottom)
-            self.textViewHeightConstraint = $0.height.equalTo(376).constraint
+            textViewHeightConstraint = $0.height.equalTo(376).constraint
         }
         
         placeholderLabel.snp.makeConstraints {
@@ -103,20 +102,15 @@ extension AIMissionInputView: UITextViewDelegate {
         onTextChanged?(textView.text)
         
         let fixedWidth = textView.frame.size.width
-        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
-        
-        let targetHeight = max(376, newSize.height)
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
+
+        let maxHeight = self.frame.height - 36 - titleLabel.frame.height - 12 - 16
+        let targetHeight = min(max(376, newSize.height), maxHeight)
         
         textViewHeightConstraint?.update(offset: targetHeight)
+        textView.isScrollEnabled = newSize.height > maxHeight
         
         self.layoutIfNeeded()
-        
-        let isScrollable = textView.frame.height < newSize.height
-        textView.isScrollEnabled = isScrollable
-        
-        if isScrollable {
-            textView.scrollRangeToVisible(textView.selectedRange)
-        }
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
