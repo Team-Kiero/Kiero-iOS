@@ -35,8 +35,6 @@ struct DailyJourneyTimelineIndicatorView: View {
                 Image("ic_indicator_rectangle")
                     .renderingMode(.template)
                     .foregroundColor(iconColor)
-                    .shadow(color: hasGlow ? .main : .clear, radius: hasGlow ? 4 : 0)
-                    .shadow(color: hasGlow ? .main.opacity(0.5) : .clear, radius: hasGlow ? 8 : 0)
                     .frame(height: 0, alignment: .bottom)
                     .offset(y: 2)
             }
@@ -44,7 +42,7 @@ struct DailyJourneyTimelineIndicatorView: View {
             Image("ic_indicator_star")
                 .renderingMode(.template)
                 .foregroundColor(iconColor)
-                .shadow(color: hasGlow ? .main : .clear, radius: hasGlow ? 4 : 0)
+                .shadow(color: hasGlow ? .main : .clear, radius: hasGlow ? 2 : 0)
         }
     }
 }
