@@ -17,6 +17,7 @@ final class MissionView: BaseUIView {
     private var groupedMissions: [String: [Mission]] = [:]
     private var sortedDates: [String] = []
     private var missionGroups: [MissionGroupDTO] = []
+    var onMissionTap: ((MissionItemDTO, String) -> Void)?
     
     // MARK: - UI Components
     
@@ -147,6 +148,13 @@ extension MissionView: UITableViewDelegate {
         }
         
         return headerView
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let group = missionGroups[indexPath.section]
+        let mission = group.missions[indexPath.row]
+        
+        onMissionTap?(mission, group.dueAt)
     }
 }
 

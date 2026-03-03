@@ -76,6 +76,10 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         floatingButton.tapAction = { [weak self] in
             self?.showFloatingMenu()
         }
+        
+        missionView.onMissionTap = { [weak self] mission, dueAt in
+            self?.presentMissionDetail(mission, dueAt: dueAt)
+        }
     }
     
     private func showFloatingMenu() {
@@ -93,6 +97,28 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         
         menuView.show(in: window)
         window.bringSubviewToFront(floatingButton)
+    }
+    
+    private func presentMissionDetail(_ mission: MissionItemDTO, dueAt: String) {
+        let detailData = DetailModel(
+            title: mission.name,
+            type: .mission(
+                dueAt: dueAt,
+                reward: mission.reward
+            )
+        )
+        
+        let bottomSheet = DetailBottomSheet(data: detailData)
+        
+        bottomSheet.onEditTap = { [weak self] in
+            print("미션 수정하기 클릭됨: \(mission.name)")
+        }
+        
+        bottomSheet.onDeleteTap = { [weak self] in
+            print("미션 삭제하기 클릭됨: \(mission.name)")
+        }
+        
+        self.present(bottomSheet, animated: false)
     }
     
     override func bindViewModel() {
