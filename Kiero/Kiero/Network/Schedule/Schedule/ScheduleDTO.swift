@@ -15,6 +15,7 @@ struct ScheduleResponseDTO: Decodable {
 struct ScheduleItemDTO: Decodable {
     let scheduleId: Int
     let date: String
+    let dayOfWeek: [String]
     let startTime: String
     let endTime: String
     let name: String
@@ -26,21 +27,37 @@ struct ChildResponseDTO: Decodable {
     let childLastName: String
     let childFirstName: String
 }
+
 extension ScheduleResponseDTO {
     func toEntity() -> [Schedule] {
         return items.map {
-            Schedule(
+            let isRecurring = !$0.dayOfWeek.isEmpty
+            let dayOfWeekString = $0.dayOfWeek.map { koreanDay($0) }.joined(separator: ", ")
+            
+            return Schedule(
                 id: $0.scheduleId,
                 name: $0.name,
-                isRecurring: false,
+                isRecurring: isRecurring,
                 startTime: $0.startTime,
                 endTime: $0.endTime,
                 scheduleColor: "SCHEDULE1",
                 colorCode: $0.colorCode,
-                dayOfWeek: nil,
+                dayOfWeek: dayOfWeekString.isEmpty ? nil : dayOfWeekString,
                 date: $0.date
             )
         }
     }
+    
+    private func koreanDay(_ day: String) -> String {
+        switch day {
+        case "MON": return "월"
+        case "TUE": return "화"
+        case "WED": return "수"
+        case "THU": return "목"
+        case "FRI": return "금"
+        case "SAT": return "토"
+        case "SUN": return "일"
+        default: return day
+        }
+    }
 }
-
