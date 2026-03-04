@@ -14,6 +14,10 @@ final class WishWellView: BaseUIView {
     
     // MARK: - UI Component
     
+    private let emptyView = WishEmptyView().then {
+        $0.isHidden = true
+    }
+    
     private let iconImage = UIImageView().then {
         $0.contentMode = .scaleAspectFit
         $0.image = UIImage(resource: .icKidProfile)
@@ -81,7 +85,7 @@ final class WishWellView: BaseUIView {
     // MARK: - Setup Method
     
     override func setUI() {
-        addSubviews(nameStack, coinChip, container, line, wishCollectionView)
+        addSubviews(nameStack, coinChip, container, line, wishCollectionView, emptyView)
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         wishWellStack.addArrangedSubviews(wishWellIcon, wishWellLabel)
         totalStack.addArrangedSubviews(wishWellStack, wishMessage)
@@ -130,6 +134,12 @@ final class WishWellView: BaseUIView {
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().inset(100)
         }
+        
+        emptyView.snp.makeConstraints {
+            $0.top.equalTo(line.snp.bottom)
+            $0.horizontalEdges.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(100)
+        }
     }
     
     // MARK: - Configuration
@@ -137,5 +147,17 @@ final class WishWellView: BaseUIView {
     func configureUserInfo(name: String, price: Int) {
         nameLabel.setTypo(.title3_16_SB, text: name)
         coinChip.configure(style: .currentCoinChip, icon: coinImg, text: "\(price) 개")
+    }
+    
+    // MARK: - Methods
+    
+    func updateEmptyState(isEmpty: Bool) {
+        if isEmpty {
+            emptyView.isHidden = false
+            wishCollectionView.isHidden = true
+        } else {
+            emptyView.isHidden = true
+            wishCollectionView.isHidden = false
+        }
     }
 }
