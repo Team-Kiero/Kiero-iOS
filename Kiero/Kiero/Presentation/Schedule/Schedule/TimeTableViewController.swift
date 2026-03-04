@@ -95,6 +95,13 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                 Toast.show(message: message)
             }
             .store(in: &cancellables)
+        
+        viewModel.isEditSuccess
+            .receive(on: RunLoop.main)
+            .sink {
+                Toast.show(message: "일정이 수정되었어요.")
+            }
+            .store(in: &cancellables)
     }
     
     private func setAction() {

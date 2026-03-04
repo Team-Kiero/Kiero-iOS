@@ -212,7 +212,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         navigationBar.leftButtonAction = { [weak self] in
             self?.dismiss(animated: true)
         }
-
+        
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
             
@@ -269,8 +269,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 }
                 
                 if hasToday {
-                    if isFireLit || startMin < currentTimeMin {
-                        Toast.show(message: "오늘 일정은 마감되어 등록되지 않았습니다.")
+                    if startMin < currentTimeMin {
+                        Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.")
+                        return
+                    }
+                    
+                    if isFireLit {
+                        Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.")
                         return
                     }
                 }
@@ -478,16 +483,17 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         let title = "\(formatter.string(from: firstDay)) - \(formatter.string(from: lastDay))"
         
+        if isEditMode {
+            pagingHeader.configure(title: title, isLeftEnabled: false, isRightEnabled: false)
+            return
+        }
+        
         let calendar = Calendar.current
         let now = Date()
-        
         let currentWeekStart = now.daysOfWeek.first!
         let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
-        
         let maxDate = calendar.date(byAdding: .weekOfYear, value: 12, to: now)!
-        
         let isLeftEnabled = calendar.startOfDay(for: firstDay) > startOfCurrentWeek
-        
         let isRightEnabled = calendar.date(byAdding: .weekOfYear, value: 1, to: baseDate)! <= calendar.startOfDay(for: maxDate)
         
         pagingHeader.configure(title: title, isLeftEnabled: isLeftEnabled, isRightEnabled: isRightEnabled)
@@ -556,16 +562,23 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private func setupEditMode() {
         guard let schedule = editingSchedule else { return }
-        
         navigationBar.setTitle("일정 수정")
         titleTextField.text = schedule.name
-        
         repeatSwitch.isOn = schedule.isRecurring
         
         if schedule.isRecurring, let dayOfWeek = schedule.dayOfWeek {
+            if let dateStr = schedule.date {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                if let date = formatter.date(from: dateStr) {
+                    baseDate = date
+                }
+            }
+            
             let dayLabels = ["월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6]
             let indices = dayOfWeek.components(separatedBy: ", ").compactMap { dayLabels[$0.trimmingCharacters(in: .whitespaces)] }
             weekdaySelectionView.setSelectedIndices(indices)
+            updatePagingTitle()
         } else if let dateStr = schedule.date {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
@@ -597,15 +610,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             timeSelectionView.updateTime(isStart: false, time: display.string(from: end))
         }
         
-        let colorMapping: [String: UIColor] = [
-            "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
-            "SCHEDULE3": .schedule3, "SCHEDULE4": .schedule4, "SCHEDULE5": .schedule5
-        ]
-        if let color = colorMapping[schedule.scheduleColor] {
-            currentSelectedColor = color
-            selectedColorChip.isHidden = false
-            selectedColorChip.configure(with: color, isSelected: false)
-        }
+        let color = UIColor(hex: schedule.colorCode)
+        currentSelectedColor = color
+        selectedColorChip.isHidden = false
+        selectedColorChip.configure(with: color, isSelected: false)
     }
     
     private func handleEditConfirm() {
@@ -627,23 +635,64 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let dayOfWeekStr: String? = isRecurring ? selectedIndices.map { dayLabels[$0] }.joined(separator: ", ") : nil
         let datesStr: String? = isRecurring ? nil : selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
         
-        let dialog = DialogBox()
-        dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: wasRecurring))
+        let originalDayIndices: Set<Int> = {
+            guard let dayOfWeek = schedule.dayOfWeek else { return [] }
+            let dayLabelsKor = ["월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6]
+            return Set(dayOfWeek.components(separatedBy: ", ").compactMap { dayLabelsKor[$0.trimmingCharacters(in: .whitespaces)] })
+        }()
+        let currentDayIndices = Set(selectedIndices)
+        let isDayChanged = originalDayIndices != currentDayIndices
+        let isRecurringChanged = wasRecurring != isRecurring
         
-        dialog.onTapCancel = { [weak self] in
-            self?.dismiss(animated: false)
-        }
+        let shouldShowDialog = wasRecurring && !isDayChanged && !isRecurringChanged
         
-        dialog.onTapClose = { [weak self] in
-            self?.dismiss(animated: false)
-        }
-        
-        dialog.onTapConfirm = { [weak self] in
-            guard let self = self else { return }
-            self.dismiss(animated: false)
+        if shouldShowDialog {
+            let dialog = DialogBox()
+            dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: wasRecurring))
             
-            let isIncludeFollowing: Bool? = wasRecurring ? dialog.isFollowingSelected : nil
+            dialog.onTapCancel = { [weak self] in
+                self?.dismiss(animated: false)
+            }
             
+            dialog.onTapClose = { [weak self] in
+                self?.dismiss(animated: false)
+            }
+            
+            dialog.onTapConfirm = { [weak self] in
+                guard let self = self else { return }
+                self.dismiss(animated: false)
+                
+                let isIncludeFollowing: Bool? = dialog.isFollowingSelected
+                
+                let finalRequest = EditScheduleRequestDTO(
+                    name: self.titleTextField.text ?? "",
+                    isRecurring: isRecurring,
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    scheduleColor: colorCode,
+                    dayOfWeek: dayOfWeekStr,
+                    dates: datesStr,
+                    isIncludeFollowing: isIncludeFollowing
+                )
+                
+                self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false) { success in
+                    if success { self.dismiss(animated: true) }
+                }
+            }
+            
+            let overlay = UIViewController()
+            overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
+            overlay.modalPresentationStyle = .overFullScreen
+            overlay.view.addSubview(dialog)
+            
+            dialog.snp.makeConstraints {
+                $0.center.equalToSuperview()
+                $0.width.equalTo(343)
+            }
+            
+            self.present(overlay, animated: false)
+            
+        } else {
             let finalRequest = EditScheduleRequestDTO(
                 name: self.titleTextField.text ?? "",
                 isRecurring: isRecurring,
@@ -652,27 +701,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 scheduleColor: colorCode,
                 dayOfWeek: dayOfWeekStr,
                 dates: datesStr,
-                isIncludeFollowing: isIncludeFollowing
+                isIncludeFollowing: nil
             )
             
-            self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false) { success in
-                if success {
-                    self.dismiss(animated: true)
-                }
+            self.onEditConfirmed?(finalRequest, false) { success in
+                if success { self.dismiss(animated: true) }
             }
         }
-        
-        let overlay = UIViewController()
-        overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
-        overlay.modalPresentationStyle = .overFullScreen
-        overlay.view.addSubview(dialog)
-        
-        dialog.snp.makeConstraints {
-            $0.center.equalToSuperview()
-            $0.width.equalTo(343)
-        }
-        
-        self.present(overlay, animated: false)
     }
 }
 

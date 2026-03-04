@@ -240,6 +240,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                     completion(false)
                 }
             }, receiveValue: { [weak self] in
+                self?.isEditSuccess.send(())
                 self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
                 completion(true)
             })
