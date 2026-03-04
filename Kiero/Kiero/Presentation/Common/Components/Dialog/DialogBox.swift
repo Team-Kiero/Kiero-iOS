@@ -21,6 +21,7 @@ final class DialogBox: UIView {
         case nextJourney
         case deleteSchedule(title: String)
         case editSchedule(title: String)
+        case deleteReward(title: String, coin: String)
         
         var title: String {
             switch self {
@@ -33,6 +34,8 @@ final class DialogBox: UIView {
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
             case .deleteSchedule(let title), .editSchedule(let title):
+                return title
+            case .deleteReward(let title, _):
                 return title
             }
         }
@@ -47,7 +50,7 @@ final class DialogBox: UIView {
                 return "금화를 사용해 소원을 빌까?"
             case .nextJourney:
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
-            case .deleteSchedule:
+            case .deleteSchedule, .deleteReward:
                 return "삭제하시겠습니까?"
             case .editSchedule:
                 return "저장하시겠습니까?"
@@ -56,7 +59,7 @@ final class DialogBox: UIView {
         
         var coinText: String? {
             switch self {
-            case .wishWell(_, let coin):
+            case .wishWell(_, let coin), .deleteReward(_, let coin):
                 return "\(coin)개"
             default:
                 return nil
