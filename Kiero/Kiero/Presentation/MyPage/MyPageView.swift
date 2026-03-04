@@ -118,11 +118,11 @@ struct ConnectionChip: View {
     var body: some View {
         Text(count == 0 ? "연결 필요" : "\(count)명 연결됨")
             .font(Font(UIFont.body6_10_R))
-            .foregroundColor(.gray500)
+            .foregroundColor(count == 0 ? .main : .gray500 )
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.gray900)
-            .overlay(Capsule().stroke(.gray500, lineWidth: 1))
+            .overlay(Capsule().stroke(count == 0 ? .main : .gray500, lineWidth: 1))
     }
 }
 
