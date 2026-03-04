@@ -205,7 +205,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
     }
     
-    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool?) {
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) {
         service.deleteSchedule(
             scheduleId: scheduleId,
             selectedDate: selectedDate,

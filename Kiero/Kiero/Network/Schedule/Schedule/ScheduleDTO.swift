@@ -29,7 +29,7 @@ struct ChildResponseDTO: Decodable {
 }
 
 struct DeleteScheduleRequestDTO: Encodable {
-    let isIncludeFollowing: Bool?
+    let isIncludeFollowing: Bool
 }
 
 extension ScheduleResponseDTO {

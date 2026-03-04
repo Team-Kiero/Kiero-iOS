@@ -42,7 +42,7 @@ enum EndPoint {
     case fetchDefaultColor(childId: Int)
     
     // DeleteSchedule
-    case deleteSchedule(scheduleId: Int, selectedDate: String, request: DeleteScheduleRequestDTO)
+    case deleteSchedule(scheduleId: Int, selectedDate: String)
     
     // Mission
     case fetchMissions(childId: Int?)
@@ -155,7 +155,7 @@ enum EndPoint {
             return "/api/v1/feeds/\(childId)\(queryString)"
         case .completeMission(let missionId):
             return "/api/v1/missions/\(missionId)/complete"
-        case .deleteSchedule(let scheduleId, let selectedDate, _):
+        case .deleteSchedule(let scheduleId, let selectedDate):
             return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
         }
     }
