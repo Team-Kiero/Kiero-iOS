@@ -52,6 +52,7 @@ struct DailyJourneyMapStateRowView: View {
             DailyJourneyStoneRewardView(stoneType: stoneType, status: status)
                 .alignmentGuide(.titleCenter) { d in d[VerticalAlignment.center] }
         }
+        .frame(height: 79)
         .padding(.horizontal, 36)
     }
 }
