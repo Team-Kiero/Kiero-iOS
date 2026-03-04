@@ -38,7 +38,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     ).then {
         $0.onTap = {[weak self] in
             self?.showLogoutDialog {
-                self?.viewModel?.performLogout()
+                //self?.viewModel?.performLogout()
+                LogoutHelper.logoutToPickRole()
             }
         }
     }
