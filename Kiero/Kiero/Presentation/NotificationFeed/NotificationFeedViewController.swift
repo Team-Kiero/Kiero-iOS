@@ -29,7 +29,9 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.tabBarController?.delegate = self
-        contentView.updateProfile()
+        
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+        
         refreshSubject.send(())
     }
     
@@ -49,12 +51,17 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     override func bind(viewModel: NotificationFeedViewModel) {
         super.bind(viewModel: viewModel)
         
-        contentView.onProfileTapped = { [weak self] in
-            self?.showLogoutDialog {
-                self?.viewModel?.performLogout()
+        contentView.onBackTapped = { [weak self] in
+            guard let self = self else { return }
+            
+            if let navigationController = self.navigationController,
+               navigationController.viewControllers.count > 1 {
+                navigationController.popViewController(animated: true)
+            }
+            else {
+                self.dismiss(animated: true, completion: nil)
             }
         }
-        
         let input = NotificationFeedViewModel.Input(
             viewDidload: viewDidLoadSubject.eraseToAnyPublisher(),
             viewWillDisappear: viewWillDisappearSubject.eraseToAnyPublisher(),
@@ -78,18 +85,11 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
             .store(in: &cancellables)
         
         viewDidLoadSubject.send(())
-        
-        viewModel.logoutSuccess
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.navigateToPickRole()
-            }
-            .store(in: &cancellables)
     }
     
     private func updateEmptyView(isEmpty: Bool) {
         contentView.tableView.backgroundView = isEmpty ? emptyView : nil
-        contentView.tableView.separatorStyle = isEmpty ? .none : .none
+        contentView.tableView.separatorStyle = .none
     }
     
     func triggerRefresh() {
