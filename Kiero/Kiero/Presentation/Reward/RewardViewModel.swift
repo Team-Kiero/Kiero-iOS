@@ -39,10 +39,10 @@ final class RewardViewModel: ObservableObject {
         // TODO: 서버 통신 로직
         self.rewards = [
             Reward(id: 1, title: "용돈 5,000원 받기", cost: 350),
-            Reward(id: 2, title: "치킨 시켜먹기", cost: 1200),
+            Reward(id: 2, title: "치킨 시켜먹기", cost: 120),
             Reward(id: 3, title: "게임 1시간 추가", cost: 100),
             Reward(id: 4, title: "친구랑 놀러가기", cost: 500),
-            Reward(id: 5, title: "새 신발 사기", cost: 3000),
+            Reward(id: 5, title: "새 신발 사기", cost: 300),
             Reward(id: 6, title: "새 신발 사기", cost: 300),
             Reward(id: 7, title: "새 신발 사기", cost: 300),
             Reward(id: 8, title: "새 신발 사기", cost: 300),
@@ -56,13 +56,12 @@ final class RewardViewModel: ObservableObject {
         }
     }
     
-    func deleteReward() {
-        guard let reward = selectedReward else { return }
-        if let index = rewards.firstIndex(of: reward) {
+    func deleteReward(reward: Reward) {
+        if let index = rewards.firstIndex(where: { $0.id == reward.id }) {
             rewards.remove(at: index)
         }
         
-        selectedReward = nil
-        showDeleteDialog = false
+        self.showDeleteDialog = false
+        self.selectedReward = nil
     }
 }
