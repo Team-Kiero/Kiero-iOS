@@ -67,8 +67,8 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         }
         
         floatingButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(31)
-            $0.bottom.equalToSuperview().inset(119)
+            $0.trailing.equalToSuperview().inset(32)
+            $0.bottom.equalToSuperview().inset(115)
         }
     }
     
