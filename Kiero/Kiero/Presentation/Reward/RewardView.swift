@@ -12,6 +12,7 @@ struct RewardView: View {
     @State private var hasNotification: Bool = false
     @State private var isShowingAddView: Bool = false
     @State private var selectedReward: Reward?
+    @State private var isNavigatingToNotification = false
     
     let columns = [
         GridItem(.flexible(), spacing: 13),
@@ -21,11 +22,22 @@ struct RewardView: View {
     var body: some View {
         ZStack {
             Color.kBlack.ignoresSafeArea()
+            
+            NavigationLink(
+                isActive: $isNavigatingToNotification,
+                destination: {
+                    NotificationFeedWrapper()
+                        .navigationBarHidden(true)
+                        .ignoresSafeArea()
+                },
+                label: { SwiftUI.EmptyView() }
+            )
+            
             VStack {
                 NavigationBarWrapper(
                     type: .main(title: "보상"),
                     isNotificationActive: hasNotification,
-                    onRightTap: { print ("알림 탭 클릭")}
+                    onRightTap: { isNavigatingToNotification = true}
                 )
                 .frame(height: 45)
                 
