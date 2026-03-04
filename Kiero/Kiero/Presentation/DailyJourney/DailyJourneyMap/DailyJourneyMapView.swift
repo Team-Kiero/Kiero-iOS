@@ -123,7 +123,6 @@ private extension DailyJourneyMapView {
                 .padding(.bottom, 40)
             }
             .frame(height: scrollAreaHeight - 44 - bannerHeight)
-            .background(.red.opacity(0.3))
             .scrollDisabled(data.schedules.count < 6)
         }
     }
