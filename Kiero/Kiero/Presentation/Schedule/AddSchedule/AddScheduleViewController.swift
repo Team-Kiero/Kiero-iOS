@@ -36,7 +36,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private let titleTextField = UITextField().then {
         $0.font = .body1_18_R
-        $0.textColor = .white
+        $0.textColor = .gray100
         $0.returnKeyType = .done
         $0.attributedPlaceholder = NSAttributedString(
             string: "일정 이름을 입력해주세요.",
