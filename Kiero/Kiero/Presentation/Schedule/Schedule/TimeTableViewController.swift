@@ -88,6 +88,13 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
             .sink { [weak self] dates in
                 self?.scheduleView.timeTableView.updateDaysDates(dates)
             }.store(in: &cancellables)
+        
+        viewModel.editErrorMessage
+            .receive(on: RunLoop.main)
+            .sink { message in
+                Toast.show(message: message)
+            }
+            .store(in: &cancellables)
     }
     
     private func setAction() {
@@ -136,13 +143,14 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                 let editVC = AppDIContainer.shared.makeEditScheduleViewController(schedule: schedule)
                 editVC.modalPresentationStyle = .overFullScreen
                 
-                editVC.onEditConfirmed = { [weak self] request, _ in
+                editVC.onEditConfirmed = { [weak self] request, _, completion in
                     guard let self = self,
                           let selectedDate = schedule.date else { return }
                     self.viewModel?.editSchedule(
                         scheduleId: schedule.id,
                         selectedDate: selectedDate,
-                        request: request
+                        request: request,
+                        completion: completion
                     )
                 }
                 

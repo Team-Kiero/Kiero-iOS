@@ -26,7 +26,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     var isEditMode: Bool = false
     var editingSchedule: Schedule?
-    var onEditConfirmed: ((EditScheduleRequestDTO, Bool) -> Void)?
+    var onEditConfirmed: ((EditScheduleRequestDTO, Bool, @escaping (Bool) -> Void) -> Void)?
     
     // MARK: - UI Components
     
@@ -619,6 +619,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let startTimeStr = (currentStartTime ?? Date()).toString(format: "HH:mm:ss")
         let endTimeStr = (currentEndTime ?? Date()).toString(format: "HH:mm:ss")
         let isRecurring = repeatSwitch.isOn
+        let wasRecurring = schedule.isRecurring
         let weekDates = baseDate.daysOfWeek
         let selectedIndices = weekdaySelectionView.selectedIndices.sorted()
         
@@ -626,19 +627,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let dayOfWeekStr: String? = isRecurring ? selectedIndices.map { dayLabels[$0] }.joined(separator: ", ") : nil
         let datesStr: String? = isRecurring ? nil : selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
         
-        let request = EditScheduleRequestDTO(
-            name: titleTextField.text ?? "",
-            isRecurring: isRecurring,
-            startTime: startTimeStr,
-            endTime: endTimeStr,
-            scheduleColor: colorCode,
-            dayOfWeek: dayOfWeekStr,
-            dates: datesStr,
-            isIncludeFollowing: nil
-        )
-        
         let dialog = DialogBox()
-        dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: isRecurring))
+        dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: wasRecurring))
         
         dialog.onTapCancel = { [weak self] in
             self?.dismiss(animated: false)
@@ -652,7 +642,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             guard let self = self else { return }
             self.dismiss(animated: false)
             
-            let isIncludeFollowing: Bool? = isRecurring ? dialog.isFollowingSelected : nil
+            let isIncludeFollowing: Bool? = wasRecurring ? dialog.isFollowingSelected : nil
             
             let finalRequest = EditScheduleRequestDTO(
                 name: self.titleTextField.text ?? "",
@@ -665,8 +655,11 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 isIncludeFollowing: isIncludeFollowing
             )
             
-            self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false)
-            self.dismiss(animated: true)
+            self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false) { success in
+                if success {
+                    self.dismiss(animated: true)
+                }
+            }
         }
         
         let overlay = UIViewController()

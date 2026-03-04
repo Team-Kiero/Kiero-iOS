@@ -224,11 +224,11 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         .store(in: &cancellables)
     }
     
-    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) {
+    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO, completion: @escaping (Bool) -> Void) {
         service.editSchedule(scheduleId: scheduleId, selectedDate: selectedDate, request: request)
             .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { [weak self] completion in
-                if case .failure(let error) = completion {
+            .sink(receiveCompletion: { [weak self] result in
+                if case .failure(let error) = result {
                     switch error {
                     case .codeError(let message):
                         self?.editErrorMessage.send(message)
@@ -237,10 +237,11 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                     default:
                         self?.editErrorMessage.send("일정 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
                     }
+                    completion(false)
                 }
             }, receiveValue: { [weak self] in
-                self?.isEditSuccess.send(())
                 self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
+                completion(true)
             })
             .store(in: &cancellables)
     }
