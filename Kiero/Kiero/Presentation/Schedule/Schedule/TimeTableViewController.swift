@@ -136,8 +136,45 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         }
         
         bottomSheet.onDeleteTap = { [weak self] in
-            print("삭제하기 클릭됨: \(schedule.name)")
-            // self?.viewModel?.deleteSchedule(id: schedule.id)
+            guard let self else { return }
+            bottomSheet.dismiss(animated: false) {
+                let dialog = DialogBox()
+                dialog.configure(state: .deleteSchedule(title: schedule.name, isRecurring: schedule.isRecurring))
+                
+                dialog.onTapCancel = { [weak self] in
+                    self?.dismiss(animated: false)
+                }
+                
+                dialog.onTapClose = { [weak self] in
+                    self?.dismiss(animated: false)
+                }
+                
+                dialog.onTapConfirm = { [weak self] in
+                    guard let self else { return }
+                    self.dismiss(animated: false)
+                    
+                    guard let selectedDate = schedule.date else { return }
+                    let isIncludeFollowing: Bool = schedule.isRecurring ? dialog.isFollowingSelected : false
+                    
+                    self.viewModel?.deleteSchedule(
+                        scheduleId: schedule.id,
+                        selectedDate: selectedDate,
+                        isIncludeFollowing: isIncludeFollowing
+                    )
+                }
+                
+                let overlay = UIViewController()
+                overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
+                overlay.modalPresentationStyle = .overFullScreen
+                overlay.view.addSubview(dialog)
+                
+                dialog.snp.makeConstraints {
+                    $0.center.equalToSuperview()
+                    $0.width.equalTo(343)
+                }
+                
+                self.present(overlay, animated: false)
+            }
         }
         
         self.present(bottomSheet, animated: false)

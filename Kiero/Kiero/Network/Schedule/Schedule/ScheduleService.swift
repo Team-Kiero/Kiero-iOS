@@ -13,6 +13,7 @@ protocol ScheduleServiceType {
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), NetworkError>
     func deleteChildDummyData() -> AnyPublisher<Void, NetworkError>
     func logout() -> AnyPublisher<Void, NetworkError>
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool?) -> AnyPublisher<Void, NetworkError>
 }
 
 final class ScheduleService: ScheduleServiceType {
@@ -69,6 +70,24 @@ final class ScheduleService: ScheduleServiceType {
             Task {
                 do {
                     let _: EmptyResponse = try await BaseService.shared.request(endPoint: .logout)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(error as? NetworkError ?? .unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool?) -> AnyPublisher<Void, NetworkError> {
+        let endPoint = EndPoint.deleteSchedule(
+            scheduleId: scheduleId,
+            selectedDate: selectedDate,
+            request: DeleteScheduleRequestDTO(isIncludeFollowing: isIncludeFollowing)
+        )
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let _: EmptyResponse = try await BaseService.shared.request(endPoint: endPoint)
                     promise(.success(()))
                 } catch {
                     promise(.failure(error as? NetworkError ?? .unknownError))

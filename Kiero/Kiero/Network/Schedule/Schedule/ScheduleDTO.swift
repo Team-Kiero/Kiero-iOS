@@ -28,6 +28,10 @@ struct ChildResponseDTO: Decodable {
     let childFirstName: String
 }
 
+struct DeleteScheduleRequestDTO: Encodable {
+    let isIncludeFollowing: Bool?
+}
+
 extension ScheduleResponseDTO {
     func toEntity() -> [Schedule] {
         return items.map {

@@ -204,4 +204,21 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
     }
+    
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool?) {
+        service.deleteSchedule(
+            scheduleId: scheduleId,
+            selectedDate: selectedDate,
+            isIncludeFollowing: isIncludeFollowing
+        )
+        .receive(on: RunLoop.main)
+        .sink(receiveCompletion: { completion in
+            if case .failure(let error) = completion {
+                print("삭제 실패: \(error)")
+            }
+        }, receiveValue: { [weak self] in
+            self?.refreshSchedules()
+        })
+        .store(in: &cancellables)
+    }
 }

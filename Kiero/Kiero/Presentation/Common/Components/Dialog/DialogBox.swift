@@ -19,7 +19,7 @@ final class DialogBox: UIView {
         case logout
         case wishWell(title: String, coin: String)
         case nextJourney
-        case deleteSchedule(title: String)
+        case deleteSchedule(title: String, isRecurring: Bool)
         case editSchedule(title: String)
         
         var title: String {
@@ -32,7 +32,7 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
-            case .deleteSchedule(let title), .editSchedule(let title):
+            case .deleteSchedule(let title, _), .editSchedule(let title):
                 return title
             }
         }
@@ -81,6 +81,10 @@ final class DialogBox: UIView {
     var onTapClose: (() -> Void)?
     var onTapCancel: (() -> Void)?
     var onTapConfirm: (() -> Void)?
+    
+    var isFollowingSelected: Bool {
+        return followingOption.isSelected
+    }
     
     // MARK: - UI Conponents
     
@@ -282,16 +286,21 @@ final class DialogBox: UIView {
         }
         
         switch state {
-        case .deleteSchedule:
-            optionStack.isHidden = false
-            optionStack.distribution = .equalSpacing
-            
-            let spacer = UIView()
-            followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
-            followingOption.isSelected = true
-            
-            optionStack.addArrangedSubviews(spacer, followingOption)
-            contentStack.setCustomSpacing(12, after: messageLabel)
+        case .deleteSchedule(_, let isRecurring):
+            if isRecurring {
+                optionStack.isHidden = false
+                optionStack.distribution = .equalSpacing
+                
+                let spacer = UIView()
+                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
+                followingOption.isSelected = true
+                
+                optionStack.addArrangedSubviews(spacer, followingOption)
+                contentStack.setCustomSpacing(12, after: messageLabel)
+            } else {
+                optionStack.isHidden = true
+                contentStack.setCustomSpacing(0, after: messageLabel)
+            }
             
         case .editSchedule:
             optionStack.isHidden = false
