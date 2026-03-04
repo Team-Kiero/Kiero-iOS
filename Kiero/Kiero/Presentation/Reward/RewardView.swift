@@ -11,6 +11,7 @@ struct RewardView: View {
     @StateObject private var viewModel = RewardViewModel()
     @State private var hasNotification: Bool = false
     @State private var isShowingAddView: Bool = false
+    @State private var selectedReward: Reward?
     
     let columns = [
         GridItem(.flexible(), spacing: 13),
@@ -35,6 +36,16 @@ struct RewardView: View {
                         LazyVGrid(columns: columns, spacing: 13) {
                             ForEach(viewModel.rewards) { reward in
                                 RewardBox(reward: reward)
+                                    .onTapGesture {
+                                        showRewardBottomSheet(
+                                            reward: reward,
+                                            onEdit: { self.selectedReward = reward },
+                                            onDelete: {
+                                                viewModel.selectedReward = reward
+                                                viewModel.showDeleteDialog = true
+                                            }
+                                        )
+                                    }
                             }
                         }
                     }
@@ -52,10 +63,31 @@ struct RewardView: View {
             .frame(width: 53, height: 53)
             .padding(.top, 596)
             .padding(.leading, 291)
+            
+            if viewModel.showDeleteDialog, let reward = viewModel.selectedReward {
+                Color.kBlack.opacity(0.75)
+                    .ignoresSafeArea()
+                    .onTapGesture { viewModel.showDeleteDialog = false }
+                
+                DialogBoxWrapper(
+                    state: .deleteReward(title: reward.title, coin: "\(reward.cost)"),
+                    isPresented: $viewModel.showDeleteDialog,
+                    onConfirm: {
+                        viewModel.deleteReward(reward: reward)
+                    }
+                )
+                .frame(width: 327, height: 216)
+                .transition(.scale.combined(with: .opacity))
+            }
         }
         .fullScreenCover(isPresented: $isShowingAddView) {
             RewardEditView(mode: .add) { title, cost in
                 viewModel.addReward(title: title, cost: cost)
+            }
+        }
+        .fullScreenCover(item: $selectedReward) { reward in
+            RewardEditView(mode: .edit(reward)) { title, cost in
+                viewModel.updateReward(id: reward.id, title: title, cost: cost)
             }
         }
     }
