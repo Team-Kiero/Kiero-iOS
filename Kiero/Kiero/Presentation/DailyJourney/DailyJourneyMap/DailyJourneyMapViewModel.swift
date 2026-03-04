@@ -20,11 +20,9 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     }
     
     struct Output {
-        let scheduleData: AnyPublisher<DailyJourneyMapData, Never>
         let dismiss: AnyPublisher<Void, Never>
     }
         
-    private let scheduleDataSubject = PassthroughSubject<DailyJourneyMapData, Never>()
     private let dismissSubject = PassthroughSubject<Void, Never>()
         
     func transform(input: Input) -> Output {
@@ -40,14 +38,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
             }
             .store(in: &cancellables)
         
-        scheduleDataSubject
-            .sink { [weak self] data in
-                self?.scheduleData = data
-            }
-            .store(in: &cancellables)
-        
         return Output(
-            scheduleData: scheduleDataSubject.eraseToAnyPublisher(),
             dismiss: dismissSubject.eraseToAnyPublisher()
         )
     }
@@ -62,7 +53,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                     print("❌ DailyJourneyMap fetch 에러: \(error)")
                 }
             } receiveValue: { [weak self] data in
-                self?.scheduleDataSubject.send(data)
+                self?.scheduleData = data
             }
             .store(in: &cancellables)
     }
