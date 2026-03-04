@@ -131,8 +131,23 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         let bottomSheet = DetailBottomSheet(data: detailData)
         
         bottomSheet.onEditTap = { [weak self] in
-            print("수정하기 클릭됨: \(schedule.name)")
-            // self?.presentEditSchedule(schedule)
+            guard let self = self else { return }
+            bottomSheet.dismiss(animated: false) {
+                let editVC = AppDIContainer.shared.makeEditScheduleViewController(schedule: schedule)
+                editVC.modalPresentationStyle = .overFullScreen
+                
+                editVC.onEditConfirmed = { [weak self] request, _ in
+                    guard let self = self,
+                          let selectedDate = schedule.date else { return }
+                    self.viewModel?.editSchedule(
+                        scheduleId: schedule.id,
+                        selectedDate: selectedDate,
+                        request: request
+                    )
+                }
+                
+                self.present(editVC, animated: true)
+            }
         }
         
         bottomSheet.onDeleteTap = { [weak self] in

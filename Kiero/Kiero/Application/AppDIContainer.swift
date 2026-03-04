@@ -88,6 +88,13 @@ extension AppDIContainer {
         let viewModel = AddScheduleViewModel(service: service, childId: selectedChildId)
         return AddScheduleViewController(viewModel: viewModel, diContainer: self)
     }
+    
+    func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController {
+        let vc = makeAddScheduleViewController() as! AddScheduleViewController
+        vc.isEditMode = true
+        vc.editingSchedule = schedule
+        return vc
+    }
 }
 
 // MARK: - Notification

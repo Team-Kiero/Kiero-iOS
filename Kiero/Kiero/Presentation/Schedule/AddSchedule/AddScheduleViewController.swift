@@ -24,6 +24,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
     }
     
+    var isEditMode: Bool = false
+    var editingSchedule: Schedule?
+    var onEditConfirmed: ((EditScheduleRequestDTO, Bool) -> Void)?
+    
     // MARK: - UI Components
     
     private let navigationBar = NavigationBar(type: .closeDone(title: "일정 추가"))
@@ -87,10 +91,15 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setInitialTime()
+        if isEditMode {
+            setupEditMode()
+        } else {
+            setInitialTime()
+            viewModel?.fetchDefaultColor()
+        }
+        
         addTarget()
         updatePagingTitle()
-        viewModel?.fetchDefaultColor()
     }
     
     // MARK: - Setup Methods
@@ -186,6 +195,11 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
     }
     
+    func configure(with schedule: Schedule) {
+        isEditMode = true
+        editingSchedule = schedule
+    }
+    
     override func addTarget() {
         pagingHeader.onLeftButtonTapped = { [weak self] in
             self?.moveWeek(value: -1)
@@ -213,6 +227,21 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
+            let start = self.currentStartTime ?? Date()
+            let end = self.currentEndTime ?? Date()
+            let startMin = Calendar.current.component(.hour, from: start) * 60 + Calendar.current.component(.minute, from: start)
+            let endMin = Calendar.current.component(.hour, from: end) * 60 + Calendar.current.component(.minute, from: end)
+            
+            if startMin >= endMin {
+                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+                return
+            }
+            
+            if self.isEditMode {
+                self.handleEditConfirm()
+                return
+            }
+            
             let calendar = Calendar.current
             let now = Date()
             let today = calendar.startOfDay(for: now)
@@ -220,18 +249,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             let isRecurring = self.repeatSwitch.isOn
             let isFireLit = self.viewModel?.isFireLit ?? false
             
-            let start = self.currentStartTime ?? now
-            let end = self.currentEndTime ?? now
-            
             let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-            let startMin = calendar.component(.hour, from: start) * 60 + calendar.component(.minute, from: start)
-            let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
-            
-            if startMin >= endMin {
-                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
-                return
-            }
-            
             let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
             let isCurrentWeek = calendar.isDate(self.baseDate, inSameDayAs: today) || (weekDates.first! <= today && weekDates.last! >= today)
             
@@ -391,6 +409,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] color in
                 guard let self = self else { return }
+                guard !self.isEditMode else { return }
                 
                 if self.currentSelectedColor == nil {
                     self.currentSelectedColor = color
@@ -533,6 +552,134 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
         
         self.present(vc, animated: false)
+    }
+    
+    private func setupEditMode() {
+        guard let schedule = editingSchedule else { return }
+        
+        navigationBar.setTitle("일정 수정")
+        titleTextField.text = schedule.name
+        
+        repeatSwitch.isOn = schedule.isRecurring
+        
+        if schedule.isRecurring, let dayOfWeek = schedule.dayOfWeek {
+            let dayLabels = ["월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6]
+            let indices = dayOfWeek.components(separatedBy: ", ").compactMap { dayLabels[$0.trimmingCharacters(in: .whitespaces)] }
+            weekdaySelectionView.setSelectedIndices(indices)
+        } else if let dateStr = schedule.date {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            
+            if let date = formatter.date(from: dateStr) {
+                baseDate = date
+                
+                let weekDates = baseDate.daysOfWeek
+                if let index = weekDates.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: date) }) {
+                    weekdaySelectionView.setSelectedIndices([index])
+                }
+            }
+        }
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        if let start = formatter.date(from: schedule.startTime) {
+            currentStartTime = start
+            let display = DateFormatter()
+            display.dateFormat = "hh : mm a"
+            display.locale = Locale(identifier: "en_US")
+            timeSelectionView.updateTime(isStart: true, time: display.string(from: start))
+        }
+        if let end = formatter.date(from: schedule.endTime) {
+            currentEndTime = end
+            let display = DateFormatter()
+            display.dateFormat = "hh : mm a"
+            display.locale = Locale(identifier: "en_US")
+            timeSelectionView.updateTime(isStart: false, time: display.string(from: end))
+        }
+        
+        let colorMapping: [String: UIColor] = [
+            "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
+            "SCHEDULE3": .schedule3, "SCHEDULE4": .schedule4, "SCHEDULE5": .schedule5
+        ]
+        if let color = colorMapping[schedule.scheduleColor] {
+            currentSelectedColor = color
+            selectedColorChip.isHidden = false
+            selectedColorChip.configure(with: color, isSelected: false)
+        }
+    }
+    
+    private func handleEditConfirm() {
+        guard let schedule = editingSchedule else { return }
+        
+        let colorMapping: [UIColor: String] = [
+            .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+            .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+        ]
+        let colorCode = colorMapping[currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+        let startTimeStr = (currentStartTime ?? Date()).toString(format: "HH:mm:ss")
+        let endTimeStr = (currentEndTime ?? Date()).toString(format: "HH:mm:ss")
+        let isRecurring = repeatSwitch.isOn
+        let weekDates = baseDate.daysOfWeek
+        let selectedIndices = weekdaySelectionView.selectedIndices.sorted()
+        
+        let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+        let dayOfWeekStr: String? = isRecurring ? selectedIndices.map { dayLabels[$0] }.joined(separator: ", ") : nil
+        let datesStr: String? = isRecurring ? nil : selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
+        
+        let request = EditScheduleRequestDTO(
+            name: titleTextField.text ?? "",
+            isRecurring: isRecurring,
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            scheduleColor: colorCode,
+            dayOfWeek: dayOfWeekStr,
+            dates: datesStr,
+            isIncludeFollowing: nil
+        )
+        
+        let dialog = DialogBox()
+        dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: isRecurring))
+        
+        dialog.onTapCancel = { [weak self] in
+            self?.dismiss(animated: false)
+        }
+        
+        dialog.onTapClose = { [weak self] in
+            self?.dismiss(animated: false)
+        }
+        
+        dialog.onTapConfirm = { [weak self] in
+            guard let self = self else { return }
+            self.dismiss(animated: false)
+            
+            let isIncludeFollowing: Bool? = isRecurring ? dialog.isFollowingSelected : nil
+            
+            let finalRequest = EditScheduleRequestDTO(
+                name: self.titleTextField.text ?? "",
+                isRecurring: isRecurring,
+                startTime: startTimeStr,
+                endTime: endTimeStr,
+                scheduleColor: colorCode,
+                dayOfWeek: dayOfWeekStr,
+                dates: datesStr,
+                isIncludeFollowing: isIncludeFollowing
+            )
+            
+            self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false)
+            self.dismiss(animated: true)
+        }
+        
+        let overlay = UIViewController()
+        overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
+        overlay.modalPresentationStyle = .overFullScreen
+        overlay.view.addSubview(dialog)
+        
+        dialog.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(343)
+        }
+        
+        self.present(overlay, animated: false)
     }
 }
 

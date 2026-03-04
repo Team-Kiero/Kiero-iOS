@@ -18,6 +18,8 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
     let currentReferenceDate = CurrentValueSubject<Date, Never>(Date())
     let logoutSuccess = PassthroughSubject<Void, Never>()
+    let isEditSuccess = PassthroughSubject<Void, Never>()
+    let editErrorMessage = PassthroughSubject<String, Never>()
     
     var isFireLit: Bool = false
     
@@ -220,5 +222,26 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             self?.refreshSchedules()
         })
         .store(in: &cancellables)
+    }
+    
+    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) {
+        service.editSchedule(scheduleId: scheduleId, selectedDate: selectedDate, request: request)
+            .receive(on: RunLoop.main)
+            .sink(receiveCompletion: { [weak self] completion in
+                if case .failure(let error) = completion {
+                    switch error {
+                    case .codeError(let message):
+                        self?.editErrorMessage.send(message)
+                    case .clientError(let code) where code == 400:
+                        self?.editErrorMessage.send("기존의 일정과 시간이 중복됩니다.")
+                    default:
+                        self?.editErrorMessage.send("일정 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
+                    }
+                }
+            }, receiveValue: { [weak self] in
+                self?.isEditSuccess.send(())
+                self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
+            })
+            .store(in: &cancellables)
     }
 }

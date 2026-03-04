@@ -32,6 +32,17 @@ struct DeleteScheduleRequestDTO: Encodable {
     let isIncludeFollowing: Bool
 }
 
+struct EditScheduleRequestDTO: Encodable {
+    let name: String
+    let isRecurring: Bool
+    let startTime: String
+    let endTime: String
+    let scheduleColor: String
+    let dayOfWeek: String?
+    let dates: String?
+    let isIncludeFollowing: Bool?
+}
+
 extension ScheduleResponseDTO {
     func toEntity() -> [Schedule] {
         return items.map {
