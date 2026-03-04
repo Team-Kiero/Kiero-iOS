@@ -18,7 +18,7 @@ struct MyPageView: View {
         ZStack {
             Color.kBlack.ignoresSafeArea()
             
-            VStack {
+            VStack(spacing: 0) {
                 NavigationBarWrapper(
                     type: .main(title: "마이페이지"),
                     isNotificationActive: hasNotification,
@@ -44,6 +44,7 @@ struct MyPageView: View {
                     Spacer()
                 }
                 .padding(.horizontal, 5)
+                .padding(.vertical, 15)
                 
                 Rectangle()
                     .fill(.gray900)
@@ -54,7 +55,7 @@ struct MyPageView: View {
                 Button(action: {
                     print("자녀 연결 관리")
                 }){
-                    HStack {
+                    HStack(spacing: 0) {
                         Text("자녀 연결 관리")
                             .font(Font(UIFont.body3_14_R))
                             .foregroundColor(.white)
@@ -66,7 +67,7 @@ struct MyPageView: View {
                         Image(.icRight)
                     }
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 15.5)
                 }
                 
                 Button(action: {
@@ -82,7 +83,7 @@ struct MyPageView: View {
                         Image(.icRight)
                     }
                     .padding(.horizontal, 8)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 15.5)
                 }
                 
                 Spacer()
