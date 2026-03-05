@@ -25,7 +25,7 @@ extension View {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
             let topVC = rootVC.presentedViewController ?? rootVC
-            topVC.present(bottomSheet, animated: false) // 내부 애니메이션 사용을 위해 false
+            topVC.present(bottomSheet, animated: false)
         }
     }
 }
