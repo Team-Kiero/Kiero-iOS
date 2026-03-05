@@ -83,8 +83,6 @@ struct DailyJourneyMapView: View {
     }
 }
 
-// MARK: - Subviews
-
 private extension DailyJourneyMapView {
     
     func scheduleListContent(data: DailyJourneyMapData, scrollAreaHeight: CGFloat) -> some View {
@@ -126,9 +124,7 @@ private extension DailyJourneyMapView {
             .scrollDisabled(data.schedules.count < 6)
         }
     }
-    
-    // MARK: Empty State
-    
+        
     var emptyStateContent: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -136,8 +132,8 @@ private extension DailyJourneyMapView {
             Image(.icFireMint)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 30, height: 30)
-                .frame(width: 50, height: 50)
+                .frame(width: 30, height: 30) // 이미지 사이즈
+                .frame(width: 50, height: 50) // 배경 사이즈
                 .background(
                     Circle()
                         .fill(Color.gray900)
