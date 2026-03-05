@@ -55,7 +55,7 @@ final class NotificationFeedView: BaseUIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(navigationBar.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(100)
+            $0.bottom.equalToSuperview()
         }
     }
 
