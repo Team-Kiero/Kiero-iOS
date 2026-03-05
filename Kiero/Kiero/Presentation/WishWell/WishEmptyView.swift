@@ -37,20 +37,23 @@ final class WishEmptyView: UIView {
         $0.textAlignment = .center
         $0.setTypo(.body4_12_R, text: "부모님과 함께 나만의 보상을 정해볼까?")
     }
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setUI()
+        setLayout()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private func setUI() {
         addSubview(stackView)
         stackView.addArrangedSubviews(iconImage, titleLabel, descriptionLabel)
-        
+    }
+    
+    private func setLayout() {
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.top.equalToSuperview().offset(76.5)
