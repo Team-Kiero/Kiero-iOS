@@ -111,7 +111,6 @@ struct RewardEditView: View {
                             }
                         }
                         
-                        
                         Rectangle()
                             .fill(Color.gray800)
                             .frame(width: 76, height: 1)
