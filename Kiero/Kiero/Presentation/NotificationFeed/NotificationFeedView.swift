@@ -21,7 +21,6 @@ final class NotificationFeedView: BaseUIView {
     
     private lazy var navigationBar = NavigationBar(type: .back(title: "알림")).then {
         $0.leftButtonAction = { [weak self] in
-            print("🔧 네비게이션 바 백 버튼 클릭됨")
             self?.onBackTapped?()
         }
     }
