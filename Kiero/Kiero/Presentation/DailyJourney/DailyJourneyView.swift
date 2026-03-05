@@ -81,7 +81,7 @@ final class DailyJourneyView: BaseUIView {
     }
     
     private let mapButton = UIButton(type: .custom).then {
-        $0.setImage(UIImage(named: "ic_button_map"), for: .normal)
+        $0.setImage(UIImage(resource: .icButtonMap), for: .normal)
         $0.imageView?.contentMode = .scaleAspectFit
         $0.layer.cornerRadius = 20
         $0.layer.shadowColor = UIColor.gray800.cgColor
