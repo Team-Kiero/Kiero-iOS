@@ -15,6 +15,7 @@ enum NavigationBarType {
     case closeDone(title: String)    // x v
     case close(title: String)        // x
     case main(title: String? = nil)
+    case titleClose(title: String)   //   x
 }
 
 final class NavigationBar: UIView {
@@ -154,6 +155,20 @@ final class NavigationBar: UIView {
             
             let alarmIcon = isNotificationActive ? UIImage(resource: .icAlarmPin) : UIImage(resource: .icAlarm)
             rightButton.setImage(alarmIcon, for: .normal)
+            
+        case .titleClose(let title):
+            leftButton.isHidden = true
+            rightButton.setImage(.icClose, for: .normal)
+            titleLabel.setTypo(.head3_16_B, text: title)
+            
+            rightButton.snp.makeConstraints {
+                $0.trailing.equalToSuperview().inset(16)
+                $0.centerY.equalToSuperview()
+            }
+            titleLabel.snp.remakeConstraints {
+                $0.leading.equalToSuperview().offset(16)
+                $0.centerY.equalToSuperview()
+            }
         }
     }
     
