@@ -67,12 +67,6 @@ final class PickRoleView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Public API
-
-//    func setSelectedRole(_ role: LoginUser?) {
-//        selectedRole = role
-//    }
-
     // MARK: - Setup
     
     private func setUI() {
