@@ -104,8 +104,9 @@ struct MyPageView: View {
                         print("로그아웃 API 호출")
                     }
                 )
-                .frame(maxWidth: .infinity - 32)
+                .frame(maxWidth: .infinity)
                 .frame(height: 197)
+                .padding(.horizontal, 16)
                 .zIndex(1)
             }
         }
