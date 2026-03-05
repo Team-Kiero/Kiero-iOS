@@ -50,8 +50,7 @@ struct MyPageView: View {
                     .fill(.gray900)
                     .frame(height: 1)
                     .padding(.bottom, 11)
-                
-                
+                                
                 Button(action: {
                     print("자녀 연결 관리")
                 }){
