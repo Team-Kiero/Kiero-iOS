@@ -87,8 +87,6 @@ struct MyPageView: View {
                 }
                 
                 Spacer()
-                
-                //TODO: - 탭바 연결
             }
             .padding(.horizontal, 16)
             
@@ -106,7 +104,8 @@ struct MyPageView: View {
                         print("로그아웃 API 호출")
                     }
                 )
-                .frame(width: UIScreen.main.bounds.width - 32, height: 197)
+                .frame(maxWidth: .infinity - 32)
+                .frame(height: 197)
                 .zIndex(1)
             }
         }
