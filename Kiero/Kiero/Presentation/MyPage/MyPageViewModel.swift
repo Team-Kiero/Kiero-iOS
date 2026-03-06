@@ -32,7 +32,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                         LogoutHelper.logoutToPickRole()
                     case .failure(let error):
                         print("로그아웃 실패: \(error)")
-                        LogoutHelper.logoutToPickRole()
                     }
                 } receiveValue: { _ in }
                 .store(in: &cancellables)
