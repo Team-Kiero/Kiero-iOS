@@ -17,6 +17,7 @@ import Then
 final class DailyJourneyView: BaseUIView {
     
     var onNextJourneyTap: (() -> Void)?
+    var onMapButtonTap: (() -> Void)?
     
     // MARK: - UI Components
     
@@ -79,6 +80,17 @@ final class DailyJourneyView: BaseUIView {
         )
     }
     
+    private let mapButton = UIButton(type: .custom).then {
+        $0.setImage(UIImage(resource: .icButtonMap), for: .normal)
+        $0.imageView?.contentMode = .scaleAspectFit
+        $0.layer.cornerRadius = 20
+        $0.layer.shadowColor = UIColor.gray800.cgColor
+        $0.layer.shadowOpacity = 1
+        $0.layer.shadowRadius = 10
+        $0.layer.shadowOffset = CGSize(width: 0, height: 0)
+        $0.clipsToBounds = false
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -94,11 +106,13 @@ final class DailyJourneyView: BaseUIView {
     // MARK: - Setup Methods
     
     override func setUI() {
-        addSubviews(backgroundImageView, dimOverlayView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
+        addSubviews(backgroundImageView, dimOverlayView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton, mapButton)
         
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
         }
+        
+        mapButton.addTarget(self, action: #selector(mapButtonTapped), for: .touchUpInside)
 
         loadIntroWebP()
     }
@@ -125,6 +139,12 @@ final class DailyJourneyView: BaseUIView {
             $0.top.equalTo(headerView.snp.bottom).offset(22)
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.height.equalTo(50)
+        }
+        
+        mapButton.snp.makeConstraints {
+            $0.centerY.equalTo(journeyTimeView)
+            $0.trailing.equalToSuperview().inset(16)
+            $0.size.equalTo(60)
         }
         
         verifyPhotoButton.snp.makeConstraints {
@@ -161,6 +181,11 @@ final class DailyJourneyView: BaseUIView {
         } else {
             print("⚠️ webp 파일을 Bundle에서 찾을 수 없습니다.")
         }
+    }
+    
+    @objc
+    private func mapButtonTapped() {
+        onMapButtonTap?()
     }
     
     // MARK: - Update Methods

@@ -70,9 +70,9 @@ enum EndPoint {
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
-        case .kakaoLogin, .kakaoAccessToken, .childSignup, .reissueAccessToken, .reissueAllTokens:
+        case .kakaoLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup:
             return .child
         default:
             return .parent
@@ -82,6 +82,7 @@ enum EndPoint {
     // DailyJourney
     case updateDailyJourney
     case skipJourney(scheduleDetailId: Int)
+    case fetchJourneyList
     
     // Presigned URL 요청
     case getPresignedURL
@@ -101,7 +102,7 @@ enum EndPoint {
         case .sseToken:
             return "/api/v1/tokens/subscribe-token"
         case .childSignup:
-            return "/api/v1/children/signup"
+            return "/api/v1/children/login"
         case .fetchChildren:
             return "/api/v1/parents/children"
         case .kakaoLogin:
@@ -140,6 +141,8 @@ enum EndPoint {
             return "/api/v1/schedules/today"
         case .skipJourney(let scheduleDetailId):
             return "/api/v1/schedules/skip/\(scheduleDetailId)"
+        case .fetchJourneyList:
+            return "/api/v1/schedules/progress"
         case .getPresignedURL:
             return "/api/v1/presigned-url/schedules"
         case .completeSchedule(let scheduleDetailId):
@@ -167,7 +170,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule:
             return "PATCH"

@@ -34,14 +34,14 @@ struct DailyJourneyTimelineIndicatorView: View {
             if shouldShowRectangle {
                 Image("ic_indicator_rectangle")
                     .renderingMode(.template)
-                    .foregroundColor(iconColor)
+                    .foregroundStyle(iconColor)
                     .frame(height: 0, alignment: .bottom)
                     .offset(y: 2)
             }
             
             Image("ic_indicator_star")
                 .renderingMode(.template)
-                .foregroundColor(iconColor)
+                .foregroundStyle(iconColor)
                 .shadow(color: hasGlow ? .main : .clear, radius: hasGlow ? 2 : 0)
         }
     }
