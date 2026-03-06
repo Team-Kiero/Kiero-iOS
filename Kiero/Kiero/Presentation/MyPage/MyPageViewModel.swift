@@ -16,4 +16,20 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     
     let scrollToTop = PassthroughSubject<Void, Never>()
     
+    func requestLogout() {
+            LogoutService.shared.logout()
+                .receive(on: DispatchQueue.main)
+                .sink { completion in
+                    switch completion {
+                    case .finished:
+                        print("로그아웃 완료")
+                        LogoutHelper.logoutToPickRole()
+                    case .failure(let error):
+                        print("로그아웃 실패: \(error)")
+                        LogoutHelper.logoutToPickRole()
+                    }
+                } receiveValue: { _ in }
+                .store(in: &cancellables)
+        }
+    
 }
