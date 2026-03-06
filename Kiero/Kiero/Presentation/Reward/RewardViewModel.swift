@@ -18,13 +18,17 @@ struct Reward: Identifiable, Equatable {
 
 // MARK: - ViewModel
 
-final class RewardViewModel: ObservableObject {
+final class RewardViewModel: BaseViewModel, ObservableObject {
     
     @Published var rewards: [Reward] = []
     @Published var selectedReward: Reward? = nil
     @Published var showDeleteDialog: Bool = false
     
-    init() {
+    let scrollToTop = PassthroughSubject<Void, Never>()
+    
+    override init() {
+        super.init()
+        
         fetchRewards()
     }
     
