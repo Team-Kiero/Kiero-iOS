@@ -13,6 +13,8 @@ protocol ScheduleServiceType {
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), NetworkError>
     func deleteChildDummyData() -> AnyPublisher<Void, NetworkError>
     func logout() -> AnyPublisher<Void, NetworkError>
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError>
+    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError>
 }
 
 final class ScheduleService: ScheduleServiceType {
@@ -69,6 +71,42 @@ final class ScheduleService: ScheduleServiceType {
             Task {
                 do {
                     let _: EmptyResponse = try await BaseService.shared.request(endPoint: .logout)
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(error as? NetworkError ?? .unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError> {
+        let endPoint = EndPoint.deleteSchedule(
+            scheduleId: scheduleId,
+            selectedDate: selectedDate
+        )
+        let requestBody = DeleteScheduleRequestDTO(isIncludeFollowing: isIncludeFollowing)
+        
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let _: EmptyResponse = try await BaseService.shared.request(
+                        endPoint: endPoint,
+                        body: requestBody
+                    )
+                    promise(.success(()))
+                } catch {
+                    promise(.failure(error as? NetworkError ?? .unknownError))
+                }
+            }
+        }.eraseToAnyPublisher()
+    }
+    
+    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError> {
+        let endPoint = EndPoint.editSchedule(scheduleId: scheduleId, selectedDate: selectedDate)
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let _: EmptyResponse = try await BaseService.shared.request(endPoint: endPoint, body: request)
                     promise(.success(()))
                 } catch {
                     promise(.failure(error as? NetworkError ?? .unknownError))

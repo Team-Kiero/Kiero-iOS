@@ -41,6 +41,12 @@ enum EndPoint {
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
     case fetchDefaultColor(childId: Int)
     
+    // EditSchedule
+    case editSchedule(scheduleId: Int, selectedDate: String)
+    
+    // DeleteSchedule
+    case deleteSchedule(scheduleId: Int, selectedDate: String)
+    
     // Mission
     case fetchMissions(childId: Int?)
     
@@ -152,6 +158,10 @@ enum EndPoint {
             return "/api/v1/feeds/\(childId)\(queryString)"
         case .completeMission(let missionId):
             return "/api/v1/missions/\(missionId)/complete"
+        case .deleteSchedule(let scheduleId, let selectedDate):
+            return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
+        case .editSchedule(let scheduleId, let selectedDate):
+            return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
         }
     }
     
@@ -159,9 +169,9 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule:
             return "PATCH"
-        case .deleteChildDummy:
+        case .deleteChildDummy, .deleteSchedule:
             return "DELETE"
         default:
             return "POST"

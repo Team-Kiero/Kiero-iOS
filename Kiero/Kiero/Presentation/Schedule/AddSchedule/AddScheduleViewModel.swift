@@ -24,27 +24,7 @@ final class AddScheduleViewModel: BaseViewModel {
         super.init()
     }
 
-    func addSchedule(
-        name: String,
-        isRecurring: Bool,
-        startTime: String,
-        endTime: String,
-        color: String,
-        dayOfWeek: String?,
-        dates: String?
-    ) {
-        let request = AddScheduleRequestDTO(
-            name: name,
-            isRecurring: isRecurring,
-            startTime: startTime,
-            endTime: endTime,
-            scheduleColor: color,
-            dayOfWeek: dayOfWeek,
-            dates: dates
-        )
-        
-        print("📡 [Service] 일정 저장 요청 시작")
-        
+    func addSchedule(request: AddScheduleRequestDTO) {        
         service.postSchedule(childId: self.childId, request: request)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
@@ -56,10 +36,8 @@ final class AddScheduleViewModel: BaseViewModel {
                     switch error {
                     case .codeError(let message):
                         self.errorMessage.send(message)
-                        
                     case .clientError(let code) where code == 400:
                         self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
-                        
                     default:
                         self.errorMessage.send("일정 저장에 실패했어요. 잠시 후 다시 시도해주세요.")
                     }

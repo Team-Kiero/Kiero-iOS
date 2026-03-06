@@ -14,6 +14,7 @@ final class WriteMissionViewModel: BaseViewModel {
     let childId: Int
     
     let isMissionAddSuccess = PassthroughSubject<Mission, Never>()
+    let isMissionUpdateSuccess = PassthroughSubject<Void, Never>()
 
     init(service: WriteMissionServiceType, childId: Int) {
         self.service = service
@@ -34,5 +35,11 @@ final class WriteMissionViewModel: BaseViewModel {
                 self?.isMissionAddSuccess.send(newMission)
             }
             .store(in: &cancellables)
+    }
+    
+    func updateMission(id: Int, name: String, reward: Int, dueAt: String) {
+        print("🚀 미션 수정 API 대기 중 - ID: \(id), Name: \(name)")
+        
+        // TODO: 서버 수정 API 연결
     }
 }

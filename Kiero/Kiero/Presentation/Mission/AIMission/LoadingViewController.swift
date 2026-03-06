@@ -54,16 +54,14 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
             $0.center.equalToSuperview()
         }
         
-        descriptionLabel.snp.makeConstraints {
-            $0.bottom.equalToSuperview().inset(298)
-            $0.centerX.equalToSuperview()
-        }
-        
         characterImageView.snp.makeConstraints {
-            $0.bottom.equalTo(descriptionLabel.snp.top).offset(-17)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(450)
             $0.height.equalTo(150)
+        }
+        
+        descriptionLabel.snp.makeConstraints {
+            $0.top.equalTo(characterImageView.snp.bottom).offset(17)
         }
     }
     

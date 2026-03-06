@@ -33,7 +33,7 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
-            case .deleteSchedule(let title), .editSchedule(let title):
+            case .deleteSchedule(let title, _), .editSchedule(let title, _):
                 return title
             case .deleteReward(let title, _):
                 return title
@@ -84,6 +84,10 @@ final class DialogBox: UIView {
     var onTapClose: (() -> Void)?
     var onTapCancel: (() -> Void)?
     var onTapConfirm: (() -> Void)?
+    
+    var isFollowingSelected: Bool {
+        return followingOption.isSelected
+    }
     
     // MARK: - UI Conponents
     
@@ -285,24 +289,36 @@ final class DialogBox: UIView {
         }
         
         switch state {
-        case .deleteSchedule:
-            optionStack.isHidden = false
-            optionStack.distribution = .equalSpacing
+        case .deleteSchedule(_, let isRecurring):
+            if isRecurring {
+                optionStack.isHidden = false
+                optionStack.distribution = .equalSpacing
+                
+                let spacer = UIView()
+                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
+                followingOption.isSelected = true
+                
+                optionStack.addArrangedSubviews(spacer, followingOption)
+                contentStack.setCustomSpacing(12, after: messageLabel)
+            } else {
+                optionStack.isHidden = true
+                contentStack.setCustomSpacing(0, after: messageLabel)
+            }
             
-            let spacer = UIView()
-            followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
-            followingOption.isSelected = true
-            
-            optionStack.addArrangedSubviews(spacer, followingOption)
-            contentStack.setCustomSpacing(12, after: messageLabel)
-            
-        case .editSchedule:
-            optionStack.isHidden = false
-            optionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-            onlyThisOption.setConfigurationTypo(.body4_12_R, text: " 이번 일정만 포함")
-            followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 일정 포함")
-            optionStack.addArrangedSubviews(onlyThisOption, followingOption)
-            contentStack.setCustomSpacing(12, after: messageLabel)
+        case .editSchedule(_, let isRecurring):
+            if isRecurring {
+                optionStack.isHidden = false
+                optionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+                onlyThisOption.setConfigurationTypo(.body4_12_R, text: " 이번 일정만 포함")
+                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 일정 포함")
+                onlyThisOption.isSelected = true
+                followingOption.isSelected = false
+                optionStack.addArrangedSubviews(onlyThisOption, followingOption)
+                contentStack.setCustomSpacing(12, after: messageLabel)
+            } else {
+                optionStack.isHidden = true
+                contentStack.setCustomSpacing(0, after: messageLabel)
+            }
             
         default:
             optionStack.isHidden = true

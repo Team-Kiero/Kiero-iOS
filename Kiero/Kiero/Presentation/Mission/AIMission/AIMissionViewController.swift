@@ -111,7 +111,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             if self.isAnalysisDone {
                 self.isAnalysisDone = false
             } else {
-                self.dismiss(animated: true)
+                self.navigationController?.popViewController(animated: true)
             }
         }
         
@@ -181,7 +181,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             .sink { [weak self] in
                 guard let self = self else { return }
                 Toast.show(message: "미션이 등록되었어요.")
-                self.dismiss(animated: true)
+                self.navigationController?.popViewController(animated: true)
             }
             .store(in: &cancellables)
         
