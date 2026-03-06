@@ -25,7 +25,7 @@ struct DailyJourneyScheduleTimeView: View {
     
     var body: some View {
         (formattedTimeText(startTime) + Text(" ~ ").font(Font(UIFont.body4_12_R)) + formattedTimeText(endTime))
-            .foregroundColor(timeColor)
+            .foregroundStyle(timeColor)
     }
     
     private func formattedTimeText(_ time: String) -> Text {

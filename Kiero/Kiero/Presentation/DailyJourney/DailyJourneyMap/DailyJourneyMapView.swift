@@ -92,7 +92,7 @@ private extension DailyJourneyMapView {
             HStack {
                 Text("오늘은 \(data.scheduleCount)개의 여정이 있어!")
                     .font(Font(UIFont.body4_12_R))
-                    .foregroundColor(.gray200)
+                    .foregroundStyle(.gray200)
                 Spacer()
             }
             .padding(.horizontal, 16)
@@ -147,12 +147,12 @@ private extension DailyJourneyMapView {
             
             Text("오늘은 등록된 여정이 없어!")
                 .font(Font(UIFont.title3_16_SB))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding(.bottom, 5)
             
             Text("여정이 없는 오늘 여유를 즐겨봐!")
                 .font(Font(UIFont.body4_12_R))
-                .foregroundColor(.gray300)
+                .foregroundStyle(.gray300)
             
             Spacer()
         }
