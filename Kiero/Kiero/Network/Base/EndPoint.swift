@@ -54,6 +54,9 @@ enum EndPoint {
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
     
+    // Reward
+    case fetchCoupons(childId: Int)
+    
     //NotificationFeed
     case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
     
@@ -129,6 +132,8 @@ enum EndPoint {
             return "/api/v1/coupons"
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
+        case .fetchCoupons(let childId):
+            return "/api/v1/coupons/\(childId)"
         case .updateDailyJourney:
             return "/api/v1/schedules/today"
         case .skipJourney(let scheduleDetailId):
@@ -164,7 +169,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList, .fetchCoupons:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission:
             return "PATCH"
