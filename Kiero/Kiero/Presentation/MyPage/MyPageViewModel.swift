@@ -19,6 +19,7 @@ final class MyPageViewModel: ObservableObject {
     override init() {
         super.init()
         fetchUserInfo()
+        fetchChildCount()
     }
     
     func requestLogout() {
@@ -36,6 +37,20 @@ final class MyPageViewModel: ObservableObject {
                 } receiveValue: { _ in }
                 .store(in: &cancellables)
         }
+    
+    func fetchChildCount() {
+        ScheduleService.shared.fetchChildren()
+                .receive(on: DispatchQueue.main)
+                .sink { completion in
+                    if case .failure(let error) = completion {
+                        print("자녀 수 조회 실패: \(error)")
+                    }
+                } receiveValue: { [weak self] children in
+                    self?.connectedChild = children.count
+                }
+                .store(in: &cancellables)
+        }
+    
     
     func fetchUserInfo() {
         self.userName = TokenManager.shared.getUserName() ?? ""
