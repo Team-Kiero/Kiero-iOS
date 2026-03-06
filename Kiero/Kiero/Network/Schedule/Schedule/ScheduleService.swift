@@ -18,6 +18,8 @@ protocol ScheduleServiceType {
 }
 
 final class ScheduleService: ScheduleServiceType {
+    static let shared = ScheduleService()
+    
     func fetchChildren() -> AnyPublisher<[ChildResponseDTO], NetworkError> {
         let endPoint = EndPoint.fetchChildren
         return Future<[ChildResponseDTO], NetworkError> { promise in

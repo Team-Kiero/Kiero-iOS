@@ -1,5 +1,5 @@
 //
-//  RewardHostingViewController.swift
+//  RewardHostingController.swift
 //  Kiero
 //
 //  Created by 정윤아 on 3/6/26.
@@ -7,7 +7,6 @@
 
 import Combine
 import SwiftUI
-import UIKit
 
 final class RewardHostingController: UIHostingController<RewardView> {
     
