@@ -115,6 +115,12 @@ struct MyPageView: View {
                 NotificationFeedWrapper()
                     .toolbar(.hidden, for: .navigationBar)
                     .ignoresSafeArea()
+                    .onAppear {
+                        NotificationCenter.default.post(name: .hideTabBar, object: true)
+                    }
+                    .onDisappear {
+                        NotificationCenter.default.post(name: .hideTabBar, object: false)
+                    }
             }
         }
     }
