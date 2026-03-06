@@ -111,6 +111,7 @@ struct RewardView: View {
                 }
             }
         }
+        .background(.kBlack)
     }
 }
 
