@@ -10,8 +10,7 @@ import SwiftUI
 import Kingfisher
 
 struct MyPageView: View {
-    
-    @ObservedObject var viewModel = MyPageViewModel()
+    @StateObject var viewModel = MyPageViewModel()
     
     @State private var showDialog: Bool = false
     @State private var hasNotification: Bool = false
