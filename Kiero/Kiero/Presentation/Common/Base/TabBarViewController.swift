@@ -52,6 +52,23 @@ public final class TabBarViewController: UITabBarController {
         setStyle()
         setViewControllers()
         setCustomTabBarUI()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTabBarHidden(_:)),
+            name: .hideTabBar,
+            object: nil
+        )
+    }
+    
+    @objc
+    private func handleTabBarHidden(_ notification: Notification) {
+        guard let isHidden = notification.object as? Bool else { return }
+        
+        UIView.animate(withDuration: 0.3) {
+            let height = self.customTabBar.frame.height
+            self.customTabBar.transform = isHidden ? CGAffineTransform(translationX: 0, y: height) : .identity
+        }
     }
     
     public override func viewDidAppear(_ animated: Bool) {
