@@ -104,15 +104,6 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
             .store(in: &cancellables)
     }
     
-    private func setAction() {
-        scheduleView.pagingHeader.onLeftButtonTapped = { [weak self] in
-            self?.prevButtonTapped.send(())
-        }
-        scheduleView.pagingHeader.onRightButtonTapped = { [weak self] in
-            self?.nextButtonTapped.send(())
-        }
-    }
-    
     func updateHeader(title: String, leftEnabled: Bool, rightEnabled: Bool) {
         scheduleView.pagingHeader.configure(
             title: title,
