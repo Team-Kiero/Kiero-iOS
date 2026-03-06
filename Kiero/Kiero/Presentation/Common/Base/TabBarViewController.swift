@@ -81,7 +81,7 @@ public final class TabBarViewController: UITabBarController {
             let myPageVC = factory.makeMyPageViewController()
             
             self.viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
-                if $0 is RewardHostingController {
+                if $0 is RewardHostingController || $0 is MyPageHostingViewController {
                     return $0
                 }
                 

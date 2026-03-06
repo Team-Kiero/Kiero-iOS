@@ -14,4 +14,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     @Published var userImage: String? = nil
     @Published var connectedChild: Int = 0
     
+    let scrollToTop = PassthroughSubject<Void, Never>()
+    
 }
