@@ -55,11 +55,11 @@ struct RewardEditView: View {
                 SwiftUI.TextField("",
                                   text: $rewardTitle,
                                   prompt: Text("보상 이름을 입력해주세요.")
-                    .foregroundColor(.gray500)
+                    .foregroundStyle(.gray500)
                     .font(Font(UIFont.body1_18_R))
                 )
                 .focused($isTextFieldFocused)
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
                 .padding(.leading, 16)
                 .padding(.vertical, 9)
                 .padding(.bottom, 15)
@@ -74,7 +74,7 @@ struct RewardEditView: View {
                     
                     Text("보상")
                         .font(Font(UIFont.body2_16_R))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
                 .padding(.leading, 16)
                 .padding(.vertical, 11.5)
@@ -101,7 +101,7 @@ struct RewardEditView: View {
                         ))
                         .focused($isCoinFieldFocused)
                         .font(Font(UIFont.title3_16_SB))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .multilineTextAlignment(.center)
                         .keyboardType(.numberPad)
                         .frame(minWidth: 60)
@@ -194,7 +194,7 @@ struct CoinAddButton: View {
         Button(action: action) {
             Text(label)
                 .font(Font(UIFont.title3_16_SB))
-                .foregroundColor(.gray500)
+                .foregroundStyle(.gray500)
         }
         .frame(width: 54, height: 45)
         .background(.gray900)

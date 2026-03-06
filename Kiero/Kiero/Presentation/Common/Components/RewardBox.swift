@@ -14,7 +14,7 @@ struct RewardBox: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("\(reward.title)")
                 .font(Font(UIFont.body3_14_R))
-                .foregroundColor(.white)
+                .foregroundStyle(.white)
             
             ChipItemWrapper(
                 style: .usedCoinChip,
