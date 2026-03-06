@@ -5,6 +5,7 @@
 //  Created by 신혜연 on 1/8/26.
 //
 
+import SwiftUI
 import UIKit
 
 import KakaoSDKAuth
@@ -203,7 +204,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeRewardViewController() -> UIViewController {
         let viewModel = RewardViewModel()
-        return RewardViewController(viewModel: viewModel, diContainer: self)
+        return RewardHostingController(viewModel: viewModel)
     }
 }
 
