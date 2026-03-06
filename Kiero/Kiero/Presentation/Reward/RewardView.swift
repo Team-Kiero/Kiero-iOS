@@ -89,6 +89,7 @@ struct RewardView: View {
                     .transition(.scale.combined(with: .opacity))
                 }
             }
+            .onAppear { viewModel.fetchCoupons() }
             .navigationDestination(isPresented: $isNavigatingToNotification) {
                 NotificationFeedWrapper()
                     .toolbar(.hidden, for: .navigationBar)
