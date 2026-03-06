@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import Kingfisher
+
 struct MyPageView: View {
     
     @ObservedObject var viewModel = MyPageViewModel()
@@ -35,9 +37,14 @@ struct MyPageView: View {
                     .padding(.horizontal, -16)
                     
                     HStack(spacing: 9) {
-                        
-                        //TODO: - 프로필 이미지 넣기
-                        Image(.icParentProfile)
+                        if let imageUrl = viewModel.userImage, let url = URL(string: imageUrl){
+                            KFImage(url)
+                                .placeholder{ Image(.icParentProfile) }
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 30, height: 30)
+                                .clipShape(Circle())
+                        } else { Image(.icParentProfile)}
                         
                         Text("\(viewModel.userName)")
                             .font(Font(UIFont.title3_16_SB))

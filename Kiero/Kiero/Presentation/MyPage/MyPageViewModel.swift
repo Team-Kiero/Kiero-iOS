@@ -10,11 +10,16 @@ import SwiftUI
 
 final class MyPageViewModel: ObservableObject {
     
-    @Published var userName: String = "꾸비"
+    @Published var userName: String = ""
     @Published var userImage: String? = nil
     @Published var connectedChild: Int = 0
     
     let scrollToTop = PassthroughSubject<Void, Never>()
+    
+    override init() {
+        super.init()
+        fetchUserInfo()
+    }
     
     func requestLogout() {
             LogoutService.shared.logout()
@@ -32,4 +37,8 @@ final class MyPageViewModel: ObservableObject {
                 .store(in: &cancellables)
         }
     
+    func fetchUserInfo() {
+        self.userName = TokenManager.shared.getUserName() ?? ""
+        self.userImage = TokenManager.shared.getProfile()
+    }
 }
