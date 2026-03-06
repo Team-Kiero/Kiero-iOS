@@ -26,8 +26,6 @@ final class MyPageHostingViewController: UIHostingController<MyPageView> {
     }
 }
 
-// MARK: - TabBarReselectRefreshable
-
 extension MyPageHostingViewController: TabBarReselectRefreshable {
     func refreshOnTabReselect() {
     }
