@@ -1,5 +1,5 @@
 //
-//  MyPageHostingViewController.swift
+//  MyPageHostingController.swift
 //  Kiero
 //
 //  Created by 정윤아 on 3/6/26.
@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-final class MyPageHostingViewController: UIHostingController<MyPageView> {
+final class MyPageHostingController: UIHostingController<MyPageView> {
     
     // MARK: - Properties
     
@@ -26,12 +26,12 @@ final class MyPageHostingViewController: UIHostingController<MyPageView> {
     }
 }
 
-extension MyPageHostingViewController: TabBarReselectRefreshable {
+extension MyPageHostingController: TabBarReselectRefreshable {
     func refreshOnTabReselect() {
     }
 }
 
-extension MyPageHostingViewController: ScrollToTopAvailable {
+extension MyPageHostingController: ScrollToTopAvailable {
     func scrollToTop() {
         viewModel.scrollToTop.send()
     }
