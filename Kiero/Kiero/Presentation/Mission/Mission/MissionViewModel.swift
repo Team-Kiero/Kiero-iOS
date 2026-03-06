@@ -53,8 +53,16 @@ final class MissionViewModel: BaseViewModel {
             .store(in: &cancellables)
     }
     
-    func addMission(_ mission: Mission) {
-        print("🚀 새로운 미션 추가 시도: \(mission.name)")
-        fetchMissions()
+    func deleteMission(id: Int) {
+        service.deleteMission(missionId: id)
+            .receive(on: RunLoop.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("미션 삭제 실패: \(error)")
+                }
+            }, receiveValue: { [weak self] in
+                self?.fetchMissions()
+            })
+            .store(in: &cancellables)
     }
 }

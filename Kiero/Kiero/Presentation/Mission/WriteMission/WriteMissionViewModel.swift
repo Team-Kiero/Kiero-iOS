@@ -15,6 +15,7 @@ final class WriteMissionViewModel: BaseViewModel {
     
     let isMissionAddSuccess = PassthroughSubject<Mission, Never>()
     let isMissionUpdateSuccess = PassthroughSubject<Void, Never>()
+    let errorMessage = PassthroughSubject<String, Never>()
 
     init(service: WriteMissionServiceType, childId: Int) {
         self.service = service
@@ -38,8 +39,16 @@ final class WriteMissionViewModel: BaseViewModel {
     }
     
     func updateMission(id: Int, name: String, reward: Int, dueAt: String) {
-        print("🚀 미션 수정 API 대기 중 - ID: \(id), Name: \(name)")
-        
-        // TODO: 서버 수정 API 연결
+        let request = WriteMissionRequestDTO(name: name, reward: reward, dueAt: dueAt)
+        service.updateMission(missionId: id, request: request)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                if case .failure(let error) = completion {
+                    print("❌ 미션 수정 실패: \(error)")
+                }
+            }, receiveValue: { [weak self] _ in
+                self?.isMissionUpdateSuccess.send(())
+            })
+            .store(in: &cancellables)
     }
 }

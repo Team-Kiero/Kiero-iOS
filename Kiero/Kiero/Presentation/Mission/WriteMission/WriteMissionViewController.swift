@@ -126,6 +126,13 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
                 self?.handleSuccess(message: "미션이 수정되었어요.")
             }
             .store(in: &cancellables)
+        
+        viewModel?.errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { message in
+                Toast.show(message: message)
+            }
+            .store(in: &cancellables)
     }
 
     private func handleSuccess(message: String) {
