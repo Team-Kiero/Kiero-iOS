@@ -31,8 +31,11 @@ final class NavigationBar: UIView {
         }
     }
     
+    private var currentType: NavigationBarType = .main()
+
     var isNotificationActive: Bool = false {
         didSet {
+            guard case .main = currentType else { return }
             let icon = isNotificationActive ? UIImage(resource: .icAlarmPin) : UIImage(resource: .icAlarm)
             rightButton.setImage(icon, for: .normal)
         }
@@ -106,6 +109,7 @@ final class NavigationBar: UIView {
     }
     
     private func configure(with type: NavigationBarType) {
+        currentType = type
         titleLabel.snp.remakeConstraints { $0.center.equalToSuperview() }
         titleLabel.isHidden = false
         logoImageView.isHidden = true
