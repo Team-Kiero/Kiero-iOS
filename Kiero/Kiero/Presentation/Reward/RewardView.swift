@@ -27,7 +27,7 @@ struct RewardView: View {
                 isActive: $isNavigatingToNotification,
                 destination: {
                     NotificationFeedWrapper()
-                        .navigationBarHidden(true)
+                        .toolbar(.hidden, for: .navigationBar)
                         .ignoresSafeArea()
                 },
                 label: { SwiftUI.EmptyView() }
