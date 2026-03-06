@@ -213,6 +213,6 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeMyPageViewController() -> UIViewController {
         let viewModel = MyPageViewModel()
-        return MyPageViewController(viewModel: viewModel, diContainer: self)
+        return MyPageHostingViewController(viewModel: viewModel)
     }
 }
