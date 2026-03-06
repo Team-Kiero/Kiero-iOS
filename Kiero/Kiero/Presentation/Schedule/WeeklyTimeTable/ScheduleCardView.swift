@@ -15,6 +15,7 @@ final class ScheduleCardView: BaseUIView {
     // MARK: - Properties
     
     private var originalText: String = ""
+    var tapAction: (() -> Void)?
     
     // MARK: - UI Components
     
@@ -55,6 +56,8 @@ final class ScheduleCardView: BaseUIView {
         dotView.backgroundColor = color
         
         self.backgroundColor = color.withAlphaComponent(0.2)
+        
+        setAction()
     }
     
     required init?(coder: NSCoder) { nil }
@@ -91,7 +94,13 @@ final class ScheduleCardView: BaseUIView {
             $0.size.equalTo(4)
         }
     }
-
+    
+    private func setAction() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapCard))
+        self.addGestureRecognizer(tap)
+        self.isUserInteractionEnabled = true
+    }
+    
     private func applyDynamicTextLogic() {
         let cardHeight = bounds.height
         
@@ -136,6 +145,10 @@ final class ScheduleCardView: BaseUIView {
         }
         
         dotView.transform = CGAffineTransform(translationX: 0, y: 5.5)
+    }
+    
+    @objc private func didTapCard() {
+        tapAction?()
     }
 }
 

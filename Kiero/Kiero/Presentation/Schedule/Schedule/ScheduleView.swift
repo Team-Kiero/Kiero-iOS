@@ -26,7 +26,7 @@ final class ScheduleView: BaseUIView {
     
     override func setLayout() {
         pagingHeader.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(22)
+            $0.top.equalToSuperview().inset(13)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(24)
         }
@@ -40,6 +40,7 @@ final class ScheduleView: BaseUIView {
     
     func updateSchedules(_ schedules: [Schedule]) {
         self.currentSchedules = schedules
+        timeTableView.updateEmptyState(isEmpty: schedules.isEmpty)
         
         UIView.performWithoutAnimation {
             timeTableView.clearSchedules()

@@ -73,10 +73,18 @@ public final class TabBarViewController: UITabBarController {
     
     private func setViewControllers() {
         if isParent {
+            let statusVC = factory.makeTodayStatusViewController()
             let scheduleVC = factory.makeScheduleViewController()
-            let notificationVC = factory.makeNotificationFeedViewController()
+            let missionVC = factory.makeMissionViewController()
             
-            self.viewControllers = [scheduleVC, notificationVC].map {
+            let rewardVC = factory.makeRewardViewController()
+            let myPageVC = factory.makeMyPageViewController()
+            
+            self.viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
+                if $0 is RewardHostingController {
+                    return $0
+                }
+                
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
                 nav.delegate = self
@@ -84,8 +92,8 @@ public final class TabBarViewController: UITabBarController {
             }
             
             customTabBar.setTabItems(
-                titles: ["스케줄 관리", "알림 피드"],
-                icons: [.icCalendarLine, .icBell]
+                titles: ["오늘의 현황", "일정", "미션", "보상", "마이페이지"],
+                icons: [.icMap, .icCalenderFill, .icMission, .icStar, .icProfile]
             )
         } else {
             let dailyJourneyVC = factory.makeDailyJourneyViewController()

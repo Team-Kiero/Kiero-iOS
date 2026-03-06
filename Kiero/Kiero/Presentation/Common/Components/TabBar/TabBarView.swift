@@ -79,34 +79,23 @@ final class TabBarView: UIView {
         itemViews.removeAll()
         
         if isParent {
-            stackView.distribution = .fill
-            stackView.alignment = .center
-            stackView.spacing = 99
-            
-            let leftSpacer = UIView().then { $0.isUserInteractionEnabled = false }
-            let rightSpacer = UIView().then { $0.isUserInteractionEnabled = false }
-            
-            stackView.addArrangedSubview(leftSpacer)
+            stackView.distribution = .fillEqually
+            stackView.alignment = .fill
+            stackView.spacing = 12
             
             for (index, title) in titles.enumerated() {
                 let itemView = createTabItem(title: title, icon: icons[index], index: index)
                 
                 itemView.snp.makeConstraints {
-                    $0.width.equalTo(43)
-                    $0.height.equalTo(51).priority(.high)
+                    $0.width.equalTo(52)
+                    $0.height.equalTo(42).priority(.high)
                 }
                 
                 stackView.addArrangedSubview(itemView)
                 itemViews.append(itemView)
             }
-            
-            stackView.addArrangedSubview(rightSpacer)
-            
-            leftSpacer.snp.makeConstraints {
-                $0.width.equalTo(rightSpacer.snp.width)
-            }
-            self.layoutIfNeeded()
         } else {
+            stackView.isLayoutMarginsRelativeArrangement = false
             stackView.distribution = .fillEqually
             stackView.alignment = .fill
             stackView.spacing = 0
@@ -116,8 +105,10 @@ final class TabBarView: UIView {
                 stackView.addArrangedSubview(itemView)
                 itemViews.append(itemView)
             }
-            self.setNeedsLayout()
         }
+        
+        self.setNeedsLayout()
+        self.layoutIfNeeded()
     }
     
     private func createTabItem(title: String, icon: ImageResource, index: Int) -> TabItem {

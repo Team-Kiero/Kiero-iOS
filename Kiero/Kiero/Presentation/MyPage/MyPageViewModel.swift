@@ -8,7 +8,7 @@
 import Combine
 import SwiftUI
 
-final class MyPageViewModel: ObservableObject {
+final class MyPageViewModel: BaseViewModel, ObservableObject {
     
     @Published var userName: String = "꾸비"
     @Published var userImage: String? = nil

@@ -26,7 +26,7 @@ final class EmptyView: BaseUIView {
     
     private let containerStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.alignment = .fill
+        $0.alignment = .center
         $0.distribution = .fill
         $0.spacing = 0
     }

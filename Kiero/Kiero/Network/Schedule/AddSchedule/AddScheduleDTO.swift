@@ -10,6 +10,7 @@ import Foundation
 struct AddScheduleRequestDTO: Encodable {
     let name: String
     let isRecurring: Bool
+    let firstOrderDate: String?
     let startTime: String
     let endTime: String
     let scheduleColor: String
