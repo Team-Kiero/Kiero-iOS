@@ -24,7 +24,7 @@ final class RewardHostingController: UIHostingController<RewardView> {
 
 extension RewardHostingController: TabBarReselectRefreshable {
     func refreshOnTabReselect() {
-        viewModel.fetchRewards()
+        viewModel.fetchCoupons()
     }
     
 }
