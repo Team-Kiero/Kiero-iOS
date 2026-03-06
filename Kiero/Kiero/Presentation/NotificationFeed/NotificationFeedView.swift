@@ -14,7 +14,6 @@ final class NotificationFeedView: BaseUIView {
     
     // MARK: - Properties
     
-    var onProfileTapped: (() -> Void)?
     var onBackTapped: (() -> Void)?
     
     // MARK: - UI Components
@@ -62,10 +61,5 @@ final class NotificationFeedView: BaseUIView {
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
-    }
-    
-    @objc
-    private func handleTap() {
-        onProfileTapped?()
     }
 }
