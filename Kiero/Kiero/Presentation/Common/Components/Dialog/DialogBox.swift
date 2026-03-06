@@ -19,8 +19,8 @@ final class DialogBox: UIView {
         case logout
         case wishWell(title: String, coin: String)
         case nextJourney
-        case deleteSchedule(title: String)
-        case editSchedule(title: String)
+        case deleteSchedule(title: String, isRecurring: Bool)
+        case editSchedule(title: String, isRecurring: Bool)
         case deleteReward(title: String, coin: String)
         
         var title: String {
