@@ -20,6 +20,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     let logoutSuccess = PassthroughSubject<Void, Never>()
     let isEditSuccess = PassthroughSubject<Void, Never>()
     let editErrorMessage = PassthroughSubject<String, Never>()
+    let deleteErrorMessage = PassthroughSubject<String, Never>()
     
     var isFireLit: Bool = false
     
@@ -216,7 +217,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         .receive(on: RunLoop.main)
         .sink(receiveCompletion: { completion in
             if case .failure(let error) = completion {
-                print("삭제 실패: \(error)")
+                self.deleteErrorMessage.send("일정 삭제에 실패했어요. 잠시 후 다시 시도해주세요.")
             }
         }, receiveValue: { [weak self] in
             self?.refreshSchedules()
