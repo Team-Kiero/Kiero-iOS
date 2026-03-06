@@ -102,7 +102,7 @@ struct MyPageView: View {
                         state: .logout,
                         isPresented: $showDialog,
                         onConfirm: {
-                            print("로그아웃 API 호출")
+                            viewModel.requestLogout()
                         }
                     )
                     .frame(maxWidth: .infinity)
