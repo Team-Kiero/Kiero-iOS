@@ -24,12 +24,14 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
     @Published var selectedReward: Reward? = nil
     @Published var showDeleteDialog: Bool = false
     
+    var currentChildId: Int = 0
+    
     let scrollToTop = PassthroughSubject<Void, Never>()
     
     override init() {
         super.init()
         
-        fetchRewards()
+        self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
     }
     
     func addReward(title: String, cost: Int) {
@@ -39,19 +41,22 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
         self.rewards.insert(newReward, at: 0)
     }
     
-    func fetchRewards() {
-        // TODO: 서버 통신 로직
-        self.rewards = [
-            Reward(id: 1, title: "용돈 5,000원 받기", cost: 350),
-            Reward(id: 2, title: "치킨 시켜먹기", cost: 120),
-            Reward(id: 3, title: "게임 1시간 추가", cost: 100),
-            Reward(id: 4, title: "친구랑 놀러가기", cost: 500),
-            Reward(id: 5, title: "새 신발 사기", cost: 300),
-            Reward(id: 6, title: "새 신발 사기", cost: 300),
-            Reward(id: 7, title: "새 신발 사기", cost: 300),
-            Reward(id: 8, title: "새 신발 사기", cost: 300),
-            Reward(id: 9, title: "새 신발 사기", cost: 300)
-        ]
+    func fetchCoupons(childId: Int? = nil) {
+        let targetId = childId ?? self.currentChildId
+        
+        RewardService.shared.fetchCoupons(childId: targetId)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 목록 조회 성공")
+                case .failure(let error):
+                    print("쿠폰 목록 조회 실패: \(error)")
+                }
+            } receiveValue: { [weak self] rewards in
+                self?.rewards = rewards
+            }
+            .store(in: &cancellables)
     }
     
     func updateReward(id: Int, title: String, cost: Int) {
