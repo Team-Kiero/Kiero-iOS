@@ -130,6 +130,7 @@ struct MyPageView: View {
                     }
             }
         }
+        .background(.kBlack)
     }
 }
 
