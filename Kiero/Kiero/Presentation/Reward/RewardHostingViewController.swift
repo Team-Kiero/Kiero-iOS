@@ -9,7 +9,7 @@ import Combine
 import SwiftUI
 import UIKit
 
-final class RewardHostingController: UIHostingController<RewardView>, ScrollToTopAvailable, TabBarReselectRefreshable {
+final class RewardHostingController: UIHostingController<RewardView> {
     
     private let viewModel: RewardViewModel
     
@@ -21,11 +21,16 @@ final class RewardHostingController: UIHostingController<RewardView>, ScrollToTo
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+}
+
+extension RewardHostingController: TabBarReselectRefreshable {
     func refreshOnTabReselect() {
         viewModel.fetchRewards()
     }
     
+}
+
+extension RewardHostingController: ScrollToTopAvailable {
     func scrollToTop() {
         viewModel.scrollToTop.send()
     }
