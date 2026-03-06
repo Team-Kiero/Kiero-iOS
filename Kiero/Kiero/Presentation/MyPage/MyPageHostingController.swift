@@ -6,15 +6,10 @@
 //
 
 import SwiftUI
-import UIKit
 
 final class MyPageHostingController: UIHostingController<MyPageView> {
     
-    // MARK: - Properties
-    
     private let viewModel: MyPageViewModel
-    
-    // MARK: - Init
     
     init(viewModel: MyPageViewModel) {
         self.viewModel = viewModel
