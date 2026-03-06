@@ -39,7 +39,7 @@ struct MyPageView: View {
                     
                     Text("\(viewModel.userName)")
                         .font(Font(UIFont.title3_16_SB))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     
                     Spacer()
                 }
@@ -57,7 +57,7 @@ struct MyPageView: View {
                     HStack(spacing: 0) {
                         Text("자녀 연결 관리")
                             .font(Font(UIFont.body3_14_R))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         
                         Spacer()
                         
@@ -75,7 +75,7 @@ struct MyPageView: View {
                     HStack {
                         Text("로그아웃")
                             .font(Font(UIFont.body3_14_R))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                         
                         Spacer()
                         
@@ -118,7 +118,7 @@ struct ConnectionChip: View {
     var body: some View {
         Text(count == 0 ? "연결 필요" : "\(count)명 연결됨")
             .font(Font(UIFont.body6_10_R))
-            .foregroundColor(count == 0 ? .main : .gray500 )
+            .foregroundStyle(count == 0 ? .main : .gray500 )
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.gray900)
