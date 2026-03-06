@@ -76,10 +76,15 @@ public final class TabBarViewController: UITabBarController {
             let statusVC = factory.makeTodayStatusViewController()
             let scheduleVC = factory.makeScheduleViewController()
             let missionVC = factory.makeMissionViewController()
+            
             let rewardVC = factory.makeRewardViewController()
             let myPageVC = factory.makeMyPageViewController()
             
             self.viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
+                if $0 is RewardHostingController {
+                    return $0
+                }
+                
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
                 nav.delegate = self
