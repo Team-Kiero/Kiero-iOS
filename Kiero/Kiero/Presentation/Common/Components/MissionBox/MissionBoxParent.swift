@@ -60,6 +60,7 @@ final class MissionBoxParent: UIView {
         
         rewardStackView.layer.borderColor = UIColor.gray500.cgColor
         rewardIcon.image = .ic3DCoin
+        rewardStackView.insetsLayoutMarginsFromSafeArea = false
         rewardStackView.isLayoutMarginsRelativeArrangement = true
         rewardStackView.layoutMargins = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 8)
     }
@@ -90,6 +91,6 @@ final class MissionBoxParent: UIView {
     
     func configure(name: String, reward: Int) {
         titleLabel.setTypo(.title3_16_SB, text: name)
-        rewardLabel.setTypo(.body5_10_R, text: "\(reward) 개")
+        rewardLabel.setTypo(.body6_10_R, text: "\(reward) 개")
     }
 }

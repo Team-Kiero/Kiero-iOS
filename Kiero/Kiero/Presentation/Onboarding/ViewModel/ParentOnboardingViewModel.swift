@@ -61,7 +61,7 @@ final class ParentOnboardingViewModel: BaseViewModel {
 
                 print("✅ [VM] 2) reissueSseAccessToken() 호출 직전")
 
-                let sseToken = try await BaseService.shared.reissueSseAccessToken()
+                let sseToken = try await TokenRefresher.shared.reissueSseAccessToken()
 
                 print("✅ [VM] 2) sseToken 발급 성공:", sseToken.prefix(10))
 

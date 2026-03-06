@@ -60,7 +60,7 @@ final class SseStreamManager {
                 self.onRefreshWillStart?()
                 
                 do {
-                    let newToken = try await BaseService.shared.reissueSseAccessToken()
+                    let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
                     self.sseAccessToken = newToken
                     
                     await MainActor.run { [weak self] in

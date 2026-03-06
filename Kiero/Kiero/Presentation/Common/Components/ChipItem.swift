@@ -46,7 +46,7 @@ final class ChipItem: UIView {
         var font: UIFont.NotoSans {
             switch self {
             case .usedCoinChip:
-                return .body5_10_R
+                return .body6_10_R
             default:
                 return .body3_14_R
             }
@@ -127,7 +127,7 @@ final class ChipItem: UIView {
         
         contentStackView.snp.makeConstraints {
             $0.center.equalToSuperview()
-            $0.horizontalEdges.equalToSuperview().inset(12)
+            $0.horizontalEdges.equalToSuperview().inset(8)
         }
         
         iconImageView.snp.makeConstraints {

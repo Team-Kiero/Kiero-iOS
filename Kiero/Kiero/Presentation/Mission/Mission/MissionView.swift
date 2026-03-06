@@ -17,6 +17,7 @@ final class MissionView: BaseUIView {
     private var groupedMissions: [String: [Mission]] = [:]
     private var sortedDates: [String] = []
     private var missionGroups: [MissionGroupDTO] = []
+    var onMissionTap: ((MissionItemDTO, String) -> Void)?
     
     // MARK: - UI Components
     
@@ -117,12 +118,13 @@ extension MissionView: UITableViewDelegate {
         }
         
         let titleLabel = UILabel().then {
-            $0.textColor = .gray300
             if headerDate.isToday {
                 $0.setTypo(.title4_14_SB, text: "오늘")
+                $0.textColor = .main
                 $0.isHidden = false
             } else if headerDate.isTomorrow {
                 $0.setTypo(.title4_14_SB, text: "내일")
+                $0.textColor = .schedule1
                 $0.isHidden = false
             } else {
                 $0.isHidden = true
@@ -140,12 +142,19 @@ extension MissionView: UITableViewDelegate {
         containerStack.addArrangedSubviews(titleLabel, dateLabel)
         
         containerStack.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(section == 0 ? 23 : 16)
+            $0.top.equalToSuperview().offset(section == 0 ? 13 : 5)
             $0.horizontalEdges.equalToSuperview()
             $0.bottom.equalToSuperview().inset(11)
         }
         
         return headerView
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let group = missionGroups[indexPath.section]
+        let mission = group.missions[indexPath.row]
+        
+        onMissionTap?(mission, group.dueAt)
     }
 }
 

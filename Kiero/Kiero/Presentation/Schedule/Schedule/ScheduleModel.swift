@@ -8,6 +8,7 @@
 import Foundation
 
 struct Schedule: Codable {
+    let id: Int
     let name: String
     let isRecurring: Bool
     let startTime: String

@@ -14,3 +14,8 @@ struct BaseResponse<T: Decodable>: Decodable {
 }
 
 struct EmptyResponse: Decodable { }
+
+struct ErrorResponse: Decodable {
+    let status: Int
+    let message: String
+}

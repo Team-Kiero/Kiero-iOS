@@ -17,6 +17,7 @@ final class NotificationFeed: UIView {
     
     enum State {
         case finishSchedule(
+            key: String,
             time: String,
             childName: String,
             schedule: String,
@@ -64,9 +65,10 @@ final class NotificationFeed: UIView {
     }
     
     private let proofImageView = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
+        $0.contentMode = .scaleAspectFill
         $0.clipsToBounds = true
         $0.isHidden = true
+        $0.layer.cornerRadius = 10
     }
     
     private let coinChip = ChipItem().then {
@@ -136,7 +138,7 @@ final class NotificationFeed: UIView {
         
         proofImageView.snp.makeConstraints {
             $0.top.equalTo(messageLabel.snp.bottom).offset(7)
-            $0.centerX.equalToSuperview()
+            $0.horizontalEdges.equalTo(container).inset(13)
             $0.height.equalTo(0)
         }
         
@@ -152,7 +154,7 @@ final class NotificationFeed: UIView {
         downButton.addTarget(self, action: #selector(didTapToggle), for: .touchUpInside)
     }
     
-    // MARK: - Congifuration
+    // MARK: - Configuration
     
     func configure(_ state: State) {
         downButton.isHidden = true
@@ -163,7 +165,7 @@ final class NotificationFeed: UIView {
         let style: UIFont.NotoSans = .title3_16_SB
         
         switch state {
-        case let .finishSchedule(time, childName, schedule, proofImageUrl, isExpanded):
+        case let .finishSchedule(_, time, childName, schedule, proofImageUrl, isExpanded):
             timeLabel.setTypo(.body4_12_R, text: time)
             downButton.isHidden = false
             let subject = "\(childName)\(childName.subjectMarker)"
@@ -219,7 +221,7 @@ final class NotificationFeed: UIView {
     
     private func applyExpanded(_ expanded: Bool, animated: Bool) {
         proofImageView.isHidden = !expanded
-        proofImageView.snp.updateConstraints { $0.height.equalTo(expanded ? 343 : 0) }
+        proofImageView.snp.updateConstraints { $0.height.equalTo(expanded ? 435 : 0) }
         let name = expanded ? UIImage.icUp : UIImage.icDown
         downButton.setImage(name, for: .normal)
     }
@@ -309,8 +311,9 @@ extension NotificationFeed.State {
 
     mutating func toggleExpanded() {
         switch self {
-        case let .finishSchedule(time, childName, schedule, url, isExpanded):
+        case let .finishSchedule(key, time, childName, schedule, url, isExpanded):
             self = .finishSchedule(
+                key: key,
                 time: time,
                 childName: childName,
                 schedule: schedule,
@@ -324,7 +327,7 @@ extension NotificationFeed.State {
 
     var dateKey: String {
         switch self {
-        case let .finishSchedule(time, _, _, _, _),
+        case let .finishSchedule(_, time, _, _, _, _),
              let .finishMission(time, _, _, _),
              let .useCoupon(time, _, _, _),
              let .finishAllSchedule(time, _, _):

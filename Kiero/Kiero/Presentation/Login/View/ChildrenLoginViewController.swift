@@ -33,7 +33,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     private let firstNameTextField = TextField(type: .child(.firstName))
     private let codeTextField = TextField(type: .child(.inviteCode))
     
-    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
         $0.configure(title: "여정 시작하기")
         $0.isEnabled = false
     }

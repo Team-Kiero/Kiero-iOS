@@ -20,6 +20,18 @@ protocol TabBarReselectRefreshable {
 
 public final class TabBarViewController: UITabBarController {
     
+    public override var selectedIndex: Int {
+        didSet {
+            updateCustomTabBarSelection()
+        }
+    }
+    
+    public override var selectedViewController: UIViewController? {
+        didSet {
+            updateCustomTabBarSelection()
+        }
+    }
+    
     private let factory: ViewControllerFactory
     private let isParent: Bool
     
@@ -47,6 +59,13 @@ public final class TabBarViewController: UITabBarController {
         self.delegate = self
     }
     
+    private func updateCustomTabBarSelection() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.customTabBar.updateSelection(self.selectedIndex)
+        }
+    }
+    
     private func setStyle() {
         self.tabBar.isHidden = true
         view.backgroundColor = .kBlack
@@ -54,10 +73,13 @@ public final class TabBarViewController: UITabBarController {
     
     private func setViewControllers() {
         if isParent {
+            let statusVC = factory.makeTodayStatusViewController()
             let scheduleVC = factory.makeScheduleViewController()
-            let notificationVC = factory.makeNotificationFeedViewController()
+            let missionVC = factory.makeMissionViewController()
+            let rewardVC = factory.makeRewardViewController()
+            let myPageVC = factory.makeMyPageViewController()
             
-            self.viewControllers = [scheduleVC, notificationVC].map {
+            self.viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
                 nav.delegate = self
@@ -65,8 +87,8 @@ public final class TabBarViewController: UITabBarController {
             }
             
             customTabBar.setTabItems(
-                titles: ["스케줄 관리", "알림 피드"],
-                icons: [.icCalendarLine, .icBell]
+                titles: ["오늘의 현황", "일정", "미션", "보상", "마이페이지"],
+                icons: [.icMap, .icCalenderFill, .icMission, .icStar, .icProfile]
             )
         } else {
             let dailyJourneyVC = factory.makeDailyJourneyViewController()

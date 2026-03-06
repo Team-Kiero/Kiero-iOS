@@ -146,7 +146,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             if token == nil {
                 print("⚠️ [DailyJourneyViewModel] No SSE Token found. Reissuing...")
                 do {
-                    token = try await BaseService.shared.reissueSseAccessToken()
+                    token = try await TokenRefresher.shared.reissueSseAccessToken()
                     print("✅ [DailyJourneyViewModel] SSE Token reissued successfully.")
                 } catch {
                     print("❌ [DailyJourneyViewModel] Failed to reissue SSE Token: \(error)")

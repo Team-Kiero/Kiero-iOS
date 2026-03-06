@@ -10,12 +10,14 @@ import Combine
 import ImageIO
 
 import Kingfisher
+import KingfisherWebP
 import SnapKit
 import Then
 
 final class DailyJourneyView: BaseUIView {
     
     var onNextJourneyTap: (() -> Void)?
+    var onMapButtonTap: (() -> Void)?
     
     // MARK: - UI Components
     
@@ -25,13 +27,39 @@ final class DailyJourneyView: BaseUIView {
         $0.clipsToBounds = true
     }
     
+    private let dimOverlayView = UIView().then {
+        $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.6)
+        $0.isUserInteractionEnabled = false
+    }
+    
     private let backgroundMaskView = UIView().then {
         let gradientLayer = CAGradientLayer()
         gradientLayer.type = .radial
-        gradientLayer.colors = [UIColor.black.cgColor, UIColor.clear.cgColor]
+        
+        gradientLayer.colors = [
+            UIColor(white: 1.0, alpha: 1.0).cgColor,
+            UIColor(white: 1.0, alpha: 1.0).cgColor,
+            UIColor(white: 1.0, alpha: 0.85).cgColor,
+            UIColor(white: 1.0, alpha: 0.65).cgColor,
+            UIColor(white: 1.0, alpha: 0.45).cgColor,
+            UIColor(white: 1.0, alpha: 0.25).cgColor,
+            UIColor(white: 1.0, alpha: 0.12).cgColor,
+            UIColor(white: 1.0, alpha: 0.0).cgColor
+        ]
+        
+        gradientLayer.locations = [
+            0.0,
+            0.75,
+            0.82,
+            0.88,
+            0.92,
+            0.95,
+            0.97,
+            1.0
+        ] as [NSNumber]
         gradientLayer.startPoint = CGPoint(x: 0.5, y: 0.5)
         gradientLayer.endPoint = CGPoint(x: 1.0, y: 1.0)
-        gradientLayer.locations = [0.0, 1.0]
+        
         $0.layer.addSublayer(gradientLayer)
     }
     
@@ -45,11 +73,22 @@ final class DailyJourneyView: BaseUIView {
     
     private let speechField = SpeechField(type: .gray)
     
-    let verifyPhotoButton = CTAButton(style: .gray900).then {
+    let verifyPhotoButton = CTAButton(style: .gray100, size: .h49).then {
         $0.configure(
             title: "인증하고 불조각 받기",
-            icon: UIImage(resource: .icCamera)
+            icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)
         )
+    }
+    
+    private let mapButton = UIButton(type: .custom).then {
+        $0.setImage(UIImage(resource: .icButtonMap), for: .normal)
+        $0.imageView?.contentMode = .scaleAspectFit
+        $0.layer.cornerRadius = 20
+        $0.layer.shadowColor = UIColor.gray800.cgColor
+        $0.layer.shadowOpacity = 1
+        $0.layer.shadowRadius = 10
+        $0.layer.shadowOffset = CGSize(width: 0, height: 0)
+        $0.clipsToBounds = false
     }
     
     override func layoutSubviews() {
@@ -67,21 +106,27 @@ final class DailyJourneyView: BaseUIView {
     // MARK: - Setup Methods
     
     override func setUI() {
-        addSubviews(backgroundImageView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton)
+        addSubviews(backgroundImageView, dimOverlayView, headerView, journeyTimeView, kkubiCharacterImageView, speechField, verifyPhotoButton, mapButton)
         
         speechField.onTap = { [weak self] in
             self?.onNextJourneyTap?()
         }
         
-        loadIntroGif()
+        mapButton.addTarget(self, action: #selector(mapButtonTapped), for: .touchUpInside)
+
+        loadIntroWebP()
     }
     
     override func setLayout() {
         backgroundImageView.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(126)
+            $0.centerX.equalToSuperview()
             $0.width.equalTo(410)
             $0.height.equalTo(437)
-            $0.top.equalToSuperview().offset(106)
-            $0.leading.equalToSuperview().offset(-17)
+        }
+        
+        dimOverlayView.snp.makeConstraints {
+            $0.edges.equalTo(backgroundImageView)
         }
         
         headerView.snp.makeConstraints {
@@ -96,6 +141,12 @@ final class DailyJourneyView: BaseUIView {
             $0.height.equalTo(50)
         }
         
+        mapButton.snp.makeConstraints {
+            $0.centerY.equalTo(journeyTimeView)
+            $0.trailing.equalToSuperview().inset(16)
+            $0.size.equalTo(60)
+        }
+        
         verifyPhotoButton.snp.makeConstraints {
             $0.bottom.equalToSuperview().inset(114)
             $0.horizontalEdges.equalToSuperview().inset(16)
@@ -107,19 +158,34 @@ final class DailyJourneyView: BaseUIView {
         }
         
         kkubiCharacterImageView.snp.makeConstraints {
-            $0.top.equalTo(journeyTimeView.snp.bottom).offset(20)
+            $0.top.equalTo(journeyTimeView.snp.bottom).offset(60)
             $0.centerX.equalToSuperview()
             $0.width.equalTo(343)
             $0.height.equalTo(343)
         }
     }
     
-    private func loadIntroGif() {
-        if let url = Bundle.main.url(forResource: "intro_1", withExtension: "gif") {
-            kkubiCharacterImageView.kf.setImage(with: url)
+    private func loadIntroWebP() {
+        if let url = Bundle.main.url(forResource: "kkubi_intro", withExtension: "webp") {
+            
+            let processor = WebPProcessor.default
+            let serializer = WebPSerializer.default
+            
+            kkubiCharacterImageView.kf.setImage(
+                with: url,
+                options: [
+                    .processor(processor),
+                    .cacheSerializer(serializer)
+                ]
+            )
         } else {
-            print("⚠️ gif 파일을 Bundle에서 찾을 수 없습니다.")
+            print("⚠️ webp 파일을 Bundle에서 찾을 수 없습니다.")
         }
+    }
+    
+    @objc
+    private func mapButtonTapped() {
+        onMapButtonTap?()
     }
     
     // MARK: - Update Methods
@@ -164,7 +230,7 @@ final class DailyJourneyView: BaseUIView {
             verifyPhotoButton.isHidden = false
             verifyPhotoButton.configure(
                 title: "마음의 불꽃 피워주기",
-                icon: nil
+                icon: UIImage(resource: .icFire)
             )
             
         case .hidden:

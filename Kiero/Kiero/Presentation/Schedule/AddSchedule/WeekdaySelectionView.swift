@@ -29,7 +29,7 @@ final class WeekdaySelectionView: UIView {
     
     private lazy var everyDayButton = UIButton().then {
         $0.setTitleColor(.white, for: .normal)
-        $0.setTypo(.body5_10_R, text: "매일", for: .normal)
+        $0.setTypo(.body6_10_R, text: "매일", for: .normal)
         $0.setImage(UIImage(resource: .btnUncheck), for: .normal)
         $0.setImage(UIImage(resource: .btnCheck), for: .selected)
         $0.semanticContentAttribute = .forceLeftToRight
@@ -83,6 +83,23 @@ final class WeekdaySelectionView: UIView {
             $0.trailing.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
+    }
+    
+    func setSelectedIndices(_ indices: [Int]) {
+        dayButtons.forEach {
+            $0.isSelected = false
+            $0.layer.borderWidth = 0
+        }
+        selectedIndices.removeAll()
+        
+        indices.forEach { index in
+            guard index < dayButtons.count else { return }
+            dayButtons[index].isSelected = true
+            dayButtons[index].layer.borderWidth = 1.0
+            selectedIndices.insert(index)
+        }
+        
+        everyDayButton.isSelected = (selectedIndices.count == 7)
     }
     
     @objc

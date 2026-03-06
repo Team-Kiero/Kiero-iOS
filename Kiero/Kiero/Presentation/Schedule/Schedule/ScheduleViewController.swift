@@ -13,46 +13,19 @@ import Then
 
 class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
-    // MARK: - Properties
-    
-    private var currentTabIndex: Int = 0 {
-        didSet {
-            updateFloatingButtonType()
-        }
-    }
-    
-    private lazy var scheduleChildVC: ScheduleChildViewController = {
-        guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
-        let vc = AppDIContainer.shared.makeScheduleChildViewController(viewModel: viewModel)
-        return vc
-    }()
-    
-    private let missionVC = AppDIContainer.shared.makeMissionViewController()
-    
     // MARK: - UI Components
     
-    private lazy var profileBox = ProfileBox(
-        name: TokenManager.shared.getUserName() ?? "신키로",
-        profileURL: TokenManager.shared.getProfile() ?? "",
-        backgroundColor: .clear
-    ).then {
-        $0.onTap = {[weak self] in
-            self?.showLogoutDialog {
-                //self?.viewModel?.performLogout()
-                LogoutHelper.logoutToPickRole()
-            }
+    private lazy var navigationBar = NavigationBar(type: .main(title: "일정")).then {
+        $0.rightButtonAction = { [weak self] in
+            self?.presentNotificationFeed()
         }
     }
     
-    private lazy var segmentedControl = SegmentedControl(
-        titles: ["일정", "미션"],
-        contentViews: [scheduleChildVC.view, missionVC.view]
-    ).then {
-        $0.onIndexChanged = { [weak self] index in
-            guard let self = self else { return }
-            self.currentTabIndex = index
-        }
-    }
+    private lazy var scheduleChildVC: TimeTableViewController = {
+        guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
+        let vc = AppDIContainer.shared.makeTimeTableViewController(viewModel: viewModel)
+        return vc
+    }()
     
     private let floatingButton = FloatingButton(type: .schedule)
     
@@ -70,46 +43,33 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - Setup Methods
     
-    override func setStyle() {
-        view.backgroundColor = .gray900
-    }
-    
     override func setUI() {
         addChild(scheduleChildVC)
-        addChild(missionVC)
-        
-        view.addSubviews(profileBox, segmentedControl, floatingButton)
-        
+        view.addSubviews(navigationBar, scheduleChildVC.view, floatingButton)
         scheduleChildVC.didMove(toParent: self)
-        missionVC.didMove(toParent: self)
     }
     
     override func setLayout() {
-        profileBox.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(59)
-            $0.trailing.equalToSuperview()
+        navigationBar.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(57)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(40)
         }
         
-        segmentedControl.snp.makeConstraints {
-            $0.top.equalTo(profileBox.snp.bottom)
+        scheduleChildVC.view.snp.makeConstraints {
+            $0.top.equalTo(navigationBar.snp.bottom)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
         floatingButton.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(31)
-            $0.bottom.equalToSuperview().inset(119)
+            $0.trailing.equalToSuperview().inset(32)
+            $0.bottom.equalToSuperview().inset(115)
         }
     }
     
     private func setAction() {
         floatingButton.tapAction = { [weak self] in
-            guard let self = self else { return }
-            
-            if self.currentTabIndex == 0 {
-                self.presentAddSchedule()
-            } else {
-                self.presentAddMission()
-            }
+            self?.presentAddSchedule()
         }
     }
     
@@ -126,11 +86,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let startOfReferenceWeek = calendar.startOfDay(for: referenceWeekStart)
         
         return startOfReferenceWeek < startOfCurrentWeek
-    }
-    
-    private func updateFloatingButtonType() {
-        let newType: FloatingButtonType = (currentTabIndex == 0) ? .schedule : .mission
-        floatingButton.updateType(newType)
     }
     
     private func presentAddSchedule() {
@@ -160,49 +115,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let nav = UINavigationController(rootViewController: addScheduleVC)
         nav.modalPresentationStyle = .fullScreen
         self.present(nav, animated: true)
-    }
-    
-    private func presentAddMission() {
-        let menuView = MissionFloatingMenuView()
-        
-        menuView.onMenuSelected = { [weak self] index in
-            guard let self = self else { return }
-            
-            self.view.endEditing(true)
-            
-            if index == 0 {
-                guard let writeVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else { return }
-                
-                writeVC.onMissionAdded = { [weak self] (newMission: Mission) in
-                    if let missionViewController = self?.missionVC as? MissionViewController {
-                        missionViewController.viewModel?.addMission(newMission)
-                    }
-                }
-                
-                let nav = UINavigationController(rootViewController: writeVC)
-                nav.modalPresentationStyle = .fullScreen
-                self.present(nav, animated: true)
-                
-            } else {
-                guard let aiVC = self.diContainer.makeAIMissionViewController() as? AIMissionViewController else { return }
-                
-                aiVC.onMissionAdded = { [weak self] (newMission: Mission) in
-                    if let missionVC = self?.missionVC as? MissionViewController {
-                        missionVC.viewModel?.addMission(newMission)
-                    }
-                }
-                
-                let nav = UINavigationController(rootViewController: aiVC)
-                nav.modalPresentationStyle = .fullScreen
-                self.present(nav, animated: true)
-            }
-        }
-        
-        if let tabBarView = self.tabBarController?.view {
-            menuView.show(in: tabBarView)
-        } else {
-            menuView.show(in: self.view)
-        }
     }
     
     override func bindViewModel() {
@@ -243,5 +155,10 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
             .sink { [weak self] in
                 self?.navigateToPickRole()
             }.store(in: &cancellables)
+    }
+    
+    private func presentNotificationFeed() {
+        let notificationVC = diContainer.makeNotificationFeedViewController()
+        self.navigationController?.pushViewController(notificationVC, animated: true)
     }
 }

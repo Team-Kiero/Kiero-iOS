@@ -35,7 +35,7 @@ final class TabItem: UIView {
     init(title: String, image: UIImage?) {
         super.init(frame: .zero)
         iconImageView.image = image?.withRenderingMode(.alwaysTemplate)
-        titleLabel.setTypo(.body5_10_R, text: title)
+        titleLabel.setTypo(.body5_11_R, text: title)
         
         setUI()
         setLayout()

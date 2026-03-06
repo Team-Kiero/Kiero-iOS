@@ -251,7 +251,7 @@ final class TextField: UIView {
             return
         }
         
-        errorLabel.setTypo(.body5_10_R, text: type.errorMessage)
+        errorLabel.setTypo(.body6_10_R, text: type.errorMessage)
         errorLabel.alpha = 1
         errorImage.alpha = 1
         
