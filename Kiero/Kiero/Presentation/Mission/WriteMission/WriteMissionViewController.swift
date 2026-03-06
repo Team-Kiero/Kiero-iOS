@@ -17,6 +17,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     private var currentSelectedDate: Date = Date()
     private var editMissionId: Int?
     var onMissionAdded: ((Mission) -> Void)?
+    private var isRequesting: Bool = false
     
     // MARK: - UI Components
     
@@ -90,12 +91,14 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         
         navigationBar.rightButtonAction = { [weak self] in
             guard let self = self else { return }
+            guard !self.isRequesting else { return }
             
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
                 Toast.show(message: "미션 이름을 입력해주세요.")
                 return
             }
             
+            self.isRequesting = true
             let rewardValue = self.rewardView.selectedReward
             let dueAtStr = self.currentSelectedDate.toString(format: "yyyy-MM-dd")
             
@@ -130,6 +133,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         viewModel?.errorMessage
             .receive(on: DispatchQueue.main)
             .sink { message in
+                self.isRequesting = false
                 Toast.show(message: message)
             }
             .store(in: &cancellables)
