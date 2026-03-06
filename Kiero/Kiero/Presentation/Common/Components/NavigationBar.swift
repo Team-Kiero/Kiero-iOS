@@ -162,6 +162,10 @@ final class NavigationBar: UIView {
         rightButton.addTarget(self, action: #selector(didTapRight), for: .touchUpInside)
     }
     
+    func setTitle(_ title: String) {
+        titleLabel.setTypo(.head2_20_B, text: title)
+    }
+    
     func updateTitle(_ title: String) {
         titleLabel.setTypo(.title3_16_SB, text: title)
     }

@@ -46,7 +46,7 @@ final class FloatingButton: UIButton {
         case .schedule:
             self.setImage(UIImage(resource: .btnAddSchedule), for: .normal)
         case .mission:
-            self.setImage(UIImage(resource: .btnAddMission), for: .normal)
+            self.setImage(UIImage(resource: .btnAddSchedule), for: .normal)
         }
     }
     

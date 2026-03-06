@@ -8,6 +8,16 @@
 import Foundation
 
 extension String {
+    var toShortTime: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        if let date = formatter.date(from: self) {
+            formatter.dateFormat = "HH:mm"
+            return formatter.string(from: date)
+        }
+        return self
+    }
+    
     func toDate(format: String = "yyyy-MM-dd") -> Date? {
         let formatter = DateFormatter()
         formatter.dateFormat = format
