@@ -17,13 +17,16 @@ extension View {
             title: reward.title,
             type: .reward(price: reward.cost)
         )
-
+        
         let bottomSheet = DetailBottomSheet(data: detailData)
         bottomSheet.onEditTap = onEdit
         bottomSheet.onDeleteTap = onDelete
         
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
+        if let windowScene = UIApplication.shared.connectedScenes
+            .compactMap({$0 as? UIWindowScene})
+            .first(where: {$0.activationState == .foregroundActive}),
+           let window = windowScene.windows.first(where: { $0.isKeyWindow }),
+           let rootVC = window.rootViewController {
             let topVC = rootVC.presentedViewController ?? rootVC
             topVC.present(bottomSheet, animated: false)
         }
