@@ -5,6 +5,7 @@
 //  Created by 신혜연 on 1/8/26.
 //
 
+import SwiftUI
 import UIKit
 
 import KakaoSDKAuth
@@ -77,8 +78,8 @@ extension AppDIContainer {
         return ScheduleViewController(viewModel: viewModel, diContainer: self)
     }
     
-    func makeScheduleChildViewController(viewModel: ScheduleViewModel) -> ScheduleChildViewController {
-        return ScheduleChildViewController(viewModel: viewModel, diContainer: self)
+    func makeTimeTableViewController(viewModel: ScheduleViewModel) -> TimeTableViewController {
+        return TimeTableViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeAddScheduleViewController() -> UIViewController {
@@ -87,6 +88,13 @@ extension AppDIContainer {
         
         let viewModel = AddScheduleViewModel(service: service, childId: selectedChildId)
         return AddScheduleViewController(viewModel: viewModel, diContainer: self)
+    }
+    
+    func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController {
+        let vc = makeAddScheduleViewController() as! AddScheduleViewController
+        vc.isEditMode = true
+        vc.editingSchedule = schedule
+        return vc
     }
 }
 
@@ -179,5 +187,32 @@ extension AppDIContainer {
     func makeWishWellViewController() -> UIViewController {
         let viewModel = makeWishWellViewModel()
         return WishWellViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
+// MARK: - TodayStatus
+
+extension AppDIContainer {
+    func makeTodayStatusViewController() -> UIViewController {
+        let viewModel = TodayStatusViewModel()
+        return TodayStatusViewController(viewModel: viewModel, diContainer: self)
+    }
+}
+
+// MARK: - Reward
+
+extension AppDIContainer {
+    func makeRewardViewController() -> UIViewController {
+        let viewModel = RewardViewModel()
+        return RewardHostingController(viewModel: viewModel)
+    }
+}
+
+// MARK: - MyPage
+
+extension AppDIContainer {
+    func makeMyPageViewController() -> UIViewController {
+        let viewModel = MyPageViewModel()
+        return MyPageHostingController(viewModel: viewModel)
     }
 }

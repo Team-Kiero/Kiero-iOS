@@ -68,7 +68,7 @@ struct DailyJourneyStoneRewardView: View {
                 if let text = resultText {
                     Text(text)
                         .font(Font(UIFont.body6_10_R))
-                        .foregroundColor(resultColor)
+                        .foregroundStyle(resultColor)
                         .offset(y: 18) 
                         .fixedSize()
                 }

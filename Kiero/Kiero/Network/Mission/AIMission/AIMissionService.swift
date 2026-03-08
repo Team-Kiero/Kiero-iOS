@@ -34,6 +34,9 @@ final class AIMissionService: AIMissionServiceType {
                     
                     promise(.success(response.suggestedMissions))
                     
+                } catch let networkError as NetworkError {
+                    print("❌ [Service] 알림장 분석 에러 상세: \(networkError)")
+                    promise(.failure(networkError))
                 } catch {
                     print("❌ [Service] 알림장 분석 에러 상세: \(error)")
                     promise(.failure(.responseDecodingError))

@@ -45,6 +45,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             self?.didTapNextButton()
         }
         mainView.verifyPhotoButton.addTarget(self, action: #selector(didTapVerifyButton), for: .touchUpInside)
+        
+        mainView.onMapButtonTap = { [weak self] in
+            let viewModel = DailyJourneyMapViewModel()
+            let mapVC = DailyJourneyMapViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
+            mapVC.hidesBottomBarWhenPushed = true
+            self?.navigationController?.pushViewController(mapVC, animated: true)
+        }
     }
     
     override func bind(viewModel: DailyJourneyViewModel) {

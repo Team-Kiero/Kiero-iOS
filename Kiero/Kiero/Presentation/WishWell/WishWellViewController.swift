@@ -59,8 +59,11 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         
         output.coupons
             .receive(on: RunLoop.main)
-            .sink { [weak self] _ in
-                self?.rootView.wishCollectionView.reloadData()
+            .sink { [weak self] coupons in
+                guard let self = self else { return }
+                
+                self.rootView.updateEmptyState(isEmpty: coupons.isEmpty)
+                self.rootView.wishCollectionView.reloadData()
             }
             .store(in: &cancellables)
         

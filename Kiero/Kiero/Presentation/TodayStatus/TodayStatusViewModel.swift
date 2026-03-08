@@ -2,7 +2,12 @@
 //  TodayStatusViewModel.swift
 //  Kiero
 //
-//  Created by 안치욱 on 3/4/26.
+//  Created by 신혜연 on 3/2/26.
 //
 
+import UIKit
+import Combine
 
+final class TodayStatusViewModel: BaseViewModel {
+    
+}

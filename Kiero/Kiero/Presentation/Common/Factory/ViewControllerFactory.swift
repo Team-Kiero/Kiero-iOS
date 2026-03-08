@@ -11,7 +11,11 @@ public protocol ViewControllerFactory {
     // 부모 탭
     //func makeLoginViewController() -> UIViewController
     //func makeParentOnboardingViewController() -> UIViewController
+    
+    func makeTodayStatusViewController() -> UIViewController
     func makeScheduleViewController() -> UIViewController
+    func makeRewardViewController() -> UIViewController
+    func makeMyPageViewController() -> UIViewController
     func makeNotificationFeedViewController() -> UIViewController
     
     func makeAddScheduleViewController() -> UIViewController

@@ -14,17 +14,13 @@ final class NotificationFeedView: BaseUIView {
     
     // MARK: - Properties
     
-    var onProfileTapped: (() -> Void)?
+    var onBackTapped: (() -> Void)?
     
     // MARK: - UI Components
     
-    private lazy var profileView = ProfileBox(
-        name: "사용자",
-        profileURL: "",
-        backgroundColor: .clear
-    ).then {
-        $0.onTap = { [weak self] in
-            self?.onProfileTapped?()
+    private lazy var navigationBar = NavigationBar(type: .back(title: "알림")).then {
+        $0.leftButtonAction = { [weak self] in
+            self?.onBackTapped?()
         }
     }
     
@@ -43,37 +39,27 @@ final class NotificationFeedView: BaseUIView {
     }
     
     override func setUI() {
-        addSubviews(profileView, tableView)
-        updateProfile()
+        addSubviews(navigationBar, tableView)
     }
     
     override func setLayout() {
-        profileView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(59)
-            $0.trailing.equalToSuperview()
+        
+        navigationBar.snp.makeConstraints {
+            $0.top.equalTo(safeAreaLayoutGuide).offset(13)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(37)
         }
         
         tableView.snp.makeConstraints {
-            $0.top.equalTo(profileView.snp.bottom).offset(25)
+            $0.top.equalTo(navigationBar.snp.bottom).offset(16)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(100)
+            $0.bottom.equalToSuperview()
         }
     }
-    
-    func updateProfile() {
-         let name = TokenManager.shared.getUserName() ?? "사용자"
-         let profileURL = TokenManager.shared.getProfile()
-         profileView.configure(name: name, url: profileURL)
-     }
-    
+
     func applySnapshot() {
         DispatchQueue.main.async {
             self.tableView.reloadData()
         }
-    }
-    
-    @objc
-    private func handleTap() {
-        onProfileTapped?()
     }
 }
