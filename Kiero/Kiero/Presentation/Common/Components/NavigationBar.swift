@@ -55,7 +55,7 @@ final class NavigationBar: UIView {
     }
     
     private let logoImageView = UIImageView().then {
-        $0.image = UIImage(resource: .kieroLogo)
+        $0.image = UIImage(resource: .imgLogo)
         $0.contentMode = .scaleAspectFit
         $0.isHidden = true
     }
