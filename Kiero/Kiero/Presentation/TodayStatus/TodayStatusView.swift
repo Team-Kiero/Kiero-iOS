@@ -27,8 +27,15 @@ struct TodayStatusView: View {
             
             backgroundView
             
-            VStack {
+            VStack(spacing: 0) {
+                
+                NavigationBarWrapper(type: .main(title: nil))
+                    .frame(height: 41)
+                    .padding(.top, 9)
+                
                 ProfileCard()
+                    .frame(height: 96)
+                    .padding(.top, 14)
 
                 MissionButtonBar(
                     completeCount: completeMissions.count,
@@ -54,8 +61,8 @@ struct TodayStatusView: View {
                         }
                     )
                 }
+                .padding(.top, 18)
 
-                Spacer()
             }
 
             if let selectedSchedule {
@@ -96,7 +103,7 @@ struct TodayStatusView: View {
                     incompleteMissions: incompleteMissions
                 )
                 .frame(maxWidth: .infinity)
-                .offset(y: isMissionSheetPresented ? 0 : 911)
+                .offset(y: isMissionSheetPresented ? 0 : 900)
             }
             .ignoresSafeArea(edges: .bottom)
             .zIndex(4)
@@ -112,7 +119,7 @@ private extension TodayStatusView {
         VStack(spacing: 0) {
             Color.gray900
                 .ignoresSafeArea()
-                .frame(height: 245)
+                .frame(height: 201)
             
             Color.kBlack
                 .ignoresSafeArea()

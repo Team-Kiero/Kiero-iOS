@@ -16,7 +16,13 @@ struct MissionBottomSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerView
+            NavigationBarWrapper(
+                type: .titleClose(title: "오늘의 미션"),
+                onRightTap: {
+                    isPresented = false
+                }
+            )
+            .frame(height: 40)
             
             Rectangle()
                 .fill(Color.gray800)
@@ -29,7 +35,7 @@ struct MissionBottomSheet: View {
                 .padding(.top, 16)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .padding(.top, 20)
+        .padding(.top, 8)
         .frame(maxWidth: .infinity)
         .frame(maxHeight: UIScreen.main.bounds.height * 711 / 812)
         .background(

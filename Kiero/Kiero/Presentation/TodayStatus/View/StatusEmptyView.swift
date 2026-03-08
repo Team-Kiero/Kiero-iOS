@@ -31,10 +31,9 @@ struct StatusEmptyView: View {
     
     var body: some View {
         VStack (spacing: 0){
-            Image(.icKidProfile)
+            Image(.icScheduleEmpty)
                 .resizable()
                 .frame(width: 69, height: 52)
-                .foregroundStyle(.gray600)
             
             Text(type.emptyText)
                 .font(Font(UIFont.title3_16_SB))

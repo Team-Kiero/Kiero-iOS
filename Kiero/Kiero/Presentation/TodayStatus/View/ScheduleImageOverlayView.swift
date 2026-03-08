@@ -14,41 +14,30 @@ struct ScheduleImageOverlayView: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            headerView
+            NavigationBarWrapper(
+                type: .titleClose(title: schedule.name),
+                onRightTap: {
+                    onClose()
+                }
+            )
+            .frame(height: 40)
+            .padding(.top, 16)
 
             imageView
-                .padding(.horizontal, 10)
-                .padding(.bottom, 10)
+                .padding(.horizontal, 13)
+                .padding(.top, 20)
+                .padding(.bottom, 16)
         }
         .padding(.top, 12)
-        .frame(maxWidth: .infinity)
+        .frame(width: UIScreen.main.bounds.width - 32)
         .background(
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(Color.gray900)
         )
     }
 }
 
 private extension ScheduleImageOverlayView {
-    var headerView: some View {
-        HStack {
-            Text(schedule.name)
-                .font(Font(UIFont.head3_16_B))
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 12)
-    }
-
     @ViewBuilder
     var imageView: some View {
         if let imageUrl = schedule.imageUrl,
@@ -62,10 +51,10 @@ private extension ScheduleImageOverlayView {
                 .retry(maxCount: 2, interval: .seconds(1))
                 .resizable()
                 .scaledToFit()
-                .frame(width: 317)
+                .frame(width: UIScreen.main.bounds.width - 58)
                 .clipShape(RoundedRectangle(cornerRadius: 5))
         } else {
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: 5)
                 .fill(Color.gray800)
                 .frame(width: 317)
         }
