@@ -27,7 +27,7 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     private let childButton = RolePickButton(type: .child)
     
     override func setStyle() {
-        descriptionLabel.setTypo(.body1_18_R, text: "아이의 하루가 모험이 되는 곳")
+        descriptionLabel.setTypo(.body2_16_R, text: "아이의 하루가 모험이 되는 곳")
     }
     
     override func setUI() {

@@ -16,113 +16,130 @@ enum LoginUser {
 }
 
 extension LoginUser {
-    var buttonIcon: UIImage {
-        switch self {
-        case .parent:
-            return .imgGoblinGlass
-        case .child:
-            return .imgGoblinSmile
-        }
+    var unselectedIcon: UIImage {
+        return .btnUncheck
+    }
+    
+    var selectedIcon: UIImage {
+        return .btnCheckWhite
     }
     
     var buttonTitle: String {
         switch self {
         case .parent:
-            return "부모님으로 시작하기"
+            return "부모님으로"
         case .child:
-            return "자녀로 시작하기"
+            return "자녀로"
         }
     }
 }
 
 final class RolePickButton: UIView {
-    
+
     // MARK: - Properties
     
     var onTap: (() -> Void)?
+
+    func setPicked(_ picked: Bool) {
+        isPicked = picked
+    }
+
+    var picked: Bool { isPicked }
     
+    private let type: LoginUser
+    private var isPicked: Bool = false {
+        didSet { updateStyle() }
+    }
+
     // MARK: - UI Components
     
     private let buttonImageView = UIImageView().then {
-        $0.isUserInteractionEnabled = true
+        $0.contentMode = .scaleAspectFit
+        $0.isUserInteractionEnabled = false
     }
-    
+
     private let buttonLabel = UILabel().then {
         $0.textAlignment = .center
-        $0.isUserInteractionEnabled = true
+        $0.isUserInteractionEnabled = false
     }
-    
-    // MARK: - Life Cycle
+
+    // MARK: - Init
     
     init(type: LoginUser) {
+        self.type = type
         super.init(frame: .zero)
-        setStyle()
         setUI()
         setLayout()
         setAction()
-        configure(type: type)
+        configure()
+        updateStyle()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: - Setting Methods
-    
-    private func setStyle() {
-        backgroundColor = .gray900
-        layer.cornerRadius = 10
-    }
+
+    // MARK: - Setup Methods
     
     private func setUI() {
-        addSubviews(
-            buttonImageView,
-            buttonLabel
-        )
+        layer.cornerRadius = 20
+        clipsToBounds = true
+        addSubviews(buttonImageView, buttonLabel)
     }
-    
+
     private func setLayout() {
         self.snp.makeConstraints {
-            $0.height.equalTo(80)
+            $0.height.equalTo(81)
         }
-        
+
         buttonImageView.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.leading.equalToSuperview().offset(29)
+            $0.leading.equalToSuperview().offset(14)
+            $0.size.equalTo(30)
         }
-        
+
         buttonLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.centerX.equalToSuperview().offset(20)
+            $0.leading.equalTo(buttonImageView.snp.trailing).offset(12)
+            $0.trailing.lessThanOrEqualToSuperview().inset(14)
         }
     }
-    
+
     private func setAction() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(loginButtonDidTap))
         addGestureRecognizer(tap)
+        isUserInteractionEnabled = true
+    }
+
+    private func configure() {
+        buttonLabel.setTypo(.body2_16_R, text: type.buttonTitle)
+        buttonLabel.textAlignment = .center
     }
     
-    private func configure(type: LoginUser) {
-        switch type {
-            case .parent:
-            buttonImageView.image = type.buttonIcon.resized(to: CGSize(width: 52, height: 48))
-            buttonLabel.setTypo(.body2_16_R, text: type.buttonTitle)
-        case .child:
-            buttonImageView.image = type.buttonIcon.resized(to: CGSize(width: 49, height: 52))
-            buttonLabel.setTypo(.body2_16_R, text: type.buttonTitle)
+    private func updateStyle() {
+        buttonImageView.image = isPicked ? type.selectedIcon : type.unselectedIcon
+        backgroundColor = .gray900
+
+        if isPicked {
+            layer.borderWidth = 1
+            layer.borderColor = UIColor.white.cgColor
+            buttonLabel.textColor = .white
+        } else {
+            layer.borderWidth = 0
+            layer.borderColor = nil
+            buttonLabel.textColor = .white.withAlphaComponent(0.6)
         }
-        buttonLabel.textAlignment = .center
-        buttonLabel.textColor = .white
     }
     
     @objc
     private func loginButtonDidTap() {
-        UIView.animate(withDuration: 0.12,
+        UIView.animate(withDuration: 0.08,
                        animations: {
-            self.alpha = 0.5
-        },
-                       completion: { _ in
-            self.alpha = 1.0
+            self.transform = CGAffineTransform(scaleX: 0.96, y: 0.96)
+        }, completion: { _ in
+            UIView.animate(withDuration: 0.08) {
+                self.transform = .identity
+            }
             self.onTap?()
         })
     }
