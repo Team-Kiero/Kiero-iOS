@@ -14,7 +14,7 @@ struct ProfileCard: View {
         HStack (alignment: .top){
             VStack (alignment: .leading, spacing: 0){
                 HStack (alignment: .bottom, spacing: 0){
-                    Text("근영")
+                    Text(name ?? "사용자")
                         .font(Font(UIFont.head2_20_B))
                         .foregroundColor(.white)
                     Text("의 오늘의 현황")

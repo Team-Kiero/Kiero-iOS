@@ -45,10 +45,3 @@ private extension MissionCard {
         )
     }
 }
-
-#Preview {
-    ZStack {
-        Color.gray900
-        MissionCard(mission: MissionDTO(name: "설거지하기", reward: 50))
-    }
-}

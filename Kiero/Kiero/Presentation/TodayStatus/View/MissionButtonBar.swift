@@ -70,21 +70,3 @@ private struct MissionButtonContent: View {
         .frame(height: 40)
     }
 }
-
-#Preview {
-    ZStack {
-        Color.kBlack.ignoresSafeArea()
-
-        MissionButtonBar(
-            completeCount: 2,
-            incompleteCount: 3,
-            completeAction: {
-                print("완료 미션 탭")
-            },
-            incompleteAction: {
-                print("미완료 미션 탭")
-            }
-        )
-        .padding(.horizontal, 16)
-    }
-}
