@@ -18,7 +18,7 @@ struct TodayStatusView: View {
 
     @State private var isMissionSheetPresented = false
     @State private var selectedMissionTab: MissionTab = .complete
-    @State private var selectedSchedule: TodayScheduleDTO?
+    @State private var selectedSchedule: ScheduleItem?
     
     var onModalChanged: ((Bool) -> Void)?
 
@@ -38,8 +38,8 @@ struct TodayStatusView: View {
                     .padding(.top, 14)
 
                 MissionButtonBar(
-                    completeCount: viewModel.completeMissions.count,
-                    incompleteCount: viewModel.incompleteMissions.count,
+                    completeCount: viewModel.state.completeMissions.count,
+                    incompleteCount: viewModel.state.incompleteMissions.count,
                     completeAction: {
                         selectedMissionTab = .complete
                         isMissionSheetPresented = true
@@ -53,10 +53,10 @@ struct TodayStatusView: View {
 
                 ScrollView {
                     ScheduleSectionView(
-                        schedules: viewModel.schedules,
-                        isFireLitToday: viewModel.isFireLitToday,
+                        schedules: viewModel.state.schedules,
+                        isFireLitToday: viewModel.state.isFireLitToday,
                         onTapSchedule: { schedule in
-                            guard schedule.imageUrl != nil else { return }
+                            guard schedule.imageURL != nil else { return }
                             selectedSchedule = schedule
                         }
                     )
@@ -101,8 +101,8 @@ struct TodayStatusView: View {
                 MissionBottomSheet(
                     selectedTab: $selectedMissionTab,
                     isPresented: $isMissionSheetPresented,
-                    completeMissions: viewModel.completeMissions,
-                    incompleteMissions: viewModel.incompleteMissions
+                    completeMissions: viewModel.state.completeMissions,
+                    incompleteMissions: viewModel.state.incompleteMissions
                 )
                 .frame(maxWidth: .infinity)
                 .offset(y: isMissionSheetPresented ? 0 : 900)

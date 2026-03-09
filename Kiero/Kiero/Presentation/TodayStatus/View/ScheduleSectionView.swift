@@ -8,17 +8,18 @@
 import SwiftUI
 
 struct ScheduleSectionView: View {
-    let schedules: [TodayScheduleDTO]
+
+    let schedules: [ScheduleItem]
     let isFireLitToday: Bool
-    let onTapSchedule: (TodayScheduleDTO) -> Void
+    let onTapSchedule: (ScheduleItem) -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             if schedules.isEmpty {
                 Spacer()
-                
+
                 StatusEmptyView(type: .scheduleEmpty)
-                
+
                 Spacer()
             } else {
                 ForEach(Array(schedules.enumerated()), id: \.element.id) { index, schedule in
@@ -30,7 +31,6 @@ struct ScheduleSectionView: View {
                     )
                     .padding(.horizontal, 29)
                 }
-
                 if isFireLitToday {
                     ScheduleCompleteFooterView(dotImage: .imgCircleSch1)
                         .padding(.top, 4)

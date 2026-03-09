@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct MissionCard: View {
-    let mission: MissionDTO
+    let mission: MissionItem
     
     var body: some View {
         HStack {
-            Text(mission.name)
+            Text(mission.title)
                 .font(Font(UIFont.title3_16_SB))
                 .foregroundStyle(.white)
             
@@ -32,7 +32,7 @@ private extension MissionCard {
                 .scaledToFit()
                 .frame(width: 16, height: 16)
 
-            Text("\(mission.reward)개")
+            Text(mission.rewardText)
                 .font(Font(UIFont.body6_10_R))
                 .foregroundStyle(.gray500)
                 .fixedSize(horizontal: true, vertical: false)

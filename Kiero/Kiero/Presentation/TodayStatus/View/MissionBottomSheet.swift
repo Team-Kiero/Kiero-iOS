@@ -11,8 +11,8 @@ struct MissionBottomSheet: View {
     @Binding var selectedTab: MissionTab
     @Binding var isPresented: Bool
 
-    let completeMissions: [MissionDTO]
-    let incompleteMissions: [MissionDTO]
+    let completeMissions: [MissionItem]
+    let incompleteMissions: [MissionItem]
 
     var body: some View {
         VStack(spacing: 0) {
@@ -93,7 +93,7 @@ private extension MissionBottomSheet {
         }
     }
 
-    var currentMissions: [MissionDTO] {
+    var currentMissions: [MissionItem] {
         switch selectedTab {
         case .complete:
             return completeMissions

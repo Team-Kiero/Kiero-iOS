@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct ScheduleCard: View {
-    let schedule: TodayScheduleDTO
+    let schedule: ScheduleItem
     let onTap: () -> Void
     
     var body: some View {
         Button(action: {
-            if schedule.imageUrl != nil {
+            if schedule.imageURL != nil {
                 onTap()
             }
         }) {
@@ -21,7 +21,7 @@ struct ScheduleCard: View {
                 Image(buttonName)
                     .padding(.leading, 10)
                 
-                Text(schedule.name)
+                Text(schedule.title)
                     .font(Font(UIFont.body4_12_R))
                     .foregroundStyle(textColor)
                     .lineLimit(1)
@@ -29,7 +29,7 @@ struct ScheduleCard: View {
                 
                 Spacer()
                 
-                if schedule.imageUrl != nil {
+                if schedule.imageURL != nil {
                     Image(.icPhoto)
                         .renderingMode(.template)
                         .foregroundStyle(photoIconColor)
@@ -96,7 +96,7 @@ private extension ScheduleCard {
         case .failed, .skipped:
             return false
         case .complete, .verified, .pending:
-            return schedule.imageUrl != nil
+            return schedule.imageURL != nil
         }
     }
     
@@ -105,7 +105,7 @@ private extension ScheduleCard {
         case .failed, .skipped:
             return false
         case .complete, .verified, .pending:
-            return schedule.imageUrl != nil
+            return schedule.imageURL != nil
         }
     }
     

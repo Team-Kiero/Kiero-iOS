@@ -16,10 +16,10 @@ enum TodayStatus: String, Decodable {
 }
 
 struct ScheduleBox: View {
-    let schedule: TodayScheduleDTO
+    let schedule: ScheduleItem
     let isFireLitToday: Bool
     let showsNextScheduleText: Bool
-    let onTapSchedule: (TodayScheduleDTO) -> Void
+    let onTapSchedule: (ScheduleItem) -> Void
 
     var body: some View {
         HStack(alignment: .top, spacing: 5) {

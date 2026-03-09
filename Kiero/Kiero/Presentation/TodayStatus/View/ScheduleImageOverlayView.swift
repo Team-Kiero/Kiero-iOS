@@ -6,16 +6,17 @@
 //
 
 import SwiftUI
+
 import Kingfisher
 
 struct ScheduleImageOverlayView: View {
-    let schedule: TodayScheduleDTO
+    let schedule: ScheduleItem
     let onClose: () -> Void
 
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             NavigationBarWrapper(
-                type: .titleClose(title: schedule.name),
+                type: .titleClose(title: schedule.title),
                 onRightTap: {
                     onClose()
                 }
@@ -40,23 +41,16 @@ struct ScheduleImageOverlayView: View {
 private extension ScheduleImageOverlayView {
     @ViewBuilder
     var imageView: some View {
-        if let imageUrl = schedule.imageUrl,
-           let url = URL(string: imageUrl) {
-            KFImage(url)
-                .placeholder {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color.gray800)
-                        .frame(height: 280)
-                }
-                .retry(maxCount: 2, interval: .seconds(1))
-                .resizable()
-                .scaledToFit()
-                .frame(width: UIScreen.main.bounds.width - 58)
-                .clipShape(RoundedRectangle(cornerRadius: 5))
-        } else {
-            RoundedRectangle(cornerRadius: 5)
-                .fill(Color.gray800)
-                .frame(width: 317)
-        }
+        KFImage(schedule.imageURL)
+            .placeholder {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(Color.gray800)
+                    .frame(height: 280)
+            }
+            .retry(maxCount: 2, interval: .seconds(1))
+            .resizable()
+            .scaledToFit()
+            .frame(width: UIScreen.main.bounds.width - 58)
+            .clipShape(RoundedRectangle(cornerRadius: 5))
     }
 }
