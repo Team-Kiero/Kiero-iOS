@@ -24,12 +24,12 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     private func loadMockData() {
         completeMissions = [
-            MissionDTO(name: "수학 숙제하기", reward: 50),
-            MissionDTO(name: "영어 숙제하기", reward: 50),
-            MissionDTO(name: "수학 숙제하기", reward: 50),
-            MissionDTO(name: "영어 숙제하기", reward: 50),
-            MissionDTO(name: "수학 숙제하기", reward: 50),
-            MissionDTO(name: "영어 숙제하기", reward: 50),
+            MissionDTO(name: "키", reward: 100),
+            MissionDTO(name: "어", reward: 200),
+            MissionDTO(name: "로", reward: 300),
+            MissionDTO(name: "사", reward: 400),
+            MissionDTO(name: "랑", reward: 500),
+            MissionDTO(name: "해", reward: 600),
             MissionDTO(name: "수학 숙제하기", reward: 50),
             MissionDTO(name: "영어 숙제하기", reward: 50)
         ]
@@ -50,18 +50,26 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
             ),
             TodayScheduleDTO(
                 name: "운동 하기",
+                startTime: "18:00",
+                endTime: "19:00",
+                imageUrl: nil,
+                status: .failed,
+                isNowSchedule: false
+            ),
+            TodayScheduleDTO(
+                name: "운동 하기",
                 startTime: "19:00",
                 endTime: "20:00",
                 imageUrl: "https://lgtm-images.lgtmeow.com/2023/11/04/00/bdd7d6c6-6e9b-4192-841a-e7afea219675.webp",
-                status: .verified,
-                isNowSchedule: true
+                status: .complete,
+                isNowSchedule: false
             ),
             TodayScheduleDTO(
                 name: "독서 시간",
                 startTime: "19:00",
                 endTime: "19:30",
                 imageUrl: nil,
-                status: .pending,
+                status: .failed,
                 isNowSchedule: false
             )
         ]

@@ -60,8 +60,10 @@ struct TodayStatusView: View {
                             selectedSchedule = schedule
                         }
                     )
+                    .padding(.top, 18)
+                    .padding(.bottom, 100)
                 }
-                .padding(.top, 18)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
             }
 
