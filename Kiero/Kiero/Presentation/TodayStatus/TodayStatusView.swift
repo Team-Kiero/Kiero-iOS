@@ -13,14 +13,14 @@ enum MissionTab {
 }
 
 struct TodayStatusView: View {
-    let completeMissions: [MissionDTO]
-    let incompleteMissions: [MissionDTO]
-    let schedules: [TodayScheduleDTO]
-    let isFireLitToday: Bool
+    
+    @ObservedObject var viewModel: TodayStatusViewModel
 
     @State private var isMissionSheetPresented = false
     @State private var selectedMissionTab: MissionTab = .complete
     @State private var selectedSchedule: TodayScheduleDTO?
+    
+    var onModalChanged: ((Bool) -> Void)?
 
     var body: some View {
         ZStack {
@@ -38,8 +38,8 @@ struct TodayStatusView: View {
                     .padding(.top, 14)
 
                 MissionButtonBar(
-                    completeCount: completeMissions.count,
-                    incompleteCount: incompleteMissions.count,
+                    completeCount: viewModel.completeMissions.count,
+                    incompleteCount: viewModel.incompleteMissions.count,
                     completeAction: {
                         selectedMissionTab = .complete
                         isMissionSheetPresented = true
@@ -53,8 +53,8 @@ struct TodayStatusView: View {
 
                 ScrollView {
                     ScheduleSectionView(
-                        schedules: schedules,
-                        isFireLitToday: isFireLitToday,
+                        schedules: viewModel.schedules,
+                        isFireLitToday: viewModel.isFireLitToday,
                         onTapSchedule: { schedule in
                             guard schedule.imageUrl != nil else { return }
                             selectedSchedule = schedule
@@ -99,8 +99,8 @@ struct TodayStatusView: View {
                 MissionBottomSheet(
                     selectedTab: $selectedMissionTab,
                     isPresented: $isMissionSheetPresented,
-                    completeMissions: completeMissions,
-                    incompleteMissions: incompleteMissions
+                    completeMissions: viewModel.completeMissions,
+                    incompleteMissions: viewModel.incompleteMissions
                 )
                 .frame(maxWidth: .infinity)
                 .offset(y: isMissionSheetPresented ? 0 : 900)
@@ -110,6 +110,18 @@ struct TodayStatusView: View {
             .animation(.easeInOut(duration: 0.25), value: isMissionSheetPresented)
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
+        .onChange(of: isMissionSheetPresented) { value in
+            NotificationCenter.default.post(
+                name: .hideTabBar,
+                object: value
+            )
+        }
+        .onChange(of: selectedSchedule) { value in
+            NotificationCenter.default.post(
+                name: .hideTabBar,
+                object: value != nil
+            )
+        }
     }
 }
 
@@ -125,42 +137,4 @@ private extension TodayStatusView {
                 .ignoresSafeArea()
         }
     }
-}
-
-#Preview {
-    TodayStatusView(
-        completeMissions: [
-        ],
-        incompleteMissions: [
-            MissionDTO(name: "수학 숙제하기", reward: 50),
-            MissionDTO(name: "영어 숙제하기", reward: 50)
-        ],
-        schedules: [
-            TodayScheduleDTO(
-                name: "피아노 학원",
-                startTime: "16:00",
-                endTime: "18:00",
-                imageUrl: "https://lgtm-images.lgtmeow.com/2025/08/12/09/3fcb0b3c-5476-4e4f-8b83-811bdf8868ad.webp",
-                status: .complete,
-                isNowSchedule: false
-            ),
-            TodayScheduleDTO(
-            name: "운동 하기",
-            startTime: "19:00",
-            endTime: "20:00",
-            imageUrl: "https://lgtm-images.lgtmeow.com/2023/11/04/00/bdd7d6c6-6e9b-4192-841a-e7afea219675.webp",
-            status: .verified,
-            isNowSchedule: true
-            ),
-            TodayScheduleDTO(
-                name: "독서 시간",
-                startTime: "19:00",
-                endTime: "19:30",
-                imageUrl: nil,
-                status: .pending,
-                isNowSchedule: false
-            )
-        ],
-        isFireLitToday: true
-    )
 }
