@@ -5,6 +5,7 @@
 //  Created by 안치욱 on 3/6/26.
 //
 
+import Foundation
 
 struct TodayStatusDTO: Decodable {
     let isFireLitToday: Bool
@@ -14,15 +15,12 @@ struct TodayStatusDTO: Decodable {
 }
 
 struct MissionDTO: Decodable, Identifiable {
+    let id = UUID()
     let name: String
     let reward: Int
-    
-    var id: String {
-        "\(name)-\(reward)"
-    }
 }
 
-struct TodayScheduleDTO: Decodable, Identifiable {
+struct TodayScheduleDTO: Decodable, Identifiable, Equatable {
     let name: String
     let startTime: String
     let endTime: String
