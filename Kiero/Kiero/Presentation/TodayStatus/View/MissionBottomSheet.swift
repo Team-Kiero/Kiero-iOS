@@ -33,7 +33,6 @@ struct MissionBottomSheet: View {
             
             missionListView
                 .padding(.top, 16)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
@@ -46,27 +45,6 @@ struct MissionBottomSheet: View {
 }
 
 private extension MissionBottomSheet {
-    var headerView: some View {
-        HStack {
-            Text("오늘의 미션")
-                .font(Font(UIFont.head3_16_B))
-                .foregroundStyle(.white)
-
-            Spacer()
-
-            Button {
-                isPresented = false
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 16)
-    }
-
     var tabView: some View {
         HStack(spacing: 20) {
             Button {
@@ -111,6 +89,7 @@ private extension MissionBottomSheet {
                 }
                 .padding(.horizontal, 13)
             }
+            .frame(maxHeight: .infinity)
         }
     }
 
