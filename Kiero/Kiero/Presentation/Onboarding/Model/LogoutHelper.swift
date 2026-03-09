@@ -12,8 +12,7 @@ enum LogoutHelper {
         TokenManager.shared.clearAll()
         AppDIContainer.shared.sseManager.stop()
 
-        let authVC = AuthGateViewController()
-        let nav = UINavigationController(rootViewController: authVC)
+        let nav = UINavigationController(rootViewController: AuthGateViewController())
 
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
             sceneDelegate.changeRootViewController(nav)

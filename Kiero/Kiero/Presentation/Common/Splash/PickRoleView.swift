@@ -12,13 +12,11 @@ import Then
 
 final class PickRoleView: UIView {
 
-    // MARK: - Callbacks
+    // MARK: - Properties
 
     var onRoleChanged: ((LoginUser?) -> Void)?
     var onTapStart: ((LoginUser) -> Void)?
 
-    // MARK: - State
-    
     private(set) var selectedRole: LoginUser? {
         didSet {
             updateSelectionUI()
@@ -26,7 +24,7 @@ final class PickRoleView: UIView {
         }
     }
 
-    // MARK: - UI
+    // MARK: - UI Components
     
     private let containerView = UIView().then {
         $0.backgroundColor = .clear
@@ -48,7 +46,7 @@ final class PickRoleView: UIView {
     let parentButton = RolePickButton(type: .parent)
     let childButton  = RolePickButton(type: .child)
 
-    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900).then {
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
         $0.configure(title: "시작하기")
         $0.isEnabled = false
     }
@@ -67,7 +65,7 @@ final class PickRoleView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Setup
+    // MARK: - Setup Methods
     
     private func setUI() {
         addSubview(containerView)
@@ -99,6 +97,8 @@ final class PickRoleView: UIView {
         }
     }
 
+    // MARK: - Bind
+    
     private func bindActions() {
         parentButton.onTap = { [weak self] in
             self?.select(role: .parent)
@@ -108,8 +108,6 @@ final class PickRoleView: UIView {
         }
         startButton.addTarget(self, action: #selector(didTapStart), for: .touchUpInside)
     }
-
-    // MARK: - Logic
     
     private func select(role: LoginUser) {
         selectedRole = role

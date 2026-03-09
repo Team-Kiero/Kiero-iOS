@@ -36,7 +36,7 @@ extension LoginUser {
 
 final class RolePickButton: UIView {
 
-    // MARK: - Public
+    // MARK: - Properties
     
     var onTap: (() -> Void)?
 
@@ -45,8 +45,6 @@ final class RolePickButton: UIView {
     }
 
     var picked: Bool { isPicked }
-
-    // MARK: - Private
     
     private let type: LoginUser
     private var isPicked: Bool = false {
@@ -81,7 +79,7 @@ final class RolePickButton: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Setup
+    // MARK: - Setup Methods
     
     private func setUI() {
         layer.cornerRadius = 20
@@ -117,26 +115,21 @@ final class RolePickButton: UIView {
         buttonLabel.setTypo(.body2_16_R, text: type.buttonTitle)
         buttonLabel.textAlignment = .center
     }
-
-    // MARK: - Style
     
     private func updateStyle() {
         buttonImageView.image = isPicked ? type.selectedIcon : type.unselectedIcon
+        backgroundColor = .gray900
 
         if isPicked {
-            backgroundColor = .gray900
             layer.borderWidth = 1
             layer.borderColor = UIColor.white.cgColor
             buttonLabel.textColor = .white
         } else {
-            backgroundColor = .gray900
             layer.borderWidth = 0
             layer.borderColor = nil
-            buttonLabel.textColor = .white.withAlphaComponent(0.9)
+            buttonLabel.textColor = .white.withAlphaComponent(0.6)
         }
     }
-
-    // MARK: - Tap
     
     @objc
     private func loginButtonDidTap() {

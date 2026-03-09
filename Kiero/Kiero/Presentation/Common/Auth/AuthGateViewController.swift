@@ -18,27 +18,12 @@ final class AuthGateViewController: UIViewController {
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
     private var pendingWork: DispatchWorkItem?
-
-    // MARK: - UI
-
-    private let splashView = SplashView()
-
-    private let dimPanelView = GradientDimView().then {
-        $0.isUserInteractionEnabled = true
-    }
-
-    private let pickRoleView = PickRoleView()
-
-    // MARK: - Constraints
-
+    
     private var dimPanelBottomConstraint: Constraint?
     private var pickRoleBottomConstraint: Constraint?
 
-    // MARK: - State
 
     private var overlayPrepared = false
-
-    // MARK: - Timing
 
     private enum IntroTiming {
         static let splashHold: TimeInterval = 2.3
@@ -49,6 +34,16 @@ final class AuthGateViewController: UIViewController {
         static let dimPanelHeight: CGFloat = 520
         static let pickRoleHiddenOffset: CGFloat = 1000
     }
+
+    // MARK: - UI Components
+
+    private let splashView = SplashView()
+
+    private let dimPanelView = GradientDimView().then {
+        $0.isUserInteractionEnabled = true
+    }
+
+    private let pickRoleView = PickRoleView()
 
     // MARK: - Init
 
@@ -64,14 +59,14 @@ final class AuthGateViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        setSplashUI()
+        setUI()
         bind()
         viewModel.decideRoute()
     }
 
-    // MARK: - Setup
+    // MARK: - Setup Methods
 
-    private func setSplashUI() {
+    private func setUI() {
         view.addSubview(splashView)
         splashView.snp.makeConstraints { $0.edges.equalToSuperview() }
         splashView.start()
@@ -104,8 +99,6 @@ final class AuthGateViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
     }
 
-    // MARK: - Route Handling
-
     private func handle(by route: AuthGateRoute) {
         switch route {
         case .pickRole:
@@ -126,8 +119,6 @@ final class AuthGateViewController: UIViewController {
             changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: false))
         }
     }
-
-    // MARK: - Overlay Setup
 
     private func prepareOverlaysIfNeeded() {
         guard !overlayPrepared else { return }
@@ -156,8 +147,6 @@ final class AuthGateViewController: UIViewController {
             self?.goLoginFlow(for: role)
         }
     }
-
-    // MARK: - Overlay Animations
 
     private func showPickRoleOverlaySequence() {
         view.layoutIfNeeded()

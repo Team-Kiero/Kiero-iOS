@@ -71,8 +71,6 @@ final class SplashView: UIView {
         return container
     }
 
-    // MARK: - Layers
-
     private let gradientLayer = CAGradientLayer()
 
     // MARK: - Init
@@ -88,7 +86,7 @@ final class SplashView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // MARK: - Setup
+    // MARK: - Setup Methods
 
     private func setUI() {
         addSubviews(
@@ -145,8 +143,6 @@ final class SplashView: UIView {
     }
 
     private func setGradient() {
-        gradientLayer.frame = bounds
-
         let color = UIColor(red: 35/255, green: 36/255, blue: 40/255, alpha: 1.0).cgColor
         gradientLayer.colors = [color.copy(alpha: 0.25)!, color.copy(alpha: 0.8)!]
         gradientLayer.locations = [0.0, 1.0]
@@ -161,7 +157,6 @@ final class SplashView: UIView {
         gradientLayer.frame = gradientView.bounds
     }
 
-    // MARK: - Public
 
     func start() {
         startFloatingAnimation()
@@ -170,8 +165,6 @@ final class SplashView: UIView {
     func stop() {
         lightViews.forEach { $0.layer.removeAllAnimations() }
     }
-
-    // MARK: - Animation
 
     private func startFloatingAnimation() {
         if lightViews.first?.layer.animationKeys()?.isEmpty == false { return }
