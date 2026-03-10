@@ -132,13 +132,13 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         
         viewModel?.errorMessage
             .receive(on: DispatchQueue.main)
-            .sink { message in
-                self.isRequesting = false
+            .sink { [weak self] message in
+                self?.isRequesting = false
                 Toast.show(message: message)
             }
             .store(in: &cancellables)
     }
-
+    
     private func handleSuccess(message: String) {
         Toast.show(message: message, bottomInset: 90)
         self.navigationController?.popViewController(animated: true)
