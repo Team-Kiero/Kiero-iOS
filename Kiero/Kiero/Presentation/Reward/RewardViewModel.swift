@@ -68,14 +68,8 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
             .store(in: &cancellables)
     }
     
-    func updateReward(id: Int, title: String, cost: Int) {
-        if let index = rewards.firstIndex(where: { $0.id == id }) {
-            self.rewards[index] = Reward(id: id, title: title, cost: cost)
-        }
-    }
-    
     func deleteReward(reward: Reward) {
-        RewardService.shared.deleteCoupond(couponId: reward.id)
+        RewardService.shared.deleteCoupon(couponId: reward.id)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 switch completion {
@@ -92,6 +86,24 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                     print("쿠폰 삭제 API 실패: \(error)")
                 }
             } receiveValue: { _  in }
+            .store(in: &cancellables)
+    }
+    
+    func updateReward(id: Int, title: String, cost: Int) {
+        RewardService.shared.updateCoupon(couponId: id, title: title, cost: cost)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 수정 API 성공")
+                    if let index = self?.rewards.firstIndex(where: { $0.id == id }) {
+                        self?.rewards[index] = Reward(id: id, title: title, cost: cost)
+                    }
+                    
+                case .failure(let error):
+                    print("쿠폰 수정 API 실패: \(error)")
+                }
+            } receiveValue: { _ in }
             .store(in: &cancellables)
     }
 }

@@ -11,7 +11,8 @@ import Foundation
 protocol RewardServiceType {
     func fetchCoupons(childId: Int) -> AnyPublisher<[Reward], NetworkError>
     func addCoupon(childId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError>
-    func deleteCoupond(couponId: Int) -> AnyPublisher<Void, NetworkError>
+    func deleteCoupon(couponId: Int) -> AnyPublisher<Void, NetworkError>
+    func updateCoupon(couponId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError>
 }
 
 final class RewardService: RewardServiceType {
@@ -56,7 +57,7 @@ final class RewardService: RewardServiceType {
         .eraseToAnyPublisher()
     }
     
-    func deleteCoupond(couponId: Int) -> AnyPublisher<Void, NetworkError> {
+    func deleteCoupon(couponId: Int) -> AnyPublisher<Void, NetworkError> {
         return Future<Void, NetworkError> { promise in
             Task {
                 do {
@@ -67,6 +68,27 @@ final class RewardService: RewardServiceType {
                     promise(.failure(error))
                 } catch {
                     
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func updateCoupon(couponId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError> {
+        return Future<Void, NetworkError> { promise in
+            Task {
+                do {
+                    let requestBody = RewardCreateRequestDTO(name: title, price: cost)
+                    let _: EmptyResponse = try await BaseService.shared.request(
+                        endPoint: .updateCoupon(couponId: couponId),
+                        body: requestBody
+                    )
+                    
+                    promise(.success(()))
+                } catch let error as NetworkError {
+                    promise(.failure(error))
+                } catch {
+                    promise(.failure(.unknownError))
                 }
             }
         }
