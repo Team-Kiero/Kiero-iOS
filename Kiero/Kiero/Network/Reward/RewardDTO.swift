@@ -1,5 +1,5 @@
 //
-//  RewardResponseDTO.swift
+//  RewardDTO.swift
 //  Kiero
 //
 //  Created by 정윤아 on 3/7/26.
