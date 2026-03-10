@@ -75,11 +75,23 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
     }
     
     func deleteReward(reward: Reward) {
-        if let index = rewards.firstIndex(where: { $0.id == reward.id }) {
-            rewards.remove(at: index)
-        }
-        
-        self.showDeleteDialog = false
-        self.selectedReward = nil
+        RewardService.shared.deleteCoupond(couponId: reward.id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 삭제 API 성공")
+                    if let index = self?.rewards.firstIndex(where: { $0.id == reward.id }) {
+                        self?.rewards.remove(at: index)
+                    }
+                    
+                    self?.showDeleteDialog = false
+                    self?.selectedReward = nil
+                    
+                case .failure(let error):
+                    print("쿠폰 삭제 API 실패: \(error)")
+                }
+            } receiveValue: { _  in }
+            .store(in: &cancellables)
     }
 }

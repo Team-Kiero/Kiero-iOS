@@ -57,6 +57,7 @@ enum EndPoint {
     // Reward
     case fetchCoupons(childId: Int)
     case addCoupon(childId: Int)
+    case deleteCoupon(couponId: Int)
     
     //NotificationFeed
     case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
@@ -137,6 +138,8 @@ enum EndPoint {
             return "/api/v1/coupons/\(childId)"
         case .addCoupon(let childId):
             return "/api/v1/coupons/\(childId)"
+        case .deleteCoupon(let couponId):
+            return "/api/v1/coupons/\(couponId)"
         case .updateDailyJourney:
             return "/api/v1/schedules/today"
         case .skipJourney(let scheduleDetailId):
@@ -176,7 +179,7 @@ enum EndPoint {
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission:
             return "PATCH"
-        case .deleteChildDummy, .deleteSchedule, .deleteMission:
+        case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
         default:
             return "POST"
