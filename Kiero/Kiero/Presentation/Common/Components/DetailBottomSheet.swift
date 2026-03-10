@@ -68,11 +68,13 @@ final class DetailBottomSheet: BaseBottomSheetViewController {
     
     // MARK: - Life Cycle
     
-    init(data: DetailModel) {
+    init(data: DetailModel, showEditDelete: Bool = true) {
         super.init(nibName: nil, bundle: nil)
         self.modalPresentationStyle = .overFullScreen
         DispatchQueue.main.async {
             self.updateData(data)
+            self.editButton.isHidden = !showEditDelete
+            self.deleteButton.isHidden = !showEditDelete
         }
     }
     
