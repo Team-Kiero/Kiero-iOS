@@ -56,6 +56,7 @@ enum EndPoint {
     
     // Reward
     case fetchCoupons(childId: Int)
+    case addCoupon(childId: Int)
     
     //NotificationFeed
     case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
@@ -133,6 +134,8 @@ enum EndPoint {
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
         case .fetchCoupons(let childId):
+            return "/api/v1/coupons/\(childId)"
+        case .addCoupon(let childId):
             return "/api/v1/coupons/\(childId)"
         case .updateDailyJourney:
             return "/api/v1/schedules/today"

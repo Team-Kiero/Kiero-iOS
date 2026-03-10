@@ -20,3 +20,8 @@ struct RewardResponseDTO: Decodable {
         )
     }
 }
+
+struct RewardCreateRequestDTO: Encodable {
+    let name: String
+    let price: Int
+}

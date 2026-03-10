@@ -34,13 +34,6 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
         self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
     }
     
-    func addReward(title: String, cost: Int) {
-        let nextId = (rewards.map { $0.id }.max() ?? 0) + 1
-        let newReward = Reward(id: nextId, title: title, cost: cost)
-        
-        self.rewards.insert(newReward, at: 0)
-    }
-    
     func fetchCoupons(childId: Int? = nil) {
         let targetId = childId ?? self.currentChildId
         
@@ -56,6 +49,22 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
             } receiveValue: { [weak self] rewards in
                 self?.rewards = rewards
             }
+            .store(in: &cancellables)
+    }
+    
+    func addReward(title: String, cost: Int) {
+        RewardService.shared.addCoupon(childId: self.currentChildId, title: title, cost: cost)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print(" 쿠폰 추가 API 성공")
+                    self?.fetchCoupons(childId: self?.currentChildId)
+                    
+                case .failure(let error):
+                    print(" 쿠폰 추가 API 실패: \(error)")
+                }
+            } receiveValue: { _ in }
             .store(in: &cancellables)
     }
     
