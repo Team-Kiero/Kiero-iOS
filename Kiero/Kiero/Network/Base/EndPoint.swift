@@ -146,7 +146,7 @@ enum EndPoint {
         case .getPresignedURL:
             return "/api/v1/presigned-url/schedules"
         case .completeSchedule(let scheduleDetailId):
-            return "/api/v1/schedules/\(scheduleDetailId)"
+            return "/api/v1/schedules/verify/\(scheduleDetailId)"
         case .fireLit:
             return "/api/v1/schedules/fire-lit"
         case .fetchDefaultColor(let childId):
