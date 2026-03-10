@@ -17,6 +17,7 @@ struct Schedule: Codable {
     let colorCode: String
     let dayOfWeek: String?
     let date: String?
+    let scheduleStatus: String?
     
     var dayIndices: [Int] {
         if isRecurring, let days = dayOfWeek {
