@@ -602,6 +602,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             weekdaySelectionView.setSelectedIndices(indices)
             updatePagingTitle()
         } else if let dateStr = schedule.date {
+            weekdaySelectionView.isSingleSelectionMode = true
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             

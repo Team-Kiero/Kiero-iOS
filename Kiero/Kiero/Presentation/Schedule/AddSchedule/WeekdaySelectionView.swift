@@ -16,6 +16,7 @@ final class WeekdaySelectionView: UIView {
     
     private let days = ["월", "화", "수", "목", "금", "토", "일"]
     private var dayButtons: [UIButton] = []
+    var isSingleSelectionMode: Bool = false
     
     private(set) var selectedIndices = Set<Int>()
     
@@ -100,10 +101,24 @@ final class WeekdaySelectionView: UIView {
         }
         
         everyDayButton.isSelected = (selectedIndices.count == 7)
+        everyDayButton.isHidden = isSingleSelectionMode
     }
     
     @objc
     private func dayButtonTapped(_ sender: UIButton) {
+        if isSingleSelectionMode {
+            dayButtons.forEach {
+                $0.isSelected = false
+                $0.layer.borderWidth = 0
+            }
+            selectedIndices.removeAll()
+            
+            sender.isSelected = true
+            sender.layer.borderWidth = 1.0
+            selectedIndices.insert(sender.tag)
+            return
+        }
+        
         sender.isSelected.toggle()
         sender.layer.borderWidth = sender.isSelected ? 1.0 : 0
         
