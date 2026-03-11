@@ -55,7 +55,7 @@ private extension TodayStatusView {
     var mainContent: some View {
         VStack(spacing: 0) {
             
-            NavigationBarWrapper(type: .main(title: nil))
+            NavigationBarWrapper(type: .main())
                 .frame(height: 41)
                 .padding(.top, 9)
             

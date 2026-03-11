@@ -106,6 +106,7 @@ final class NavigationBar: UIView {
             $0.leading.equalToSuperview().offset(10)
             $0.centerY.equalToSuperview()
             $0.height.equalTo(23)
+            $0.width.equalTo(108)
         }
     }
     
