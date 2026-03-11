@@ -67,7 +67,7 @@ final class RewardService: RewardServiceType {
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {
-                    
+                    promise(.failure(.unknownError))
                 }
             }
         }
