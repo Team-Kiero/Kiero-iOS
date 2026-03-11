@@ -22,10 +22,14 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
     var userName: String { userInfoSubject.value?.firstName ?? "" }
     var coupons: [Coupon] { couponsSubject.value }
     
+    private var sseStarted = false
+    
     struct Input {
         let viewDidLoad: AnyPublisher<Void, Never>
         let refresh: AnyPublisher<Void, Never>
-        let purchaseConfirmed: AnyPublisher<Int64, Never> // couponId
+        let purchaseConfirmed: AnyPublisher<Int64, Never>
+        let viewWillAppear: AnyPublisher<Void, Never>
+        let viewWillDisappear: AnyPublisher<Void, Never>
     }
     
     struct Output {
@@ -48,34 +52,8 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
             .eraseToAnyPublisher()
         
         loadTrigger
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(true)
-            })
-            .flatMap{ [weak self] _ -> AnyPublisher<(ChildrenInfo, [Coupon]), Never> in
-                guard let self = self else {
-                    return Just((ChildrenInfo(firstName: "", coinAmount: 0, today: ""), []))
-                        .eraseToAnyPublisher()
-                }
-                
-                let me = self.service.fetchMyInfo()
-                    .catch { [weak self] err -> Just<ChildrenInfo> in
-                        self?.errorMessageSubject.send(err.errorDescription)
-                        return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
-                    }
-                
-                let coupons = self.service.fetchCoupons()
-                    .catch { [weak self] err -> Just<[Coupon]> in
-                        self?.errorMessageSubject.send(err.errorDescription)
-                        return Just([])
-                    }
-                
-                return Publishers.Zip(me, coupons).eraseToAnyPublisher()
-            }
-            .sink { [weak self] me, coupons in
-                guard let self = self else { return }
-                self.userInfoSubject.send(me)
-                self.couponsSubject.send(coupons)
-                self.isLoadingSubject.send(false)
+            .sink { [weak self] _ in
+                self?.fetchInitialData()
             }
             .store(in: &cancellables)
         
@@ -96,31 +74,20 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
                     }
                     .eraseToAnyPublisher()
             }
-            .flatMap { [weak self] _ -> AnyPublisher<(ChildrenInfo, [Coupon]), Never> in
-                guard let self = self else {
-                    return Just((ChildrenInfo(firstName: "", coinAmount: 0, today: ""), []))
-                        .eraseToAnyPublisher()
-                }
-                
-                let me = self.service.fetchMyInfo()
-                    .catch { [weak self] err -> Just<ChildrenInfo> in
-                        self?.errorMessageSubject.send(err.errorDescription)
-                        return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
-                    }
-                
-                let coupons = self.service.fetchCoupons()
-                    .catch { [weak self] err -> Just<[Coupon]> in
-                        self?.errorMessageSubject.send(err.errorDescription)
-                        return Just([])
-                    }
-                
-                return Publishers.Zip(me, coupons).eraseToAnyPublisher()
+            .sink { [weak self] _ in
+                self?.fetchInitialData()
             }
-            .sink { [weak self] me, coupons in
-                guard let self = self else { return }
-                self.userInfoSubject.send(me)
-                self.couponsSubject.send(coupons)
-                self.isLoadingSubject.send(false)
+            .store(in: &cancellables)
+        
+        input.viewWillAppear
+            .sink { [weak self] _ in
+                self?.startSSEIfNeeded()
+            }
+            .store(in: &cancellables)
+        
+        input.viewWillDisappear
+            .sink { [weak self] _ in
+                self?.stopSSE()
             }
             .store(in: &cancellables)
         
@@ -136,5 +103,75 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
             errorMessage: errorMessageSubject.eraseToAnyPublisher(),
             purchaseCompleted: purchaseCompletedSubject.eraseToAnyPublisher()
         )
+    }
+    
+    private func fetchInitialData() {
+        isLoadingSubject.send(true)
+        
+        let me = self.service.fetchMyInfo()
+            .catch { [weak self] err -> Just<ChildrenInfo> in
+                self?.errorMessageSubject.send(err.errorDescription)
+                return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
+            }
+        
+        let coupons = self.service.fetchCoupons()
+            .catch { [weak self] err -> Just<[Coupon]> in
+                self?.errorMessageSubject.send(err.errorDescription)
+                return Just([])
+            }
+        
+        Publishers.Zip(me, coupons)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] meData, couponsData in
+                self?.userInfoSubject.send(meData)
+                self?.couponsSubject.send(couponsData)
+                self?.isLoadingSubject.send(false)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func refetchCoupons() {
+        fetchInitialData()
+    }
+    
+    // MARK: - SSE Connection
+    
+    private func startSSEIfNeeded() {
+        guard !sseStarted else { return }
+        sseStarted = true
+        
+        Task { [weak self] in
+            guard let self = self else { return }
+            
+            do {
+                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                
+                await MainActor.run { [weak self] in
+                    guard let self = self else { return }
+                    
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
+                        self?.handleCouponSse(payload: payload)
+                    }
+                    print("✅ [WishWellVM] SSE started")
+                }
+            } catch {
+                print("❌ [WishWellVM] SSE token reissue failed:", error)
+                self.sseStarted = false
+            }
+        }
+    }
+    
+    private func stopSSE() {
+        SseStreamManager.shared.stop()
+        sseStarted = false
+        print("🛑 [WishWellVM] SSE stopped")
+    }
+    
+    private func handleCouponSse(payload: SseEventPayload) {
+        guard payload.eventType == "COUPON_CREATED" else { return }
+        
+        print("🔔 [WishWellVM] COUPON_CREATED 이벤트 수신! 데이터 재조회 시작...")
+        
+        refetchCoupons()
     }
 }

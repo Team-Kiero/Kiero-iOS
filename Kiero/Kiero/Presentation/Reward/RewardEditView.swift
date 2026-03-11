@@ -172,16 +172,14 @@ struct RewardEditView: View {
             return
         }
         
-        onSave(rewardTitle, coinCount)
-        
         switch mode {
         case .add:
-            Toast.show(message: "쿠폰이 등록되었습니다.")
-            // TODO: 신규 등록 API 호출
+            Toast.show(message: "보상이 등록되었습니다.")
         case .edit(_):
-            Toast.show(message: "미션이 수정되었습니다.")
-            // TODO: 수정 API 호출
+            Toast.show(message: "보상이 수정되었습니다.")
         }
+        
+        onSave(rewardTitle, coinCount)
         dismiss()
     }
 }

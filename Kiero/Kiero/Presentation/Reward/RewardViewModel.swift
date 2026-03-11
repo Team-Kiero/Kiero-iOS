@@ -24,48 +24,90 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
     @Published var selectedReward: Reward? = nil
     @Published var showDeleteDialog: Bool = false
     
+    var currentChildId: Int = 0
+    
     let scrollToTop = PassthroughSubject<Void, Never>()
     
     override init() {
         super.init()
         
-        fetchRewards()
+        self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+    }
+    
+    func fetchCoupons(childId: Int? = nil) {
+        let targetId = childId ?? self.currentChildId
+        
+        RewardService.shared.fetchCoupons(childId: targetId)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 목록 조회 성공")
+                case .failure(let error):
+                    print("쿠폰 목록 조회 실패: \(error)")
+                }
+            } receiveValue: { [weak self] rewards in
+                self?.rewards = rewards
+            }
+            .store(in: &cancellables)
     }
     
     func addReward(title: String, cost: Int) {
-        let nextId = (rewards.map { $0.id }.max() ?? 0) + 1
-        let newReward = Reward(id: nextId, title: title, cost: cost)
-        
-        self.rewards.insert(newReward, at: 0)
-    }
-    
-    func fetchRewards() {
-        // TODO: 서버 통신 로직
-        self.rewards = [
-            Reward(id: 1, title: "용돈 5,000원 받기", cost: 350),
-            Reward(id: 2, title: "치킨 시켜먹기", cost: 120),
-            Reward(id: 3, title: "게임 1시간 추가", cost: 100),
-            Reward(id: 4, title: "친구랑 놀러가기", cost: 500),
-            Reward(id: 5, title: "새 신발 사기", cost: 300),
-            Reward(id: 6, title: "새 신발 사기", cost: 300),
-            Reward(id: 7, title: "새 신발 사기", cost: 300),
-            Reward(id: 8, title: "새 신발 사기", cost: 300),
-            Reward(id: 9, title: "새 신발 사기", cost: 300)
-        ]
-    }
-    
-    func updateReward(id: Int, title: String, cost: Int) {
-        if let index = rewards.firstIndex(where: { $0.id == id }) {
-            self.rewards[index] = Reward(id: id, title: title, cost: cost)
-        }
+        RewardService.shared.addCoupon(childId: self.currentChildId, title: title, cost: cost)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print(" 쿠폰 추가 API 성공")
+                    self?.fetchCoupons(childId: self?.currentChildId)
+                    
+                case .failure(let error):
+                    print(" 쿠폰 추가 API 실패: \(error)")
+                    Toast.show(message: "보상 추가에 실패했습니다.")
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
     }
     
     func deleteReward(reward: Reward) {
-        if let index = rewards.firstIndex(where: { $0.id == reward.id }) {
-            rewards.remove(at: index)
-        }
-        
-        self.showDeleteDialog = false
-        self.selectedReward = nil
+        RewardService.shared.deleteCoupon(couponId: reward.id)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 삭제 API 성공")
+                    if let index = self?.rewards.firstIndex(where: { $0.id == reward.id }) {
+                        self?.rewards.remove(at: index)
+                    }
+                    
+                    Toast.show(message: "보상을 삭제했습니다.")
+                    self?.showDeleteDialog = false
+                    self?.selectedReward = nil
+                    
+                case .failure(let error):
+                    print("쿠폰 삭제 API 실패: \(error)")
+                    Toast.show(message: "보상을 삭제에 실패했습니다.")
+                }
+            } receiveValue: { _  in }
+            .store(in: &cancellables)
+    }
+    
+    func updateReward(id: Int, title: String, cost: Int) {
+        RewardService.shared.updateCoupon(couponId: id, title: title, cost: cost)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                switch completion {
+                case .finished:
+                    print("쿠폰 수정 API 성공")
+                    if let index = self?.rewards.firstIndex(where: { $0.id == id }) {
+                        self?.rewards[index] = Reward(id: id, title: title, cost: cost)
+                    }
+                    
+                case .failure(let error):
+                    print("쿠폰 수정 API 실패: \(error)")
+                    Toast.show(message: "보상을 수정에 실패했습니다.")
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
     }
 }

@@ -21,6 +21,9 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     private let refreshSubject = PassthroughSubject<Void, Never>()
     private let purchaseConfirmedSubject = PassthroughSubject<Int64, Never>()
     
+    private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
+    private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
+    
     // MARK: - Life Cycle
     
     override func loadView() { view = rootView }
@@ -28,6 +31,12 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         refreshSubject.send(())
+        viewWillAppearSubject.send(())
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewWillDisappearSubject.send(())
     }
     
     // MARK: - Setup Methods
@@ -45,7 +54,9 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         let input = WishWellViewModel.Input(
             viewDidLoad: viewDidLoadSubject.eraseToAnyPublisher(),
             refresh: refreshSubject.eraseToAnyPublisher(),
-            purchaseConfirmed: purchaseConfirmedSubject.eraseToAnyPublisher()
+            purchaseConfirmed: purchaseConfirmedSubject.eraseToAnyPublisher(),
+            viewWillAppear: viewWillAppearSubject.eraseToAnyPublisher(),
+            viewWillDisappear: viewWillDisappearSubject.eraseToAnyPublisher()
         )
         
         let output = viewModel.transform(input: input)

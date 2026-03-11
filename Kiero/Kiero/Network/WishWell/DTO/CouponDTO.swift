@@ -19,6 +19,12 @@ struct Coupon: Decodable {
     let price: Int
 }
 
+struct CouponSseEventPayload: Decodable {
+    let eventType: String
+    let couponName: String?
+    let price: Int?
+}
+
 extension CouponResponseDTO {
     func toEntity() -> Coupon {
         .init(id: couponId, name: name, price: price)
