@@ -15,6 +15,7 @@ final class WriteMissionViewModel: BaseViewModel {
     
     let isMissionAddSuccess = PassthroughSubject<Mission, Never>()
     let isMissionUpdateSuccess = PassthroughSubject<Void, Never>()
+    let errorMessage = PassthroughSubject<String, Never>()
 
     init(service: WriteMissionServiceType, childId: Int) {
         self.service = service
@@ -26,9 +27,10 @@ final class WriteMissionViewModel: BaseViewModel {
         let request = WriteMissionRequestDTO(name: name, reward: reward, dueAt: dueAt)
         
         service.postMission(childId: childId, request: request)
-            .sink { completion in
+            .sink { [weak self] completion in
                 if case .failure(let error) = completion {
                     print("❌ 미션 생성 실패: \(error)")
+                    self?.errorMessage.send("미션 등록에 실패했어요. 잠시 후 다시 시도해주세요.")
                 }
             } receiveValue: { [weak self] response in
                 let newMission = Mission(name: response.name, reward: response.reward, dueAt: response.dueAt)
@@ -38,8 +40,17 @@ final class WriteMissionViewModel: BaseViewModel {
     }
     
     func updateMission(id: Int, name: String, reward: Int, dueAt: String) {
-        print("🚀 미션 수정 API 대기 중 - ID: \(id), Name: \(name)")
-        
-        // TODO: 서버 수정 API 연결
+        let request = WriteMissionRequestDTO(name: name, reward: reward, dueAt: dueAt)
+        service.updateMission(missionId: id, request: request)
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { [weak self] completion in
+                if case .failure(let error) = completion {
+                    print("❌ 미션 수정 실패: \(error)")
+                    self?.errorMessage.send("미션 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
+                }
+            }, receiveValue: { [weak self] _ in
+                self?.isMissionUpdateSuccess.send(())
+            })
+            .store(in: &cancellables)
     }
 }

@@ -17,10 +17,11 @@ struct Schedule: Codable {
     let colorCode: String
     let dayOfWeek: String?
     let date: String?
+    let scheduleStatus: String?
     
     var dayIndices: [Int] {
         if isRecurring, let days = dayOfWeek {
-            let mapping = ["MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6]
+            let mapping = ["월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6]
             return days.components(separatedBy: ", ").compactMap { mapping[$0] }
         } else if let dateString = date {
             let formatter = DateFormatter()

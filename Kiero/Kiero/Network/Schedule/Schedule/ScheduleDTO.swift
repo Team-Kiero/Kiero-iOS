@@ -20,6 +20,7 @@ struct ScheduleItemDTO: Decodable {
     let endTime: String
     let name: String
     let colorCode: String
+    let scheduleStatus: String?
 }
 
 struct ChildResponseDTO: Decodable {
@@ -58,7 +59,8 @@ extension ScheduleResponseDTO {
                 scheduleColor: "SCHEDULE1",
                 colorCode: $0.colorCode,
                 dayOfWeek: dayOfWeekString.isEmpty ? nil : dayOfWeekString,
-                date: $0.date
+                date: $0.date,
+                scheduleStatus: $0.scheduleStatus
             )
         }
     }

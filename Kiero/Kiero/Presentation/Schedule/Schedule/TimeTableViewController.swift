@@ -120,6 +120,42 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         scheduleView.timeTableView.updateDaysDates(dates)
     }
     
+    private func shouldShowEditDeleteButtons(for schedule: Schedule) -> Bool {
+        let now = Date()
+        let calendar = Calendar.current
+        let nowMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+        
+        let todayStr = now.toString(format: "yyyy-MM-dd")
+        let isToday = schedule.date == todayStr
+        
+        if isToday, let startDate = schedule.startTime.toDate(format: "HH:mm:ss") {
+            let startMin = calendar.component(.hour, from: startDate) * 60 + calendar.component(.minute, from: startDate)
+            if startMin <= nowMin { return false }
+        }
+        
+        if let status = schedule.scheduleStatus, status != "PENDING" {
+            return false
+        }
+        
+        if isToday, let endDate = schedule.endTime.toDate(format: "HH:mm:ss") {
+            let endMin = calendar.component(.hour, from: endDate) * 60 + calendar.component(.minute, from: endDate)
+            let allSchedules = viewModel?.scheduleList.value ?? []
+            
+            let hasActedLaterSchedule = allSchedules.contains { other in
+                guard other.id != schedule.id,
+                      other.date == schedule.date,
+                      let otherStart = other.startTime.toDate(format: "HH:mm:ss") else { return false }
+                let otherStartMin = calendar.component(.hour, from: otherStart) * 60 + calendar.component(.minute, from: otherStart)
+                let isAfter = otherStartMin >= endMin
+                let isActed = other.scheduleStatus != nil && other.scheduleStatus != "PENDING"
+                return isAfter && isActed
+            }
+            if hasActedLaterSchedule { return false }
+        }
+        
+        return true
+    }
+    
     private func presentScheduleDetail(_ schedule: Schedule) {
         let timeRange = "\(schedule.startTime.toShortTime) - \(schedule.endTime.toShortTime)"
         
@@ -133,7 +169,8 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
             )
         )
         
-        let bottomSheet = DetailBottomSheet(data: detailData)
+        let canEdit = shouldShowEditDeleteButtons(for: schedule)
+        let bottomSheet = DetailBottomSheet(data: detailData, showEditDelete: canEdit)
         
         bottomSheet.onEditTap = { [weak self] in
             guard let self = self else { return }

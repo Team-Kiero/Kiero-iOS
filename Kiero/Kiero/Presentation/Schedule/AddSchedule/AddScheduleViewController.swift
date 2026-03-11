@@ -278,6 +278,27 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.")
                         return
                     }
+                    
+                    let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
+                    let scheduleList = viewModel?.scheduleList ?? []
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd"
+                    
+                    let hasActedLaterSchedule = scheduleList.contains { other in
+                        guard let otherStart = other.startTime.toDate(format: "HH:mm:ss"),
+                              let otherDateStr = other.date,
+                              let otherDate = dateFormatter.date(from: otherDateStr) else { return false }
+                        guard calendar.isDate(otherDate, inSameDayAs: now) else { return false }
+                        let otherStartMin = calendar.component(.hour, from: otherStart) * 60 + calendar.component(.minute, from: otherStart)
+                        let isAfter = otherStartMin >= endMin
+                        let isActed = other.scheduleStatus != nil && other.scheduleStatus != "PENDING"
+                        return isAfter && isActed
+                    }
+                    
+                    if hasActedLaterSchedule {
+                        Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.")
+                        return
+                    }
                 }
                 
                 let hasPastDate = selectedIndices.contains { index in
@@ -392,7 +413,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         scheduleColor: colorName,
                         colorCode: hexCode,
                         dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
-                        date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd")
+                        date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd"),
+                        scheduleStatus: nil
                     )
                     
                     self.onScheduleAdded?(actualSchedule, targetDate)
@@ -580,6 +602,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             weekdaySelectionView.setSelectedIndices(indices)
             updatePagingTitle()
         } else if let dateStr = schedule.date {
+            weekdaySelectionView.isSingleSelectionMode = true
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             

@@ -18,5 +18,4 @@ struct WriteMissionResponseDTO: Decodable {
     let name: String
     let reward: Int
     let dueAt: String
-    let isCompleted: Bool
 }
