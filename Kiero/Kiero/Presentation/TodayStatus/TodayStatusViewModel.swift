@@ -6,6 +6,7 @@
 //
 
 import Combine
+import Foundation
 
 final class TodayStatusViewModel: BaseViewModel, ObservableObject {
 
@@ -15,13 +16,13 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         var schedules: [ScheduleItem] = []
         var isFireLitToday: Bool = false
     }
-    
-    private var completeMissionDTOs: [TodayMissionDTO] = []
-    private var incompleteMissionDTOs: [TodayMissionDTO] = []
-    private var scheduleDTOs: [TodayScheduleDTO] = []
-    private var fireLitToday: Bool = false
 
     @Published private(set) var state = State()
+
+    private var completeMissions: [MissionItem] = []
+    private var incompleteMissions: [MissionItem] = []
+    private var schedules: [ScheduleItem] = []
+    private var isFireLitToday: Bool = false
 
     override init() {
         super.init()
@@ -29,70 +30,78 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     }
 
     private func loadMockData() {
-
-        completeMissionDTOs = [
-            TodayMissionDTO(name: "키", reward: 100),
-            TodayMissionDTO(name: "어", reward: 200),
-            TodayMissionDTO(name: "로", reward: 300),
-            TodayMissionDTO(name: "사", reward: 400),
-            TodayMissionDTO(name: "랑", reward: 500),
-            TodayMissionDTO(name: "해", reward: 600),
-            TodayMissionDTO(name: "수학 숙제하기", reward: 50),
-            TodayMissionDTO(name: "영어 숙제하기", reward: 50)
+        completeMissions = [
+            MissionItem(title: "키", reward: 100),
+            MissionItem(title: "어", reward: 200),
+            MissionItem(title: "로", reward: 300),
+            MissionItem(title: "사", reward: 400),
+            MissionItem(title: "랑", reward: 500),
+            MissionItem(title: "해", reward: 600),
+            MissionItem(title: "수학 숙제하기", reward: 50),
+            MissionItem(title: "영어 숙제하기", reward: 50)
         ]
 
-        incompleteMissionDTOs = [
-            TodayMissionDTO(name: "수학 숙제하기", reward: 100),
-            TodayMissionDTO(name: "영어 숙제하기", reward: 50)
+        incompleteMissions = [
+            MissionItem(title: "수학 숙제하기", reward: 100),
+            MissionItem(title: "영어 숙제하기", reward: 50)
         ]
 
-        scheduleDTOs = [
-            TodayScheduleDTO(
-                name: "피아노 학원",
+        schedules = [
+            ScheduleItem(
+                title: "피아노 학원",
                 startTime: "16:00",
                 endTime: "18:00",
-                imageUrl: "https://lgtm-images.lgtmeow.com/2025/08/12/09/3fcb0b3c-5476-4e4f-8b83-811bdf8868ad.webp",
+                imageURL: URL(string: "https://lgtm-images.lgtmeow.com/2025/08/12/09/3fcb0b3c-5476-4e4f-8b83-811bdf8868ad.webp"),
                 status: .complete,
                 isNowSchedule: false
             ),
-            TodayScheduleDTO(
-                name: "운동 하기",
+            ScheduleItem(
+                title: "운동 하기",
                 startTime: "18:00",
                 endTime: "19:00",
-                imageUrl: nil,
+                imageURL: nil,
                 status: .failed,
                 isNowSchedule: false
             ),
-            TodayScheduleDTO(
-                name: "운동 하기",
+            ScheduleItem(
+                title: "운동 하기",
                 startTime: "19:00",
                 endTime: "20:00",
-                imageUrl: "https://lgtm-images.lgtmeow.com/2023/11/04/00/bdd7d6c6-6e9b-4192-841a-e7afea219675.webp",
+                imageURL: URL(string: "https://lgtm-images.lgtmeow.com/2023/11/04/00/bdd7d6c6-6e9b-4192-841a-e7afea219675.webp"),
                 status: .complete,
                 isNowSchedule: false
             ),
-            TodayScheduleDTO(
-                name: "독서 시간",
+            ScheduleItem(
+                title: "독서 시간",
                 startTime: "19:00",
                 endTime: "19:30",
-                imageUrl: nil,
+                imageURL: nil,
                 status: .failed,
                 isNowSchedule: false
             )
         ]
-        fireLitToday = true
-        
+
+        isFireLitToday = true
         syncState()
     }
 
-    func fetchTodayStatus() {
-        // TODO:- API 호출
-    }
-    
     private func syncState() {
-        state.completeMissions = completeMissionDTOs.map { $0.toItem() }
-        state.incompleteMissions = incompleteMissionDTOs.map { $0.toItem() }
-        state.schedules = scheduleDTOs.map { $0.toItem() }
-        state.isFireLitToday = fireLitToday
+        state.completeMissions = completeMissions
+        state.incompleteMissions = incompleteMissions
+        state.schedules = schedules
+        state.isFireLitToday = isFireLitToday
+    }
+
+    func fetchTodayStatus() {
+//         TODO: API 호출
+//        
+//         let dto: TodayStatusDTO
+//        
+//         completeMissions = dto.completeMissions.map { $0.toItem() }
+//         incompleteMissions = dto.incompleteMissions.map { $0.toItem() }
+//         schedules = dto.schedules.map { $0.toItem() }
+//         isFireLitToday = dto.isFireLitToday
+//        
+//         syncState()
     }
 }

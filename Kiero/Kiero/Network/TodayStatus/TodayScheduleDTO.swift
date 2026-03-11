@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TodayScheduleDTO: Decodable, Equatable {
+struct TodayScheduleDTO: Decodable {
     let name: String
     let startTime: String
     let endTime: String
