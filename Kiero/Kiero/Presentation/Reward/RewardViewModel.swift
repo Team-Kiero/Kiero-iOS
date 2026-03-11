@@ -63,6 +63,7 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                     
                 case .failure(let error):
                     print(" 쿠폰 추가 API 실패: \(error)")
+                    Toast.show(message: "보상 추가에 실패했습니다.")
                 }
             } receiveValue: { _ in }
             .store(in: &cancellables)
@@ -79,11 +80,13 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                         self?.rewards.remove(at: index)
                     }
                     
+                    Toast.show(message: "보상을 삭제했습니다.")
                     self?.showDeleteDialog = false
                     self?.selectedReward = nil
                     
                 case .failure(let error):
                     print("쿠폰 삭제 API 실패: \(error)")
+                    Toast.show(message: "보상을 삭제에 실패했습니다.")
                 }
             } receiveValue: { _  in }
             .store(in: &cancellables)
@@ -102,6 +105,7 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                     
                 case .failure(let error):
                     print("쿠폰 수정 API 실패: \(error)")
+                    Toast.show(message: "보상을 수정에 실패했습니다.")
                 }
             } receiveValue: { _ in }
             .store(in: &cancellables)
