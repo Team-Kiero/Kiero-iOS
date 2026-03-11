@@ -91,6 +91,8 @@ final class DailyJourneyView: BaseUIView {
         $0.clipsToBounds = false
     }
     
+    private var mapButtonTopConstraint: Constraint?
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -113,7 +115,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         mapButton.addTarget(self, action: #selector(mapButtonTapped), for: .touchUpInside)
-
+        
         loadIntroWebP()
     }
     
@@ -144,7 +146,7 @@ final class DailyJourneyView: BaseUIView {
         mapButton.snp.makeConstraints {
             $0.centerY.equalTo(journeyTimeView)
             $0.trailing.equalToSuperview().inset(16)
-            $0.size.equalTo(60)
+            $0.size.equalTo(40)
         }
         
         verifyPhotoButton.snp.makeConstraints {
@@ -188,7 +190,17 @@ final class DailyJourneyView: BaseUIView {
         onMapButtonTap?()
     }
     
-    // MARK: - Update Methods
+    func updateMapButtonPosition(hasSchedule: Bool) {
+        mapButton.snp.remakeConstraints {
+            if hasSchedule {
+                $0.top.equalTo(journeyTimeView.snp.bottom).offset(16)
+            } else {
+                $0.centerY.equalTo(journeyTimeView)
+            }
+            $0.trailing.equalToSuperview().inset(16)
+            $0.size.equalTo(40)
+        }
+    }
     
     func updateData(with data: DailyJourneyModel) {
         headerView.configure(
@@ -201,6 +213,7 @@ final class DailyJourneyView: BaseUIView {
         )
         
         journeyTimeView.isHidden = !data.isTimeViewActive
+        updateMapButtonPosition(hasSchedule: data.isTimeViewActive)
         
         if data.isTimeViewActive {
             journeyTimeView.configure(
@@ -223,14 +236,14 @@ final class DailyJourneyView: BaseUIView {
             verifyPhotoButton.isHidden = false
             verifyPhotoButton.configure(
                 title: "인증하고 불조각 받기",
-                icon: UIImage(resource: .icCamera)
+                icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)
             )
             
         case .lightFire:
             verifyPhotoButton.isHidden = false
             verifyPhotoButton.configure(
                 title: "마음의 불꽃 피워주기",
-                icon: UIImage(resource: .icFire)
+                icon: UIImage(resource: .icFire).withRenderingMode(.alwaysTemplate)
             )
             
         case .hidden:
