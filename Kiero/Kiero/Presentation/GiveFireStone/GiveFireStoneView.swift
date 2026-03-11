@@ -88,7 +88,7 @@ final class GiveFireStoneView: BaseUIView {
     
     private let fireActionLabel = UILabel().then {
         $0.textColor = .white
-        $0.setTypo(.title3_16_SB, text: "불 조각 건네주기")
+        $0.setTypo(.title3_16_SB, text: "불조각 건네주기")
     }
     
     // MARK: - Life Cycle

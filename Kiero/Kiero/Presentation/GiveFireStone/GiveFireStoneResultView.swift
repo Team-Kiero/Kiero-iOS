@@ -163,7 +163,7 @@ final class GiveFireStoneResultView: BaseUIView {
         
         for i in 0..<count {
             if let properties = CGImageSourceCopyPropertiesAtIndex(source, i, nil) as? [String: Any],
-               let webpProperties = properties["{WEBP}"] as? [String: Any] {
+               let webpProperties = properties["{WebP}"] as? [String: Any] {
                 
                 var delay = webpProperties["UnclampedDelayTime"] as? Double
                 ?? webpProperties["DelayTime"] as? Double

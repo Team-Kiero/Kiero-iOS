@@ -13,7 +13,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     @Published var scheduleData: DailyJourneyMapData?
     
     let confirmButtonTapSubject = PassthroughSubject<Void, Never>()
-        
+    
     struct Input {
         let viewWillAppear: AnyPublisher<Void, Never>
         let confirmButtonTap: AnyPublisher<Void, Never>
@@ -22,18 +22,22 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     struct Output {
         let dismiss: AnyPublisher<Void, Never>
     }
-        
+    
     private let dismissSubject = PassthroughSubject<Void, Never>()
-        
+    
     func transform(input: Input) -> Output {
         input.viewWillAppear
             .sink { [weak self] in
                 self?.fetchJourneyList()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self?.startSseConnection()
+                }
             }
             .store(in: &cancellables)
         
         input.confirmButtonTap
             .sink { [weak self] in
+                self?.pauseSseConnection()
                 self?.dismissSubject.send()
             }
             .store(in: &cancellables)
@@ -41,6 +45,31 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
         return Output(
             dismiss: dismissSubject.eraseToAnyPublisher()
         )
+    }
+    
+    // MARK: - SSE
+    
+    private func startSseConnection() {
+        Task {
+            do {
+                let token = try await TokenRefresher.shared.reissueSseAccessToken()
+                await MainActor.run {
+                    SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
+                        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
+                           || payload.eventType == "SCHEDULE_MODIFIED" else { return }
+                        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
+                        self?.fetchJourneyList()
+                    }
+                }
+            } catch {
+                print("❌ [DailyJourneyMapVM] SSE 토큰 발급 실패: \(error)")
+            }
+        }
+    }
+    
+    private func pauseSseConnection() {
+        print("⏸ [DailyJourneyMapVM] pauseSseConnection called")
+        SseStreamManager.shared.pause()
     }
     
     // MARK: - Network
@@ -57,8 +86,6 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
             }
             .store(in: &cancellables)
     }
-    
-    // MARK: - Helpers
     
     var todayDateText: String {
         let formatter = DateFormatter()

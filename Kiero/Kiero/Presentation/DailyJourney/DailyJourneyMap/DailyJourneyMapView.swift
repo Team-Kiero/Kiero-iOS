@@ -84,7 +84,6 @@ struct DailyJourneyMapView: View {
 }
 
 private extension DailyJourneyMapView {
-    
     func scheduleListContent(data: DailyJourneyMapData, scrollAreaHeight: CGFloat) -> some View {
         let bannerHeight: CGFloat = 12 + 36
         
@@ -107,24 +106,35 @@ private extension DailyJourneyMapView {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    ForEach(data.schedules) { schedule in
+                    ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
+                        let hasOngoing = data.schedules.contains { $0.isOngoing }
+                        let isNext: Bool = {
+                            guard !hasOngoing,
+                                  !schedule.isOngoing,
+                                  schedule.status == .PENDING else { return false }
+                            let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || $0.isOngoing }
+                            return isFirstPending
+                        }()
+                        
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
                             startTime: schedule.startTime,
                             endTime: schedule.endTime,
                             isOngoing: schedule.isOngoing,
                             stoneType: schedule.stoneType.rawValue,
-                            status: schedule.status.rawValue
+                            status: schedule.status.rawValue,
+                            isNext: isNext
                         )
                     }
                 }
+                .padding(.top, 15)
                 .padding(.bottom, 40)
             }
             .frame(height: scrollAreaHeight - 44 - bannerHeight)
             .scrollDisabled(data.schedules.count < 6)
         }
     }
-        
+    
     var emptyStateContent: some View {
         VStack(spacing: 0) {
             Spacer()
