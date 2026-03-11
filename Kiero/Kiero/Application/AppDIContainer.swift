@@ -195,7 +195,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeTodayStatusViewController() -> UIViewController {
         let viewModel = TodayStatusViewModel()
-        return TodayStatusViewController(viewModel: viewModel, diContainer: self)
+        return TodayStatusHostingController(viewModel: viewModel)
     }
 }
 

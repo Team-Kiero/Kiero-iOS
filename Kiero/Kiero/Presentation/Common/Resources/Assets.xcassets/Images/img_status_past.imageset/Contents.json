@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "button_check_main.svg",
+      "filename" : "type=success.svg",
       "idiom" : "universal",
       "scale" : "1x"
     },
