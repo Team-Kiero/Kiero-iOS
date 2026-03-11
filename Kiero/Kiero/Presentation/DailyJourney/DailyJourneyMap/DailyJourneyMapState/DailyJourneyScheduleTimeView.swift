@@ -12,9 +12,10 @@ struct DailyJourneyScheduleTimeView: View {
     let endTime: String
     let isOngoing: Bool
     let status: String
+    let isNext: Bool
     
     private var timeColor: Color {
-        if isOngoing{
+        if isOngoing || isNext {
             return .main
         } else if status == "PENDING" {
             return .gray500
@@ -29,7 +30,7 @@ struct DailyJourneyScheduleTimeView: View {
     }
     
     private func formattedTimeText(_ time: String) -> Text {
-        let displayTime = String(time.prefix(5)) 
+        let displayTime = String(time.prefix(5))
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         formatter.locale = Locale(identifier: "ko_KR")

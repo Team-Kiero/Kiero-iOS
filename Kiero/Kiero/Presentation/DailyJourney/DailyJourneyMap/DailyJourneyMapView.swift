@@ -84,7 +84,6 @@ struct DailyJourneyMapView: View {
 }
 
 private extension DailyJourneyMapView {
-    
     func scheduleListContent(data: DailyJourneyMapData, scrollAreaHeight: CGFloat) -> some View {
         let bannerHeight: CGFloat = 12 + 36
         
@@ -107,17 +106,28 @@ private extension DailyJourneyMapView {
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
-                    ForEach(data.schedules) { schedule in
+                    ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
+                        let hasOngoing = data.schedules.contains { $0.isOngoing }
+                        let isNext: Bool = {
+                            guard !hasOngoing,
+                                  !schedule.isOngoing,
+                                  schedule.status == .PENDING else { return false }
+                            let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || $0.isOngoing }
+                            return isFirstPending
+                        }()
+                        
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
                             startTime: schedule.startTime,
                             endTime: schedule.endTime,
                             isOngoing: schedule.isOngoing,
                             stoneType: schedule.stoneType.rawValue,
-                            status: schedule.status.rawValue
+                            status: schedule.status.rawValue,
+                            isNext: isNext
                         )
                     }
                 }
+                .padding(.top, 15)
                 .padding(.bottom, 40)
             }
             .frame(height: scrollAreaHeight - 44 - bannerHeight)
@@ -158,3 +168,94 @@ private extension DailyJourneyMapView {
         }
     }
 }
+
+#if DEBUG
+struct DailyJourneyMapView_Previews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            // 1. 진행 중 일정 있음 → 다음 일정 하이라이팅 X
+            DailyJourneyMapView(viewModel: {
+                let vm = DailyJourneyMapViewModel()
+                vm.scheduleData = DailyJourneyMapData(
+                    scheduleCount: 3,
+                    schedules: [
+                        DailyJourneyMapSchedule(
+                            name: "피아노 학원",
+                            startTime: "08:00:00",
+                            endTime: "09:30:00",
+                            isOngoing: true,
+                            stoneType: .COURAGE,
+                            status: .COMPLETE
+                        ),
+                        DailyJourneyMapSchedule(
+                            name: "영어 학원",
+                            startTime: "10:00:00",
+                            endTime: "11:30:00",
+                            isOngoing: true,
+                            stoneType: .WISDOM,
+                            status: .PENDING
+                        ),
+                        DailyJourneyMapSchedule(
+                            name: "수학 공부",
+                            startTime: "14:00:00",
+                            endTime: "15:00:00",
+                            isOngoing: false,
+                            stoneType: .GRIT,
+                            status: .PENDING
+                        )
+                    ]
+                )
+                return vm
+            }())
+            .previewDisplayName("진행 중 일정 있음")
+            
+            // 2. 진행 중 없음 → 첫 PENDING 일정 하이라이팅 O
+            DailyJourneyMapView(viewModel: {
+                let vm = DailyJourneyMapViewModel()
+                vm.scheduleData = DailyJourneyMapData(
+                    scheduleCount: 3,
+                    schedules: [
+                        DailyJourneyMapSchedule(
+                            name: "피아노 학원",
+                            startTime: "08:00:00",
+                            endTime: "09:30:00",
+                            isOngoing: false,
+                            stoneType: .COURAGE,
+                            status: .COMPLETE
+                        ),
+                        DailyJourneyMapSchedule(
+                            name: "영어 학원",
+                            startTime: "14:00:00",
+                            endTime: "15:30:00",
+                            isOngoing: false,
+                            stoneType: .WISDOM,
+                            status: .PENDING
+                        ),
+                        DailyJourneyMapSchedule(
+                            name: "수학 공부",
+                            startTime: "16:00:00",
+                            endTime: "17:00:00",
+                            isOngoing: false,
+                            stoneType: .GRIT,
+                            status: .PENDING
+                        )
+                    ]
+                )
+                return vm
+            }())
+            .previewDisplayName("다음 일정 하이라이팅")
+            
+            // 3. 일정 없음
+            DailyJourneyMapView(viewModel: {
+                let vm = DailyJourneyMapViewModel()
+                vm.scheduleData = DailyJourneyMapData(
+                    scheduleCount: 0,
+                    schedules: []
+                )
+                return vm
+            }())
+            .previewDisplayName("일정 없음 (Empty State)")
+        }
+    }
+}
+#endif

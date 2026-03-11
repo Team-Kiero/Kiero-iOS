@@ -23,6 +23,7 @@ struct DailyJourneyMapStateRowView: View {
     let isOngoing: Bool
     let stoneType: String
     let status: String
+    let isNext: Bool
     
     var body: some View {
         HStack(alignment: .titleCenter, spacing: 0) {
@@ -30,7 +31,7 @@ struct DailyJourneyMapStateRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 
                 HStack(spacing: 8) {
-                    DailyJourneyTimelineIndicatorView(isOngoing: isOngoing, status: status, startTime: startTime)
+                    DailyJourneyTimelineIndicatorView(isOngoing: isOngoing, status: status, isNext: isNext)
                     DailyJourneyScheduleInfoView(name: name, isOngoing: isOngoing, status: status)
                 }
                 .alignmentGuide(.titleCenter) { d in
@@ -41,7 +42,8 @@ struct DailyJourneyMapStateRowView: View {
                     startTime: startTime,
                     endTime: endTime,
                     isOngoing: isOngoing,
-                    status: status
+                    status: status,
+                    isNext: isNext
                 )
             }
             .layoutPriority(1)
