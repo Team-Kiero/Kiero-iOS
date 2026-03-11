@@ -110,8 +110,8 @@ private extension DailyJourneyMapView {
                     ForEach(data.schedules) { schedule in
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
-                            startTime: schedule.startTime,
-                            endTime: schedule.endTime,
+                            startTime: String(schedule.startTime.prefix(5)),
+                            endTime: String(schedule.endTime.prefix(5)),
                             isOngoing: schedule.isOngoing,
                             stoneType: schedule.stoneType.rawValue,
                             status: schedule.status.rawValue
@@ -124,7 +124,7 @@ private extension DailyJourneyMapView {
             .scrollDisabled(data.schedules.count < 6)
         }
     }
-        
+    
     var emptyStateContent: some View {
         VStack(spacing: 0) {
             Spacer()
