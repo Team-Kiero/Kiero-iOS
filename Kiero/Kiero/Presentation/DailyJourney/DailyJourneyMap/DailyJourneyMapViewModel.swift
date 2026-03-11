@@ -51,21 +51,18 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     
     private func startSseConnection() {
         Task {
-            var token = TokenManager.shared.getSseToken()
-            if token == nil {
-                token = try? await TokenRefresher.shared.reissueSseAccessToken()
-            }
-            guard let validToken = token else {
-                print("❌ [DailyJourneyMapVM] SSE 토큰 없음")
-                return
-            }
-            await MainActor.run {
-                SseStreamManager.shared.startIfNeeded(initialToken: validToken) { [weak self] payload in
-                    print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
-                    guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                       || payload.eventType == "SCHEDULE_MODIFIED" else { return }
-                    self?.fetchJourneyList()
+            do {
+                let token = try await TokenRefresher.shared.reissueSseAccessToken()
+                await MainActor.run {
+                    SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
+                        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
+                           || payload.eventType == "SCHEDULE_MODIFIED" else { return }
+                        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
+                        self?.fetchJourneyList()
+                    }
                 }
+            } catch {
+                print("❌ [DailyJourneyMapVM] SSE 토큰 발급 실패: \(error)")
             }
         }
     }
