@@ -75,6 +75,11 @@ final class DetailBottomSheet: BaseBottomSheetViewController {
             self.updateData(data)
             self.editButton.isHidden = !showEditDelete
             self.deleteButton.isHidden = !showEditDelete
+            if !showEditDelete {
+                self.containerView.snp.updateConstraints {
+                    $0.height.equalTo(191)
+                }
+            }
         }
     }
     
