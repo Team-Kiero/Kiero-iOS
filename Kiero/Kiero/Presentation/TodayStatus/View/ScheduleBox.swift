@@ -38,7 +38,7 @@ struct ScheduleBox: View {
                         .foregroundStyle(.gray400)
                 }
 
-                Text("\(schedule.startTime)-\(schedule.endTime)")
+                Text(schedule.timeText)
                     .font(Font(UIFont.body4_12_R))
                     .foregroundStyle(timeColor)
                     .padding(.bottom, 8)
