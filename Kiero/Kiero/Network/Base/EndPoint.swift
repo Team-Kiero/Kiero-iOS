@@ -36,24 +36,16 @@ enum EndPoint {
     
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
-    
-    // AddSchedule
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
     case fetchDefaultColor(childId: Int)
-    
-    // EditSchedule
     case editSchedule(scheduleId: Int, selectedDate: String)
-    
-    // DeleteSchedule
     case deleteSchedule(scheduleId: Int, selectedDate: String)
     
     // Mission
     case fetchMissions(childId: Int?)
-    
-    // WriteMission
+    case updateMission(missionId: Int, request: WriteMissionRequestDTO)
+    case deleteMission(missionId: Int)
     case postMission(childId: Int, request: WriteMissionRequestDTO)
-    
-    // AIMission
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
     
@@ -165,6 +157,8 @@ enum EndPoint {
             return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
         case .editSchedule(let scheduleId, let selectedDate):
             return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
+        case .updateMission(let missionId, _), .deleteMission(let missionId):
+            return "/api/v1/missions/\(missionId)"
         }
     }
     
@@ -172,9 +166,9 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission:
             return "PATCH"
-        case .deleteChildDummy, .deleteSchedule:
+        case .deleteChildDummy, .deleteSchedule, .deleteMission:
             return "DELETE"
         default:
             return "POST"
