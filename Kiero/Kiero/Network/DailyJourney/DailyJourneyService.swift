@@ -96,11 +96,13 @@ final class DailyJourneyService {
                     
                     let requestBody = JourneyVerificationDTO.CompleteRequest(imageUrl: cleanImageUrl)
                     
-                    let _: String? = try await BaseService.shared.request(
+                    print("📤 completeSchedule API 호출 시작")
+                    
+                    let _: EmptyResponse = try await BaseService.shared.request(
                         endPoint: .completeSchedule(scheduleDetailId: scheduleDetailId),
                         body: requestBody
                     )
-                    
+                    print("✅ completeSchedule API 응답 수신")
                     print("✅ 모든 과정 성공 (DB 저장 URL: \(cleanImageUrl))")
                     promise(.success(()))
                     
