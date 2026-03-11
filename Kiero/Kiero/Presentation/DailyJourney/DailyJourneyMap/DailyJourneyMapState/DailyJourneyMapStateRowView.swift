@@ -30,7 +30,7 @@ struct DailyJourneyMapStateRowView: View {
             VStack(alignment: .leading, spacing: 4) {
                 
                 HStack(spacing: 8) {
-                    DailyJourneyTimelineIndicatorView(isOngoing: isOngoing, status: status)
+                    DailyJourneyTimelineIndicatorView(isOngoing: isOngoing, status: status, startTime: startTime)
                     DailyJourneyScheduleInfoView(name: name, isOngoing: isOngoing, status: status)
                 }
                 .alignmentGuide(.titleCenter) { d in

@@ -10,13 +10,24 @@ import SwiftUI
 struct DailyJourneyTimelineIndicatorView: View {
     let isOngoing: Bool
     let status: String
+    let startTime: String
+    
+    private var isBeforeStart: Bool {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        guard let start = formatter.date(from: startTime),
+              let now = formatter.date(from: formatter.string(from: Date())) else {
+            return false
+        }
+        return now < start
+    }
     
     private var shouldShowRectangle: Bool {
         isOngoing || status == "PENDING"
     }
     
     private var iconColor: Color {
-        if isOngoing {
+        if isOngoing || isBeforeStart {
             return .main
         } else if status == "PENDING" {
             return .white
@@ -26,7 +37,7 @@ struct DailyJourneyTimelineIndicatorView: View {
     }
     
     private var hasGlow: Bool {
-        isOngoing
+        isOngoing || isBeforeStart
     }
     
     var body: some View {

@@ -29,12 +29,13 @@ struct DailyJourneyScheduleTimeView: View {
     }
     
     private func formattedTimeText(_ time: String) -> Text {
+        let displayTime = String(time.prefix(5)) 
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         formatter.locale = Locale(identifier: "ko_KR")
         
-        guard let date = formatter.date(from: time) else {
-            return Text(time).font(Font(UIFont.body4_12_R))
+        guard let date = formatter.date(from: displayTime) else {
+            return Text(displayTime).font(Font(UIFont.body4_12_R))
         }
         
         let periodFormatter = DateFormatter()

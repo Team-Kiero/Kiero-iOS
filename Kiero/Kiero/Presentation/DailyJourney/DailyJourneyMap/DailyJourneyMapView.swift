@@ -110,8 +110,8 @@ private extension DailyJourneyMapView {
                     ForEach(data.schedules) { schedule in
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
-                            startTime: String(schedule.startTime.prefix(5)),
-                            endTime: String(schedule.endTime.prefix(5)),
+                            startTime: schedule.startTime,
+                            endTime: schedule.endTime,
                             isOngoing: schedule.isOngoing,
                             stoneType: schedule.stoneType.rawValue,
                             status: schedule.status.rawValue
