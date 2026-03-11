@@ -102,8 +102,8 @@ final class DailyJourneyService {
                         endPoint: .completeSchedule(scheduleDetailId: scheduleDetailId),
                         body: requestBody
                     )
-                    print("✅ completeSchedule API 응답 수신")
-                    print("✅ 모든 과정 성공 (DB 저장 URL: \(cleanImageUrl))")
+                    print("✅ 여정 인증 완료 (scheduleDetailId: \(scheduleDetailId), imageUrl: \(cleanImageUrl))")
+
                     promise(.success(()))
                     
                 } catch let error as NetworkError {
