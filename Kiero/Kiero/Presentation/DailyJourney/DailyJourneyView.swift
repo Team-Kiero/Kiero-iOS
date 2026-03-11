@@ -144,7 +144,7 @@ final class DailyJourneyView: BaseUIView {
         }
         
         mapButton.snp.makeConstraints {
-            $0.centerY.equalTo(journeyTimeView)
+            $0.top.equalTo(headerView.snp.bottom).offset(16)
             $0.trailing.equalToSuperview().inset(16)
             $0.size.equalTo(40)
         }
@@ -195,7 +195,7 @@ final class DailyJourneyView: BaseUIView {
             if hasSchedule {
                 $0.top.equalTo(journeyTimeView.snp.bottom).offset(16)
             } else {
-                $0.centerY.equalTo(journeyTimeView)
+                $0.top.equalTo(headerView.snp.bottom).offset(16)
             }
             $0.trailing.equalToSuperview().inset(16)
             $0.size.equalTo(40)
