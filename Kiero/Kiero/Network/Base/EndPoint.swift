@@ -135,13 +135,9 @@ enum EndPoint {
             return "/api/v1/coupons"
         case .purchaseCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
-        case .fetchCoupons(let childId):
+        case .fetchCoupons(let childId), .addCoupon(let childId):
             return "/api/v1/coupons/\(childId)"
-        case .addCoupon(let childId):
-            return "/api/v1/coupons/\(childId)"
-        case .deleteCoupon(let couponId):
-            return "/api/v1/coupons/\(couponId)"
-        case .updateCoupon(let couponId):
+        case .deleteCoupon(let couponId), .updateCoupon(let couponId):
             return "/api/v1/coupons/\(couponId)"
         case .updateDailyJourney:
             return "/api/v1/schedules/today"
