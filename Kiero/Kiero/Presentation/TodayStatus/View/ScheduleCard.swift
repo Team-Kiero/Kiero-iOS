@@ -13,7 +13,7 @@ struct ScheduleCard: View {
     
     var body: some View {
         Button(action: {
-            if schedule.imageURL != nil {
+            if isTapEnabled {
                 onTap()
             }
         }) {
@@ -29,7 +29,7 @@ struct ScheduleCard: View {
                 
                 Spacer()
                 
-                if schedule.imageURL != nil {
+                if showsIcon {
                     Image(.icPhoto)
                         .renderingMode(.template)
                         .foregroundStyle(photoIconColor)
@@ -53,6 +53,9 @@ struct ScheduleCard: View {
 }
 
 private extension ScheduleCard {
+    var isTapEnabled: Bool {
+        schedule.imageURL != nil
+    }
     
     var buttonName: ImageResource {
         switch schedule.status {
@@ -91,16 +94,7 @@ private extension ScheduleCard {
         }
     }
     
-    var showsPhotoIcon: Bool {
-        switch schedule.status {
-        case .failed, .skipped:
-            return false
-        case .complete, .verified, .pending:
-            return schedule.imageURL != nil
-        }
-    }
-    
-    var showsChevronIcon: Bool {
+    var showsIcon: Bool {
         switch schedule.status {
         case .failed, .skipped:
             return false

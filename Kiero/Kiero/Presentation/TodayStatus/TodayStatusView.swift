@@ -15,101 +15,25 @@ enum MissionTab {
 struct TodayStatusView: View {
     
     @ObservedObject var viewModel: TodayStatusViewModel
-
+    
     @State private var isMissionSheetPresented = false
     @State private var selectedMissionTab: MissionTab = .complete
     @State private var selectedSchedule: ScheduleItem?
     
-    var onModalChanged: ((Bool) -> Void)?
-
     var body: some View {
-        ZStack {
+        
+        GeometryReader { proxy in
             
-            backgroundView
-            
-            VStack(spacing: 0) {
+            ZStack {
                 
-                NavigationBarWrapper(type: .main(title: nil))
-                    .frame(height: 41)
-                    .padding(.top, 9)
+                backgroundView
                 
-                ProfileCard()
-                    .frame(height: 96)
-                    .padding(.top, 14)
-
-                MissionButtonBar(
-                    completeCount: viewModel.state.completeMissions.count,
-                    incompleteCount: viewModel.state.incompleteMissions.count,
-                    completeAction: {
-                        selectedMissionTab = .complete
-                        isMissionSheetPresented = true
-                    },
-                    incompleteAction: {
-                        selectedMissionTab = .incomplete
-                        isMissionSheetPresented = true
-                    }
-                )
-                .padding(.horizontal, 27)
-
-                ScrollView {
-                    ScheduleSectionView(
-                        schedules: viewModel.state.schedules,
-                        isFireLitToday: viewModel.state.isFireLitToday,
-                        onTapSchedule: { schedule in
-                            guard schedule.imageURL != nil else { return }
-                            selectedSchedule = schedule
-                        }
-                    )
-                    .padding(.top, 18)
-                    .padding(.bottom, 100)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
-            }
-
-            if let selectedSchedule {
-                Color.kBlack.opacity(0.75)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        self.selectedSchedule = nil
-                    }
-
-                ScheduleImageOverlayView(
-                    schedule: selectedSchedule,
-                    onClose: {
-                        self.selectedSchedule = nil
-                    }
-                )
-                .padding(.horizontal, 16)
-                .transition(.scale.combined(with: .opacity))
-                .zIndex(2)
-            }
-
-            Color.kBlack.opacity(isMissionSheetPresented ? 0.75 : 0)
-                .ignoresSafeArea()
-                .allowsHitTesting(isMissionSheetPresented)
-                .onTapGesture {
-                    withAnimation {
-                        isMissionSheetPresented = false
-                    }
-                }
-                .zIndex(3)
-            
-            VStack {
-                Spacer()
+                mainContent
                 
-                MissionBottomSheet(
-                    selectedTab: $selectedMissionTab,
-                    isPresented: $isMissionSheetPresented,
-                    completeMissions: viewModel.state.completeMissions,
-                    incompleteMissions: viewModel.state.incompleteMissions
-                )
-                .frame(maxWidth: .infinity)
-                .offset(y: isMissionSheetPresented ? 0 : 900)
+                popupOverlay
+                
+                missionSheet(proxy: proxy)
             }
-            .ignoresSafeArea(edges: .bottom)
-            .zIndex(4)
-            .animation(.easeInOut(duration: 0.25), value: isMissionSheetPresented)
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
         .onChange(of: isMissionSheetPresented) { value in
@@ -128,6 +52,96 @@ struct TodayStatusView: View {
 }
 
 private extension TodayStatusView {
+    var mainContent: some View {
+        VStack(spacing: 0) {
+            
+            NavigationBarWrapper(type: .main(title: nil))
+                .frame(height: 41)
+                .padding(.top, 9)
+            
+            ProfileCard()
+                .frame(height: 96)
+                .padding(.top, 14)
+            
+            MissionButtonBar(
+                completeCount: viewModel.state.completeMissions.count,
+                incompleteCount: viewModel.state.incompleteMissions.count,
+                completeAction: {
+                    selectedMissionTab = .complete
+                    isMissionSheetPresented = true
+                },
+                incompleteAction: {
+                    selectedMissionTab = .incomplete
+                    isMissionSheetPresented = true
+                }
+            )
+            .padding(.horizontal, 27)
+            
+            ScrollView {
+                ScheduleSectionView(
+                    schedules: viewModel.state.schedules,
+                    isFireLitToday: viewModel.state.isFireLitToday,
+                    onTapSchedule: { schedule in
+                        selectedSchedule = schedule
+                    }
+                )
+                .padding(.top, 18)
+                .padding(.bottom, 100)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var popupOverlay: some View {
+        
+        if let selectedSchedule {
+            
+            Color.kBlack.opacity(0.75)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    self.selectedSchedule = nil
+                }
+            
+            ScheduleImageOverlayView(
+                schedule: selectedSchedule,
+                onClose: {
+                    self.selectedSchedule = nil
+                }
+            )
+            .padding(.horizontal, 16)
+            .transition(.scale.combined(with: .opacity))
+            .zIndex(2)
+        }
+    }
+    
+    @ViewBuilder
+    func missionSheet(proxy: GeometryProxy) -> some View {
+        
+        Color.kBlack.opacity(isMissionSheetPresented ? 0.75 : 0)
+            .ignoresSafeArea()
+            .allowsHitTesting(isMissionSheetPresented)
+            .onTapGesture {
+                withAnimation {
+                    isMissionSheetPresented = false
+                }
+            }
+            .zIndex(3)
+        
+        VStack {
+            Spacer()
+            
+            MissionBottomSheet(
+                selectedTab: $selectedMissionTab,
+                isPresented: $isMissionSheetPresented,
+                completeMissions: viewModel.state.completeMissions,
+                incompleteMissions: viewModel.state.incompleteMissions
+            )
+            .offset(y: isMissionSheetPresented ? 0 : proxy.size.height)
+        }
+        .ignoresSafeArea(edges: .bottom)
+        .zIndex(4)
+        .animation(.easeInOut(duration: 0.25), value: isMissionSheetPresented)
+    }
     
     var backgroundView: some View {
         VStack(spacing: 0) {

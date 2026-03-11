@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MissionBottomSheet: View {
+
     @Binding var selectedTab: MissionTab
     @Binding var isPresented: Bool
 
@@ -16,6 +17,7 @@ struct MissionBottomSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
+
             NavigationBarWrapper(
                 type: .titleClose(title: "오늘의 미션"),
                 onRightTap: {
@@ -23,20 +25,20 @@ struct MissionBottomSheet: View {
                 }
             )
             .frame(height: 40)
-            
+
             Rectangle()
                 .fill(Color.gray800)
                 .frame(height: 1)
-            
+
             tabView
                 .padding(.top, 20)
-            
+
             missionListView
                 .padding(.top, 16)
         }
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
-        .frame(maxHeight: UIScreen.main.bounds.height * 711 / 812)
+        .frame(maxHeight: 750)
         .background(
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray900)
