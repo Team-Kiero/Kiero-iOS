@@ -174,9 +174,9 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList, .fetchCoupons:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .fetchFeeds:
             return "PATCH"
         case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
