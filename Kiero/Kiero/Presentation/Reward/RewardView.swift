@@ -59,19 +59,22 @@ struct RewardView: View {
                         .padding(.top, 8)
                     }
                 }
-                VStack {
+                
+                VStack(spacing: 0) {
                     Spacer()
-                    
-                    FloatingButtonWrapper(
-                        type: .schedule,
-                        action: {
-                            isShowingAddView = true
-                        }
-                    )
-                    .frame(width: 53, height: 53)
-                    .padding(.bottom, 100)
-                    .padding(.leading, 291)
+                    HStack(spacing: 0) {
+                        Spacer()
+                        FloatingButtonWrapper(
+                            type: .schedule,
+                            action: {
+                                isShowingAddView = true
+                            }
+                        )
+                        .frame(width: 53, height: 53)
+                        .offset(x: -41, y: -124)
+                    }
                 }
+                .ignoresSafeArea()
                 
                 if viewModel.showDeleteDialog, let reward = viewModel.selectedReward {
                     Color.kBlack.opacity(0.75)
