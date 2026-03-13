@@ -16,6 +16,7 @@ final class CoinMissionViewController: BaseViewController<CoinMissionViewModel> 
     private let completeMissionSubject = PassthroughSubject<Int64, Never>()
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
+    
     // MARK: - Life Cycle
     
     override func loadView() { view = rootView }
