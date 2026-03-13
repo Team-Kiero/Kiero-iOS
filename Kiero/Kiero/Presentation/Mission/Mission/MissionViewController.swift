@@ -53,16 +53,16 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         navigationBar.snp.makeConstraints {
             $0.top.equalToSuperview().offset(57)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(40)
+            $0.height.equalTo(45)
         }
         
         emptyView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
         missionView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         

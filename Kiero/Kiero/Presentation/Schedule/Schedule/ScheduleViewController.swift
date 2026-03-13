@@ -53,11 +53,11 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         navigationBar.snp.makeConstraints {
             $0.top.equalToSuperview().offset(57)
             $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(40)
+            $0.height.equalTo(45)
         }
         
         scheduleChildVC.view.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         

@@ -29,6 +29,7 @@ final class SplashView: UIView {
 
     private let logoImageView = UIImageView().then {
         $0.image = UIImage(resource: .imgLogo)
+        $0.tintColor = .white
         $0.contentMode = .scaleAspectFit
     }
 

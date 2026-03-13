@@ -8,5 +8,7 @@
 import Foundation
 
 extension Notification.Name {
+    static let didReceiveSseEvent = Notification.Name("didReceiveSseEvent")
     static let hideTabBar = Notification.Name("hideTabBar")
+    static let dimNavigationBar = Notification.Name("dimNavigationBar")
 }

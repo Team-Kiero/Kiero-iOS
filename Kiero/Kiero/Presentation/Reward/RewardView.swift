@@ -22,7 +22,7 @@ struct RewardView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .bottomTrailing) {
                 Color.kBlack.ignoresSafeArea()
                 
                 VStack {
@@ -34,6 +34,7 @@ struct RewardView: View {
                         }
                     )
                     .frame(height: 45)
+                    .padding(.top, 13)
                     
                     if viewModel.rewards.isEmpty {
                         EmptyViewWrapper(text: "등록된 보상이 없어요.\n우측 하단 버튼을 눌러 보상을 추가해보세요!")
@@ -59,19 +60,15 @@ struct RewardView: View {
                         .padding(.top, 8)
                     }
                 }
-                VStack {
-                    Spacer()
-                    
-                    FloatingButtonWrapper(
-                        type: .schedule,
-                        action: {
-                            isShowingAddView = true
-                        }
-                    )
-                    .frame(width: 53, height: 53)
-                    .padding(.bottom, 100)
-                    .padding(.leading, 291)
-                }
+                FloatingButtonWrapper(
+                    type: .schedule,
+                    action: {
+                        isShowingAddView = true
+                    }
+                )
+                .frame(width: 53, height: 53)
+                .padding(.bottom, 115)
+                .padding(.trailing, 32)
                 
                 if viewModel.showDeleteDialog, let reward = viewModel.selectedReward {
                     Color.kBlack.opacity(0.75)

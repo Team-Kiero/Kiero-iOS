@@ -55,13 +55,13 @@ private extension TodayStatusView {
     var mainContent: some View {
         VStack(spacing: 0) {
             
-            NavigationBarWrapper(type: .main())
-                .frame(height: 41)
-                .padding(.top, 9)
+//            NavigationBarWrapper(type: .main())
+//                .frame(height: 45)
+//                .padding(.top, 13)
             
             ProfileCard()
                 .frame(height: 96)
-                .padding(.top, 14)
+                .padding(.top, 64)
             
             MissionButtonBar(
                 completeCount: viewModel.state.completeMissions.count,
