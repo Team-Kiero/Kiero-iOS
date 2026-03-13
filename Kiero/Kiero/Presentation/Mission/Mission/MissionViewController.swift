@@ -23,7 +23,6 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     private let emptyView = EmptyView(text: "등록된 미션이 없어요.\n우측 하단 버튼을 눌러 미션을 추가해보세요!")
     private let missionView = MissionView()
-    
     private let floatingButton = FloatingButton(type: .mission)
     
     // MARK: - Life Cycle
@@ -115,7 +114,6 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
             guard let editVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else {
                 return
             }
-
             editVC.configureEditMode(with: mission, dueAt: dueAt)
             editVC.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(editVC, animated: true)
@@ -127,26 +125,23 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
                 let dialog = DialogBox()
                 dialog.configure(state: .deleteMission(title: mission.name, coin: "\(mission.reward)"))
                 
-                dialog.onTapCancel = { [weak self] in self?.dismiss(animated: false) }
-                dialog.onTapClose = { [weak self] in self?.dismiss(animated: false) }
-                
+                dialog.onTapClose = { [weak self] in
+                    guard let self = self else { return }
+                    dialog.dismiss()
+                    self.present(bottomSheet, animated: false)
+                }
+                dialog.onTapCancel = { [weak self] in
+                    guard let self = self else { return }
+                    dialog.dismiss()
+                    self.present(bottomSheet, animated: false)
+                }
                 dialog.onTapConfirm = { [weak self] in
                     guard let self = self else { return }
-                    self.dismiss(animated: false)
+                    dialog.dismiss()
                     self.viewModel?.deleteMission(id: mission.id)
                 }
                 
-                let overlay = UIViewController()
-                overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
-                overlay.modalPresentationStyle = .overFullScreen
-                overlay.view.addSubview(dialog)
-                
-                dialog.snp.makeConstraints {
-                    $0.center.equalToSuperview()
-                    $0.width.equalTo(343)
-                }
-                
-                self.present(overlay, animated: false)
+                dialog.show(in: self)
             }
         }
         
