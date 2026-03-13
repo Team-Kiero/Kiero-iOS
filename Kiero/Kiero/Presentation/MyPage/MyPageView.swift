@@ -111,8 +111,7 @@ struct MyPageView: View {
                             viewModel.requestLogout()
                         }
                     )
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 197)
+                    .frame(width: 327, height: 216)
                     .padding(.horizontal, 16)
                     .zIndex(1)
                 }
