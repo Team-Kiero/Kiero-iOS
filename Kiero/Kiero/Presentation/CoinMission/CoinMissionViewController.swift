@@ -112,15 +112,26 @@ extension CoinMissionViewController: UICollectionViewDelegateFlowLayout {
 
 private extension CoinMissionViewController {
     func handleMissionTap(id: Int64, name: String) {
+        let dialog = DialogBox()
         let dialogState = DialogBox.State.missionComplete(title: name)
-        view.showDialog(state: dialogState) { [weak self] in
+        dialog.configure(state: dialogState)
+        
+        dialog.onTapConfirm = { [weak self, weak dialog] in
             guard let self = self else { return }
+            dialog?.dismiss()
             
             let rewardAmount = self.findRewardAmount(missionId: id)
-            self.view.showConfirm(state: .coinMission(count: rewardAmount)) {
-                self.completeMissionSubject.send(id)
+            
+            let confirmBox = ConfirmBox()
+            confirmBox.configure(state: .coinMission(count: rewardAmount))
+            confirmBox.onTapButton = { [weak self] in
+                self?.completeMissionSubject.send(id)
             }
+            
+            confirmBox.show(in: self)
         }
+        
+        dialog.show(in: self)
     }
     
     func findRewardAmount(missionId: Int64) -> Int {
