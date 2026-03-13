@@ -108,7 +108,7 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
             )
         )
         
-        let bottomSheet = DetailBottomSheet(data: detailData)
+        let bottomSheet = DetailBottomSheet(data: detailData, showEditDelete: !mission.isCompleted)
         
         bottomSheet.onEditTap = { [weak self] in
             guard let self = self else { return }
