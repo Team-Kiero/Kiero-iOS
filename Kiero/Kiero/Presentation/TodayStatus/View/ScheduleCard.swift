@@ -32,11 +32,11 @@ struct ScheduleCard: View {
                 if showsIcon {
                     Image(.icPhoto)
                         .renderingMode(.template)
-                        .foregroundStyle(photoIconColor)
+                        .foregroundStyle(iconColor)
                     
                     Image(.icRight)
                         .renderingMode(.template)
-                        .foregroundStyle(chevronColor)
+                        .foregroundStyle(iconColor)
                         .padding(.trailing, 10)
                 }
             }
@@ -107,35 +107,20 @@ private extension ScheduleCard {
     
     var showsIcon: Bool {
         switch schedule.status {
-        case .failed, .skipped:
+        case .failed, .skipped, .pending:
             return false
-        case .complete, .verified, .pending:
-            return schedule.imageURL != nil
+        case .complete, .verified:
+            return true
         }
     }
     
-    var photoIconColor: Color {
+    var iconColor: Color {
         switch schedule.status {
         case .complete:
             return .gray800
         case .verified:
             return .gray400
-        case .pending:
-            return .gray800
-        case .failed, .skipped:
-            return .clear
-        }
-    }
-    
-    var chevronColor: Color {
-        switch schedule.status {
-        case .complete:
-            return .gray800
-        case .verified:
-            return .gray400
-        case .pending:
-            return .gray800
-        case .failed, .skipped:
+        case .failed, .skipped, .pending:
             return .clear
         }
     }

@@ -26,8 +26,8 @@ extension TodayScheduleDTO {
         ScheduleItem(
             id: scheduleDetailId,
             title: name,
-            startTime: startTime,
-            endTime: endTime,
+            startTime: String(startTime.prefix(5)),
+            endTime: String(endTime.prefix(5)),
             imageURL: imageUrl.flatMap(URL.init(string:)),
             status: status,
             isNowSchedule: isOngoing
