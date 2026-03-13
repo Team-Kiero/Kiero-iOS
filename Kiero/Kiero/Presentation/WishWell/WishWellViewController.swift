@@ -123,19 +123,28 @@ private extension WishWellViewController {
             Toast.show(message: "금화가 부족해! 미션을 더 하고 오자!", bottomInset: 117)
             return
         }
+        let dialog = DialogBox()
         let dialogState = DialogBox.State.wishWell(title: data.name, coin: "\(data.price)")
+        dialog.configure(state: dialogState)
         
-        view.showDialog(state: dialogState) { [weak self] in
+        dialog.onTapConfirm = { [weak self, weak dialog] in
+            dialog?.dismiss()
             self?.showPurchaseConfirm(for: data)
         }
+        
+        dialog.show(in: self)
     }
     
     func showPurchaseConfirm(for coupon: Coupon) {
+        let confirmBox = ConfirmBox()
         let confirmState = ConfirmBox.State.wishWell(wish: coupon.name)
+        confirmBox.configure(state: confirmState)
         
-        view.showConfirm(state: confirmState) { [weak self] in
+        confirmBox.onTapButton = { [weak self] in
             self?.purchaseConfirmedSubject.send(coupon.id)
         }
+        
+        confirmBox.show(in: self)
     }
 }
 
