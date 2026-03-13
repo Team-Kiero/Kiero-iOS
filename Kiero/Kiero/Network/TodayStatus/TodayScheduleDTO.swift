@@ -8,6 +8,7 @@
 import Foundation
 
 struct TodayScheduleDTO: Decodable {
+    let scheduleDetailId: Int
     let name: String
     let startTime: String
     let endTime: String
@@ -16,9 +17,14 @@ struct TodayScheduleDTO: Decodable {
     let isNowSchedule: Bool
 }
 
+struct ScheduleImageDTO: Decodable {
+    let imageUrl: String
+}
+
 extension TodayScheduleDTO {
     func toItem() -> ScheduleItem {
         ScheduleItem(
+            id: scheduleDetailId,
             title: name,
             startTime: startTime,
             endTime: endTime,
