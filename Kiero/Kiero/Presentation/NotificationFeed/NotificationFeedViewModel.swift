@@ -202,7 +202,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            if payload.eventType == "FEED_ITEM_CREATED" {                
+            if payload.eventType == "FEED_ITEM_CREATED" {
                 self.sseRefreshSubject.send(())
             }
         }
