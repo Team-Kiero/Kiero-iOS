@@ -34,6 +34,10 @@ enum EndPoint {
     // Child
     case fetchChildren
     
+    // TodayStatus
+    case fetchTodayStatus(childId: Int)
+    case postImageRead(scheduleDetailId: Int)
+    
     // Schedule
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
@@ -169,14 +173,18 @@ enum EndPoint {
             return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
         case .updateMission(let missionId, _), .deleteMission(let missionId):
             return "/api/v1/missions/\(missionId)"
+        case .fetchTodayStatus(let childId):
+            return "/api/v1/parents/progress/\(childId)"
+        case .postImageRead(let scheduleDetailId):
+            return "/api/v1/schedules/\(scheduleDetailId)/image"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList, .fetchCoupons:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead:
             return "PATCH"
         case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
