@@ -259,7 +259,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
                 
                 if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
-                    Toast.show(message: "일정이 등록되었어요. (오늘 일정은 마감되어 다음 주부터 적용돼요!)")
+                    Toast.show(message: "일정이 등록되었어요. 오늘은 마감되어 다음부터 적용돼요.")
                 } else {
                     Toast.show(message: "일정이 등록되었어요.")
                 }
