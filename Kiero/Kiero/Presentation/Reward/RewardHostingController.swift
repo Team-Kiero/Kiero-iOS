@@ -7,6 +7,7 @@
 
 import Combine
 import SwiftUI
+import UIKit
 
 final class RewardHostingController: UIHostingController<RewardView> {
     
@@ -31,6 +32,17 @@ extension RewardHostingController: TabBarReselectRefreshable {
 
 extension RewardHostingController: ScrollToTopAvailable {
     func scrollToTop() {
-        viewModel.scrollToTop.send()
+        findScrollViewAndScrollToTop(in: self.view)
+    }
+    
+    private func findScrollViewAndScrollToTop(in view: UIView) {
+        if let scrollView = view as? UIScrollView {
+            scrollView.setContentOffset(.zero, animated: true)
+            return
+        }
+        
+        for subview in view.subviews {
+            findScrollViewAndScrollToTop(in: subview)
+        }
     }
 }
