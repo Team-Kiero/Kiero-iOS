@@ -165,7 +165,10 @@ final class DetailBottomSheet: BaseBottomSheetViewController {
             
             var fullDateInfo = "\(formattedDate)\n\(time)"
             if isRecurring {
-                let recurringText = "매주 \(days ?? "") 반복"
+                let allDays = ["월", "화", "수", "목", "금", "토", "일"]
+                let selectedDays = (days ?? "").components(separatedBy: ", ")
+                let isEveryDay = allDays.allSatisfy { selectedDays.contains($0) }
+                let recurringText = isEveryDay ? "매일 반복" : "매주 \(days ?? "") 반복"
                 fullDateInfo += "\n\(recurringText)"
             }
             
