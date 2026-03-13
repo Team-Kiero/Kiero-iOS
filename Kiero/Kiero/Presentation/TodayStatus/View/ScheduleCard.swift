@@ -58,39 +58,50 @@ private extension ScheduleCard {
     }
     
     var buttonName: ImageResource {
-        switch schedule.status {
-        case .complete:
-            return .btnCheck
-        case .failed, .skipped:
-            return .btnClosePoint
-        case .verified:
+        if schedule.isNowSchedule {
             return .btnCheckFill
-        case .pending:
-            return .btnUncheck
+        }
+        else {
+            switch schedule.status {
+            case .complete:
+                return .btnCheck
+            case .failed, .skipped:
+                return .btnClosePoint
+            case .verified:
+                return .btnCheck
+            case .pending:
+                return .btnUncheck
+            }
         }
     }
     
     var borderColor: Color {
-        switch schedule.status {
-        case .complete:
-            return .gray800
-        case .failed, .skipped:
-            return .point
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .pending, .verified:
+                return .gray800
+            case .failed, .skipped:
+                return .point
+            }
         }
     }
     
     var textColor: Color {
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return .gray400
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .failed, .skipped:
+                return .gray400
+            case .verified:
+                return .main
+            case .pending:
+                return .gray800
+            }
         }
     }
     
@@ -131,11 +142,11 @@ private extension ScheduleCard {
     
     @ViewBuilder
     var backgroundView: some View {
-        switch schedule.status {
-        case .verified:
+        if schedule.isNowSchedule {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.schedule1.opacity(0.1))
-        default:
+        }
+        else {
             Color.clear
         }
     }

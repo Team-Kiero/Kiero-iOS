@@ -58,13 +58,16 @@ struct ScheduleBox: View {
 
 private extension ScheduleBox {
     var timeColor: Color {
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return .gray400
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .failed, .skipped, .verified:
+                return .gray400
+            case .pending:
+                return .gray800
+            }
         }
     }
      
@@ -72,14 +75,16 @@ private extension ScheduleBox {
         if isFireLitToday {
             return .imgCircleSch1
         }
-        
-        switch schedule.status {
-        case .verified:
+        else if schedule.isNowSchedule {
             return .imgCircleMain
-        case .pending:
-            return .imgCircleGray
-        default:
-            return .imgCircleSch1
+        }
+        else {
+            switch schedule.status {
+            case .pending:
+                return .imgCircleGray
+            default:
+                return .imgCircleSch1
+            }
         }
     }
     
