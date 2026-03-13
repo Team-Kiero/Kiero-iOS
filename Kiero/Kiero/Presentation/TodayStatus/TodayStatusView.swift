@@ -21,21 +21,18 @@ struct TodayStatusView: View {
     @State private var selectedSchedule: ScheduleItem?
     
     var body: some View {
-        
         GeometryReader { proxy in
-            
             ZStack {
-                
                 backgroundView
-                
                 mainContent
-                
                 popupOverlay
-                
                 missionSheet(proxy: proxy)
             }
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
+        .onAppear {
+            viewModel.fetchTodayStatus()
+        }
         .onChange(of: isMissionSheetPresented) { value in
             NotificationCenter.default.post(
                 name: .hideTabBar,
@@ -64,8 +61,8 @@ private extension TodayStatusView {
                 .padding(.top, 14)
             
             MissionButtonBar(
-                completeCount: viewModel.state.completeMissions.count,
-                incompleteCount: viewModel.state.incompleteMissions.count,
+                completeCount: viewModel.completeMissions.count,
+                incompleteCount: viewModel.incompleteMissions.count,
                 completeAction: {
                     selectedMissionTab = .complete
                     isMissionSheetPresented = true
@@ -79,10 +76,11 @@ private extension TodayStatusView {
             
             ScrollView {
                 ScheduleSectionView(
-                    schedules: viewModel.state.schedules,
-                    isFireLitToday: viewModel.state.isFireLitToday,
+                    schedules: viewModel.schedules,
+                    isFireLitToday: viewModel.isFireLitToday,
                     onTapSchedule: { schedule in
                         selectedSchedule = schedule
+                        viewModel.didTapScheduleCard(schedule)
                     }
                 )
                 .padding(.top, 18)
@@ -93,19 +91,27 @@ private extension TodayStatusView {
     
     @ViewBuilder
     var popupOverlay: some View {
-        
         if let selectedSchedule {
-            
             Color.kBlack.opacity(0.75)
                 .ignoresSafeArea()
                 .onTapGesture {
                     self.selectedSchedule = nil
+                    viewModel.selectedScheduleImageURL = nil
                 }
             
             ScheduleImageOverlayView(
-                schedule: selectedSchedule,
+                schedule: ScheduleItem(
+                    id: selectedSchedule.id,
+                    title: selectedSchedule.title,
+                    startTime: selectedSchedule.startTime,
+                    endTime: selectedSchedule.endTime,
+                    imageURL: viewModel.selectedScheduleImageURL,
+                    status: selectedSchedule.status,
+                    isNowSchedule: selectedSchedule.isNowSchedule
+                ),
                 onClose: {
                     self.selectedSchedule = nil
+                    viewModel.selectedScheduleImageURL = nil
                 }
             )
             .padding(.horizontal, 16)
@@ -116,7 +122,6 @@ private extension TodayStatusView {
     
     @ViewBuilder
     func missionSheet(proxy: GeometryProxy) -> some View {
-        
         Color.kBlack.opacity(isMissionSheetPresented ? 0.75 : 0)
             .ignoresSafeArea()
             .allowsHitTesting(isMissionSheetPresented)
@@ -133,8 +138,8 @@ private extension TodayStatusView {
             MissionBottomSheet(
                 selectedTab: $selectedMissionTab,
                 isPresented: $isMissionSheetPresented,
-                completeMissions: viewModel.state.completeMissions,
-                incompleteMissions: viewModel.state.incompleteMissions
+                completeMissions: viewModel.completeMissions,
+                incompleteMissions: viewModel.incompleteMissions
             )
             .offset(y: isMissionSheetPresented ? 0 : proxy.size.height)
         }
