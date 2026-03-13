@@ -8,7 +8,7 @@
 import Foundation
 
 struct ScheduleItem: Identifiable, Hashable {
-    let id = UUID()
+    let id: Int
     let title: String
     let startTime: String
     let endTime: String
