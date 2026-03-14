@@ -15,6 +15,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     @Published var schedules: [ScheduleItem] = []
     @Published var isFireLitToday: Bool = false
     @Published var selectedScheduleImageURL: URL? = nil
+    @Published var childFirstName: String = ""
     
     var currentChildId: Int = 0
     
@@ -44,6 +45,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
                 self.incompleteMissions = dto.incompleteMissions.map { $0.toItem() }
                 self.schedules = dto.schedules.map { $0.toItem() }
                 self.isFireLitToday = dto.isFireLitToday
+                self.childFirstName = dto.firstName
             }
             .store(in: &cancellables)
     }

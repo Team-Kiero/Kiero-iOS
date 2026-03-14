@@ -56,7 +56,7 @@ private extension TodayStatusView {
                 .frame(height: 41)
                 .padding(.top, 9)
             
-            ProfileCard()
+            ProfileCard(name: viewModel.childFirstName)
                 .frame(height: 96)
                 .padding(.top, 14)
             

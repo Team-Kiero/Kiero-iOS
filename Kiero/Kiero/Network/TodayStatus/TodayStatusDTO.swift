@@ -8,6 +8,7 @@
 import Foundation
 
 struct TodayStatusDTO: Decodable {
+    let firstName: String
     let isFireLitToday: Bool
     let completeMissions: [TodayMissionDTO]
     let incompleteMissions: [TodayMissionDTO]
