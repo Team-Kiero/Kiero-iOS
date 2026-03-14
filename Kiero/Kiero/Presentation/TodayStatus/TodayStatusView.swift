@@ -79,6 +79,7 @@ private extension TodayStatusView {
                     schedules: viewModel.schedules,
                     isFireLitToday: viewModel.isFireLitToday,
                     onTapSchedule: { schedule in
+                        viewModel.selectedScheduleImageURL = nil
                         selectedSchedule = schedule
                         viewModel.didTapScheduleCard(schedule)
                     }
@@ -100,15 +101,8 @@ private extension TodayStatusView {
                 }
             
             ScheduleImageOverlayView(
-                schedule: ScheduleItem(
-                    id: selectedSchedule.id,
-                    title: selectedSchedule.title,
-                    startTime: selectedSchedule.startTime,
-                    endTime: selectedSchedule.endTime,
-                    imageURL: viewModel.selectedScheduleImageURL,
-                    status: selectedSchedule.status,
-                    isNowSchedule: selectedSchedule.isNowSchedule
-                ),
+                title: selectedSchedule.title,
+                imageURL: viewModel.selectedScheduleImageURL,
                 onClose: {
                     self.selectedSchedule = nil
                     viewModel.selectedScheduleImageURL = nil

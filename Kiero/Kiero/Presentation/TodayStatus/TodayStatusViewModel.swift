@@ -62,7 +62,9 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
                     Toast.show(message: error.toastMessage)
                 }
             } receiveValue: { [weak self] response in
+                print("imageUrl:", response.imageUrl)
                 self?.selectedScheduleImageURL = URL(string: response.imageUrl)
+                print("converted URL:", self?.selectedScheduleImageURL as Any)
             }
             .store(in: &cancellables)
     }

@@ -13,9 +13,7 @@ struct ScheduleCard: View {
     
     var body: some View {
         Button(action: {
-            if isTapEnabled {
-                onTap()
-            }
+            onTap()
         }) {
             HStack(spacing: 0) {
                 Image(buttonName)
@@ -53,10 +51,6 @@ struct ScheduleCard: View {
 }
 
 private extension ScheduleCard {
-    var isTapEnabled: Bool {
-        schedule.imageURL != nil
-    }
-    
     var buttonName: ImageResource {
         if schedule.isNowSchedule {
             return .btnCheckFill

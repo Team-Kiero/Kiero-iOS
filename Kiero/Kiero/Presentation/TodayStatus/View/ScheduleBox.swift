@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum TodayStatus: String, Decodable {
-    case complete = "COMPLETE"
+    case complete = "COMPLETED"
     case failed = "FAILED"
     case skipped = "SKIPPED"
     case verified = "VERIFIED"
