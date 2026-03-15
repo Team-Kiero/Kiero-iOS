@@ -36,12 +36,6 @@ struct TodayStatusView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
-        .onChange(of: selectedSchedule) { value in
-            NotificationCenter.default.post(
-                name: .hideTabBar,
-                object: value != nil
-            )
-        }
     }
 }
 
@@ -125,9 +119,6 @@ private extension TodayStatusView {
             .onTapGesture {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isMissionSheetPresented = false
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                    NotificationCenter.default.post(name: .hideTabBar, object: false)
                 }
             }
             .zIndex(3)

@@ -25,7 +25,7 @@ struct MissionBottomSheet: View {
                         isPresented = false
                     }
 
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         NotificationCenter.default.post(name: .hideTabBar, object: false)
                     }
                 }
