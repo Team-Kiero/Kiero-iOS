@@ -23,13 +23,13 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private let isLoadingSubject = CurrentValueSubject<Bool, Never>(false)
     private let isLoadingMoreSubject = CurrentValueSubject<Bool, Never>(false)
     private let sectionsSubject = CurrentValueSubject<[FeedSection], Never>([])
+    private let sseRefreshSubject = PassthroughSubject<Void, Never>()
     
     private(set) var sections: [FeedSection] = []
     private var nextCursor: String? = nil
     private var canLoadMore: Bool { nextCursor != nil }
     private var cachedChildName: String = ""
     private var expandedKeys = Set<String>()
-    private var seenKeys = Set<String>()
     private var sseStarted = false
     
     init(
@@ -58,7 +58,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     func transform(input: Input) -> Output {
         
-        let idTrigger = Publishers.Merge(input.viewDidload, input.refresh)
+        let idTrigger = Publishers.Merge3(input.viewDidload, input.refresh, sseRefreshSubject)
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isLoadingSubject.send(true)
                 self?.nextCursor = nil
@@ -200,34 +200,11 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private func handleSse(payload: SseEventPayload) {
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
+            guard let self = self else { return }
             
-            let eventType = self.mapServerEventType(payload.eventType)
-            let occurredAt = payload.occurredAt ?? ""
-            
-            let metadata = FeedMetadata(
-                content: payload.metadata?.content,
-                imageUrl: payload.metadata?.imageUrl,
-                amount: payload.metadata?.amount
-            )
-            
-            let key = self.makeDedupKey(eventType: eventType, occurredAt: occurredAt, metadata: metadata)
-            guard !self.seenKeys.contains(key) else { return }
-            self.seenKeys.insert(key)
-            
-            let newItem = FeedItem(
-                eventType: eventType,
-                occurredAt: occurredAt,
-                metadata: metadata
-            )
-            
-            var current = self.itemsSubject.value
-            current.insert(newItem, at: 0)
-            self.itemsSubject.send(current)
-            
-            let newSections = self.makeSections(items: current, childName: self.cachedChildName)
-            self.sections = newSections
-            self.sectionsSubject.send(newSections)
+            if payload.eventType == "FEED_ITEM_CREATED" {
+                self.sseRefreshSubject.send(())
+            }
         }
     }
     
@@ -243,16 +220,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             metadata.imageUrl ?? "",
             String(metadata.amount ?? -1)
         ].joined(separator: "|")
-    }
-    
-    private func mapServerEventType(_ raw: String) -> FeedEventType {
-        switch raw {
-        case "MISSION_COMPLETED": return .mission
-        case "SCHEDULE_COMPLETED": return .schedule
-        case "COUPON_PURCHASED": return .coupon
-        case "FIRE_LIT": return .complete
-        default: return .mission
-        }
     }
     
     // MARK: - Helpers
