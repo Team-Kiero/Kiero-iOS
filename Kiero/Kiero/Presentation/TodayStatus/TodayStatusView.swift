@@ -32,6 +32,10 @@ struct TodayStatusView: View {
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
         .onAppear {
             viewModel.fetchTodayStatus()
+            viewModel.bindSSEIfNeeded()
+        }
+        .onDisappear() {
+            viewModel.unbindSSE()
         }
     }
 }

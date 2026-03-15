@@ -28,7 +28,7 @@ struct ScheduleBox: View {
                 dotImage: dotImage,
                 dotGlowColor: dotGlowColor,
                 lineGradient: lineGradient,
-                lineHeight: isLast ? 0 : 94
+                lineHeight: 94
             )
             .padding(.top, 4)
 
@@ -118,28 +118,38 @@ private extension ScheduleBox {
                 endPoint: .bottom
             )
         }
-        
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return LinearGradient(
-                colors: [.gray400, .gray600],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            
-        case .verified:
-            return LinearGradient(
-                colors: [.gray400, .gray800],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            
-        case .pending:
-            return LinearGradient(
-                colors: [.gray800, .kBlack],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        else {
+            if isLast {
+                return LinearGradient(
+                    colors: [.clear, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            else {
+                switch schedule.status {
+                case .complete, .failed, .skipped:
+                    return LinearGradient(
+                        colors: [.gray400, .gray600],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    
+                case .verified:
+                    return LinearGradient(
+                        colors: [.gray400, .gray800],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    
+                case .pending:
+                    return LinearGradient(
+                        colors: [.gray800, .kBlack],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+            }
         }
     }
 }

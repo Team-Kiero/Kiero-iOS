@@ -19,9 +19,11 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     var currentChildId: Int = 0
     
+    private var refreshWorkItem: DispatchWorkItem?
+    private var isSseBound = false
+    
     override init() {
         super.init()
-        
         self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
     }
     
@@ -83,5 +85,76 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     func didTapScheduleCard(_ schedule: ScheduleItem) {
         postScheduleImage(scheduleDetailId: schedule.id)
+    }
+    
+    func bindSSEIfNeeded() {
+        guard !isSseBound else { return }
+        isSseBound = true
+        
+        guard let token = UserDefaults.standard.string(forKey: "sseAccessToken") else {
+            print("SSE 토큰 없음")
+            return
+        }
+        
+        SseStreamManager.shared.onRefreshWillStart = { [weak self] in
+            DispatchQueue.main.async {
+                self?.scheduleRefresh()
+            }
+        }
+        
+        SseStreamManager.shared.onReconnected = { [weak self] in
+            DispatchQueue.main.async {
+                self?.scheduleRefresh()
+            }
+        }
+        
+        SseStreamManager.shared.startIfNeeded(
+            initialToken: token,
+            onEvent: { [weak self] payload in
+                guard let self else { return }
+                
+                if self.shouldRefreshTodayStatus(for: payload) {
+                    DispatchQueue.main.async {
+                        self.scheduleRefresh()
+                    }
+                }
+            }
+        )
+    }
+    
+    func unbindSSE() {
+        refreshWorkItem?.cancel()
+        refreshWorkItem = nil
+        isSseBound = false
+        SseStreamManager.shared.pause()
+    }
+    
+    private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {
+        if let childId = payload.childId,
+           Int(childId) != currentChildId {
+            return false
+        }
+        
+        switch payload.eventType {
+        case "FEED_ITEM_CREATED",
+             "SCHEDULE_STATUS_UPDATED",
+             "DATE_CHANGED",
+             "TODAY_MISSION_COMPLETED",
+             "FIRE_LIT":
+            return true
+        default:
+            return false
+        }
+    }
+    
+    private func scheduleRefresh() {
+        refreshWorkItem?.cancel()
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.fetchTodayStatus()
+        }
+        
+        refreshWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2, execute: workItem)
     }
 }
