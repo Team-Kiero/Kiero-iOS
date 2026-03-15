@@ -19,6 +19,7 @@ struct ScheduleBox: View {
     let schedule: ScheduleItem
     let isFireLitToday: Bool
     let showsNextScheduleText: Bool
+    let isLast: Bool
     let onTapSchedule: (ScheduleItem) -> Void
 
     var body: some View {
@@ -27,7 +28,7 @@ struct ScheduleBox: View {
                 dotImage: dotImage,
                 dotGlowColor: dotGlowColor,
                 lineGradient: lineGradient,
-                lineHeight: 94
+                lineHeight: isLast ? 0 : 94
             )
             .padding(.top, 4)
 
