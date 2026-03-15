@@ -31,8 +31,6 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         self.tabBarController?.delegate = self
         
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        
-        refreshSubject.send(())
     }
     
     override func viewWillDisappear(_ animated: Bool) {
