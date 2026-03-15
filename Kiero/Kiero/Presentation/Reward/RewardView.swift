@@ -57,15 +57,22 @@ struct RewardView: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
-                FloatingButtonWrapper(
-                    type: .schedule,
-                    action: { isShowingAddView = true }
-                )
-                .frame(width: 53, height: 53)
-                .padding(.trailing, 32)
-                .padding(.bottom, 115)
+                
+                VStack(spacing: 0) {
+                    Spacer()
+                    HStack(spacing: 0) {
+                        Spacer()
+                        FloatingButtonWrapper(
+                            type: .schedule,
+                            action: {
+                                isShowingAddView = true
+                            }
+                        )
+                        .frame(width: 53, height: 53)
+                        .offset(x: -41, y: -124)
+                    }
+                }
+                .ignoresSafeArea()
                 
                 if viewModel.showDeleteDialog, let reward = viewModel.selectedReward {
                     Color.kBlack.opacity(0.75)

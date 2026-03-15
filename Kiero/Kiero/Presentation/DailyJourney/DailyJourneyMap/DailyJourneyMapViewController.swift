@@ -38,6 +38,7 @@ final class DailyJourneyMapViewController: BaseViewController<DailyJourneyMapVie
         let swiftUIView = DailyJourneyMapView(viewModel: viewModel)
         let hosting = UIHostingController(rootView: swiftUIView)
         hosting.view.backgroundColor = .clear
+        hosting.view.clipsToBounds = true
         
         addChild(hosting)
         view.addSubview(hosting.view)

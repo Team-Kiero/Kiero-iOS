@@ -36,7 +36,7 @@ struct DailyJourneyMapSchedule: Decodable, Identifiable {
     
     enum ScheduleStatus: String, Decodable {
         case PENDING
-        case COMPLETE
+        case COMPLETED
         case FAILED
         case SKIPPED
         case VERIFIED

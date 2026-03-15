@@ -145,19 +145,36 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         missionResultView.pagingHeader.onLeftButtonTapped = { [weak self] in
             self?.saveCurrentState()
             self?.currentIndex -= 1
-            self?.displayMission(at: self?.currentIndex ?? 0)
+            self?.displayMission(at: self?.currentIndex ?? 0, direction: .right)
         }
-        
+
         missionResultView.pagingHeader.onRightButtonTapped = { [weak self] in
             guard let self = self else { return }
             self.saveCurrentState()
             self.currentIndex += 1
-            
             if self.currentIndex == self.suggestedMissions.count - 1 {
                 self.isAllMissionsViewed = true
             }
-            
-            self.displayMission(at: self.currentIndex)
+            self.displayMission(at: self.currentIndex, direction: .left)
+        }
+        
+        missionResultView.onSwipeLeft = { [weak self] in
+            guard let self = self else { return }
+            guard self.currentIndex < self.suggestedMissions.count - 1 else { return }
+            self.saveCurrentState()
+            self.currentIndex += 1
+            if self.currentIndex == self.suggestedMissions.count - 1 {
+                self.isAllMissionsViewed = true
+            }
+            self.displayMission(at: self.currentIndex, direction: .left)
+        }
+
+        missionResultView.onSwipeRight = { [weak self] in
+            guard let self = self else { return }
+            guard self.currentIndex > 0 else { return }
+            self.saveCurrentState()
+            self.currentIndex -= 1
+            self.displayMission(at: self.currentIndex, direction: .right)
         }
     }
     
@@ -265,7 +282,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         viewModel?.createBulkMissions(missions: finalMissions)
     }
     
-    private func displayMission(at index: Int) {
+    private func displayMission(at index: Int, direction: UISwipeGestureRecognizer.Direction? = nil) {
         let total = suggestedMissions.count
         let mission = suggestedMissions[index]
         
@@ -286,6 +303,18 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         }
         
         missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+        
+        guard let direction else { return }
+        let contentContainer = missionResultView.contentContainer
+        let offset: CGFloat = direction == .left ? 60 : -60
+        
+        contentContainer.transform = CGAffineTransform(translationX: offset, y: 0)
+        contentContainer.alpha = 0
+        
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
+            contentContainer.transform = .identity
+            contentContainer.alpha = 1
+        }
     }
     
     private func updateButtonState(text: String) {

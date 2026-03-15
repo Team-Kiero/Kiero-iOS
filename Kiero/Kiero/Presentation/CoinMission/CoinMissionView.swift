@@ -61,7 +61,6 @@ final class CoinMissionView: BaseUIView {
         $0.textColor = .gray400
         $0.setTypo(.title3_16_SB, text: "아직 등록된 미션이 없어!")
         $0.isHidden = true
-        
     }
     
     // MARK: - Setup Methods

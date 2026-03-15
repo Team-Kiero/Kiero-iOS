@@ -56,7 +56,13 @@ final class AIMissionViewModel: BaseViewModel {
         service.postBulkMissions(childId: childId, missions: items)
             .sink { [weak self] completion in
                 self?.isLoading.send(false)
-            } receiveValue: { [weak self] _ in
+            } receiveValue: { [weak self] response in
+                let sortedAiIds = response.sorted { $0.name < $1.name }.reversed().map { $0.id }
+                
+                var recentActivity = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []
+                recentActivity.append(contentsOf: sortedAiIds)
+                UserDefaults.standard.set(recentActivity, forKey: "recentActivityIds")
+                
                 self?.bulkCreateSuccess.send(())
             }
             .store(in: &cancellables)

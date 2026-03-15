@@ -17,6 +17,7 @@ final class WeeklyTimeTableView: BaseUIView {
     private let hourHeight: CGFloat = 40
     private let startHour = 8
     private let endHour = 21
+    private let spacing: CGFloat = 3
     
     private var daysDates: [Date] = []
     var onScheduleTap: ((Schedule) -> Void)?
@@ -103,7 +104,7 @@ final class WeeklyTimeTableView: BaseUIView {
         gridContainer.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
-            $0.height.equalTo(totalGridHeight+10)
+            $0.height.equalTo(totalGridHeight + 10)
         }
         
         gridBackgroundView.snp.makeConstraints {
@@ -236,8 +237,8 @@ final class WeeklyTimeTableView: BaseUIView {
         let cardHeight = CGFloat(duration) * hourHeight
         let actualColor = UIColor(hex: schedule.colorCode)
         
-        let cardWidth: CGFloat = 44
-        let spacing: CGFloat = 3
+        let totalWidth = cardContainerView.bounds.width
+        let cardWidth = (totalWidth - CGFloat(6) * spacing) / 7
         
         guard let dateString = schedule.date,
               let scheduleDate = dateString.toDate() else { return }
