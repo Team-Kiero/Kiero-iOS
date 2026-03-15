@@ -42,6 +42,8 @@ final class ConfirmBox: UIView {
     
     var onTapButton: (() -> Void)?
     
+    private weak var overlayVC: UIViewController?
+    
     // MARK: - UI Component
     
     private let characterImage = UIImageView().then {
@@ -138,8 +140,40 @@ final class ConfirmBox: UIView {
     
     // MARK: Action
     
+    func show(in viewController: UIViewController) {
+        let overlay = UIViewController()
+        overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
+        overlay.modalPresentationStyle = .overFullScreen
+        overlay.view.addSubview(self)
+        
+        self.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(343)
+        }
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapDim(_:)))
+        overlay.view.addGestureRecognizer(tap)
+        
+        self.overlayVC = overlay
+        viewController.present(overlay, animated: false)
+    }
+    
+    func dismiss() {
+        overlayVC?.dismiss(animated: false)
+        overlayVC = nil
+    }
+    
     @objc
     private func didTapButton() {
         onTapButton?()
+        dismiss()
+    }
+    
+    @objc
+    private func didTapDim(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: gesture.view)
+        if !self.frame.contains(location) {
+            dismiss()
+        }
     }
 }

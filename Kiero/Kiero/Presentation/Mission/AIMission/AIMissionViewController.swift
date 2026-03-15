@@ -54,15 +54,35 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     // MARK: - Life Cycle
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.view.endEditing(true)
+        view.endEditing(true)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
         updateButtonState(text: "")
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        if isBeingDismissed {
+            NotificationCenter.default.post(name: .hideTabBar, object: false)
+            NotificationCenter.default.post(name: .hideNavigationBar, object: false)
+        }
     }
     
     deinit {
@@ -72,9 +92,12 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     // MARK: - Setup Methods
     
     override func setUI() {
-        view.addSubviews(navigationBar,
-                         missionInputView, missionResultView,
-                         addMissionButton)
+        view.addSubviews(
+            navigationBar,
+            missionInputView,
+            missionResultView,
+            addMissionButton
+        )
     }
     
     override func setLayout() {
@@ -106,12 +129,12 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         }
         
         navigationBar.leftButtonAction = { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
             if self.isAnalysisDone {
                 self.isAnalysisDone = false
             } else {
-                self.navigationController?.popViewController(animated: true)
+                self.dismiss(animated: true)
             }
         }
         
@@ -122,19 +145,36 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         missionResultView.pagingHeader.onLeftButtonTapped = { [weak self] in
             self?.saveCurrentState()
             self?.currentIndex -= 1
-            self?.displayMission(at: self?.currentIndex ?? 0)
+            self?.displayMission(at: self?.currentIndex ?? 0, direction: .right)
         }
-        
+
         missionResultView.pagingHeader.onRightButtonTapped = { [weak self] in
             guard let self = self else { return }
             self.saveCurrentState()
             self.currentIndex += 1
-            
             if self.currentIndex == self.suggestedMissions.count - 1 {
                 self.isAllMissionsViewed = true
             }
-            
-            self.displayMission(at: self.currentIndex)
+            self.displayMission(at: self.currentIndex, direction: .left)
+        }
+        
+        missionResultView.onSwipeLeft = { [weak self] in
+            guard let self = self else { return }
+            guard self.currentIndex < self.suggestedMissions.count - 1 else { return }
+            self.saveCurrentState()
+            self.currentIndex += 1
+            if self.currentIndex == self.suggestedMissions.count - 1 {
+                self.isAllMissionsViewed = true
+            }
+            self.displayMission(at: self.currentIndex, direction: .left)
+        }
+
+        missionResultView.onSwipeRight = { [weak self] in
+            guard let self = self else { return }
+            guard self.currentIndex > 0 else { return }
+            self.saveCurrentState()
+            self.currentIndex -= 1
+            self.displayMission(at: self.currentIndex, direction: .right)
         }
     }
     
@@ -149,7 +189,10 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                 if isLoading {
                     if self.isAnalysisDone { return }
                     
-                    let loadingVC = LoadingViewController(viewModel: LoadingViewModel(), diContainer: AppDIContainer.shared)
+                    let loadingVC = LoadingViewController(
+                        viewModel: LoadingViewModel(),
+                        diContainer: AppDIContainer.shared
+                    )
                     loadingVC.modalPresentationStyle = .overFullScreen
                     self.present(loadingVC, animated: false)
                 } else {
@@ -164,15 +207,12 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] missions in
                 guard let self = self, !missions.isEmpty else { return }
-                if missions.isEmpty {
-                    self.addMissionButton.isEnabled = true
-                } else {
-                    self.suggestedMissions = missions
-                    self.currentIndex = 0
-                    self.isAnalysisDone = true
-                    self.isAllMissionsViewed = (missions.count <= 1)
-                    self.displayMission(at: 0)
-                }
+                
+                self.suggestedMissions = missions
+                self.currentIndex = 0
+                self.isAnalysisDone = true
+                self.isAllMissionsViewed = (missions.count <= 1)
+                self.displayMission(at: 0)
             }
             .store(in: &cancellables)
         
@@ -181,7 +221,11 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             .sink { [weak self] in
                 guard let self = self else { return }
                 Toast.show(message: "미션이 등록되었어요.")
-                self.navigationController?.popViewController(animated: true)
+                
+                NotificationCenter.default.post(name: .hideTabBar, object: false)
+                NotificationCenter.default.post(name: .hideNavigationBar, object: false)
+                
+                self.dismiss(animated: true)
             }
             .store(in: &cancellables)
         
@@ -203,7 +247,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     @objc
     private func didTapBottomButton() {
         if !isAnalysisDone {
-            self.view.endEditing(true)
+            view.endEditing(true)
             guard let text = missionInputView.textView.text, !text.isEmpty else { return }
             
             addMissionButton.isEnabled = false
@@ -238,7 +282,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         viewModel?.createBulkMissions(missions: finalMissions)
     }
     
-    private func displayMission(at index: Int) {
+    private func displayMission(at index: Int, direction: UISwipeGestureRecognizer.Direction? = nil) {
         let total = suggestedMissions.count
         let mission = suggestedMissions[index]
         
@@ -250,15 +294,27 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         
         if let edited = editedMissions[index] {
             missionResultView.nameTextField.text = edited.name
-            self.currentSelectedDate = edited.dueAt.toDate(format: "yyyy-MM-dd") ?? Date()
+            currentSelectedDate = edited.dueAt.toDate(format: "yyyy-MM-dd") ?? Date()
             missionResultView.updateReward(to: edited.reward)
         } else {
             missionResultView.nameTextField.text = mission.name
-            self.currentSelectedDate = mission.dueAt.toDate(format: "yyyy-MM-dd") ?? Date()
+            currentSelectedDate = mission.dueAt.toDate(format: "yyyy-MM-dd") ?? Date()
             missionResultView.updateReward(to: mission.reward)
         }
         
         missionResultView.deadlineView.dateLabel.text = currentSelectedDate.toFullDateString
+        
+        guard let direction else { return }
+        let contentContainer = missionResultView.contentContainer
+        let offset: CGFloat = direction == .left ? 60 : -60
+        
+        contentContainer.transform = CGAffineTransform(translationX: offset, y: 0)
+        contentContainer.alpha = 0
+        
+        UIView.animate(withDuration: 0.25, delay: 0, options: .curveEaseOut) {
+            contentContainer.transform = .identity
+            contentContainer.alpha = 1
+        }
     }
     
     private func updateButtonState(text: String) {
@@ -294,11 +350,11 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         }
         
         endDateVC.modalPresentationStyle = .overFullScreen
-        self.present(endDateVC, animated: false)
+        present(endDateVC, animated: false)
     }
     
     func setAnalysisStatus(isDone: Bool) {
-        self.isAnalysisDone = isDone
+        isAnalysisDone = isDone
     }
     
     @objc

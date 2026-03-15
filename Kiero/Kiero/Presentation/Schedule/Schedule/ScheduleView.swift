@@ -44,13 +44,12 @@ final class ScheduleView: BaseUIView {
         
         UIView.performWithoutAnimation {
             timeTableView.clearSchedules()
+            timeTableView.setNeedsLayout()
+            timeTableView.layoutIfNeeded()
             
             schedules.forEach { schedule in
                 timeTableView.addSchedule(schedule: schedule)
             }
-            
-            self.timeTableView.setNeedsLayout()
-            self.timeTableView.layoutIfNeeded()
         }
         
         timeTableView.updateEmptyState(isEmpty: schedules.isEmpty)

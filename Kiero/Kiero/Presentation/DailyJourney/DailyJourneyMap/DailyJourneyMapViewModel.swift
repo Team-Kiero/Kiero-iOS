@@ -56,7 +56,8 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                 await MainActor.run {
                     SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
                         guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                           || payload.eventType == "SCHEDULE_MODIFIED" else { return }
+                                || payload.eventType == "SCHEDULE_MODIFIED"
+                                || payload.eventType == "DATE_CHANGED" else { return }
                         print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
                         self?.fetchJourneyList()
                     }

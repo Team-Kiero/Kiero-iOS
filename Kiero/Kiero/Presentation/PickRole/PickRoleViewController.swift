@@ -14,6 +14,7 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     private let logoImageView = UIImageView().then {
         $0.image = .imgLogo
+        $0.tintColor = .white
         $0.contentMode = .scaleAspectFit
     }
     

@@ -21,22 +21,20 @@ struct RewardView: View {
     ]
     
     var body: some View {
-        NavigationStack {
-            ZStack {
+        GeometryReader { proxy in
+            let topOffset: CGFloat = 102
+            
+            ZStack(alignment: .bottomTrailing) {
                 Color.kBlack.ignoresSafeArea()
                 
-                VStack {
-                    NavigationBarWrapper(
-                        type: .main(title: "보상"),
-                        isNotificationActive: hasNotification,
-                        onRightTap: {
-                            isNavigatingToNotification = true
-                        }
-                    )
-                    .frame(height: 45)
-                    
+                VStack(spacing: 0) {
                     if viewModel.rewards.isEmpty {
+                        Spacer()
+                            .frame(height: topOffset)
+                        
                         EmptyViewWrapper(text: "등록된 보상이 없어요.\n우측 하단 버튼을 눌러 보상을 추가해보세요!")
+                        
+                        Spacer()
                     } else {
                         ScrollView {
                             LazyVGrid(columns: columns, spacing: 13) {
@@ -54,24 +52,27 @@ struct RewardView: View {
                                         }
                                 }
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.top, topOffset)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 8)
                     }
                 }
-                VStack {
+                
+                VStack(spacing: 0) {
                     Spacer()
-                    
-                    FloatingButtonWrapper(
-                        type: .schedule,
-                        action: {
-                            isShowingAddView = true
-                        }
-                    )
-                    .frame(width: 53, height: 53)
-                    .padding(.bottom, 100)
-                    .padding(.leading, 291)
+                    HStack(spacing: 0) {
+                        Spacer()
+                        FloatingButtonWrapper(
+                            type: .schedule,
+                            action: {
+                                isShowingAddView = true
+                            }
+                        )
+                        .frame(width: 53, height: 53)
+                        .offset(x: -41, y: -124)
+                    }
                 }
+                .ignoresSafeArea()
                 
                 if viewModel.showDeleteDialog, let reward = viewModel.selectedReward {
                     Color.kBlack.opacity(0.75)
@@ -89,33 +90,25 @@ struct RewardView: View {
                     .transition(.scale.combined(with: .opacity))
                 }
             }
-            .onAppear { viewModel.fetchCoupons() }
-            .navigationDestination(isPresented: $isNavigatingToNotification) {
-                NotificationFeedWrapper()
-                    .toolbar(.hidden, for: .navigationBar)
-                    .ignoresSafeArea()
-                    .onAppear {
-                        NotificationCenter.default.post(name: .hideTabBar, object: true)
-                    }
-                    .onDisappear {
-                        NotificationCenter.default.post(name: .hideTabBar, object: false)
-                    }
-            }
-            .fullScreenCover(isPresented: $isShowingAddView) {
-                RewardEditView(mode: .add) { title, cost in
-                    viewModel.addReward(title: title, cost: cost)
-                }
-            }
-            .fullScreenCover(item: $selectedReward) { reward in
-                RewardEditView(mode: .edit(reward)) { title, cost in
-                    viewModel.updateReward(id: reward.id, title: title, cost: cost)
-                }
+        }
+        .onAppear { viewModel.fetchCoupons() }
+        .onChange(of: isShowingAddView) { isPresented in
+            NotificationCenter.default.post(name: .hideTabBar, object: isPresented)
+            NotificationCenter.default.post(name: .hideNavigationBar, object: isPresented)
+        }
+        .onChange(of: selectedReward != nil) { isPresented in
+            NotificationCenter.default.post(name: .hideTabBar, object: isPresented)
+            NotificationCenter.default.post(name: .hideNavigationBar, object: isPresented)
+        }
+        .fullScreenCover(isPresented: $isShowingAddView) {
+            RewardEditView(mode: .add) { title, cost in
+                viewModel.addReward(title: title, cost: cost)
             }
         }
-        .background(.kBlack)
+        .fullScreenCover(item: $selectedReward) { reward in
+            RewardEditView(mode: .edit(reward)) { title, cost in
+                viewModel.updateReward(id: reward.id, title: title, cost: cost)
+            }
+        }
     }
-}
-
-#Preview {
-    RewardView()
 }

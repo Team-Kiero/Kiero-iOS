@@ -92,7 +92,9 @@ final class DialogBox: UIView {
         return followingOption.isSelected
     }
     
-    // MARK: - UI Conponents
+    private weak var overlayVC: UIViewController?
+    
+    // MARK: - UI Components
     
     private let closeButton = UIButton().then {
         $0.setImage(UIImage(resource: .icClose), for: .normal)
@@ -118,7 +120,6 @@ final class DialogBox: UIView {
             
             config?.image = isSelected ? UIImage(resource: .btnCheck) : UIImage(resource: .btnUncheck)
             config?.baseForegroundColor = isSelected ? .main : .gray400
-            
             config?.background.backgroundColor = .clear
             button.configuration = config
         }
@@ -256,14 +257,37 @@ final class DialogBox: UIView {
         messageLabel.setContentHuggingPriority(.required, for: .vertical)
     }
     
-    // MARK: - Bind
-    
     private func bind() {
         closeButton.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
         cancelButton.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
         confirmButton.addTarget(self, action: #selector(didTapConfirm), for: .touchUpInside)
         onlyThisOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
         followingOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
+    }
+    
+    // MARK: - Action
+    
+    func show(in viewController: UIViewController) {
+        let overlay = UIViewController()
+        overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
+        overlay.modalPresentationStyle = .overFullScreen
+        overlay.view.addSubview(self)
+        
+        self.snp.makeConstraints {
+            $0.center.equalToSuperview()
+            $0.width.equalTo(343)
+        }
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapDim(_:)))
+        overlay.view.addGestureRecognizer(tap)
+        
+        self.overlayVC = overlay
+        viewController.present(overlay, animated: false)
+    }
+    
+    func dismiss() {
+        overlayVC?.dismiss(animated: false)
+        overlayVC = nil
     }
     
     // MARK: - Configure
@@ -346,13 +370,28 @@ final class DialogBox: UIView {
     // MARK: - Actions
     
     @objc
-    private func didTapClose() { onTapClose?() }
+    private func didTapClose() {
+        onTapClose?()
+        dismiss()
+    }
     
     @objc
-    private func didTapCancel() { onTapCancel?() }
+    private func didTapCancel() {
+        onTapCancel?()
+        dismiss()
+    }
     
     @objc
     private func didTapConfirm() { onTapConfirm?() }
+    
+    @objc
+    private func didTapDim(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: gesture.view)
+        if !self.frame.contains(location) {
+            onTapClose?()
+            dismiss()
+        }
+    }
     
     @objc
     private func didTapOption(_ sender: UIButton) {
