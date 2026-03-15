@@ -26,7 +26,7 @@ struct DailyJourneyStoneRewardView: View {
     
     private var ringColor: Color {
         switch status {
-        case "COMPLETE", "VERIFIED":
+        case "COMPLETED", "VERIFIED":
             return .main
         case "FAILED", "SKIPPED":
             return .point
@@ -34,25 +34,25 @@ struct DailyJourneyStoneRewardView: View {
             return .white
         }
     }
-    
+
     private var hasGlow: Bool {
-        status == "COMPLETE" || status == "VERIFIED" || status == "FAILED" || status == "SKIPPED"
+        status == "COMPLETED" || status == "VERIFIED" || status == "FAILED" || status == "SKIPPED"
     }
-    
+
     private var resultText: String? {
         switch status {
-        case "COMPLETE", "VERIFIED": 
+        case "COMPLETED", "VERIFIED":
             return "획득!"
-        case "FAILED", "SKIPPED":    
+        case "FAILED", "SKIPPED":
             return "실패!"
         default:
             return nil
         }
     }
-    
+
     private var resultColor: Color {
         switch status {
-        case "COMPLETE", "VERIFIED":
+        case "COMPLETED", "VERIFIED":
             return .main
         case "FAILED", "SKIPPED":
             return .point
