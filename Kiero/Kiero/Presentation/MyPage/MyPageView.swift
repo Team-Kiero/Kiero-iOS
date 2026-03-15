@@ -22,17 +22,6 @@ struct MyPageView: View {
             ZStack {
                 Color.kBlack.ignoresSafeArea()
                 VStack(spacing: 0) {
-                    NavigationBarWrapper(
-                        type: .main(title: "마이페이지"),
-                        isNotificationActive: hasNotification,
-                        onRightTap: {
-                            isNavigatingToNotification = true
-                        }
-                    )
-                    .frame(height: 45)
-                    .padding(.bottom, 16)
-                    .padding(.top, 13)
-                    
                     VStack(spacing: 0) {
                         
                         HStack(spacing: 9) {
@@ -53,6 +42,7 @@ struct MyPageView: View {
                         }
                         .frame(height: 60)
                         .padding(.horizontal, 5)
+                        .padding(.top, 74)
                         
                         
                         Rectangle()

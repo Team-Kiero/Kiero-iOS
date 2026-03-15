@@ -46,23 +46,17 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     // MARK: - Setup Methods
 
     override func setUI() {
-        view.addSubviews(navigationBar, emptyView, missionView, floatingButton)
+        view.addSubviews(emptyView, missionView, floatingButton)
     }
     
     override func setLayout() {
-        navigationBar.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(57)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(45)
-        }
-        
         emptyView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
         missionView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         

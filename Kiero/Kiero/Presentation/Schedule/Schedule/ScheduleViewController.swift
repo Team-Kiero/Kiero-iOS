@@ -45,19 +45,13 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     override func setUI() {
         addChild(scheduleChildVC)
-        view.addSubviews(navigationBar, scheduleChildVC.view, floatingButton)
+        view.addSubviews(scheduleChildVC.view, floatingButton)
         scheduleChildVC.didMove(toParent: self)
     }
     
     override func setLayout() {
-        navigationBar.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(57)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(45)
-        }
-        
         scheduleChildVC.view.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom).offset(8)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
