@@ -43,19 +43,21 @@ public final class TabBarViewController: UITabBarController {
     private let factory: ViewControllerFactory
     private let isParent: Bool
     
-    private let chromeDimView = UIView().then {
-        $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.75)
-        $0.alpha = 0
-        $0.isUserInteractionEnabled = false
-    }
-    
     private lazy var customNavigationBar = NavigationBar(type: .main()).then {
         $0.rightButtonAction = { [weak self] in
             self?.handleNavigationBarRightTap()
         }
+        $0.leftButtonAction = { [weak self] in
+            self?.handleNavigationBarLeftTap()
+        }
     }
     
-    private lazy var customTabBar = TabBarView(cornerRadius: isParent ? 24 : 0, isParent: isParent)
+    private lazy var customTabBar = TabBarView(
+        cornerRadius: isParent ? 24 : 0,
+        isParent: isParent
+    )
+    
+    private var customTabBarBottomConstraint: Constraint?
     
     public init(factory: ViewControllerFactory, isParent: Bool) {
         self.factory = factory
@@ -65,67 +67,52 @@ public final class TabBarViewController: UITabBarController {
     
     required init?(coder: NSCoder) { fatalError() }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
-        self.delegate = self
+        delegate = self
         
         setStyle()
         setViewControllers()
         setCustomNavigationBarUI()
         setCustomTabBarUI()
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleTabBarHidden(_:)),
-            name: .hideTabBar,
-            object: nil
-        )
-    }
-    
-    @objc
-    private func handleTabBarHidden(_ notification: Notification) {
-        guard let isHidden = notification.object as? Bool else { return }
-        
-        UIView.animate(withDuration: 0.3) {
-            let height = self.customTabBar.frame.height
-            self.customTabBar.transform = isHidden ? CGAffineTransform(translationX: 0, y: height) : .identity
-        }
+        bindNotifications()
+        updateNavigationBar()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.delegate = self
+        delegate = self
     }
+}
+
+// MARK: - Setup
+
+private extension TabBarViewController {
     
-    private func updateCustomTabBarSelection() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.customTabBar.updateSelection(self.selectedIndex)
-        }
-    }
-    
-    private func setStyle() {
-        self.tabBar.isHidden = true
+    func setStyle() {
+        tabBar.isHidden = true
         view.backgroundColor = .kBlack
+        additionalSafeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
     }
     
-    private func setViewControllers() {
+    func setViewControllers() {
         if isParent {
             let statusVC = factory.makeTodayStatusViewController()
             let scheduleVC = factory.makeScheduleViewController()
             let missionVC = factory.makeMissionViewController()
-            
             let rewardVC = factory.makeRewardViewController()
             let myPageVC = factory.makeMyPageViewController()
             
-            self.viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
-                if $0 is RewardHostingController || $0 is MyPageHostingController {
-                    return $0
-                }
-                
+            viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
                 nav.delegate = self
+                nav.view.backgroundColor = .kBlack
+                $0.view.backgroundColor = .kBlack
                 return nav
             }
             
@@ -138,10 +125,12 @@ public final class TabBarViewController: UITabBarController {
             let coinMissionVC = factory.makeCoinMissionViewController()
             let wishWellVC = factory.makeWishWellViewController()
             
-            self.viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map {
+            viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map {
                 let nav = UINavigationController(rootViewController: $0)
                 nav.isNavigationBarHidden = true
                 nav.delegate = self
+                nav.view.backgroundColor = .kBlack
+                $0.view.backgroundColor = .kBlack
                 return nav
             }
             
@@ -150,22 +139,35 @@ public final class TabBarViewController: UITabBarController {
                 icons: [.icMap, .icCoin, .icStar]
             )
         }
+        
         customTabBar.updateSelection(0)
     }
     
-    private func setCustomTabBarUI() {
+    func setCustomNavigationBarUI() {
+        view.addSubview(customNavigationBar)
+         
+        customNavigationBar.snp.makeConstraints {
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(13)
+            $0.horizontalEdges.equalToSuperview()
+            $0.height.equalTo(45)
+        }
+    }
+    
+    func setCustomTabBarUI() {
         view.addSubview(customTabBar)
         view.clipsToBounds = false
         
         customTabBar.snp.makeConstraints {
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview()
+            customTabBarBottomConstraint = $0.bottom.equalToSuperview().constraint
             $0.height.equalTo(100)
         }
         
-        additionalSafeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
+        view.bringSubviewToFront(customNavigationBar)
+        view.bringSubviewToFront(customTabBar)
         
         customTabBar.onTabSelected = { [weak self] index in
-            guard let self = self else { return }
+            guard let self else { return }
             
             let isReclick = (self.selectedIndex == index)
             self.selectedIndex = index
@@ -184,18 +186,118 @@ public final class TabBarViewController: UITabBarController {
         }
     }
     
-    private func handleScrollToTop(for viewController: UIViewController) {
-        let targetVC: UIViewController
-        if let nav = viewController as? UINavigationController {
-            targetVC = nav.viewControllers.first ?? viewController
-        } else {
-            targetVC = viewController
+    func bindNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTabBarHidden(_:)),
+            name: .hideTabBar,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleChromeAlpha(_:)),
+            name: .dimNavigationBar,
+            object: nil
+        )
+    }
+    
+    func updateCustomTabBarSelection() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.customTabBar.updateSelection(self.selectedIndex)
         }
-        scrollToTop(viewController: targetVC)
     }
 }
 
+// MARK: - Navigation Bar
+
+private extension TabBarViewController {
+    
+    func updateNavigationBar() {
+        let style = navigationBarStyle(for: selectedIndex)
+        
+        var resolvedType = style.type
+        
+        if let nav = selectedViewController as? UINavigationController,
+           nav.viewControllers.count > 1 {
+            resolvedType = .back(title: style.title ?? "")
+        }
+        
+        customNavigationBar.apply(type: resolvedType)
+        customNavigationBar.isNotificationActive = style.isNotificationActive
+    }
+    
+    func handleNavigationBarLeftTap() {
+        if let nav = selectedViewController as? UINavigationController,
+           nav.viewControllers.count > 1 {
+            nav.popViewController(animated: true)
+        }
+    }
+    
+    func handleNavigationBarRightTap() {
+        let notificationVC = factory.makeNotificationFeedViewController()
+        
+        guard let nav = selectedViewController as? UINavigationController else { return }
+        nav.pushViewController(notificationVC, animated: true)
+    }
+    
+    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle {
+        if isParent {
+            switch index {
+            case 0:
+                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+            case 1:
+                return .init(title: "일정", type: .main(title: "일정"), isNotificationActive: false)
+            case 2:
+                return .init(title: "미션", type: .main(title: "미션"), isNotificationActive: false)
+            case 3:
+                return .init(title: "보상", type: .main(title: "보상"), isNotificationActive: false)
+            case 4:
+                return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: false)
+            default:
+                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+            }
+        } else {
+            switch index {
+            default:
+                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+            }
+        }
+    }
+}
+
+// MARK: - Notification Handlers
+
+private extension TabBarViewController {
+    
+    @objc
+    func handleTabBarHidden(_ notification: Notification) {
+        guard let isHidden = notification.object as? Bool else { return }
+        
+        customTabBarBottomConstraint?.update(offset: isHidden ? 100 : 0)
+        
+        UIView.animate(withDuration: 0.25) {
+            self.customTabBar.alpha = isHidden ? 0 : 1
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc
+    private func handleChromeAlpha(_ notification: Notification) {
+        guard let isDimmed = notification.object as? Bool else { return }
+
+        UIView.animate(withDuration: 0.25) {
+            self.customNavigationBar.alpha = isDimmed ? 0.25 : 1.0
+            self.customTabBar.alpha = isDimmed ? 0.25 : 1.0
+        }
+    }
+}
+
+// MARK: - UITabBarControllerDelegate
+
 extension TabBarViewController: UITabBarControllerDelegate {
+    
     public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
         let targetVC: UIViewController
         if let nav = viewController as? UINavigationController {
@@ -224,7 +326,6 @@ extension TabBarViewController: UITabBarControllerDelegate {
         
         if let refreshable = target as? TabBarReselectRefreshable {
             refreshable.refreshOnTabReselect()
-            return
         }
     }
     
@@ -242,105 +343,28 @@ extension TabBarViewController: UITabBarControllerDelegate {
     }
 }
 
-private extension TabBarViewController {
-    func setCustomNavigationBarUI() {
-        view.addSubviews(customNavigationBar, chromeDimView)
-                
-        customNavigationBar.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(13)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(45)
-        }
-        
-        chromeDimView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-    }
-    
-    private func updateNavigationBar() {
-        let style = navigationBarStyle(for: selectedIndex)
-
-        customNavigationBar.removeFromSuperview()
-
-        customNavigationBar = NavigationBar(type: style.type)
-        customNavigationBar.isNotificationActive = style.isNotificationActive
-        customNavigationBar.rightButtonAction = { [weak self] in
-            self?.handleNavigationBarRightTap()
-        }
-        customNavigationBar.leftButtonAction = { [weak self] in
-            self?.handleNavigationBarLeftTap()
-        }
-
-        view.addSubview(customNavigationBar)
-
-        customNavigationBar.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(13)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(45)
-        }
-    }
-    
-    private func handleNavigationBarLeftTap() {
-        if let nav = selectedViewController as? UINavigationController,
-           nav.viewControllers.count > 1 {
-            nav.popViewController(animated: true)
-        }
-    }
-    
-    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle {
-        if isParent {
-            switch index {
-            case 0:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-            case 1:
-                return .init(title: "일정", type: .main(title: "일정"), isNotificationActive: false)
-            case 2:
-                return .init(title: "미션", type: .main(title: "미션"), isNotificationActive: false)
-            case 3:
-                return .init(title: "보상", type: .main(title: "보상"), isNotificationActive: false)
-            case 4:
-                return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: false)
-            default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-            }
-        } else {
-            switch index {
-//            case 0:
-//                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-//            case 1:
-//                return .init(title: "금화 미션", type: .main(title: "금화 미션"), isNotificationActive: false)
-//            case 2:
-//                return .init(title: "소원의 우물", type: .main(title: "소원의 우물"), isNotificationActive: false)
-            default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-            }
-        }
-    }
-    
-    func handleNavigationBarRightTap() {
-        let notificationVC = factory.makeNotificationFeedViewController()
-        
-        if let nav = selectedViewController as? UINavigationController {
-            notificationVC.hidesBottomBarWhenPushed = true
-            nav.pushViewController(notificationVC, animated: true)
-        } else {
-            notificationVC.hidesBottomBarWhenPushed = true
-            selectedViewController?.show(notificationVC, sender: nil)
-        }
-    }
-}
+// MARK: - UINavigationControllerDelegate
 
 extension TabBarViewController: UINavigationControllerDelegate {
-    public func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+    public func navigationController(
+        _ navigationController: UINavigationController,
+        willShow viewController: UIViewController,
+        animated: Bool
+    ) {
+        let isNotification = viewController is NotificationFeedViewController
         
-        let shouldHide = viewController.hidesBottomBarWhenPushed
+        UIView.animate(withDuration: 0.25) {
+            self.customTabBar.alpha = isNotification ? 0 : 1
+            self.customTabBar.isUserInteractionEnabled = !isNotification
+            
+            self.customNavigationBar.alpha = isNotification ? 0 : 1
+            self.customNavigationBar.isUserInteractionEnabled = !isNotification
+            
+            self.view.layoutIfNeeded()
+        }
         
-        if shouldHide {
-            self.customTabBar.transform = CGAffineTransform(translationX: 0, y: 100)
-            self.customTabBar.alpha = 0
-        } else {
-            self.customTabBar.transform = .identity
-            self.customTabBar.alpha = 1
+        if !isNotification {
+            self.updateNavigationBar()
         }
     }
 }
