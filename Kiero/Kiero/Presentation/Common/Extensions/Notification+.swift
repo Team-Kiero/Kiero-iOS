@@ -11,4 +11,5 @@ extension Notification.Name {
     static let didReceiveSseEvent = Notification.Name("didReceiveSseEvent")
     static let hideTabBar = Notification.Name("hideTabBar")
     static let dimNavigationBar = Notification.Name("dimNavigationBar")
+    static let hideNavigationBar = Notification.Name("hideNavigationBar")
 }
