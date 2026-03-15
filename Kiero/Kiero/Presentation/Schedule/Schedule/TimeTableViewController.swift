@@ -123,6 +123,16 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
     private func shouldShowEditDeleteButtons(for schedule: Schedule) -> Bool {
         let now = Date()
         let calendar = Calendar.current
+        
+        if let dateStr = schedule.date {
+                let formatter = DateFormatter()
+                formatter.dateFormat = "yyyy-MM-dd"
+                if let scheduleDate = formatter.date(from: dateStr) {
+                    let startOfToday = calendar.startOfDay(for: now)
+                    if scheduleDate < startOfToday { return false }
+                }
+            }
+        
         let nowMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
         
         let todayStr = now.toString(format: "yyyy-MM-dd")
