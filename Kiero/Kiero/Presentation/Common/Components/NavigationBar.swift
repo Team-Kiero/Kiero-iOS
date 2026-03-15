@@ -167,7 +167,7 @@ final class NavigationBar: UIView {
             rightButton.setImage(.icClose, for: .normal)
             titleLabel.setTypo(.head3_16_B, text: title)
             
-            rightButton.snp.makeConstraints {
+            rightButton.snp.remakeConstraints {
                 $0.trailing.equalToSuperview().inset(16)
                 $0.centerY.equalToSuperview()
             }
@@ -189,6 +189,11 @@ final class NavigationBar: UIView {
     
     func updateTitle(_ title: String) {
         titleLabel.setTypo(.title3_16_SB, text: title)
+    }
+    
+    func apply(type: NavigationBarType) {
+        configure(with: type)
+        layoutIfNeeded()
     }
     
     @objc
