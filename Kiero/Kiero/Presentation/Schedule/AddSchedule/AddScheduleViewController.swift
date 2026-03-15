@@ -205,9 +205,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
     }
     
-    func configure(with schedule: Schedule) {
-        isEditMode = true
-        editingSchedule = schedule
+    override func setDelegate() {
+        titleTextField.delegate = self
     }
     
     override func addTarget() {
@@ -368,6 +367,11 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         timeSelectionView.endTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: false) }
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
+    }
+    
+    func configure(with schedule: Schedule) {
+        isEditMode = true
+        editingSchedule = schedule
     }
     
     private func convertTimeToMinutes(_ timeString: String) -> Int {
