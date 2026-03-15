@@ -15,12 +15,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - UI Components
     
-    private lazy var navigationBar = NavigationBar(type: .main(title: "일정")).then {
-        $0.rightButtonAction = { [weak self] in
-            self?.presentNotificationFeed()
-        }
-    }
-    
     private lazy var scheduleChildVC: TimeTableViewController = {
         guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
         let vc = AppDIContainer.shared.makeTimeTableViewController(viewModel: viewModel)
