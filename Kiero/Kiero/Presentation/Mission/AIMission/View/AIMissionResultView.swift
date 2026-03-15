@@ -15,6 +15,8 @@ final class AIMissionResultView: BaseUIView {
     // MARK: - Propertie
     
     var onDeadlineViewTapped: (() -> Void)?
+    var onSwipeLeft: (() -> Void)?
+    var onSwipeRight: (() -> Void)?
     
     var selectedReward: Int {
         return rewardView.selectedReward
@@ -24,7 +26,7 @@ final class AIMissionResultView: BaseUIView {
     
     let pagingHeader = PagingHeader()
     
-    private let contentContainer = UIView().then {
+    private(set) var contentContainer = UIView().then {
         $0.backgroundColor = .gray900
         $0.layer.cornerRadius = 15
     }
@@ -103,6 +105,23 @@ final class AIMissionResultView: BaseUIView {
         
         let backgroundTap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         self.addGestureRecognizer(backgroundTap)
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeLeft))
+        swipeLeft.direction = .left
+        self.addGestureRecognizer(swipeLeft)
+        
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeRight))
+        swipeRight.direction = .right
+        self.addGestureRecognizer(swipeRight)
+    }
+
+    @objc
+    private func handleSwipeLeft() {
+        onSwipeLeft?()
+    }
+
+    @objc
+    private func handleSwipeRight() {
+        onSwipeRight?()
     }
     
     @objc

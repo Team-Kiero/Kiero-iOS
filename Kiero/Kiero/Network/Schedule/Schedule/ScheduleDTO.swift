@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct ScheduleResponseDTO: Decodable {
     let isFireLit: Bool
@@ -49,6 +50,7 @@ extension ScheduleResponseDTO {
         return items.map {
             let isRecurring = !$0.dayOfWeek.isEmpty
             let dayOfWeekString = $0.dayOfWeek.map { koreanDay($0) }.joined(separator: ", ")
+            let scheduleColor = scheduleColorFromHex($0.colorCode)
             
             return Schedule(
                 id: $0.scheduleId,
@@ -56,13 +58,24 @@ extension ScheduleResponseDTO {
                 isRecurring: isRecurring,
                 startTime: $0.startTime,
                 endTime: $0.endTime,
-                scheduleColor: "SCHEDULE1",
+                scheduleColor: scheduleColor,
                 colorCode: $0.colorCode,
                 dayOfWeek: dayOfWeekString.isEmpty ? nil : dayOfWeekString,
                 date: $0.date,
                 scheduleStatus: $0.scheduleStatus
             )
         }
+    }
+    
+    private func scheduleColorFromHex(_ hex: String) -> String {
+        let mapping: [String: String] = [
+            UIColor.schedule1.toHexString(): "SCHEDULE1",
+            UIColor.schedule2.toHexString(): "SCHEDULE2",
+            UIColor.schedule3.toHexString(): "SCHEDULE3",
+            UIColor.schedule4.toHexString(): "SCHEDULE4",
+            UIColor.schedule5.toHexString(): "SCHEDULE5"
+        ]
+        return mapping[hex.uppercased()] ?? "SCHEDULE1"
     }
     
     private func koreanDay(_ day: String) -> String {

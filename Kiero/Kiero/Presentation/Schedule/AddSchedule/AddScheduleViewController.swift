@@ -28,6 +28,16 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     var editingSchedule: Schedule?
     var onEditConfirmed: ((EditScheduleRequestDTO, Bool, @escaping (Bool) -> Void) -> Void)?
     
+    private let colorReverseMapping: [String: UIColor] = [
+        "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
+        "SCHEDULE3": .schedule3, "SCHEDULE4": .schedule4, "SCHEDULE5": .schedule5
+    ]
+
+    private let colorMapping: [UIColor: String] = [
+        .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
+        .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
+    ]
+    
     // MARK: - UI Components
     
     private let navigationBar = NavigationBar(type: .closeDone(title: "일정 추가"))
@@ -132,7 +142,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     override func setLayout() {
-        navigationBar.snp.makeConstraints{
+        navigationBar.snp.makeConstraints {
             $0.top.equalToSuperview().offset(57)
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(32)
@@ -195,9 +205,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         }
     }
     
-    func configure(with schedule: Schedule) {
-        isEditMode = true
-        editingSchedule = schedule
+    override func setDelegate() {
+        titleTextField.delegate = self
     }
     
     override func addTarget() {
@@ -259,7 +268,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
                 
                 if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
-                    Toast.show(message: "일정이 등록되었어요. (오늘 일정은 마감되어 다음 주부터 적용돼요!)")
+                    Toast.show(message: "일정이 등록되었어요. 오늘은 마감되어 다음부터 적용돼요.")
                 } else {
                     Toast.show(message: "일정이 등록되었어요.")
                 }
@@ -315,12 +324,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             
             self.navigationBar.isRightButtonEnabled = false
             
-            let colorMapping: [UIColor: String] = [
-                .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
-                .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
-            ]
-            let colorCode = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
-            
+            let colorCode = self.colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
             let startTimeStr = start.toString(format: "HH:mm:ss")
             let endTimeStr = end.toString(format: "HH:mm:ss")
             
@@ -363,6 +367,12 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         timeSelectionView.endTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: false) }
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
+        repeatSwitch.addTarget(self, action: #selector(repeatSwitchChanged), for: .valueChanged)
+    }
+    
+    func configure(with schedule: Schedule) {
+        isEditMode = true
+        editingSchedule = schedule
     }
     
     private func convertTimeToMinutes(_ timeString: String) -> Int {
@@ -389,13 +399,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let isRecurring = self.repeatSwitch.isOn
                 let startTime = self.currentStartTime?.toString(format: "HH:mm:ss") ?? ""
                 let endTime = self.currentEndTime?.toString(format: "HH:mm:ss") ?? ""
-                
-                let colorMapping: [UIColor: String] = [
-                    .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
-                    .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
-                ]
-                let colorName = colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
-                
+                let colorName = self.colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
                 let hexCode = self.currentSelectedColor?.toHexString() ?? "#FF5C5C"
                 
                 let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
@@ -556,6 +560,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     @objc
+    private func repeatSwitchChanged() {
+        if repeatSwitch.isOn {
+            weekdaySelectionView.isSingleSelectionMode = false
+        }
+    }
+    
+    @objc
     private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         
@@ -602,7 +613,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             weekdaySelectionView.setSelectedIndices(indices)
             updatePagingTitle()
         } else if let dateStr = schedule.date {
-            weekdaySelectionView.isSingleSelectionMode = true
+            weekdaySelectionView.isSingleSelectionMode = false
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             
@@ -633,7 +644,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             timeSelectionView.updateTime(isStart: false, time: display.string(from: end))
         }
         
-        let color = UIColor(hex: schedule.colorCode)
+        let color = colorReverseMapping[schedule.scheduleColor] ?? UIColor(hex: schedule.colorCode)
         currentSelectedColor = color
         selectedColorChip.isHidden = false
         selectedColorChip.configure(with: color, isSelected: false)
@@ -642,10 +653,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     private func handleEditConfirm() {
         guard let schedule = editingSchedule else { return }
         
-        let colorMapping: [UIColor: String] = [
-            .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
-            .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
-        ]
         let colorCode = colorMapping[currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
         let startTimeStr = (currentStartTime ?? Date()).toString(format: "HH:mm:ss")
         let endTimeStr = (currentEndTime ?? Date()).toString(format: "HH:mm:ss")
@@ -703,19 +710,30 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 }
             }
             
-            let overlay = UIViewController()
-            overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
-            overlay.modalPresentationStyle = .overFullScreen
-            overlay.view.addSubview(dialog)
-            
-            dialog.snp.makeConstraints {
-                $0.center.equalToSuperview()
-                $0.width.equalTo(343)
-            }
-            
-            self.present(overlay, animated: false)
+            dialog.show(in: self)
             
         } else {
+            if !isRecurring {
+                let calendar = Calendar.current
+                let today = calendar.startOfDay(for: Date())
+                let now = Date()
+                let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+                let startMin = calendar.component(.hour, from: currentStartTime ?? now) * 60 + calendar.component(.minute, from: currentStartTime ?? now)
+                
+                let hasPastDate = selectedIndices.contains { index in
+                    let date = weekDates[index]
+                    let dateStart = calendar.startOfDay(for: date)
+                    if dateStart < today { return true }
+                    if dateStart == today && startMin < currentTimeMin { return true }
+                    return false
+                }
+                
+                if hasPastDate {
+                    Toast.show(message: "과거 날짜에는 일정을 등록할 수 없습니다.")
+                    return
+                }
+            }
+            
             let finalRequest = EditScheduleRequestDTO(
                 name: self.titleTextField.text ?? "",
                 isRecurring: isRecurring,
@@ -745,8 +763,4 @@ extension AddScheduleViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
-}
-
-#Preview {
-    AppDIContainer.shared.makeAddScheduleViewController()
 }

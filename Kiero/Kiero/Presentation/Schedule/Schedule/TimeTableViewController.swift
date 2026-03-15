@@ -199,21 +199,22 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                 let dialog = DialogBox()
                 dialog.configure(state: .deleteSchedule(title: schedule.name, isRecurring: schedule.isRecurring))
                 
-                dialog.onTapCancel = { [weak self] in
-                    self?.dismiss(animated: false)
-                }
-                
                 dialog.onTapClose = { [weak self] in
-                    self?.dismiss(animated: false)
+                    guard let self else { return }
+                    dialog.dismiss()
+                    self.present(bottomSheet, animated: false)
                 }
-                
+                dialog.onTapCancel = { [weak self] in
+                    guard let self else { return }
+                    dialog.dismiss()
+                    self.present(bottomSheet, animated: false)
+                }
                 dialog.onTapConfirm = { [weak self] in
                     guard let self else { return }
-                    self.dismiss(animated: false)
+                    dialog.dismiss()
                     
                     guard let selectedDate = schedule.date else { return }
                     let isIncludeFollowing: Bool = schedule.isRecurring ? dialog.isFollowingSelected : false
-                    
                     self.viewModel?.deleteSchedule(
                         scheduleId: schedule.id,
                         selectedDate: selectedDate,
@@ -221,17 +222,7 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                     )
                 }
                 
-                let overlay = UIViewController()
-                overlay.view.backgroundColor = .kBlack.withAlphaComponent(0.75)
-                overlay.modalPresentationStyle = .overFullScreen
-                overlay.view.addSubview(dialog)
-                
-                dialog.snp.makeConstraints {
-                    $0.center.equalToSuperview()
-                    $0.width.equalTo(343)
-                }
-                
-                self.present(overlay, animated: false)
+                dialog.show(in: self)
             }
         }
         

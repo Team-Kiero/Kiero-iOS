@@ -30,23 +30,30 @@ final class MissionViewModel: BaseViewModel {
             } receiveValue: { [weak self] response in
                 guard let self = self else { return }
                 
-                let sortedGroups = response.missionsByDate.sorted { $0.dueAt < $1.dueAt }
-                
-                let finalGroups = sortedGroups.map { group -> MissionGroupDTO in
-                    let sortedMissions = group.missions.sorted { (m1, m2) -> Bool in
-                        if m1.id != m2.id {
-                            return m1.id < m2.id
-                        }
-                        
-                        return m1.name < m2.name
-                    }
-                    
-                    return MissionGroupDTO(
-                        dueAt: group.dueAt,
-                        dayOfWeek: group.dayOfWeek,
-                        missions: sortedMissions
-                    )
+                let recentActivityIds = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []
+
+                var activityOrderMap: [Int: Int] = [:]
+                var order = 0
+                for id in recentActivityIds {
+                    activityOrderMap[id] = order
+                    order += 1
                 }
+
+                let finalGroups = response.missionsByDate
+                    .sorted { $0.dueAt < $1.dueAt }
+                    .map { group -> MissionGroupDTO in
+                        let sortedMissions = group.missions.sorted { m1, m2 in
+                            let o1 = activityOrderMap[m1.id]
+                            let o2 = activityOrderMap[m2.id]
+
+                            guard o1 != nil || o2 != nil else { return m1.id > m2.id }
+                            if o1 == nil { return false }
+                            if o2 == nil { return true }
+
+                            return o1! > o2!
+                        }
+                        return MissionGroupDTO(dueAt: group.dueAt, dayOfWeek: group.dayOfWeek, missions: sortedMissions)
+                    }
                 
                 self.missionGroups = finalGroups
             }
