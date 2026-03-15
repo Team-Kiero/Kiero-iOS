@@ -12,7 +12,6 @@ struct TodayScheduleDTO: Decodable {
     let name: String
     let startTime: String
     let endTime: String
-    let imageUrl: String?
     let status: TodayStatus
     let isOngoing: Bool
 }
@@ -28,7 +27,6 @@ extension TodayScheduleDTO {
             title: name,
             startTime: String(startTime.prefix(5)),
             endTime: String(endTime.prefix(5)),
-            imageURL: imageUrl.flatMap(URL.init(string:)),
             status: status,
             isNowSchedule: isOngoing
         )

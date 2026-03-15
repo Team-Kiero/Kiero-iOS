@@ -12,7 +12,6 @@ struct ScheduleItem: Identifiable, Hashable {
     let title: String
     let startTime: String
     let endTime: String
-    let imageURL: URL?
     let status: TodayStatus
     let isNowSchedule: Bool
 

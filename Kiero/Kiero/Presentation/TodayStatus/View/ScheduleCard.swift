@@ -13,7 +13,9 @@ struct ScheduleCard: View {
     
     var body: some View {
         Button(action: {
-            onTap()
+            if tapAction {
+                onTap()
+            }
         }) {
             HStack(spacing: 0) {
                 Image(buttonName)
@@ -51,21 +53,25 @@ struct ScheduleCard: View {
 }
 
 private extension ScheduleCard {
-    var buttonName: ImageResource {
-        if schedule.isNowSchedule {
-            return .btnCheckFill
+    var tapAction: Bool {
+        switch schedule.status {
+        case .complete, .verified:
+            return true
+        case .pending, .skipped, .failed:
+            return false
         }
-        else {
-            switch schedule.status {
-            case .complete:
-                return .btnCheck
-            case .failed, .skipped:
-                return .btnClosePoint
-            case .verified:
-                return .btnCheck
-            case .pending:
-                return .btnUncheck
-            }
+    }
+    
+    var buttonName: ImageResource {
+        switch schedule.status {
+        case .complete:
+            return .btnCheck
+        case .failed, .skipped:
+            return .btnClosePoint
+        case .verified:
+            return .btnCheckFill
+        case .pending:
+            return .btnUncheck
         }
     }
     

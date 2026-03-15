@@ -56,15 +56,27 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    print("일정 인증 이미지 조회 성공")
+                    print("일정 인증 이미지 조회 완료")
                 case .failure(let error):
                     print("일정 인증 이미지 조회 실패: \(error)")
                     Toast.show(message: error.toastMessage)
                 }
             } receiveValue: { [weak self] response in
-                print("imageUrl:", response.imageUrl)
-                self?.selectedScheduleImageURL = URL(string: response.imageUrl)
-                print("converted URL:", self?.selectedScheduleImageURL as Any)
+                guard let self else { return }
+                
+                let imageUrlString = response.imageUrl.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+                guard !imageUrlString.isEmpty else {
+                    Toast.show(message: "등록된 인증 이미지가 없어요.")
+                    return
+                }
+                
+                guard let url = URL(string: imageUrlString) else {
+                    Toast.show(message: "이미지 주소가 올바르지 않아요.")
+                    return
+                }
+                
+                self.selectedScheduleImageURL = url
             }
             .store(in: &cancellables)
     }
