@@ -46,6 +46,15 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         updateDeadlineDate(with: currentSelectedDate)
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        if self.isBeingDismissed {
+            NotificationCenter.default.post(name: .hideTabBar, object: false)
+            NotificationCenter.default.post(name: .hideNavigationBar, object: false)
+        }
+    }
+    
     // MARK: - Setup Methods
     
     override func setUI() {
@@ -86,7 +95,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         navigationBar.leftButtonAction = { [weak self] in
-            self?.navigationController?.popViewController(animated: true)
+            self?.dismiss(animated: true)
         }
         
         navigationBar.rightButtonAction = { [weak self] in
@@ -141,7 +150,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     
     private func handleSuccess(message: String) {
         Toast.show(message: message, bottomInset: 90)
-        self.navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

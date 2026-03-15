@@ -200,6 +200,13 @@ private extension TabBarViewController {
             name: .dimNavigationBar,
             object: nil
         )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNavigationBarHidden(_:)),
+            name: .hideNavigationBar,
+            object: nil
+        )
     }
     
     func updateCustomTabBarSelection() {
@@ -270,7 +277,6 @@ private extension TabBarViewController {
 // MARK: - Notification Handlers
 
 private extension TabBarViewController {
-    
     @objc
     func handleTabBarHidden(_ notification: Notification) {
         guard let isHidden = notification.object as? Bool else { return }
@@ -290,6 +296,16 @@ private extension TabBarViewController {
         UIView.animate(withDuration: 0.25) {
             self.customNavigationBar.alpha = isDimmed ? 0.25 : 1.0
             self.customTabBar.alpha = isDimmed ? 0.25 : 1.0
+        }
+    }
+    
+    @objc
+    private func handleNavigationBarHidden(_ notification: Notification) {
+        guard let isHidden = notification.object as? Bool else { return }
+        
+        UIView.animate(withDuration: 0.25) {
+            self.customNavigationBar.alpha = isHidden ? 0 : 1
+            self.customNavigationBar.isUserInteractionEnabled = !isHidden
         }
     }
 }
