@@ -367,6 +367,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         timeSelectionView.endTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: false) }
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
+        repeatSwitch.addTarget(self, action: #selector(repeatSwitchChanged), for: .valueChanged)
     }
     
     func configure(with schedule: Schedule) {
@@ -559,6 +560,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     }
     
     @objc
+    private func repeatSwitchChanged() {
+        if repeatSwitch.isOn {
+            weekdaySelectionView.isSingleSelectionMode = false
+        }
+    }
+    
+    @objc
     private func textFieldDidChange(_ textField: UITextField) {
         guard let text = textField.text else { return }
         
@@ -605,7 +613,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             weekdaySelectionView.setSelectedIndices(indices)
             updatePagingTitle()
         } else if let dateStr = schedule.date {
-            weekdaySelectionView.isSingleSelectionMode = true
+            weekdaySelectionView.isSingleSelectionMode = false
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             
@@ -755,8 +763,4 @@ extension AddScheduleViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
-}
-
-#Preview {
-    AppDIContainer.shared.makeAddScheduleViewController()
 }
