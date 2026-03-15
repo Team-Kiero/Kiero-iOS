@@ -15,12 +15,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - UI Components
     
-    private lazy var navigationBar = NavigationBar(type: .main(title: "일정")).then {
-        $0.rightButtonAction = { [weak self] in
-            self?.presentNotificationFeed()
-        }
-    }
-    
     private lazy var scheduleChildVC: TimeTableViewController = {
         guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
         let vc = AppDIContainer.shared.makeTimeTableViewController(viewModel: viewModel)
@@ -45,19 +39,13 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     override func setUI() {
         addChild(scheduleChildVC)
-        view.addSubviews(navigationBar, scheduleChildVC.view, floatingButton)
+        view.addSubviews(scheduleChildVC.view, floatingButton)
         scheduleChildVC.didMove(toParent: self)
     }
     
     override func setLayout() {
-        navigationBar.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(57)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(40)
-        }
-        
         scheduleChildVC.view.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         

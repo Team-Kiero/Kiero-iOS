@@ -18,4 +18,8 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .kBlack
+    }
 }

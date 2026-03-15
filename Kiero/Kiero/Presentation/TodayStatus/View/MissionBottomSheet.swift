@@ -21,7 +21,13 @@ struct MissionBottomSheet: View {
             NavigationBarWrapper(
                 type: .titleClose(title: "오늘의 미션"),
                 onRightTap: {
-                    isPresented = false
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isPresented = false
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+                        NotificationCenter.default.post(name: .hideTabBar, object: false)
+                    }
                 }
             )
             .frame(height: 40)
@@ -38,7 +44,7 @@ struct MissionBottomSheet: View {
         }
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
-        .frame(maxHeight: 750)
+        .frame(maxHeight: 750, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray900)

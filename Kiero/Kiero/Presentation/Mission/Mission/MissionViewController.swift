@@ -15,12 +15,6 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     // MARK: - UI Components
     
-    private lazy var navigationBar = NavigationBar(type: .main(title: "미션")).then {
-        $0.rightButtonAction = { [weak self] in
-            self?.presentNotificationFeed()
-        }
-    }
-    
     private let emptyView = EmptyView(text: "등록된 미션이 없어요.\n우측 하단 버튼을 눌러 미션을 추가해보세요!")
     private let missionView = MissionView()
     private let floatingButton = FloatingButton(type: .mission)
@@ -45,23 +39,17 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     // MARK: - Setup Methods
 
     override func setUI() {
-        view.addSubviews(navigationBar, emptyView, missionView, floatingButton)
+        view.addSubviews(emptyView, missionView, floatingButton)
     }
     
     override func setLayout() {
-        navigationBar.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(57)
-            $0.horizontalEdges.equalToSuperview()
-            $0.height.equalTo(40)
-        }
-        
         emptyView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
         missionView.snp.makeConstraints {
-            $0.top.equalTo(navigationBar.snp.bottom)
+            $0.top.equalToSuperview().offset(102)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
         
@@ -115,8 +103,14 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
                 return
             }
             editVC.configureEditMode(with: mission, dueAt: dueAt)
-            editVC.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(editVC, animated: true)
+            
+            NotificationCenter.default.post(name: .hideTabBar, object: true)
+            NotificationCenter.default.post(name: .hideNavigationBar, object: true)
+            
+            editVC.modalPresentationStyle = .fullScreen
+            bottomSheet.dismiss(animated: false) {
+                self.present(editVC, animated: true)
+            }
         }
         
         bottomSheet.onDeleteTap = { [weak self] in
@@ -172,13 +166,17 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     private func presentAddMissionDirectly() {
         let vc = diContainer.makeWriteMissionViewController()
-        vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
+        NotificationCenter.default.post(name: .hideTabBar, object: true)
+        NotificationCenter.default.post(name: .hideNavigationBar, object: true)
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true)
     }
     
     private func presentAddMissionByAI() {
         let vc = diContainer.makeAIMissionViewController()
-        vc.hidesBottomBarWhenPushed = true
-        self.navigationController?.pushViewController(vc, animated: true)
+        NotificationCenter.default.post(name: .hideTabBar, object: true)
+        NotificationCenter.default.post(name: .hideNavigationBar, object: true)
+        vc.modalPresentationStyle = .fullScreen
+        self.present(vc, animated: true)
     }
 }
