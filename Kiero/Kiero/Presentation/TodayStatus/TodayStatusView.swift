@@ -36,12 +36,6 @@ struct TodayStatusView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
-        .onChange(of: isMissionSheetPresented) { value in
-            NotificationCenter.default.post(
-                name: .hideTabBar,
-                object: value
-            )
-        }
         .onChange(of: selectedSchedule) { value in
             NotificationCenter.default.post(
                 name: .hideTabBar,
@@ -54,11 +48,6 @@ struct TodayStatusView: View {
 private extension TodayStatusView {
     var mainContent: some View {
         VStack(spacing: 0) {
-            
-//            NavigationBarWrapper(type: .main())
-//                .frame(height: 45)
-//                .padding(.top, 13)
-            
             ProfileCard()
                 .frame(height: 96)
                 .padding(.top, 64)
@@ -68,11 +57,17 @@ private extension TodayStatusView {
                 incompleteCount: viewModel.state.incompleteMissions.count,
                 completeAction: {
                     selectedMissionTab = .complete
-                    isMissionSheetPresented = true
+                    NotificationCenter.default.post(name: .hideTabBar, object: true)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isMissionSheetPresented = true
+                    }
                 },
                 incompleteAction: {
                     selectedMissionTab = .incomplete
-                    isMissionSheetPresented = true
+                    NotificationCenter.default.post(name: .hideTabBar, object: true)
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        isMissionSheetPresented = true
+                    }
                 }
             )
             .padding(.horizontal, 27)
@@ -82,12 +77,18 @@ private extension TodayStatusView {
                     schedules: viewModel.state.schedules,
                     isFireLitToday: viewModel.state.isFireLitToday,
                     onTapSchedule: { schedule in
+                        isMissionSheetPresented = false
                         selectedSchedule = schedule
                     }
                 )
                 .padding(.top, 18)
-                .padding(.bottom, 100)
             }
+        }
+        .onChange(of: isMissionSheetPresented) { value in
+            NotificationCenter.default.post(name: .dimNavigationBar, object: value)
+        }
+        .onChange(of: selectedSchedule != nil) { value in
+            NotificationCenter.default.post(name: .dimNavigationBar, object: value)
         }
     }
     
@@ -116,31 +117,36 @@ private extension TodayStatusView {
     
     @ViewBuilder
     func missionSheet(proxy: GeometryProxy) -> some View {
-        
-        Color.kBlack.opacity(isMissionSheetPresented ? 0.75 : 0)
+        let shouldShowSheet = isMissionSheetPresented && selectedSchedule == nil
+
+        Color.kBlack.opacity(shouldShowSheet ? 0.75 : 0)
             .ignoresSafeArea()
-            .allowsHitTesting(isMissionSheetPresented)
+            .allowsHitTesting(shouldShowSheet)
             .onTapGesture {
-                withAnimation {
+                withAnimation(.easeInOut(duration: 0.25)) {
                     isMissionSheetPresented = false
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    NotificationCenter.default.post(name: .hideTabBar, object: false)
                 }
             }
             .zIndex(3)
-        
+
         VStack {
             Spacer()
-            
+
             MissionBottomSheet(
                 selectedTab: $selectedMissionTab,
                 isPresented: $isMissionSheetPresented,
                 completeMissions: viewModel.state.completeMissions,
                 incompleteMissions: viewModel.state.incompleteMissions
             )
-            .offset(y: isMissionSheetPresented ? 0 : proxy.size.height)
+            .offset(y: shouldShowSheet ? 0 : proxy.size.height + 10)
+            .opacity(shouldShowSheet ? 1 : 0)
         }
         .ignoresSafeArea(edges: .bottom)
         .zIndex(4)
-        .animation(.easeInOut(duration: 0.25), value: isMissionSheetPresented)
+        .animation(.easeInOut(duration: 0.25), value: shouldShowSheet)
     }
     
     var backgroundView: some View {
