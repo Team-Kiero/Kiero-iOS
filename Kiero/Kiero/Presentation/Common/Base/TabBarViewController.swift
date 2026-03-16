@@ -151,6 +151,7 @@ private extension TabBarViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(45)
         }
+        customNavigationBar.isHidden = !isParent
     }
     
     func setCustomTabBarUI() {
@@ -222,7 +223,12 @@ private extension TabBarViewController {
 private extension TabBarViewController {
     
     func updateNavigationBar() {
-        let style = navigationBarStyle(for: selectedIndex)
+        guard let style = navigationBarStyle(for: selectedIndex) else {
+            customNavigationBar.isHidden = true
+            return
+        }
+        
+        customNavigationBar.isHidden = false
         
         var resolvedType = style.type
         
@@ -249,7 +255,7 @@ private extension TabBarViewController {
         nav.pushViewController(notificationVC, animated: true)
     }
     
-    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle {
+    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle? {
         if isParent {
             switch index {
             case 0:
@@ -263,13 +269,10 @@ private extension TabBarViewController {
             case 4:
                 return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: false)
             default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+                return nil
             }
         } else {
-            switch index {
-            default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-            }
+            return nil
         }
     }
 }
