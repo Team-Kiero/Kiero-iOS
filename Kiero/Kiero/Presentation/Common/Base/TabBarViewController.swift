@@ -96,7 +96,6 @@ private extension TabBarViewController {
     func setStyle() {
         tabBar.isHidden = true
         view.backgroundColor = .kBlack
-        additionalSafeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
     }
     
     func setViewControllers() {
@@ -370,20 +369,17 @@ extension TabBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
-        let isNotification = viewController is NotificationFeedViewController
-        
-        UIView.animate(withDuration: 0.25) {
-            self.customTabBar.alpha = isNotification ? 0 : 1
-            self.customTabBar.isUserInteractionEnabled = !isNotification
-            
-            self.customNavigationBar.alpha = isNotification ? 0 : 1
-            self.customNavigationBar.isUserInteractionEnabled = !isNotification
-            
-            self.view.layoutIfNeeded()
-        }
-        
-        if !isNotification {
-            self.updateNavigationBar()
+        let shouldHideTabBar = viewController.hidesBottomBarWhenPushed
+        let shouldHideNavigationBar = viewController is NotificationFeedViewController
+
+        customTabBar.isHidden = shouldHideTabBar
+        customTabBar.isUserInteractionEnabled = !shouldHideTabBar
+
+        customNavigationBar.isHidden = shouldHideNavigationBar
+        customNavigationBar.isUserInteractionEnabled = !shouldHideNavigationBar
+
+        if !shouldHideNavigationBar {
+            updateNavigationBar()
         }
     }
 }
