@@ -11,7 +11,7 @@ struct RewardBox: View {
     let reward: Reward
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .center, spacing: 8) {
             Text("\(reward.title)")
                 .font(Font(UIFont.body3_14_R))
                 .foregroundStyle(.white)
@@ -23,8 +23,8 @@ struct RewardBox: View {
             )
             .frame(width: 66, height: 24)
         }
-        .padding(.leading, 12)
-        .frame(width: 165, height: 119, alignment: .leading)
+        .padding(.vertical, 35)
+        .frame(maxWidth: .infinity)
         .background(.gray900)
         .cornerRadius(10)
     }
