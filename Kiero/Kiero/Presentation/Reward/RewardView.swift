@@ -21,16 +21,13 @@ struct RewardView: View {
     ]
     
     var body: some View {
-        GeometryReader { proxy in
-            let topOffset: CGFloat = 102
-            
-            ZStack(alignment: .bottomTrailing) {
+            ZStack {
                 Color.kBlack.ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     if viewModel.rewards.isEmpty {
-                        Spacer()
-                            .frame(height: topOffset)
+                        
+                        Spacer().frame(height: 45)
                         
                         EmptyViewWrapper(text: "등록된 보상이 없어요.\n우측 하단 버튼을 눌러 보상을 추가해보세요!")
                         
@@ -53,7 +50,7 @@ struct RewardView: View {
                                 }
                             }
                             .padding(.horizontal, 16)
-                            .padding(.top, topOffset)
+                            .padding(.top, 66)
                         }
                     }
                 }
@@ -89,7 +86,6 @@ struct RewardView: View {
                     .frame(width: 327, height: 216)
                     .transition(.scale.combined(with: .opacity))
                 }
-            }
         }
         .onAppear { viewModel.fetchCoupons() }
         .onChange(of: isShowingAddView) { isPresented in
