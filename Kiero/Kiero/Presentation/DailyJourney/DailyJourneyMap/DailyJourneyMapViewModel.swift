@@ -11,6 +11,12 @@ import UIKit
 final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableObject {
     
     @Published var scheduleData: DailyJourneyMapData?
+    @Published var todayDateText: String = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "M월 d일 EEEE"
+        return formatter.string(from: Date())
+    }()
     
     let confirmButtonTapSubject = PassthroughSubject<Void, Never>()
     
@@ -24,6 +30,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     }
     
     private let dismissSubject = PassthroughSubject<Void, Never>()
+    private var shouldUpdateDateOnNextFetch = false
     
     func transform(input: Input) -> Output {
         input.viewWillAppear
@@ -59,6 +66,9 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                                 || payload.eventType == "SCHEDULE_MODIFIED"
                                 || payload.eventType == "DATE_CHANGED" else { return }
                         print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
+                        if payload.eventType == "DATE_CHANGED" {
+                            self?.shouldUpdateDateOnNextFetch = true
+                        }
                         self?.fetchJourneyList()
                     }
                 }
@@ -83,15 +93,17 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                     print("❌ DailyJourneyMap fetch 에러: \(error)")
                 }
             } receiveValue: { [weak self] data in
-                self?.scheduleData = data
+                guard let self else { return }
+                if self.shouldUpdateDateOnNextFetch {
+                    self.shouldUpdateDateOnNextFetch = false
+                    let formatter = DateFormatter()
+                    formatter.locale = Locale(identifier: "ko_KR")
+                    formatter.dateFormat = "M월 d일 EEEE"
+                    self.todayDateText = formatter.string(from: Date())
+                }
+                self.scheduleData = data
             }
             .store(in: &cancellables)
     }
     
-    var todayDateText: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "M월 d일 EEEE"
-        return formatter.string(from: Date())
-    }
 }
