@@ -224,11 +224,28 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Helpers
     
+    private func getWeekday(from dateString: String) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy.MM.dd"
+        
+        guard let date = formatter.date(from: dateString) else { return "" }
+        
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "E"
+        return formatter.string(from: date)
+    }
+    
     private func splitOccurredAt(_ occurredAt: String) -> (date: String, time: String) {
         if occurredAt.contains("T") {
             let parts = occurredAt.split(separator: "T", maxSplits: 1)
-            var date = parts.first.map(String.init) ?? occurredAt
-            date = date.replacingOccurrences(of: "-", with: ".")
+            let rawDateString = parts.first.map(String.init) ?? occurredAt
+            
+            let weekday = getWeekday(from: rawDateString)
+            
+            var date = rawDateString.replacingOccurrences(of: "-", with: ".")
+            if !weekday.isEmpty {
+                date = "\(date).(\(weekday))"
+            }
             
             let timePart = parts.count > 1 ? String(parts[1]) : ""
             let beforeDot = String(timePart.split(separator: ".", maxSplits: 1).first ?? Substring(timePart))
@@ -242,7 +259,17 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
         }
         
         let parts = occurredAt.split(separator: " ")
-        if parts.count >= 2 { return (String(parts[0]), String(parts[1])) }
+        if parts.count >= 2 {
+            let rawDateString = String(parts[0])
+            let weekday = getWeekday(from: rawDateString)
+            
+            var date = rawDateString
+            if !weekday.isEmpty {
+                date = "\(date).(\(weekday))"
+            }
+            
+            return (date, String(parts[1]))
+        }
         
         return (occurredAt, "")
     }
