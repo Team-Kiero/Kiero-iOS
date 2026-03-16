@@ -96,7 +96,6 @@ private extension TabBarViewController {
     func setStyle() {
         tabBar.isHidden = true
         view.backgroundColor = .kBlack
-        additionalSafeAreaInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
     }
     
     func setViewControllers() {
@@ -151,6 +150,7 @@ private extension TabBarViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(45)
         }
+        customNavigationBar.isHidden = !isParent
     }
     
     func setCustomTabBarUI() {
@@ -222,7 +222,12 @@ private extension TabBarViewController {
 private extension TabBarViewController {
     
     func updateNavigationBar() {
-        let style = navigationBarStyle(for: selectedIndex)
+        guard let style = navigationBarStyle(for: selectedIndex) else {
+            customNavigationBar.isHidden = true
+            return
+        }
+        
+        customNavigationBar.isHidden = false
         
         var resolvedType = style.type
         
@@ -249,7 +254,7 @@ private extension TabBarViewController {
         nav.pushViewController(notificationVC, animated: true)
     }
     
-    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle {
+    func navigationBarStyle(for index: Int) -> TabNavigationBarStyle? {
         if isParent {
             switch index {
             case 0:
@@ -263,13 +268,10 @@ private extension TabBarViewController {
             case 4:
                 return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: false)
             default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+                return nil
             }
         } else {
-            switch index {
-            default:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
-            }
+            return nil
         }
     }
 }
@@ -367,20 +369,17 @@ extension TabBarViewController: UINavigationControllerDelegate {
         willShow viewController: UIViewController,
         animated: Bool
     ) {
-        let isNotification = viewController is NotificationFeedViewController
-        
-        UIView.animate(withDuration: 0.25) {
-            self.customTabBar.alpha = isNotification ? 0 : 1
-            self.customTabBar.isUserInteractionEnabled = !isNotification
-            
-            self.customNavigationBar.alpha = isNotification ? 0 : 1
-            self.customNavigationBar.isUserInteractionEnabled = !isNotification
-            
-            self.view.layoutIfNeeded()
-        }
-        
-        if !isNotification {
-            self.updateNavigationBar()
+        let shouldHideTabBar = viewController.hidesBottomBarWhenPushed
+        let shouldHideNavigationBar = viewController is NotificationFeedViewController
+
+        customTabBar.isHidden = shouldHideTabBar
+        customTabBar.isUserInteractionEnabled = !shouldHideTabBar
+
+        customNavigationBar.isHidden = shouldHideNavigationBar
+        customNavigationBar.isUserInteractionEnabled = !shouldHideNavigationBar
+
+        if !shouldHideNavigationBar {
+            updateNavigationBar()
         }
     }
 }
