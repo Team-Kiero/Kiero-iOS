@@ -182,9 +182,9 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchFeeds, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"
         case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
