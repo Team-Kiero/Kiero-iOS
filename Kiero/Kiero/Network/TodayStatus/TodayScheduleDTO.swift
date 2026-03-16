@@ -8,23 +8,27 @@
 import Foundation
 
 struct TodayScheduleDTO: Decodable {
+    let scheduleDetailId: Int
     let name: String
     let startTime: String
     let endTime: String
-    let imageUrl: String?
     let status: TodayStatus
-    let isNowSchedule: Bool
+    let isOngoing: Bool
+}
+
+struct ScheduleImageDTO: Decodable {
+    let imageUrl: String
 }
 
 extension TodayScheduleDTO {
     func toItem() -> ScheduleItem {
         ScheduleItem(
+            id: scheduleDetailId,
             title: name,
-            startTime: startTime,
-            endTime: endTime,
-            imageURL: imageUrl.flatMap(URL.init(string:)),
+            startTime: String(startTime.prefix(5)),
+            endTime: String(endTime.prefix(5)),
             status: status,
-            isNowSchedule: isNowSchedule
+            isNowSchedule: isOngoing
         )
     }
 }

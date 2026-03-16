@@ -84,7 +84,7 @@ private extension MissionBottomSheet {
             Spacer()
             
             StatusEmptyView(
-                type: selectedTab == .complete ? .missionComplete : .missionEmpty
+                type: selectedTab == .complete ? .missionEmpty : .missionComplete
             )
             
             Spacer()

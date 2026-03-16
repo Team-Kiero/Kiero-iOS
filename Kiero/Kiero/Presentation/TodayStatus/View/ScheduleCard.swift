@@ -13,7 +13,7 @@ struct ScheduleCard: View {
     
     var body: some View {
         Button(action: {
-            if isTapEnabled {
+            if tapAction {
                 onTap()
             }
         }) {
@@ -32,11 +32,11 @@ struct ScheduleCard: View {
                 if showsIcon {
                     Image(.icPhoto)
                         .renderingMode(.template)
-                        .foregroundStyle(photoIconColor)
+                        .foregroundStyle(iconColor)
                     
                     Image(.icRight)
                         .renderingMode(.template)
-                        .foregroundStyle(chevronColor)
+                        .foregroundStyle(iconColor)
                         .padding(.trailing, 10)
                 }
             }
@@ -53,8 +53,13 @@ struct ScheduleCard: View {
 }
 
 private extension ScheduleCard {
-    var isTapEnabled: Bool {
-        schedule.imageURL != nil
+    var tapAction: Bool {
+        switch schedule.status {
+        case .complete, .verified:
+            return true
+        case .pending, .skipped, .failed:
+            return false
+        }
     }
     
     var buttonName: ImageResource {
@@ -71,71 +76,62 @@ private extension ScheduleCard {
     }
     
     var borderColor: Color {
-        switch schedule.status {
-        case .complete:
-            return .gray800
-        case .failed, .skipped:
-            return .point
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .pending, .verified:
+                return .gray800
+            case .failed, .skipped:
+                return .point
+            }
         }
     }
     
     var textColor: Color {
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return .gray400
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .failed, .skipped:
+                return .gray400
+            case .verified:
+                return .main
+            case .pending:
+                return .gray800
+            }
         }
     }
     
     var showsIcon: Bool {
         switch schedule.status {
-        case .failed, .skipped:
+        case .failed, .skipped, .pending:
             return false
-        case .complete, .verified, .pending:
-            return schedule.imageURL != nil
+        case .complete, .verified:
+            return true
         }
     }
     
-    var photoIconColor: Color {
+    var iconColor: Color {
         switch schedule.status {
         case .complete:
             return .gray800
         case .verified:
             return .gray400
-        case .pending:
-            return .gray800
-        case .failed, .skipped:
-            return .clear
-        }
-    }
-    
-    var chevronColor: Color {
-        switch schedule.status {
-        case .complete:
-            return .gray800
-        case .verified:
-            return .gray400
-        case .pending:
-            return .gray800
-        case .failed, .skipped:
+        case .failed, .skipped, .pending:
             return .clear
         }
     }
     
     @ViewBuilder
     var backgroundView: some View {
-        switch schedule.status {
-        case .verified:
+        if schedule.isNowSchedule {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.schedule1.opacity(0.1))
-        default:
+        }
+        else {
             Color.clear
         }
     }

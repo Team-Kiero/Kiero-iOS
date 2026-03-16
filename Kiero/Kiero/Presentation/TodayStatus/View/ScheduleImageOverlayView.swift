@@ -10,24 +10,24 @@ import SwiftUI
 import Kingfisher
 
 struct ScheduleImageOverlayView: View {
-    let schedule: ScheduleItem
+    let title: String
+    let imageURL: URL?
     let onClose: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-
             NavigationBarWrapper(
-                type: .titleClose(title: schedule.title),
+                type: .titleClose(title: title),
                 onRightTap: onClose
             )
             .frame(height: 40)
             .padding(.top, 16)
 
-            KFImage(schedule.imageURL)
+            KFImage(imageURL)
                 .placeholder {
                     RoundedRectangle(cornerRadius: 5)
                         .fill(Color.gray800)
-                        .frame(height: 280)
+                        .frame(width: 150, height: 150)
                 }
                 .retry(maxCount: 2, interval: .seconds(1))
                 .resizable()

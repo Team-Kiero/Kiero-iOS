@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum TodayStatus: String, Decodable {
-    case complete = "COMPLETE"
+    case complete = "COMPLETED"
     case failed = "FAILED"
     case skipped = "SKIPPED"
     case verified = "VERIFIED"
@@ -19,6 +19,7 @@ struct ScheduleBox: View {
     let schedule: ScheduleItem
     let isFireLitToday: Bool
     let showsNextScheduleText: Bool
+    let isLast: Bool
     let onTapSchedule: (ScheduleItem) -> Void
 
     var body: some View {
@@ -32,6 +33,12 @@ struct ScheduleBox: View {
             .padding(.top, 4)
 
             VStack(alignment: .leading, spacing: 0) {
+                if schedule.isNowSchedule {
+                    Text("현재 일정")
+                        .font(Font(UIFont.body6_10_R))
+                        .foregroundStyle(.gray400)
+                }
+                
                 if showsNextScheduleText {
                     Text("다음 일정")
                         .font(Font(UIFont.body6_10_R))
@@ -58,13 +65,16 @@ struct ScheduleBox: View {
 
 private extension ScheduleBox {
     var timeColor: Color {
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return .gray400
-        case .verified:
+        if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
+        }
+        else {
+            switch schedule.status {
+            case .complete, .failed, .skipped, .verified:
+                return .gray400
+            case .pending:
+                return .gray800
+            }
         }
     }
      
@@ -72,14 +82,16 @@ private extension ScheduleBox {
         if isFireLitToday {
             return .imgCircleSch1
         }
-        
-        switch schedule.status {
-        case .verified:
+        else if schedule.isNowSchedule {
             return .imgCircleMain
-        case .pending:
-            return .imgCircleGray
-        default:
-            return .imgCircleSch1
+        }
+        else {
+            switch schedule.status {
+            case .pending:
+                return .imgCircleGray
+            default:
+                return .imgCircleSch1
+            }
         }
     }
     
@@ -106,28 +118,38 @@ private extension ScheduleBox {
                 endPoint: .bottom
             )
         }
-        
-        switch schedule.status {
-        case .complete, .failed, .skipped:
-            return LinearGradient(
-                colors: [.gray400, .gray600],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            
-        case .verified:
-            return LinearGradient(
-                colors: [.gray400, .gray800],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            
-        case .pending:
-            return LinearGradient(
-                colors: [.gray800, .kBlack],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+        else {
+            if isLast {
+                return LinearGradient(
+                    colors: [.clear, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            else {
+                switch schedule.status {
+                case .complete, .failed, .skipped:
+                    return LinearGradient(
+                        colors: [.gray400, .gray600],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    
+                case .verified:
+                    return LinearGradient(
+                        colors: [.gray400, .gray800],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    
+                case .pending:
+                    return LinearGradient(
+                        colors: [.gray800, .kBlack],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
+            }
         }
     }
 }

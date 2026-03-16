@@ -27,6 +27,7 @@ struct ScheduleSectionView: View {
                         schedule: schedule,
                         isFireLitToday: isFireLitToday,
                         showsNextScheduleText: shouldShowNextScheduleText(at: index),
+                        isLast: index == schedules.count - 1,
                         onTapSchedule: onTapSchedule
                     )
                     .padding(.horizontal, 29)

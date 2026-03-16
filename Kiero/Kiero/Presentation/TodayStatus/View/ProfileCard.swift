@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ProfileCard: View {
-    let name = UserDefaults.standard.string(forKey: "firstName")
+    let name: String
 
     var body: some View {
         HStack (alignment: .top){
             VStack (alignment: .leading, spacing: 0){
                 HStack (alignment: .bottom, spacing: 0){
-                    Text(name ?? "사용자")
+                    Text(name)
                         .font(Font(UIFont.head2_20_B))
                         .foregroundColor(.white)
                     Text("의 오늘의 현황")
