@@ -184,7 +184,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .purchaseCoupon, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"
         case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
