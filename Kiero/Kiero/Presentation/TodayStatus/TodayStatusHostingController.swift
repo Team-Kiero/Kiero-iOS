@@ -10,7 +10,10 @@ import UIKit
 
 final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     
+    private let todayStatusViewModel: TodayStatusViewModel
+    
     init(viewModel: TodayStatusViewModel) {
+        self.todayStatusViewModel = viewModel
         super.init(rootView: TodayStatusView(viewModel: viewModel))
     }
     
@@ -21,5 +24,17 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .kBlack
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        view.backgroundColor = .kBlack
+        todayStatusViewModel.fetchTodayStatus()
+        todayStatusViewModel.bindSSEIfNeeded()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        todayStatusViewModel.unbindSSE()
     }
 }

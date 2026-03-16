@@ -92,10 +92,27 @@ public final class TabBarViewController: UITabBarController {
 // MARK: - Setup
 
 private extension TabBarViewController {
-    
+
     func setStyle() {
         tabBar.isHidden = true
         view.backgroundColor = .kBlack
+
+        let appearance = UITabBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear
+        appearance.backgroundEffect = nil
+
+        tabBar.standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+            tabBar.scrollEdgeAppearance = appearance
+        }
+
+        tabBar.backgroundImage = UIImage()
+        tabBar.shadowImage = UIImage()
+        tabBar.backgroundColor = .clear
+        tabBar.barTintColor = .clear
+        tabBar.isTranslucent = true
     }
     
     func setViewControllers() {
@@ -156,25 +173,25 @@ private extension TabBarViewController {
     func setCustomTabBarUI() {
         view.addSubview(customTabBar)
         view.clipsToBounds = false
-        
+
         customTabBar.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview()
-            customTabBarBottomConstraint = $0.bottom.equalToSuperview().constraint
+            $0.bottom.equalToSuperview()
             $0.height.equalTo(100)
         }
-        
+
         view.bringSubviewToFront(customNavigationBar)
         view.bringSubviewToFront(customTabBar)
-        
+
         customTabBar.onTabSelected = { [weak self] index in
             guard let self else { return }
-            
+
             let isReclick = (self.selectedIndex == index)
             self.selectedIndex = index
-            
+
             if let selectedVC = self.viewControllers?[index] {
                 let targetVC = (selectedVC as? UINavigationController)?.viewControllers.first ?? selectedVC
-                
+
                 if isReclick {
                     if let scheduleVC = targetVC as? ScheduleViewController {
                         scheduleVC.viewModel?.currentReferenceDate.send(Date())
@@ -249,6 +266,7 @@ private extension TabBarViewController {
     
     func handleNavigationBarRightTap() {
         let notificationVC = factory.makeNotificationFeedViewController()
+        notificationVC.hidesBottomBarWhenPushed = true
         
         guard let nav = selectedViewController as? UINavigationController else { return }
         nav.pushViewController(notificationVC, animated: true)
@@ -283,8 +301,6 @@ private extension TabBarViewController {
     func handleTabBarHidden(_ notification: Notification) {
         guard let isHidden = notification.object as? Bool else { return }
         
-        customTabBarBottomConstraint?.update(offset: isHidden ? 100 : 0)
-        
         UIView.animate(withDuration: 0.25) {
             self.customTabBar.alpha = isHidden ? 0 : 1
             self.view.layoutIfNeeded()
@@ -297,7 +313,7 @@ private extension TabBarViewController {
 
         UIView.animate(withDuration: 0.25) {
             self.customNavigationBar.alpha = isDimmed ? 0.25 : 1.0
-            self.customTabBar.alpha = isDimmed ? 0.25 : 1.0
+            self.customTabBar.alpha = isDimmed ? 0 : 1.0
         }
     }
     
@@ -307,6 +323,7 @@ private extension TabBarViewController {
         
         UIView.animate(withDuration: 0.25) {
             self.customNavigationBar.alpha = isHidden ? 0 : 1
+            self.customTabBar.alpha = isHidden ? 0 : 1
             self.customNavigationBar.isUserInteractionEnabled = !isHidden
         }
     }
@@ -370,16 +387,21 @@ extension TabBarViewController: UINavigationControllerDelegate {
         animated: Bool
     ) {
         let shouldHideTabBar = viewController.hidesBottomBarWhenPushed
-        let shouldHideNavigationBar = viewController is NotificationFeedViewController
+        let shouldHideNavigationBar = shouldHideTabBar || !isParent
 
         customTabBar.isHidden = shouldHideTabBar
+        customTabBar.alpha = shouldHideTabBar ? 0 : 1
         customTabBar.isUserInteractionEnabled = !shouldHideTabBar
 
         customNavigationBar.isHidden = shouldHideNavigationBar
+        customNavigationBar.alpha = shouldHideNavigationBar ? 0 : 1
         customNavigationBar.isUserInteractionEnabled = !shouldHideNavigationBar
 
         if !shouldHideNavigationBar {
             updateNavigationBar()
         }
+
+        view.bringSubviewToFront(customNavigationBar)
+        view.bringSubviewToFront(customTabBar)
     }
 }
