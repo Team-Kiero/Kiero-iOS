@@ -79,7 +79,7 @@ final class TimePickerViewController: BaseBottomSheetViewController {
                     finalDate = minDate
                 }
                 Toast.show(message: "시각은 08:00AM부터 설정가능합니다.")
-            } else if hour >= 22 {
+            } else if hour > 22 || (hour == 22 && calendar.component(.minute, from: self.datePicker.date) > 0) {
                 if let maxDate = calendar.date(bySettingHour: 22, minute: 0, second: 0, of: finalDate) {
                     finalDate = maxDate
                 }
