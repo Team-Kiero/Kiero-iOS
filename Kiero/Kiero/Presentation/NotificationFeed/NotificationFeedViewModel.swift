@@ -109,7 +109,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        // 무한 스크롤 처리
         input.loadMore
             .filter { [weak self] in
                 guard let self = self else { return false }
