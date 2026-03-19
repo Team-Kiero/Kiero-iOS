@@ -30,7 +30,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     private var canLoadMore: Bool { nextCursor != nil }
     private var cachedChildName: String = ""
     private var expandedKeys = Set<String>()
-    private var sseStarted = false
     
     init(
         feedService: FeedServiceType,
@@ -110,14 +109,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        idTrigger
-            .filter { $0 != 0 }
-            .sink { [weak self] _ in
-                guard let self else { return }
-                self.startSSEIfNeeded()
-            }
-            .store(in: &cancellables)
-        
         // 무한 스크롤 처리
         input.loadMore
             .filter { [weak self] in
@@ -154,10 +145,12 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        input.viewWillDisappear
-            .sink (receiveValue:{ [weak self] _ in
-                self?.stopSSE()
-            })
+        NotificationCenter.default.publisher(for: .feedItemCreated)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .sink { [weak self] payload in
+                print("✅ FeedVM received SSE:", payload.eventType)
+                self?.sseRefreshSubject.send(())
+            }
             .store(in: &cancellables)
         
         return Output(
@@ -165,47 +158,6 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             isLoading: isLoadingSubject.eraseToAnyPublisher(),
             isLoadingMore: isLoadingMoreSubject.eraseToAnyPublisher()
         )
-    }
-    
-    // MARK: - SSE
-    
-    private func startSSEIfNeeded() {
-        guard !sseStarted else { return }
-        sseStarted = true
-        
-        Task { [weak self] in
-            guard let self else { return }
-            
-            do {
-                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
-                
-                await MainActor.run { [weak self] in
-                    guard let self else { return }
-                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
-                        self?.handleSse(payload: payload)
-                    }
-                    print("✅ [FeedVM] SSE started")
-                }
-            } catch {
-                print("❌ [FeedVM] SSE initial token reissue failed:", error)
-                self.sseStarted = false
-            }
-        }
-    }
-    
-    private func stopSSE() {
-        SseStreamManager.shared.stop()
-        sseStarted = false
-    }
-    
-    private func handleSse(payload: SseEventPayload) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            
-            if payload.eventType == "FEED_ITEM_CREATED" {
-                self.sseRefreshSubject.send(())
-            }
-        }
     }
     
     private func makeDedupKey(
