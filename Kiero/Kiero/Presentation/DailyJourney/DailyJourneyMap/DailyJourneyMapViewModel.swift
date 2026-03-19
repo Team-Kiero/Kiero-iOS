@@ -44,7 +44,6 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
         
         input.confirmButtonTap
             .sink { [weak self] in
-                self?.pauseSseConnection()
                 self?.dismissSubject.send()
             }
             .store(in: &cancellables)
@@ -76,11 +75,6 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                 print("❌ [DailyJourneyMapVM] SSE 토큰 발급 실패: \(error)")
             }
         }
-    }
-    
-    private func pauseSseConnection() {
-        print("⏸ [DailyJourneyMapVM] pauseSseConnection called")
-        SseStreamManager.shared.pause()
     }
     
     // MARK: - Network

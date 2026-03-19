@@ -126,7 +126,6 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         refreshWorkItem?.cancel()
         refreshWorkItem = nil
         isSseBound = false
-        SseStreamManager.shared.pause()
     }
     
     private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {

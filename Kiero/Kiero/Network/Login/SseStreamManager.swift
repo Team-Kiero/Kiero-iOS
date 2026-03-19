@@ -85,15 +85,22 @@ final class SseStreamManager {
             return
         }
         isConnecting = true
-        
-        // 기존 연결 종료
+
         client?.disconnect()
-        
-        // 새 클라이언트 생성
+
         client = SseClient(
             url: sseURL,
-            tokenProvider: { [weak self] in self?.sseAccessToken },
-            onEvent: onEvent,
+            tokenProvider: { [weak self] in
+                return self?.sseAccessToken
+            },
+            onEvent: { payload in
+                NotificationCenter.default.post(
+                    name: .sseEventReceived,
+                    object: nil,
+                    userInfo: ["payload": payload]
+                )
+                onEvent(payload)
+            },
             onConnected: { [weak self] in
                 guard let self else { return }
                 print("✅ [SSEManager] onConnected -> onReconnected")
@@ -101,12 +108,11 @@ final class SseStreamManager {
                 self.isConnecting = false
             },
             onError: { [weak self] error in
-                // 필요 시 backoff 재연결
                 print("❌ [SSEClient] error:", error)
                 self?.isConnecting = false
             }
         )
-        
+
         client?.connect()
     }
     
