@@ -66,6 +66,7 @@ enum EndPoint {
     
     //NotificationFeed
     case fetchFeeds(childId: Int64, size: Int?, cursor: String?)
+    case fetchUnreadFeed
     
     // CoinMission
     case completeMission(missionId: Int64)
@@ -165,6 +166,8 @@ enum EndPoint {
             if let cursor, !cursor.isEmpty { query.append("cursor=\(cursor)") }
             let queryString = query.isEmpty ? "" : "?\(query.joined(separator: "&"))"
             return "/api/v1/feeds/\(childId)\(queryString)"
+        case .fetchUnreadFeed:
+            return "/api/v1/feeds/unread"
         case .completeMission(let missionId):
             return "/api/v1/missions/\(missionId)/complete"
         case .deleteSchedule(let scheduleId, let selectedDate):
@@ -182,7 +185,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"
