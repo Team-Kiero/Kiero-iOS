@@ -32,6 +32,11 @@ struct FeedMetadataDTO: Decodable {
     let amount: Int?
 }
 
+struct UnreadNotificationDTO: Decodable {
+    let hasUnread: Bool
+    let unreadChildIds: [Int]
+}
+
 extension FeedResponseDTO {
     func toEntity() -> FeedPage {
         .init(
