@@ -29,7 +29,6 @@ final class WishWellView: BaseUIView {
     
     private let nameStack = UIStackView().then {
         $0.axis = .horizontal
-        $0.spacing = 10
     }
     
     private let coinChip = ChipItem()
