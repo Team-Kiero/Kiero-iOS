@@ -24,6 +24,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     }
     
     private let textField = TextField(type: .parent(.totalName))
+    
     private let inviteView = InviteCodeView()
     
     private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
@@ -93,6 +94,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
         )
         
         textField.setText(text: viewModel.childName)
+        textField.innerTextField.isUserInteractionEnabled = false
         
         Publishers.CombineLatest3(viewModel.inviteCode, viewModel.remainingText, viewModel.isExpired)
             .receive(on: DispatchQueue.main)
