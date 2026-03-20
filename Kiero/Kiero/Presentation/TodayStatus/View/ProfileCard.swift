@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileCard: View {
     let name: String
+    let date: String
 
     var body: some View {
         HStack (alignment: .top){
@@ -25,7 +26,7 @@ struct ProfileCard: View {
                 .padding(.leading, 16)
                 .padding(.top, 5)
                 
-                Text(Date().toFullDateString)
+                Text(date)
                     .font(Font(UIFont.body4_12_R))
                     .foregroundStyle(.gray500)
                     .padding(.leading, 18)

@@ -36,7 +36,7 @@ struct TodayStatusView: View {
 private extension TodayStatusView {
     var mainContent: some View {
         VStack(spacing: 0) {
-            ProfileCard(name: viewModel.childFirstName)
+            ProfileCard(name: viewModel.childFirstName, date: viewModel.todayDate)
                 .frame(height: 96)
                 .padding(.top, 64)
             

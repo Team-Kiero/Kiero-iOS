@@ -36,16 +36,18 @@ struct ScheduleBox: View {
             .padding(.top, 4)
             
             VStack(alignment: .leading, spacing: 0) {
-                if showsCurrentScheduleText {
-                    Text("현재 일정")
-                        .font(Font(UIFont.body6_10_R))
-                        .foregroundStyle(.gray400)
-                }
-                
-                if showsNextScheduleText {
-                    Text("다음 일정")
-                        .font(Font(UIFont.body6_10_R))
-                        .foregroundStyle(.gray400)
+                if isHighlighted {
+                    if showsCurrentScheduleText {
+                        Text("현재 일정")
+                            .font(Font(UIFont.body6_10_R))
+                            .foregroundStyle(.gray400)
+                    }
+                    
+                    if showsNextScheduleText {
+                        Text("다음 일정")
+                            .font(Font(UIFont.body6_10_R))
+                            .foregroundStyle(.gray400)
+                    }
                 }
                 
                 Text(schedule.timeText)
@@ -84,7 +86,7 @@ private extension ScheduleBox {
             }
         }
     }
-     
+    
     var dotImage: ImageResource {
         if isFireLitToday {
             return .imgCircleSch1

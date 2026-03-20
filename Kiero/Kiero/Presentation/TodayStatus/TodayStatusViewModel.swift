@@ -16,6 +16,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     @Published var isFireLitToday: Bool = false
     @Published var selectedScheduleImageURL: URL? = nil
     @Published var childFirstName: String = ""
+    @Published var todayDate: String = ""
     
     var currentChildId: Int = 0
     
@@ -29,6 +30,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     func fetchTodayStatus(childId: Int? = nil) {
         let targetId = childId ?? self.currentChildId
+        todayDate = Date().toFullDateString
         
         TodayStatusService.shared.fetchTodayStatus(childId: targetId)
             .receive(on: DispatchQueue.main)
