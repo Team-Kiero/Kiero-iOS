@@ -31,6 +31,7 @@ struct ScheduleSectionView: View {
                         showsNextScheduleText: shouldShowNextScheduleText(at: index),
                         isHighlighted: highlightedIndex == index,
                         isLast: index == schedules.count - 1,
+                        isAfterTenPM: isAfterTenPM,
                         onTapSchedule: onTapSchedule
                     )
                     .padding(.horizontal, 29)
@@ -47,12 +48,17 @@ struct ScheduleSectionView: View {
 }
 
 private extension ScheduleSectionView {
+    var isAfterTenPM: Bool {
+        Calendar.current.component(.hour, from: Date()) >= 22
+    }
+
     var currentIndex: Int? {
         schedules.firstIndex(where: { $0.isNowSchedule })
     }
     
     var highlightedIndex: Int? {
         guard !schedules.isEmpty else { return nil }
+        guard !isAfterTenPM else { return nil }
         
         if let currentIndex {
             let current = schedules[currentIndex]
@@ -72,6 +78,7 @@ private extension ScheduleSectionView {
     
     var nextScheduleTextIndex: Int? {
         guard !schedules.isEmpty else { return nil }
+        guard !isAfterTenPM else { return nil }
         
         if let currentIndex {
             let nextIndex = currentIndex + 1
@@ -82,10 +89,10 @@ private extension ScheduleSectionView {
     }
     
     func shouldShowCurrentScheduleText(at index: Int) -> Bool {
+        guard !isAfterTenPM else { return false }
         guard schedules.indices.contains(index) else { return false }
         
         let schedule = schedules[index]
-        
         guard schedule.isNowSchedule else { return false }
         
         switch schedule.status {
@@ -97,6 +104,7 @@ private extension ScheduleSectionView {
     }
     
     func shouldShowNextScheduleText(at index: Int) -> Bool {
+        guard !isAfterTenPM else { return false }
         guard let nextScheduleTextIndex else { return false }
         guard schedules.indices.contains(index) else { return false }
         

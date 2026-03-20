@@ -22,6 +22,7 @@ struct ScheduleBox: View {
     let showsNextScheduleText: Bool
     let isHighlighted: Bool
     let isLast: Bool
+    let isAfterTenPM: Bool
     let onTapSchedule: (ScheduleItem) -> Void
     
     var body: some View {
@@ -68,6 +69,10 @@ struct ScheduleBox: View {
 
 private extension ScheduleBox {
     var timeColor: Color {
+        if isAfterTenPM {
+            return .gray400
+        }
+        
         if isHighlighted {
             return .main
         } else {
