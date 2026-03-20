@@ -89,37 +89,55 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     func bindSSEIfNeeded() {
         guard !isSseBound else { return }
-        isSseBound = true
         
-        guard let token = UserDefaults.standard.string(forKey: "sseAccessToken") else {
-            print("SSE 토큰 없음")
-            return
-        }
-        
-        SseStreamManager.shared.onRefreshWillStart = { [weak self] in
-            DispatchQueue.main.async {
-                self?.scheduleRefresh()
-            }
-        }
-        
-        SseStreamManager.shared.onReconnected = { [weak self] in
-            DispatchQueue.main.async {
-                self?.scheduleRefresh()
-            }
-        }
-        
-        SseStreamManager.shared.startIfNeeded(
-            initialToken: token,
-            onEvent: { [weak self] payload in
-                guard let self else { return }
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let token = try await TokenRefresher.shared.reissueSseAccessToken()
                 
-                if self.shouldRefreshTodayStatus(for: payload) {
-                    DispatchQueue.main.async {
-                        self.scheduleRefresh()
+                await MainActor.run {
+                    self.isSseBound = true
+                    
+                    print("✅ [TodayStatusVM] SSE 연결 시작")
+                    
+                    SseStreamManager.shared.onRefreshWillStart = { [weak self] in
+                        DispatchQueue.main.async {
+                            print("🔄 [TodayStatusVM] onRefreshWillStart")
+                            self?.scheduleRefresh()
+                        }
                     }
+                    
+                    SseStreamManager.shared.onReconnected = { [weak self] in
+                        DispatchQueue.main.async {
+                            print("🔄 [TodayStatusVM] onReconnected")
+                            self?.scheduleRefresh()
+                        }
+                    }
+                    
+                    SseStreamManager.shared.startIfNeeded(
+                        initialToken: token,
+                        onEvent: { [weak self] payload in
+                            guard let self else { return }
+                            
+                            print("📩 [TodayStatusVM] SSE EVENT:", payload.eventType, payload.childId as Any)
+                            
+                            if self.shouldRefreshTodayStatus(for: payload) {
+                                DispatchQueue.main.async {
+                                    self.scheduleRefresh()
+                                }
+                            }
+                        }
+                    )
+                }
+            } catch {
+                print("❌ [TodayStatusVM] SSE 토큰 재발급 실패:", error)
+                
+                await MainActor.run {
+                    self.isSseBound = false
                 }
             }
-        )
+        }
     }
     
     func unbindSSE() {

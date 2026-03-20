@@ -30,13 +30,6 @@ struct TodayStatusView: View {
             }
         }
         .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
-        .onAppear {
-            viewModel.fetchTodayStatus()
-            viewModel.bindSSEIfNeeded()
-        }
-        .onDisappear() {
-            viewModel.unbindSSE()
-        }
     }
 }
 
@@ -66,7 +59,7 @@ private extension TodayStatusView {
                 }
             )
             .padding(.horizontal, 27)
-            
+
             ScrollView {
                 ScheduleSectionView(
                     schedules: viewModel.schedules,
@@ -78,6 +71,7 @@ private extension TodayStatusView {
                     }
                 )
                 .padding(.top, 18)
+                .padding(.bottom, 100)
             }
         }
         .onChange(of: isMissionSheetPresented) { value in
