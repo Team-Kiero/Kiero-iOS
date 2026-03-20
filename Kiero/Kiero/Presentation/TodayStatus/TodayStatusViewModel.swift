@@ -29,8 +29,17 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     }
     
     func fetchTodayStatus(childId: Int? = nil) {
-        let targetId = childId ?? self.currentChildId
+        let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let targetId = childId ?? latestChildId
+        
         todayDate = Date().toFullDateString
+        
+        guard targetId != 0 else {
+            print("⚠️ [TodayStatusVM] selectedChildId가 아직 없음")
+            return
+        }
+        
+        self.currentChildId = targetId
         
         TodayStatusService.shared.fetchTodayStatus(childId: targetId)
             .receive(on: DispatchQueue.main)
@@ -150,8 +159,10 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     }
     
     private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {
+        let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
         if let childId = payload.childId,
-           Int(childId) != currentChildId {
+           Int(childId) != latestChildId {
             return false
         }
         
