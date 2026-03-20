@@ -107,12 +107,12 @@ private extension DailyJourneyMapView {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
-                        let hasOngoing = data.schedules.contains { $0.isOngoing }
+                        let hasOngoing = data.schedules.contains { $0.isOngoing && $0.status != .COMPLETED }
                         let isNext: Bool = {
                             guard !hasOngoing,
-                                  !schedule.isOngoing,
+                                  !(schedule.isOngoing && schedule.status != .COMPLETED),
                                   schedule.status == .PENDING else { return false }
-                            let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || $0.isOngoing }
+                            let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || ($0.isOngoing && $0.status != .COMPLETED) }
                             return isFirstPending
                         }()
                         

@@ -24,7 +24,6 @@ final class DailyJourneyHeaderView: BaseUIView {
 
     private let nameStack = UIStackView().then {
         $0.axis = .horizontal
-        $0.spacing = 10
         $0.alignment = .center
     }
 

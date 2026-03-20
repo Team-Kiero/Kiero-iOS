@@ -14,14 +14,18 @@ struct DailyJourneyScheduleTimeView: View {
     let status: String
     let isNext: Bool
     
+    private var isEnded: Bool {
+        status == "COMPLETED" || status == "FAILED" || status == "SKIPPED"
+    }
+
     private var timeColor: Color {
-        if isOngoing || isNext {
-            return .main
-        } else if status == "PENDING" {
-            return .gray500
-        } else {
+        if isEnded {
             return .gray500.opacity(0.5)
         }
+        if isOngoing || isNext {
+            return .main
+        }
+        return .gray500
     }
     
     var body: some View {
@@ -50,6 +54,6 @@ struct DailyJourneyScheduleTimeView: View {
         let timeString = timeFormatter.string(from: date)
         
         return Text(period).font(Font(UIFont.body6_10_R))
-        + Text(" \(timeString)").font(Font(UIFont.body4_12_R))
+        + Text("  \(timeString)").font(Font(UIFont.body4_12_R))
     }
 }

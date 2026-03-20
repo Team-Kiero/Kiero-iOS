@@ -112,10 +112,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
     
     private func showNextJourneyDialog() {
-        self.view.showDialog(state: .nextJourney) { [weak self] in
-            print("유저가 다음 여정으로 넘어가기를 확정")
+        let dialogBox = DialogBox()
+        dialogBox.configure(state: .nextJourney)
+        dialogBox.onTapConfirm = { [weak self] in
+            dialogBox.dismiss()
             self?.skipConfirmSubject.send(())
         }
+        dialogBox.show(in: self)
     }
     
     private func openCamera() {
