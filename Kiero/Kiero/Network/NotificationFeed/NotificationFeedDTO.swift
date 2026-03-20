@@ -1,5 +1,5 @@
 //
-//  NotificatioinFeedDTO.swift
+//  NotificationFeedDTO.swift
 //  Kiero
 //
 //  Created by 정윤아 on 1/21/26.
