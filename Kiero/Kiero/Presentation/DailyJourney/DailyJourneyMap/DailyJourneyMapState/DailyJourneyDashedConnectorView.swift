@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct DailyJourneyDashedConnectorView: View {
-    let isOngoing: Bool
     let status: String
     
     private var shouldShow: Bool {
-        isOngoing || status == "PENDING"
+        status == "PENDING" || status == "VERIFIED"
     }
     
     var body: some View {

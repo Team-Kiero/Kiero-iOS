@@ -12,22 +12,26 @@ struct DailyJourneyTimelineIndicatorView: View {
     let status: String
     let isNext: Bool
     
+    private var isEnded: Bool {
+        status == "COMPLETED" || status == "FAILED" || status == "SKIPPED"
+    }
+    
     private var shouldShowRectangle: Bool {
-        isOngoing || status == "PENDING"
+        !isEnded
     }
     
     private var iconColor: Color {
-        if isOngoing || isNext {
-            return .main
-        } else if status == "PENDING" {
-            return .white
-        } else {
+        if isEnded {
             return .white.opacity(0.5)
         }
+        if isOngoing || isNext {
+            return .main
+        }
+        return .white
     }
     
     private var hasGlow: Bool {
-        isOngoing || isNext
+        !isEnded && (isOngoing || isNext)
     }
     
     var body: some View {

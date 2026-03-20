@@ -13,11 +13,10 @@ struct DailyJourneyScheduleInfoView: View {
     let status: String
     
     private var nameColor: Color {
-        if isOngoing || status == "PENDING" {
-            return .white
-        } else {
+        if status == "COMPLETED" || status == "FAILED" || status == "SKIPPED" {
             return .white.opacity(0.5)
         }
+        return .white
     }
     
     var body: some View {
