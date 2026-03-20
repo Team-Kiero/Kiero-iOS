@@ -29,7 +29,7 @@ struct DailyJourneyScheduleInfoView: View {
                 .truncationMode(.tail)
                 .layoutPriority(1)
             
-            if isOngoing {
+            if isOngoing && status != "COMPLETED" {
                 Text("진행중")
                     .font(Font(UIFont.body6_10_R))
                     .foregroundStyle(.main)
