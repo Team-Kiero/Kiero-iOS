@@ -10,6 +10,7 @@ import Foundation
 
 protocol FeedServiceType {
     func fetchFeeds(childId: Int64, size: Int?, cursor: String?) -> AnyPublisher<FeedPage, NetworkError>
+    func fetchUnreadFeed() -> AnyPublisher<UnreadNotificationDTO, NetworkError>
 }
 
 final class FeedService: FeedServiceType {
@@ -21,6 +22,30 @@ final class FeedService: FeedServiceType {
                 do {
                     let dto: FeedResponseDTO = try await BaseService.shared.request(endPoint: endPoint)
                     promise(.success(dto.toEntity()))
+                } catch let error as NetworkError {
+                    promise(.failure(error))
+                } catch {
+                    promise(.failure(.unknownError))
+                }
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    func fetchUnreadFeed() -> AnyPublisher<UnreadNotificationDTO, NetworkError> {
+        let endPoint = EndPoint.fetchUnreadFeed
+
+        return Future<UnreadNotificationDTO, NetworkError> { promise in
+            Task {
+                do {
+                    let response: BaseResponse<UnreadNotificationDTO> = try await BaseService.shared.request(endPoint: endPoint)
+
+                    guard let data = response.data else {
+                        promise(.failure(.unknownError))
+                        return
+                    }
+
+                    promise(.success(data))
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {

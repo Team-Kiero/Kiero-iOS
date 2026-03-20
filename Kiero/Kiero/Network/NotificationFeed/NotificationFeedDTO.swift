@@ -1,5 +1,5 @@
 //
-//  NotificatioinFeedDTO.swift
+//  NotificationFeedDTO.swift
 //  Kiero
 //
 //  Created by 정윤아 on 1/21/26.
@@ -30,6 +30,11 @@ struct FeedMetadataDTO: Decodable {
     let content: String?
     let imageUrl: String?
     let amount: Int?
+}
+
+struct UnreadNotificationDTO: Decodable {
+    let hasUnread: Bool
+    let unreadChildIds: [Int]
 }
 
 extension FeedResponseDTO {

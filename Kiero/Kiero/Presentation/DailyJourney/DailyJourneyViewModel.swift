@@ -52,10 +52,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        input.viewWillDisappear
-            .sink { [weak self] in self?.pauseSseConnection() }
-            .store(in: &cancellables)
-        
         input.nextJourneyButtonTap
             .sink { [weak self] in self?.routeSubject.send(.showNextJourneyDialogBox) }
             .store(in: &cancellables)
@@ -166,11 +162,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 }
             }
         }
-    }
-    
-    func pauseSseConnection() {
-        print("⏸ [DailyJourneyViewModel] pauseSseConnection called")
-        SseStreamManager.shared.pause()
     }
     
     // MARK: - Converter

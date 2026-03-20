@@ -5,6 +5,7 @@
 //  Created by 신혜연 on 1/9/26.
 //
 
+import Combine
 import UIKit
 
 import SnapKit
@@ -25,6 +26,12 @@ struct TabNavigationBarStyle {
 }
 
 public final class TabBarViewController: UITabBarController {
+    
+    private let feedService: FeedServiceType = FeedService()
+    private var cancellables = Set<AnyCancellable>()
+    private var hasUnreadNotification = false
+    private var globalSseStarted = false
+    private var isShowingNotificationFeed = false
     
     public override var selectedIndex: Int {
         didSet {
@@ -80,6 +87,13 @@ public final class TabBarViewController: UITabBarController {
         setCustomNavigationBarUI()
         setCustomTabBarUI()
         bindNotifications()
+        bindUnreadState()
+        bindSSEEvents()
+        
+        if isParent {
+            fetchInitialUnreadStatus()
+            startGlobalFeedSSEIfNeeded()
+        }
         updateNavigationBar()
     }
     
@@ -144,7 +158,7 @@ private extension TabBarViewController {
     
     func setCustomNavigationBarUI() {
         view.addSubview(customNavigationBar)
-         
+        
         customNavigationBar.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(13)
             $0.horizontalEdges.equalToSuperview()
@@ -250,6 +264,8 @@ private extension TabBarViewController {
     func handleNavigationBarRightTap() {
         let notificationVC = factory.makeNotificationFeedViewController()
         
+        NotificationBadgeCenter.shared.setUnread(false)
+        
         guard let nav = selectedViewController as? UINavigationController else { return }
         nav.pushViewController(notificationVC, animated: true)
     }
@@ -258,15 +274,15 @@ private extension TabBarViewController {
         if isParent {
             switch index {
             case 0:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: false)
+                return .init(title: nil, type: .main(title: nil), isNotificationActive: hasUnreadNotification)
             case 1:
-                return .init(title: "일정", type: .main(title: "일정"), isNotificationActive: false)
+                return .init(title: "일정", type: .main(title: "일정"), isNotificationActive: hasUnreadNotification)
             case 2:
-                return .init(title: "미션", type: .main(title: "미션"), isNotificationActive: false)
+                return .init(title: "미션", type: .main(title: "미션"), isNotificationActive: hasUnreadNotification)
             case 3:
-                return .init(title: "보상", type: .main(title: "보상"), isNotificationActive: false)
+                return .init(title: "보상", type: .main(title: "보상"), isNotificationActive: hasUnreadNotification)
             case 4:
-                return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: false)
+                return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: hasUnreadNotification)
             default:
                 return nil
             }
@@ -294,7 +310,7 @@ private extension TabBarViewController {
     @objc
     private func handleChromeAlpha(_ notification: Notification) {
         guard let isDimmed = notification.object as? Bool else { return }
-
+        
         UIView.animate(withDuration: 0.25) {
             self.customNavigationBar.alpha = isDimmed ? 0.25 : 1.0
             self.customTabBar.alpha = isDimmed ? 0.25 : 1.0
@@ -371,15 +387,93 @@ extension TabBarViewController: UINavigationControllerDelegate {
     ) {
         let shouldHideTabBar = viewController.hidesBottomBarWhenPushed
         let shouldHideNavigationBar = viewController is NotificationFeedViewController
-
+        
+        isShowingNotificationFeed = viewController is NotificationFeedViewController
+        
         customTabBar.isHidden = shouldHideTabBar
         customTabBar.isUserInteractionEnabled = !shouldHideTabBar
-
+        
         customNavigationBar.isHidden = shouldHideNavigationBar
         customNavigationBar.isUserInteractionEnabled = !shouldHideNavigationBar
-
+        
         if !shouldHideNavigationBar {
             updateNavigationBar()
         }
+    }
+}
+
+private extension TabBarViewController {
+    func bindUnreadState() {
+        NotificationBadgeCenter.shared.hasUnreadSubject
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] hasUnread in
+                guard let self else { return }
+                self.hasUnreadNotification = hasUnread
+                self.customNavigationBar.isNotificationActive = hasUnread
+            }
+            .store(in: &cancellables)
+    }
+    
+    func fetchInitialUnreadStatus() {
+        feedService.fetchUnreadFeed()
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("✅ unread fetch finished")
+                case .failure(let error):
+                    print("❌ unread fetch failed:", String(reflecting: error))
+                    debugPrint(error)
+                }
+            } receiveValue: { status in
+                print("✅ unread status:", status.hasUnread)
+                NotificationBadgeCenter.shared.setUnread(status.hasUnread)
+            }
+            .store(in: &cancellables)
+    }
+    
+    func startGlobalFeedSSEIfNeeded() {
+        guard !globalSseStarted else { return }
+        globalSseStarted = true
+        
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                
+                await MainActor.run {
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { payload in
+                        print("📡 raw SSE event:", payload.eventType)
+                    }
+                    print("✅ [TabBar] global SSE started")
+                }
+            } catch {
+                print("❌ [TabBar] SSE start failed:", error)
+                self.globalSseStarted = false
+            }
+        }
+    }
+    
+    func bindSSEEvents() {
+        NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .sink { [weak self] payload in
+                guard let self else { return }
+                print("📡 TabBar received SSE:", payload.eventType)
+                
+                guard payload.eventType == "FEED_ITEM_CREATED" else { return }
+                
+                NotificationCenter.default.post(
+                    name: .feedItemCreated,
+                    object: nil,
+                    userInfo: ["payload": payload]
+                )
+                
+                if !self.isShowingNotificationFeed {
+                    NotificationBadgeCenter.shared.setUnread(true)
+                }
+            }
+            .store(in: &cancellables)
     }
 }
