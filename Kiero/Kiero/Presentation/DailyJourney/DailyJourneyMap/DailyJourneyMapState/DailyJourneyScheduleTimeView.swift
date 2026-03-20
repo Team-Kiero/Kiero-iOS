@@ -50,6 +50,6 @@ struct DailyJourneyScheduleTimeView: View {
         let timeString = timeFormatter.string(from: date)
         
         return Text(period).font(Font(UIFont.body6_10_R))
-        + Text(" \(timeString)").font(Font(UIFont.body4_12_R))
+        + Text("  \(timeString)").font(Font(UIFont.body4_12_R))
     }
 }
