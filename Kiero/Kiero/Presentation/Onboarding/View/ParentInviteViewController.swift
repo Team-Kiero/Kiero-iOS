@@ -94,7 +94,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
         )
         
         textField.setText(text: viewModel.childName)
-        textField.innerTextField.isUserInteractionEnabled = false
+        textField.isEditable = false
         
         Publishers.CombineLatest3(viewModel.inviteCode, viewModel.remainingText, viewModel.isExpired)
             .receive(on: DispatchQueue.main)
