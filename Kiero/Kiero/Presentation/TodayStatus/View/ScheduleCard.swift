@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ScheduleCard: View {
     let schedule: ScheduleItem
+    let isHighlighted: Bool
     let onTap: () -> Void
     
     var body: some View {
@@ -53,6 +54,10 @@ struct ScheduleCard: View {
 }
 
 private extension ScheduleCard {
+    var isErrorState: Bool {
+        schedule.status == .failed || schedule.status == .skipped
+    }
+    
     var tapAction: Bool {
         switch schedule.status {
         case .complete, .verified:
@@ -76,32 +81,25 @@ private extension ScheduleCard {
     }
     
     var borderColor: Color {
-        if schedule.isNowSchedule {
+        if isHighlighted {
             return .main
-        }
-        else {
-            switch schedule.status {
-            case .complete, .pending, .verified:
-                return .gray800
-            case .failed, .skipped:
-                return .point
-            }
+        } else if isErrorState {
+            return .point
+        } else {
+            return .gray800
         }
     }
     
     var textColor: Color {
-        if schedule.isNowSchedule {
+        if isHighlighted {
             return .main
         }
-        else {
-            switch schedule.status {
-            case .complete, .failed, .skipped:
-                return .gray400
-            case .verified:
-                return .main
-            case .pending:
-                return .gray800
-            }
+        
+        switch schedule.status {
+        case .pending:
+            return .gray800
+        case .complete, .verified, .failed, .skipped:
+            return .gray400
         }
     }
     
@@ -127,11 +125,10 @@ private extension ScheduleCard {
     
     @ViewBuilder
     var backgroundView: some View {
-        if schedule.isNowSchedule {
+        if isHighlighted {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.schedule1.opacity(0.1))
-        }
-        else {
+        } else {
             Color.clear
         }
     }

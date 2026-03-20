@@ -19,8 +19,8 @@ struct TimelineColumnView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 7, height: 7)
-                .shadow(color: dotGlowColor.opacity(0.9), radius: 8)
-                .shadow(color: dotGlowColor.opacity(0.5), radius: 16)
+                .shadow(color: dotGlowColor.opacity(1), radius: 3)
+                .shadow(color: dotGlowColor.opacity(0.8), radius: 5)
             DashedVerticalLine()
                 .stroke(
                     lineGradient,
