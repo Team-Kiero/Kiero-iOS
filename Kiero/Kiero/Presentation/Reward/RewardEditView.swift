@@ -143,10 +143,10 @@ struct RewardEditView: View {
     private func validateCoinRange() {
         if coinCount > 500 {
             coinCount = 500
-            Toast.show(message: "최대 보상은 500개입니다")
+            Toast.show(message: "최대 보상은 500개입니다", bottomInset: 88)
         } else if coinCount < 1 {
             coinCount = 1
-            Toast.show(message: "보상을 입력해주세요.")
+            Toast.show(message: "보상을 입력해주세요.", bottomInset: 88)
         }
     }
     
@@ -155,28 +155,28 @@ struct RewardEditView: View {
         coinCount = newValue
         
         if coinCount < 1 {
-            Toast.show(message: "보상을 입력해주세요.")
+            Toast.show(message: "보상을 입력해주세요.", bottomInset: 88)
             coinCount = 1
             return
         }
         
         if coinCount > 500 {
-            Toast.show(message: "최대 보상은 500개입니다")
+            Toast.show(message: "최대 보상은 500개입니다", bottomInset: 88)
             coinCount = 500
         }
     }
     
     private func saveAction() {
         if rewardTitle.trimmingCharacters(in: .whitespaces).isEmpty {
-            Toast.show(message: "보상 이름을 입력해주세요.")
+            Toast.show(message: "보상 이름을 입력해주세요.", bottomInset: 88)
             return
         }
         
         switch mode {
         case .add:
-            Toast.show(message: "보상이 등록되었습니다.")
+            Toast.show(message: "보상이 등록되었습니다.", bottomInset: 88)
         case .edit(_):
-            Toast.show(message: "보상이 수정되었습니다.")
+            Toast.show(message: "보상이 수정되었습니다.", bottomInset: 88)
         }
         
         onSave(rewardTitle, coinCount)

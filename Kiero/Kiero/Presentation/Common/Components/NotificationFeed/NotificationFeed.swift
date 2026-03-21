@@ -120,7 +120,7 @@ final class NotificationFeed: UIView {
         }
         
         messageLabel.snp.makeConstraints {
-            $0.top.equalTo(timeLabel.snp.bottom).offset(4)
+            $0.top.equalTo(timeLabel.snp.bottom).offset(10)
             $0.leading.equalToSuperview().inset(13)
             $0.trailing.equalTo(downButton.snp.leading).offset(0)
         }

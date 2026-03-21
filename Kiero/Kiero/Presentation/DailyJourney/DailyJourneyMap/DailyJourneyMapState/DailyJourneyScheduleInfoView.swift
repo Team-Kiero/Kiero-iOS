@@ -13,11 +13,10 @@ struct DailyJourneyScheduleInfoView: View {
     let status: String
     
     private var nameColor: Color {
-        if isOngoing || status == "PENDING" {
-            return .white
-        } else {
+        if status == "COMPLETED" || status == "FAILED" || status == "SKIPPED" {
             return .white.opacity(0.5)
         }
+        return .white
     }
     
     var body: some View {
@@ -29,7 +28,7 @@ struct DailyJourneyScheduleInfoView: View {
                 .truncationMode(.tail)
                 .layoutPriority(1)
             
-            if isOngoing {
+            if isOngoing && status != "COMPLETED" {
                 Text("진행중")
                     .font(Font(UIFont.body6_10_R))
                     .foregroundStyle(.main)

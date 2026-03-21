@@ -48,7 +48,7 @@ struct DailyJourneyMapStateRowView: View {
             }
             .layoutPriority(1)
             
-            DailyJourneyDashedConnectorView(isOngoing: isOngoing, status: status)
+            DailyJourneyDashedConnectorView(status: status)
                 .alignmentGuide(.titleCenter) { d in d[VerticalAlignment.center] }
             
             DailyJourneyStoneRewardView(stoneType: stoneType, status: status)

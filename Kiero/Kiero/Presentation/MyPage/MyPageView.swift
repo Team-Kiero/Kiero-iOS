@@ -134,7 +134,7 @@ struct ConnectionChip: View {
             .foregroundStyle(count == 0 ? .main : .gray500 )
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(.gray900)
+            .background(.gray900, in: Capsule())
             .overlay(Capsule().stroke(count == 0 ? .main : .gray500, lineWidth: 1))
     }
 }

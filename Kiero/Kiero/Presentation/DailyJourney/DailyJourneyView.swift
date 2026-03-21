@@ -146,7 +146,7 @@ final class DailyJourneyView: BaseUIView {
         mapButton.snp.makeConstraints {
             $0.top.equalTo(headerView.snp.bottom).offset(16)
             $0.trailing.equalToSuperview().inset(16)
-            $0.size.equalTo(40)
+            $0.size.equalTo(60)
         }
         
         verifyPhotoButton.snp.makeConstraints {
@@ -193,12 +193,12 @@ final class DailyJourneyView: BaseUIView {
     func updateMapButtonPosition(hasSchedule: Bool) {
         mapButton.snp.remakeConstraints {
             if hasSchedule {
-                $0.top.equalTo(journeyTimeView.snp.bottom).offset(16)
+                $0.top.equalTo(journeyTimeView.snp.bottom).offset(6)
             } else {
                 $0.top.equalTo(headerView.snp.bottom).offset(16)
             }
             $0.trailing.equalToSuperview().inset(16)
-            $0.size.equalTo(40)
+            $0.size.equalTo(60)
         }
     }
     
