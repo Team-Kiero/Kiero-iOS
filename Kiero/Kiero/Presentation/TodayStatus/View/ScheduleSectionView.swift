@@ -31,7 +31,6 @@ struct ScheduleSectionView: View {
                         showsNextScheduleText: shouldShowNextScheduleText(at: index),
                         isHighlighted: highlightedIndex == index,
                         isLast: index == schedules.count - 1,
-                        isAfterTenPM: isAfterTenPM,
                         onTapSchedule: onTapSchedule
                     )
                     .padding(.horizontal, 29)
@@ -48,17 +47,13 @@ struct ScheduleSectionView: View {
 }
 
 private extension ScheduleSectionView {
-    var isAfterTenPM: Bool {
-        Calendar.current.component(.hour, from: Date()) >= 22
-    }
-
+    
     var currentIndex: Int? {
         schedules.firstIndex(where: { $0.isNowSchedule })
     }
     
     var highlightedIndex: Int? {
         guard !schedules.isEmpty else { return nil }
-        guard !isAfterTenPM else { return nil }
         
         if let currentIndex {
             let current = schedules[currentIndex]
@@ -68,45 +63,68 @@ private extension ScheduleSectionView {
                 return currentIndex
                 
             case .complete, .failed, .skipped:
-                let nextIndex = currentIndex + 1
-                return nextIndex < schedules.count ? nextIndex : nil
+                let nextIndex = nextUpcomingIndex(after: currentIndex)
+                return nextIndex
             }
         }
         
-        return schedules.isEmpty ? nil : 0
+        return firstUpcomingIndex
     }
     
     var nextScheduleTextIndex: Int? {
-        guard !schedules.isEmpty else { return nil }
-        guard !isAfterTenPM else { return nil }
+        guard let currentIndex else { return firstUpcomingIndex }
+        return nextUpcomingIndex(after: currentIndex)
+    }
+    
+    var firstUpcomingIndex: Int? {
+        let now = currentTimeMinutes
         
-        if let currentIndex {
-            let nextIndex = currentIndex + 1
-            return nextIndex < schedules.count ? nextIndex : nil
+        return schedules.firstIndex { schedule in
+            startMinutes(of: schedule) > now
         }
+    }
+    
+    func nextUpcomingIndex(after index: Int) -> Int? {
+        let now = currentTimeMinutes
         
-        return 0
+        guard index + 1 < schedules.count else { return nil }
+        
+        return schedules[(index + 1)...].firstIndex { schedule in
+            startMinutes(of: schedule) > now
+        }
+    }
+    
+    var currentTimeMinutes: Int {
+        let components = Calendar.current.dateComponents([.hour, .minute], from: Date())
+        let hour = components.hour ?? 0
+        let minute = components.minute ?? 0
+        return hour * 60 + minute
+    }
+    
+    func startMinutes(of schedule: ScheduleItem) -> Int {
+        let parts = schedule.timeText.split(separator: "-")
+        guard let start = parts.first else { return 0 }
+        
+        let hm = start.split(separator: ":")
+        guard hm.count == 2,
+              let hour = Int(hm[0]),
+              let minute = Int(hm[1]) else { return 0 }
+        
+        return hour * 60 + minute
     }
     
     func shouldShowCurrentScheduleText(at index: Int) -> Bool {
-        guard !isAfterTenPM else { return false }
         guard schedules.indices.contains(index) else { return false }
         
         let schedule = schedules[index]
-        guard schedule.isNowSchedule else { return false }
         
-        switch schedule.status {
-        case .pending, .verified:
-            return true
-        case .complete, .failed, .skipped:
-            return false
-        }
+        return schedule.isNowSchedule &&
+               (schedule.status == .pending || schedule.status == .verified)
     }
     
     func shouldShowNextScheduleText(at index: Int) -> Bool {
-        guard !isAfterTenPM else { return false }
-        guard let nextScheduleTextIndex else { return false }
         guard schedules.indices.contains(index) else { return false }
+        guard let nextScheduleTextIndex else { return false }
         
         if shouldShowCurrentScheduleText(at: index) {
             return false
