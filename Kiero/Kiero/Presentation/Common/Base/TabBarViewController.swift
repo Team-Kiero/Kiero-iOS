@@ -99,17 +99,8 @@ private extension TabBarViewController {
 
         let appearance = UITabBarAppearance()
         appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.shadowColor = .clear
-        appearance.backgroundEffect = nil
-
         tabBar.standardAppearance = appearance
-
-        tabBar.backgroundImage = UIImage()
-        tabBar.shadowImage = UIImage()
-        tabBar.backgroundColor = .clear
-        tabBar.barTintColor = .clear
-        tabBar.isTranslucent = true
+        tabBar.scrollEdgeAppearance = appearance
     }
     
     func setViewControllers() {
