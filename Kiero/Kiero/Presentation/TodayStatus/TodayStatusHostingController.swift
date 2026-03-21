@@ -10,10 +10,10 @@ import UIKit
 
 final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     
-    private let todayStatusViewModel: TodayStatusViewModel
+    private let viewModel: TodayStatusViewModel
     
     init(viewModel: TodayStatusViewModel) {
-        self.todayStatusViewModel = viewModel
+        self.viewModel = viewModel
         super.init(rootView: TodayStatusView(viewModel: viewModel))
     }
     
@@ -28,13 +28,18 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        view.backgroundColor = .kBlack
-        todayStatusViewModel.fetchTodayStatus()
-        todayStatusViewModel.bindSSEIfNeeded()
+        viewModel.fetchTodayStatus()
+        viewModel.bindSSEIfNeeded()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        todayStatusViewModel.unbindSSE()
+        viewModel.unbindSSE()
+    }
+}
+
+extension TodayStatusHostingController: TabBarReselectRefreshable {
+    func refreshOnTabReselect() {
+        viewModel.fetchTodayStatus()
     }
 }

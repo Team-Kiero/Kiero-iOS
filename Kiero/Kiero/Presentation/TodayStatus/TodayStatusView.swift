@@ -36,7 +36,7 @@ struct TodayStatusView: View {
 private extension TodayStatusView {
     var mainContent: some View {
         VStack(spacing: 0) {
-            ProfileCard(name: viewModel.childFirstName)
+            ProfileCard(name: viewModel.childFirstName, date: viewModel.todayDate)
                 .frame(height: 96)
                 .padding(.top, 64)
             
@@ -59,7 +59,7 @@ private extension TodayStatusView {
                 }
             )
             .padding(.horizontal, 27)
-            
+
             ScrollView {
                 ScheduleSectionView(
                     schedules: viewModel.schedules,
@@ -71,6 +71,7 @@ private extension TodayStatusView {
                     }
                 )
                 .padding(.top, 18)
+                .padding(.bottom, 100)
             }
         }
         .onChange(of: isMissionSheetPresented) { value in

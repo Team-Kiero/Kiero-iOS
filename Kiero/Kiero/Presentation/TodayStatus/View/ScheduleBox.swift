@@ -18,10 +18,12 @@ enum TodayStatus: String, Decodable {
 struct ScheduleBox: View {
     let schedule: ScheduleItem
     let isFireLitToday: Bool
+    let showsCurrentScheduleText: Bool
     let showsNextScheduleText: Bool
+    let isHighlighted: Bool
     let isLast: Bool
     let onTapSchedule: (ScheduleItem) -> Void
-
+    
     var body: some View {
         HStack(alignment: .top, spacing: 5) {
             TimelineColumnView(
@@ -31,33 +33,36 @@ struct ScheduleBox: View {
                 lineHeight: 94
             )
             .padding(.top, 4)
-
+            
             VStack(alignment: .leading, spacing: 0) {
-                if schedule.isNowSchedule {
-                    Text("현재 일정")
-                        .font(Font(UIFont.body6_10_R))
-                        .foregroundStyle(.gray400)
+                if isHighlighted {
+                    if showsCurrentScheduleText {
+                        Text("현재 일정")
+                            .font(Font(UIFont.body6_10_R))
+                            .foregroundStyle(.gray400)
+                    }
+                    
+                    if showsNextScheduleText {
+                        Text("다음 일정")
+                            .font(Font(UIFont.body6_10_R))
+                            .foregroundStyle(.gray400)
+                    }
                 }
                 
-                if showsNextScheduleText {
-                    Text("다음 일정")
-                        .font(Font(UIFont.body6_10_R))
-                        .foregroundStyle(.gray400)
-                }
-
                 Text(schedule.timeText)
                     .font(Font(UIFont.body4_12_R))
                     .foregroundStyle(timeColor)
                     .padding(.bottom, 8)
-
+                
                 ScheduleCard(
                     schedule: schedule,
+                    isHighlighted: isHighlighted,
                     onTap: {
                         onTapSchedule(schedule)
                     }
                 )
             }
-
+            
             Spacer(minLength: 0)
         }
     }
@@ -65,10 +70,9 @@ struct ScheduleBox: View {
 
 private extension ScheduleBox {
     var timeColor: Color {
-        if schedule.isNowSchedule {
+        if isHighlighted {
             return .main
-        }
-        else {
+        } else {
             switch schedule.status {
             case .complete, .failed, .skipped, .verified:
                 return .gray400
@@ -77,12 +81,12 @@ private extension ScheduleBox {
             }
         }
     }
-     
+    
     var dotImage: ImageResource {
         if isFireLitToday {
             return .imgCircleSch1
         }
-        else if schedule.isNowSchedule {
+        else if isHighlighted {
             return .imgCircleMain
         }
         else {
@@ -98,15 +102,17 @@ private extension ScheduleBox {
     var dotGlowColor: Color {
         if isFireLitToday {
             return .schedule1
-        }
-        
-        switch schedule.status {
-        case .verified:
+        } else if schedule.isNowSchedule {
             return .main
-        case .pending:
-            return .gray800
-        default:
-            return .schedule1
+        } else {
+            switch schedule.status {
+            case .verified:
+                return .main
+            case .pending:
+                return .gray800
+            default:
+                return .schedule1
+            }
         }
     }
     
@@ -122,6 +128,13 @@ private extension ScheduleBox {
             if isLast {
                 return LinearGradient(
                     colors: [.clear, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+            else if schedule.isNowSchedule {
+                return LinearGradient(
+                    colors: [.gray400, .gray600],
                     startPoint: .top,
                     endPoint: .bottom
                 )
