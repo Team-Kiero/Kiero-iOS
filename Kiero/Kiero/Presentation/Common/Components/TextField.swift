@@ -93,6 +93,11 @@ final class TextField: UIView {
     
     var innerTextField: UITextField { textField }
     
+    var isEditable: Bool {
+        get { innerTextField.isUserInteractionEnabled }
+        set { innerTextField.isUserInteractionEnabled = newValue }
+    }
+    
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {

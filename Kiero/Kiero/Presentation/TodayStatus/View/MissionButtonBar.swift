@@ -39,11 +39,11 @@ struct MissionButtonBar: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.vertical, 22)
+        .frame(height: 71)
         .background {
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.kBlack)
-                .shadow(color: .black.opacity(0.35), radius: 12, x: 0, y: 12)
+                .shadow(color: Color.black.opacity(0.35), radius: 3, x: 0, y: 3)
         }
     }
 }
