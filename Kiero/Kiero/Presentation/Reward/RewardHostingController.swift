@@ -37,7 +37,7 @@ extension RewardHostingController: ScrollToTopAvailable {
     
     private func findScrollViewAndScrollToTop(in view: UIView) {
         if let scrollView = view as? UIScrollView {
-            scrollView.setContentOffset(CGPoint(x: 0, y: -66), animated: true)
+            scrollView.setContentOffset(CGPoint(x: 0, y: -61), animated: true)
             return
         }
         
