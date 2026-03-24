@@ -105,16 +105,23 @@ extension AIMissionInputView: UITextViewDelegate {
         guard fixedWidth > 0 else { return }
         
         let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
-
-        let maxHeight = self.frame.height - 36 - titleLabel.frame.height - 12 - 16
-        guard maxHeight > 0 else { return }
+        
+        let titleAreaHeight: CGFloat = 68
+        let maxHeight = self.frame.height - titleAreaHeight
         
         let targetHeight = min(max(376, newSize.height), maxHeight)
         
         textViewHeightConstraint?.update(offset: targetHeight)
         textView.isScrollEnabled = newSize.height > maxHeight
         
-        self.layoutIfNeeded()
+        UIView.animate(withDuration: 0.2) {
+            self.layoutIfNeeded()
+        } completion: { _ in
+            if let selectedRange = textView.selectedTextRange {
+                let cursorRect = textView.caretRect(for: selectedRange.end)
+                textView.scrollRectToVisible(cursorRect, animated: true)
+            }
+        }
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

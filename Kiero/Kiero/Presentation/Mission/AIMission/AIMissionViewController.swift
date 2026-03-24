@@ -364,17 +364,22 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
         
         let keyboardHeight = keyboardFrame.cgRectValue.height
         let safeAreaBottom = view.safeAreaInsets.bottom
-        let targetInset = keyboardHeight - safeAreaBottom - 40
-        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: targetInset, right: 0)
         
-        UIView.animate(withDuration: 0.3) {
-            self.missionInputView.textView.contentInset = contentInset
-            self.missionInputView.textView.scrollIndicatorInsets = contentInset
-            
-            if let selectedRange = self.missionInputView.textView.selectedTextRange {
-                let cursorRect = self.missionInputView.textView.caretRect(for: selectedRange.start)
-                self.missionInputView.textView.scrollRectToVisible(cursorRect, animated: false)
-            }
+        let textViewBottom = missionInputView.textView.convert(
+            missionInputView.textView.bounds, to: view
+        ).maxY
+        let visibleHeight = view.frame.height - keyboardHeight
+        let overlap = textViewBottom - visibleHeight
+        
+        let bottomInset = max(0, overlap + 65)
+        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: bottomInset, right: 0)
+        
+        missionInputView.textView.contentInset = contentInset
+        missionInputView.textView.scrollIndicatorInsets = contentInset
+        
+        if let selectedRange = missionInputView.textView.selectedTextRange {
+            let cursorRect = missionInputView.textView.caretRect(for: selectedRange.end)
+            missionInputView.textView.scrollRectToVisible(cursorRect, animated: true)
         }
     }
     
