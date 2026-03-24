@@ -32,7 +32,7 @@ final class WeekdaySelectionView: UIView {
         $0.setTitleColor(.white, for: .normal)
         $0.setTypo(.body6_10_R, text: "매일", for: .normal)
         $0.setImage(UIImage(resource: .btnUncheck), for: .normal)
-        $0.setImage(UIImage(resource: .btnCheck), for: .selected)
+        $0.setImage(UIImage(resource: .btnCheckFill), for: .selected)
         $0.semanticContentAttribute = .forceLeftToRight
         $0.imageEdgeInsets = UIEdgeInsets(top: 0, left: -4, bottom: 0, right: 0)
         $0.addTarget(self, action: #selector(everyDayTapped), for: .touchUpInside)
