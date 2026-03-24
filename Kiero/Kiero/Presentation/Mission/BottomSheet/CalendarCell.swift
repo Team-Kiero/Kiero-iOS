@@ -48,7 +48,8 @@ final class CalendarCell: UICollectionViewCell {
         }
         
         dateLabel.snp.makeConstraints {
-            $0.center.equalToSuperview()
+            $0.centerX.equalTo(selectionView)
+            $0.centerY.equalTo(selectionView).offset(-1)
         }
     }
     
