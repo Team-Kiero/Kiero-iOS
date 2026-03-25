@@ -18,6 +18,8 @@ final class WeeklyTimeTableView: BaseUIView {
     private let startHour = 8
     private let endHour = 21
     private let spacing: CGFloat = 3
+    private let verticalPadding: CGFloat = 4
+    private let timeLabelWidth: CGFloat = 23
     
     private var daysDates: [Date] = []
     var onScheduleTap: ((Schedule) -> Void)?
@@ -75,9 +77,7 @@ final class WeeklyTimeTableView: BaseUIView {
         addSubviews(headerStackView, scrollView)
         scrollView.addSubview(gridContainer)
         gridContainer.addSubview(gridBackgroundView)
-        
-        gridBackgroundView.addSubview(emptyView)
-        gridBackgroundView.addSubview(cardContainerView)
+        gridBackgroundView.addSubviews(emptyView, cardContainerView)
         emptyView.addSubviews(emptyImageView, emptyTitleLabel, emptySubLabel)
         
         self.daysDates = Date().daysOfWeek
@@ -104,14 +104,19 @@ final class WeeklyTimeTableView: BaseUIView {
         gridContainer.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
-            $0.height.equalTo(totalGridHeight + 10)
+            $0.height.equalTo(totalGridHeight + (verticalPadding * 2) + 20)
         }
         
         gridBackgroundView.snp.makeConstraints {
             $0.top.equalToSuperview()
-            $0.leading.equalToSuperview().offset(23)
+            $0.leading.equalToSuperview().offset(timeLabelWidth)
             $0.trailing.equalToSuperview()
-            $0.height.equalTo(totalGridHeight)
+            $0.height.equalTo(totalGridHeight + (verticalPadding * 2))
+        }
+        
+        cardContainerView.snp.makeConstraints {
+            $0.top.bottom.equalToSuperview().inset(verticalPadding)
+            $0.leading.trailing.equalToSuperview().inset(4)
         }
         
         emptyView.snp.makeConstraints {
@@ -121,8 +126,7 @@ final class WeeklyTimeTableView: BaseUIView {
         
         emptyImageView.snp.makeConstraints {
             $0.top.centerX.equalToSuperview()
-            $0.height.equalTo(52)
-            $0.width.equalTo(69)
+            $0.size.equalTo(CGSize(width: 69, height: 52))
         }
         
         emptyTitleLabel.snp.makeConstraints {
@@ -134,47 +138,55 @@ final class WeeklyTimeTableView: BaseUIView {
             $0.top.equalTo(emptyTitleLabel.snp.bottom).offset(4)
             $0.horizontalEdges.bottom.equalToSuperview()
         }
-        
-        cardContainerView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4))
-        }
     }
     
     private func setTimeLabel() {
+        gridContainer.subviews.filter { $0 is UILabel }.forEach { $0.removeFromSuperview() }
+        gridBackgroundView.subviews.forEach {
+            if $0 != cardContainerView && $0 != emptyView {
+                $0.removeFromSuperview()
+            }
+        }
+
         for hour in startHour...endHour {
             let yOffset = CGFloat(hour - startHour) * hourHeight
             
-            let timeRowContainer = UIView()
-            gridContainer.addSubview(timeRowContainer)
-            
-            timeRowContainer.snp.makeConstraints {
-                $0.top.equalTo(gridBackgroundView.snp.top).offset(yOffset)
-                $0.leading.equalToSuperview()
-                $0.width.equalTo(23)
-                $0.height.equalTo(hourHeight)
-            }
-            
-            let timeLabel = UILabel().then {
-                $0.setTypo(.body6_10_R, text: "\(hour)")
-                $0.textColor = .gray600
-                $0.textAlignment = .center
-            }
-            timeRowContainer.addSubview(timeLabel)
-            
-            timeLabel.snp.makeConstraints {
-                $0.top.equalToSuperview().offset(3)
-                $0.centerX.equalToSuperview()
-            }
-            
             if hour > startHour {
-                let line = UIView().then { $0.backgroundColor = .gray800 }
-                gridContainer.addSubview(line)
+                let line = UIView().then {
+                    $0.backgroundColor = .gray800
+                }
+                gridBackgroundView.addSubview(line)
                 
                 line.snp.makeConstraints {
-                    $0.top.equalToSuperview().offset(yOffset)
+                    $0.centerY.equalTo(cardContainerView.snp.top).offset(yOffset)
+                    $0.leading.equalToSuperview().offset(-timeLabelWidth)
+                    $0.trailing.equalTo(gridBackgroundView.snp.leading)
+                    $0.height.equalTo(0.5)
+                }
+                
+                let timeLabel = UILabel().then {
+                    $0.setTypo(.body6_10_R, text: "\(hour)")
+                    $0.textColor = .gray600
+                    $0.textAlignment = .center
+                }
+                gridContainer.addSubview(timeLabel)
+                
+                timeLabel.snp.makeConstraints {
+                    $0.top.equalTo(line.snp.centerY).offset(5)
+                    $0.centerX.equalTo(line.snp.leading).offset(timeLabelWidth / 2)
+                }
+            } else {
+                let timeLabel = UILabel().then {
+                    $0.setTypo(.body6_10_R, text: "\(hour)")
+                    $0.textColor = .gray600
+                    $0.textAlignment = .center
+                }
+                gridContainer.addSubview(timeLabel)
+                
+                timeLabel.snp.makeConstraints {
+                    $0.top.equalTo(gridBackgroundView.snp.top).offset(verticalPadding + 5)
                     $0.leading.equalToSuperview()
-                    $0.width.equalTo(23)
-                    $0.height.equalTo(0.3)
+                    $0.width.equalTo(timeLabelWidth)
                 }
             }
         }
@@ -189,7 +201,6 @@ final class WeeklyTimeTableView: BaseUIView {
         
         daysDates.enumerated().forEach { index, date in
             let itemView = DayItem()
-            
             let dayNum = calendar.component(.day, from: date)
             let weekday = date.toString(format: "E")
             let isToday = calendar.isDate(date, inSameDayAs: today)
@@ -198,30 +209,27 @@ final class WeeklyTimeTableView: BaseUIView {
             headerStackView.addArrangedSubview(itemView)
         }
     }
-    
+
     func clearSchedules() {
         cardContainerView.subviews.forEach { $0.removeFromSuperview() }
         emptyView.alpha = 0
         emptyView.isHidden = true
         cardContainerView.layoutIfNeeded()
     }
-    
+
     func scrollToTop() {
         scrollView.setContentOffset(CGPoint.zero, animated: true)
     }
-    
+
     func updateEmptyState(isEmpty: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            
             if !isEmpty {
                 self.emptyView.alpha = 0
                 self.emptyView.isHidden = true
             } else {
                 self.emptyView.isHidden = false
-                UIView.animate(withDuration: 0.4) {
-                    self.emptyView.alpha = 1
-                }
+                UIView.animate(withDuration: 0.4) { self.emptyView.alpha = 1 }
             }
         }
     }
@@ -237,6 +245,7 @@ final class WeeklyTimeTableView: BaseUIView {
         let cardHeight = CGFloat(duration) * hourHeight
         let actualColor = UIColor(hex: schedule.colorCode)
         
+        self.layoutIfNeeded()
         let totalWidth = cardContainerView.bounds.width
         let cardWidth = (totalWidth - CGFloat(6) * spacing) / 7
         
@@ -244,12 +253,8 @@ final class WeeklyTimeTableView: BaseUIView {
               let scheduleDate = dateString.toDate() else { return }
         
         if let dayIndex = daysDates.firstIndex(where: { Calendar.current.isDate($0, inSameDayAs: scheduleDate) }) {
-            
             let card = ScheduleCardView(name: schedule.name, color: actualColor)
-            
-            card.tapAction = { [weak self] in
-                self?.onScheduleTap?(schedule)
-            }
+            card.tapAction = { [weak self] in self?.onScheduleTap?(schedule) }
             
             cardContainerView.addSubview(card)
             
