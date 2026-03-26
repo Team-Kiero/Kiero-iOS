@@ -16,7 +16,7 @@ final class AIMissionInputView: BaseUIView {
     
     var onTextChanged: ((String) -> Void)?
     private var textViewHeightConstraint: Constraint?
-    private var isUserTouched: Bool = false
+    private var maxHeight: CGFloat = 463
     
     // MARK: - UI Components
     
@@ -32,8 +32,8 @@ final class AIMissionInputView: BaseUIView {
         $0.font = .body3_14_R
         $0.textContainerInset = UIEdgeInsets(top: 12, left: 14, bottom: 12, right: 14)
         $0.returnKeyType = .done
-        $0.isScrollEnabled = true
-        $0.alwaysBounceVertical = true
+        $0.isScrollEnabled = false
+        $0.alwaysBounceVertical = false
         $0.showsVerticalScrollIndicator = false
         $0.contentInsetAdjustmentBehavior = .never
         $0.autocorrectionType = .no
@@ -51,10 +51,15 @@ final class AIMissionInputView: BaseUIView {
         super.init(frame: .zero)
         
         setDelegate()
+        addObserver()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
@@ -86,9 +91,54 @@ final class AIMissionInputView: BaseUIView {
         textView.delegate = self
     }
     
+    private func addObserver() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(textDidChange),
+            name: UITextView.textDidChangeNotification,
+            object: nil
+        )
+    }
+    
     func activateTextView() {
         textView.isEditable = true
         textView.becomeFirstResponder()
+    }
+    
+    func updateMaxHeight(_ height: CGFloat) {
+        maxHeight = height
+        recalculateHeight()
+    }
+
+    func setKeyboardInset(bottom: CGFloat) {
+        textView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: bottom, right: 0)
+    }
+    
+    @objc
+    private func textDidChange() {
+        recalculateHeight()
+    }
+    
+    private func recalculateHeight() {
+        let fixedWidth = textView.frame.size.width
+        guard fixedWidth > 0 else { return }
+        
+        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
+        let targetHeight = min(max(376, newSize.height), maxHeight)
+        
+        textViewHeightConstraint?.update(offset: targetHeight)
+        
+        let needsScroll = newSize.height > maxHeight
+        textView.isScrollEnabled = needsScroll
+        
+        UIView.animate(withDuration: 0.2) {
+            self.layoutIfNeeded()
+        } completion: { _ in
+            if needsScroll, let selectedRange = self.textView.selectedTextRange {
+                let cursorRect = self.textView.caretRect(for: selectedRange.end)
+                self.textView.scrollRectToVisible(cursorRect, animated: false)
+            }
+        }
     }
 }
 
@@ -100,28 +150,7 @@ extension AIMissionInputView: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         placeholderLabel.isHidden = !textView.text.isEmpty
         onTextChanged?(textView.text)
-        
-        let fixedWidth = textView.frame.size.width
-        guard fixedWidth > 0 else { return }
-        
-        let newSize = textView.sizeThatFits(CGSize(width: fixedWidth, height: .greatestFiniteMagnitude))
-        
-        let titleAreaHeight: CGFloat = 68
-        let maxHeight = self.frame.height - titleAreaHeight
-        
-        let targetHeight = min(max(376, newSize.height), maxHeight)
-        
-        textViewHeightConstraint?.update(offset: targetHeight)
-        textView.isScrollEnabled = newSize.height > maxHeight
-        
-        UIView.animate(withDuration: 0.2) {
-            self.layoutIfNeeded()
-        } completion: { _ in
-            if let selectedRange = textView.selectedTextRange {
-                let cursorRect = textView.caretRect(for: selectedRange.end)
-                textView.scrollRectToVisible(cursorRect, animated: true)
-            }
-        }
+        recalculateHeight()
     }
     
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {

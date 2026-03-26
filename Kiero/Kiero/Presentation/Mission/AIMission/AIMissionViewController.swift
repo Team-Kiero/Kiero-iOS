@@ -363,30 +363,18 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
               let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
         
         let keyboardHeight = keyboardFrame.cgRectValue.height
-        let safeAreaBottom = view.safeAreaInsets.bottom
+        let textViewFrameInView = missionInputView.convert(missionInputView.textView.frame, to: view)
+        let textViewMinY = textViewFrameInView.minY
+        let availableHeight = view.frame.height - keyboardHeight - textViewMinY
         
-        let textViewBottom = missionInputView.textView.convert(
-            missionInputView.textView.bounds, to: view
-        ).maxY
-        let visibleHeight = view.frame.height - keyboardHeight
-        let overlap = textViewBottom - visibleHeight
-        
-        let bottomInset = max(0, overlap + 65)
-        let contentInset = UIEdgeInsets(top: 0, left: 0, bottom: bottomInset, right: 0)
-        
-        missionInputView.textView.contentInset = contentInset
-        missionInputView.textView.scrollIndicatorInsets = contentInset
-        
-        if let selectedRange = missionInputView.textView.selectedTextRange {
-            let cursorRect = missionInputView.textView.caretRect(for: selectedRange.end)
-            missionInputView.textView.scrollRectToVisible(cursorRect, animated: true)
-        }
+        missionInputView.updateMaxHeight(min(508, max(376, availableHeight)))
+        missionInputView.setKeyboardInset(bottom: 65)
     }
-    
+
     @objc
     private func keyboardWillHide(notification: NSNotification) {
-        missionInputView.textView.contentInset = .zero
-        missionInputView.textView.scrollIndicatorInsets = .zero
+        missionInputView.setKeyboardInset(bottom: 0)
+        missionInputView.updateMaxHeight(508)
     }
 }
 
