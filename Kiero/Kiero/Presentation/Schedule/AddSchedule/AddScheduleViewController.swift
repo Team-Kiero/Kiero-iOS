@@ -395,7 +395,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let today = calendar.startOfDay(for: now)
                 let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
                 let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
-                let isCurrentWeek = weekDates.first! <= today && weekDates.last! >= today
+                guard let firstDate = weekDates.first, let lastDate = weekDates.last else { return }
+                let isCurrentWeek = firstDate <= today && lastDate >= today
                 let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60
                              + calendar.component(.minute, from: self.currentStartTime ?? now)
                 
