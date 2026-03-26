@@ -19,20 +19,19 @@ final class WishEmptyView: UIView {
     }
     
     private let iconImage = UIImageView().then {
-        $0.contentMode = .scaleAspectFit
-        $0.image = UIImage(resource: .icKidProfile)
-        $0.tintColor = .gray700
+        $0.contentMode = .scaleAspectFill
+        $0.image = UIImage(resource: .icScheduleEmpty)
     }
     
     private let titleLabel = UILabel().then {
-        $0.textColor = .white
+        $0.textColor = .gray500
         $0.numberOfLines = 0
         $0.textAlignment = .center
         $0.setTypo(.title3_16_SB, text: "아직 등록된 보상이 없어!")
     }
     
     private let descriptionLabel = UILabel().then {
-        $0.textColor = .gray500
+        $0.textColor = .gray700
         $0.numberOfLines = 0
         $0.textAlignment = .center
         $0.setTypo(.body4_12_R, text: "부모님과 함께 나만의 보상을 정해볼까?")
@@ -54,14 +53,15 @@ final class WishEmptyView: UIView {
     }
     
     private func setLayout() {
-        stackView.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(76.5)
-        }
         
         iconImage.snp.makeConstraints {
             $0.width.equalTo(69)
             $0.height.equalTo(52)
+        }
+        
+        stackView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.top.equalToSuperview().offset(76.5)
         }
         
         stackView.setCustomSpacing(4, after: titleLabel)
