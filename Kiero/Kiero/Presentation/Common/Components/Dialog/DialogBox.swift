@@ -105,7 +105,7 @@ final class DialogBox: UIView {
             var config = button.configuration
             let isSelected = button.isSelected
             
-            config?.image = isSelected ? UIImage(resource: .btnCheck) : UIImage(resource: .btnUncheck)
+            config?.image = isSelected ? UIImage(resource: .btnCheckFill) : UIImage(resource: .btnUncheck)
             config?.baseForegroundColor = isSelected ? .main : .gray400
             config?.background.backgroundColor = .clear
             button.configuration = config
@@ -118,7 +118,7 @@ final class DialogBox: UIView {
             var config = button.configuration
             let isSelected = button.isSelected
             
-            config?.image = isSelected ? UIImage(resource: .btnCheck) : UIImage(resource: .btnUncheck)
+            config?.image = isSelected ? UIImage(resource: .btnCheckFill) : UIImage(resource: .btnUncheck)
             config?.baseForegroundColor = isSelected ? .main : .gray400
             config?.background.backgroundColor = .clear
             button.configuration = config

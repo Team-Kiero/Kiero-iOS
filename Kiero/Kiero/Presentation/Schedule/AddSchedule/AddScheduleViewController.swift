@@ -32,7 +32,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
         "SCHEDULE3": .schedule3, "SCHEDULE4": .schedule4, "SCHEDULE5": .schedule5
     ]
-
+    
     private let colorMapping: [UIColor: String] = [
         .schedule1: "SCHEDULE1", .schedule2: "SCHEDULE2",
         .schedule3: "SCHEDULE3", .schedule4: "SCHEDULE4", .schedule5: "SCHEDULE5"
@@ -259,20 +259,8 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             let isFireLit = self.viewModel?.isFireLit ?? false
             
             let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-            let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
-            let isCurrentWeek = calendar.isDate(self.baseDate, inSameDayAs: today) || (weekDates.first! <= today && weekDates.last! >= today)
             
-            if isRecurring {
-                let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
-                let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
-                let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
-                
-                if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
-                    Toast.show(message: "일정이 등록되었어요. 오늘은 마감되어 다음부터 적용돼요.")
-                } else {
-                    Toast.show(message: "일정이 등록되었어요.")
-                }
-            } else {
+            if !isRecurring {
                 let hasToday = selectedIndices.contains { index in
                     calendar.isDate(weekDates[index], inSameDayAs: today)
                 }
@@ -288,7 +276,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         return
                     }
                     
-                    let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
                     let scheduleList = viewModel?.scheduleList ?? []
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd"
@@ -318,8 +305,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
                     return
                 }
-                
-                Toast.show(message: "일정이 등록되었어요.")
             }
             
             self.navigationBar.isRightButtonEnabled = false
@@ -404,6 +389,29 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
                 let weekDates = self.baseDate.daysOfWeek
+                
+                let calendar = Calendar.current
+                let now = Date()
+                let today = calendar.startOfDay(for: now)
+                let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+                let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+                let isCurrentWeek = weekDates.first! <= today && weekDates.last! >= today
+                let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60
+                             + calendar.component(.minute, from: self.currentStartTime ?? now)
+                
+                if isRecurring {
+                    let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
+                    let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                    let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
+                    
+                    if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
+                        Toast.show(message: "일정이 등록되었어요. 오늘은 마감되어 다음부터 적용돼요.")
+                    } else {
+                        Toast.show(message: "일정이 등록되었어요.")
+                    }
+                } else {
+                    Toast.show(message: "일정이 등록되었어요.")
+                }
                 
                 if let firstIndex = selectedIndices.first {
                     let targetDate = weekDates[firstIndex]

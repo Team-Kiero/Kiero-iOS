@@ -82,7 +82,7 @@ final class ScheduleCardView: BaseUIView {
             $0.centerX.equalToSuperview()
             $0.leading.greaterThanOrEqualToSuperview().inset(3)
             $0.trailing.lessThanOrEqualToSuperview().inset(3)
-            $0.bottom.lessThanOrEqualToSuperview().inset(2)
+            $0.bottom.lessThanOrEqualToSuperview().inset(2).priority(.low)
         }
         
         topBar.snp.makeConstraints {
