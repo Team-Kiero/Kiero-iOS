@@ -47,7 +47,7 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                     print("쿠폰 목록 조회 실패: \(error)")
                 }
             } receiveValue: { [weak self] rewards in
-                self?.rewards = rewards
+                self?.rewards = rewards.sorted { $0.cost < $1.cost }
             }
             .store(in: &cancellables)
     }
