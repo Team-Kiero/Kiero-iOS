@@ -56,9 +56,7 @@ final class CoinMissionView: BaseUIView {
         $0.register(DailyMissionCell.self, forCellWithReuseIdentifier: DailyMissionCell.identifier)
     }
     
-    private let emptyLabel = UILabel().then {
-        $0.textColor = .gray400
-        $0.setTypo(.title3_16_SB, text: "아직 등록된 미션이 없어!")
+    private let emptyView = CoinMissionEmptyView().then {
         $0.isHidden = true
     }
     
@@ -72,9 +70,9 @@ final class CoinMissionView: BaseUIView {
             characterImg,
             speechField,
             missionLabel,
-            missionCollectionView
+            missionCollectionView,
+            emptyView
         )
-        addSubview(emptyLabel)
     }
     
     override func setLayout() {
@@ -115,8 +113,8 @@ final class CoinMissionView: BaseUIView {
             $0.horizontalEdges.equalToSuperview()
         }
         
-        emptyLabel.snp.makeConstraints {
-            $0.top.equalTo(speechField.snp.bottom).offset(152)
+        emptyView.snp.makeConstraints {
+            $0.top.equalTo(speechField.snp.bottom)
             $0.centerX.equalToSuperview()
         }
     }
@@ -139,6 +137,6 @@ final class CoinMissionView: BaseUIView {
         missionLabel.isHidden = isEmpty
         missionCollectionView.isHidden = isEmpty
         
-        emptyLabel.isHidden = !isEmpty
+        emptyView.isHidden = !isEmpty
     }
 }
