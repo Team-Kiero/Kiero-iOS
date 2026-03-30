@@ -202,7 +202,7 @@ final class DailyJourneyView: BaseUIView {
         }
     }
     
-    func updateData(with data: DailyJourneyModel) {
+    func updateData(with data: DailyJourneyModel, animated: Bool = false) {
         headerView.configure(
             kidName: data.kidName,
             date: data.dateText,
@@ -211,6 +211,12 @@ final class DailyJourneyView: BaseUIView {
             maxFireStoneCount: data.maxFireStoneCount,
             chipType: data.chipItemType
         )
+        
+        if animated {
+            animateTransition(to: data)
+        } else {
+            applyWithoutAnimation(data)
+        }
         
         journeyTimeView.isHidden = !data.isTimeViewActive
         updateMapButtonPosition(hasSchedule: data.isTimeViewActive)
@@ -248,6 +254,113 @@ final class DailyJourneyView: BaseUIView {
             
         case .hidden:
             verifyPhotoButton.isHidden = true
+        }
+    }
+    
+    // MARK: - Animation
+    
+    private func applyWithoutAnimation(_ data: DailyJourneyModel) {
+        journeyTimeView.isHidden = !data.isTimeViewActive
+        updateMapButtonPosition(hasSchedule: data.isTimeViewActive)
+        
+        if data.isTimeViewActive {
+            journeyTimeView.configure(
+                title: "\(data.scheduleOrderText)번째 여정 시간",
+                time: data.journeyTimeText
+            )
+        }
+        
+        let lines = data.bubbleText.components(separatedBy: "\n")
+        speechField.configure(
+            fieldType: data.speechFieldType,
+            name: "꾸비",
+            lines: lines,
+            highlightKeywords: data.highlightKeywords
+        )
+        
+        switch data.actionButtonType {
+        case .verify:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "인증하고 불조각 받기",
+                icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)
+            )
+        case .lightFire:
+            verifyPhotoButton.isHidden = false
+            verifyPhotoButton.configure(
+                title: "마음의 불꽃 피워주기",
+                icon: UIImage(resource: .icFire).withRenderingMode(.alwaysTemplate)
+            )
+        case .hidden:
+            verifyPhotoButton.isHidden = true
+        }
+    }
+    
+    private func animateTransition(to data: DailyJourneyModel) {
+        if data.isTimeViewActive {
+            journeyTimeView.configure(
+                title: "\(data.scheduleOrderText)번째 여정 시간",
+                time: data.journeyTimeText
+            )
+            journeyTimeView.isHidden = false
+            journeyTimeView.alpha = 0
+            journeyTimeView.transform = CGAffineTransform(translationX: 0, y: -20)
+        }
+        
+        UIView.animate(
+            withDuration: 0.3,
+            delay: 0,
+            options: .curveEaseInOut
+        ) { [weak self] in
+            guard let self else { return }
+            
+            if data.isTimeViewActive {
+                self.journeyTimeView.alpha = 1
+                self.journeyTimeView.transform = .identity
+            }
+            
+            self.updateMapButtonPosition(hasSchedule: data.isTimeViewActive)
+            self.layoutIfNeeded()
+        }
+        
+        let lines = data.bubbleText.components(separatedBy: "\n")
+        UIView.transition(
+            with: speechField,
+            duration: 0.3,
+            options: .transitionCrossDissolve
+        ) { [weak self] in
+            self?.speechField.configure(
+                fieldType: data.speechFieldType,
+                name: "꾸비",
+                lines: lines,
+                highlightKeywords: data.highlightKeywords
+            )
+        }
+        
+        let shouldShowButton = data.actionButtonType != .hidden
+        if shouldShowButton {
+            switch data.actionButtonType {
+            case .verify:
+                verifyPhotoButton.configure(
+                    title: "인증하고 불조각 받기",
+                    icon: UIImage(resource: .icCamera).withRenderingMode(.alwaysTemplate)
+                )
+            case .lightFire:
+                verifyPhotoButton.configure(
+                    title: "마음의 불꽃 피워주기",
+                    icon: UIImage(resource: .icFire).withRenderingMode(.alwaysTemplate)
+                )
+            case .hidden:
+                break
+            }
+        }
+        
+        UIView.transition(
+            with: verifyPhotoButton,
+            duration: 0.3,
+            options: .transitionCrossDissolve
+        ) { [weak self] in
+            self?.verifyPhotoButton.isHidden = !shouldShowButton
         }
     }
 }

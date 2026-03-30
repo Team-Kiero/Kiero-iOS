@@ -18,6 +18,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
+    private var previousHasSchedule: Bool?
     
     // MARK: - Life Cycle
     
@@ -70,14 +71,14 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         output.viewData
             .receive(on: DispatchQueue.main)
             .sink { [weak self] viewData in
-                self?.mainView.updateData(with: viewData)
-            }
-            .store(in: &cancellables)
-        
-        output.route
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] route in
-                self?.handleRoute(route)
+                guard let self else { return }
+                
+                let wasEmpty = self.previousHasSchedule == false
+                let nowHasSchedule = viewData.isTimeViewActive
+                let shouldAnimate = wasEmpty && nowHasSchedule
+                
+                self.mainView.updateData(with: viewData, animated: shouldAnimate)
+                self.previousHasSchedule = nowHasSchedule
             }
             .store(in: &cancellables)
     }
