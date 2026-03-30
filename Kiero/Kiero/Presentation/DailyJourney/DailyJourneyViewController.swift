@@ -81,6 +81,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
                 self.previousHasSchedule = nowHasSchedule
             }
             .store(in: &cancellables)
+        
+        output.route
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] route in
+                self?.handleRoute(route)
+            }
+            .store(in: &cancellables)
     }
     
     @objc
