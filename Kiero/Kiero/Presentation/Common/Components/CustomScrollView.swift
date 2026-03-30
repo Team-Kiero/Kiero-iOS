@@ -19,7 +19,7 @@ struct CustomScrollView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
-                        let hasOngoing = data.schedules.contains { $0.isOngoing && $0.status != .COMPLETED }
+                        let hasOngoing = data.schedules.contains { ($0.isOngoing && $0.status != .COMPLETED) || $0.status == .VERIFIED }
                         let isNext: Bool = {
                             guard !hasOngoing,
                                   !(schedule.isOngoing && schedule.status != .COMPLETED),
