@@ -10,6 +10,7 @@ import SwiftUI
 struct CustomScrollView: View {
     let data: DailyJourneyMapData
     let visibleHeight: CGFloat
+    var isFireLit: Bool = false
     
     @State private var scrollOffset: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
@@ -19,22 +20,26 @@ struct CustomScrollView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
+                        let effectiveStatus: String = (isFireLit && schedule.status == .VERIFIED) ? "COMPLETED" : schedule.status.rawValue
+                        let effectiveIsOngoing: Bool = isFireLit ? false : schedule.isOngoing
+
                         let hasOngoing = data.schedules.contains { ($0.isOngoing && $0.status != .COMPLETED) || $0.status == .VERIFIED }
                         let isNext: Bool = {
-                            guard !hasOngoing,
+                            guard !isFireLit,
+                                  !hasOngoing,
                                   !(schedule.isOngoing && schedule.status != .COMPLETED),
                                   schedule.status == .PENDING else { return false }
                             let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || ($0.isOngoing && $0.status != .COMPLETED) }
                             return isFirstPending
                         }()
-                        
+
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
                             startTime: schedule.startTime,
                             endTime: schedule.endTime,
-                            isOngoing: schedule.isOngoing,
+                            isOngoing: effectiveIsOngoing,
                             stoneType: schedule.stoneType.rawValue,
-                            status: schedule.status.rawValue,
+                            status: effectiveStatus,
                             isNext: isNext
                         )
                     }

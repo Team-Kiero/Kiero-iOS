@@ -11,6 +11,7 @@ import UIKit
 final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableObject {
     
     @Published var scheduleData: DailyJourneyMapData?
+    @Published var isFireLit: Bool = false
     @Published var todayDateText: String = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
@@ -80,24 +81,28 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     // MARK: - Network
     
     private func fetchJourneyList() {
-        DailyJourneyMapService.shared.fetchJourneyList()
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    print("❌ DailyJourneyMap fetch 에러: \(error)")
-                }
-            } receiveValue: { [weak self] data in
-                guard let self else { return }
-                if self.shouldUpdateDateOnNextFetch {
-                    self.shouldUpdateDateOnNextFetch = false
-                    let formatter = DateFormatter()
-                    formatter.locale = Locale(identifier: "ko_KR")
-                    formatter.dateFormat = "M월 d일 EEEE"
-                    self.todayDateText = formatter.string(from: Date())
-                }
-                self.scheduleData = data
+        Publishers.Zip(
+            DailyJourneyMapService.shared.fetchJourneyList(),
+            DailyJourneyService.shared.updateDailyJourney()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { completion in
+            if case .failure(let error) = completion {
+                print("❌ DailyJourneyMap fetch 에러: \(error)")
             }
-            .store(in: &cancellables)
+        } receiveValue: { [weak self] (mapData, journeyDTO) in
+            guard let self else { return }
+            if self.shouldUpdateDateOnNextFetch {
+                self.shouldUpdateDateOnNextFetch = false
+                let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: "ko_KR")
+                formatter.dateFormat = "M월 d일 EEEE"
+                self.todayDateText = formatter.string(from: Date())
+            }
+            self.scheduleData = mapData
+            self.isFireLit = journeyDTO.scheduleStatus == .fireLit
+        }
+        .store(in: &cancellables)
     }
     
 }
