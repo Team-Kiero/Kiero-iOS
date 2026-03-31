@@ -114,7 +114,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                 self.todayDateText = formatter.string(from: Date())
             }
             self.scheduleData = mapData
-            self.isFireLit = journeyDTO.scheduleStatus == .fireLit
+            self.isFireLit = journeyDTO.scheduleStatus == .fireLit || journeyDTO.scheduleStatus == .fireNotLit
         }
         .store(in: &cancellables)
     }
