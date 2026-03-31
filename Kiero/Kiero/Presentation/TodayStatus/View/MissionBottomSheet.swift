@@ -14,20 +14,15 @@ struct MissionBottomSheet: View {
 
     let completeMissions: [MissionItem]
     let incompleteMissions: [MissionItem]
+    let onClose: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
 
             NavigationBarWrapper(
-                type: .titleClose(title: "오늘의 미션"),
+                type: .titleClose(title: "오늘 미션"),
                 onRightTap: {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        isPresented = false
-                    }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
-                        NotificationCenter.default.post(name: .hideTabBar, object: false)
-                    }
+                    onClose()
                 }
             )
             .frame(height: 40)
@@ -88,6 +83,7 @@ private extension MissionBottomSheet {
             )
             
             Spacer()
+            Spacer()
         } else {
             ScrollView {
                 LazyVStack(spacing: 4) {
@@ -104,9 +100,9 @@ private extension MissionBottomSheet {
     var currentMissions: [MissionItem] {
         switch selectedTab {
         case .complete:
-            return completeMissions
+            return Array(completeMissions.reversed())
         case .incomplete:
-            return incompleteMissions
+            return Array(incompleteMissions.reversed())
         }
     }
 }
