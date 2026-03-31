@@ -57,25 +57,39 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     // MARK: - SSE
     
     private func startSseConnection() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSseEvent(_:)),
+            name: .sseEventReceived,
+            object: nil
+        )
+        
         Task {
             do {
                 let token = try await TokenRefresher.shared.reissueSseAccessToken()
                 await MainActor.run {
-                    SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
-                        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                                || payload.eventType == "SCHEDULE_MODIFIED"
-                                || payload.eventType == "DATE_CHANGED" else { return }
-                        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
-                        if payload.eventType == "DATE_CHANGED" {
-                            self?.shouldUpdateDateOnNextFetch = true
-                        }
-                        self?.fetchJourneyList()
-                    }
+                    SseStreamManager.shared.startIfNeeded(initialToken: token) { _ in }
                 }
             } catch {
                 print("❌ [DailyJourneyMapVM] SSE 토큰 발급 실패: \(error)")
             }
         }
+    }
+    
+    @objc private func handleSseEvent(_ notification: Notification) {
+        guard let payload = notification.userInfo?["payload"] as? SseEventPayload else { return }
+        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
+                || payload.eventType == "SCHEDULE_MODIFIED"
+                || payload.eventType == "DATE_CHANGED" else { return }
+        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
+        if payload.eventType == "DATE_CHANGED" {
+            shouldUpdateDateOnNextFetch = true
+        }
+        fetchJourneyList()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Network
