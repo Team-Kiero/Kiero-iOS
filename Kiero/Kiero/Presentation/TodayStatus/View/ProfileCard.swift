@@ -18,7 +18,7 @@ struct ProfileCard: View {
                     Text(name)
                         .font(Font(UIFont.head2_20_B))
                         .foregroundColor(.white)
-                    Text("의 오늘의 현황")
+                    Text("의 오늘 현황")
                         .font(Font(UIFont.head3_16_B))
                         .foregroundStyle(.white)
                 }
