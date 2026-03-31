@@ -15,6 +15,12 @@ struct CustomScrollView: View {
     @State private var scrollOffset: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
     
+    private var showBottomGradient: Bool {
+        guard contentHeight > visibleHeight, data.schedules.count >= 6 else { return false }
+        let maxScroll = contentHeight - visibleHeight
+        return -scrollOffset < maxScroll - 1
+    }
+    
     var body: some View {
         ZStack(alignment: .topTrailing) {
             ScrollView(showsIndicators: false) {
@@ -22,7 +28,7 @@ struct CustomScrollView: View {
                     ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
                         let effectiveStatus: String = (isFireLit && schedule.status == .VERIFIED) ? "COMPLETED" : schedule.status.rawValue
                         let effectiveIsOngoing: Bool = isFireLit ? false : schedule.isOngoing
-
+                        
                         let hasOngoing = data.schedules.contains { ($0.isOngoing && $0.status != .COMPLETED) || $0.status == .VERIFIED }
                         let isNext: Bool = {
                             guard !isFireLit,
@@ -32,7 +38,7 @@ struct CustomScrollView: View {
                             let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || ($0.isOngoing && $0.status != .COMPLETED) }
                             return isFirstPending
                         }()
-
+                        
                         DailyJourneyMapStateRowView(
                             name: schedule.name,
                             startTime: schedule.startTime,
@@ -66,7 +72,7 @@ struct CustomScrollView: View {
                 VStack(spacing: 0) {
                     Rectangle().fill(Color.kBlack)
                     LinearGradient(
-                        gradient: Gradient(colors: [Color.kBlack, Color.kBlack.opacity(0)]),
+                        gradient: Gradient(colors: [Color.kBlack, showBottomGradient ? Color.kBlack.opacity(0) : Color.kBlack]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
