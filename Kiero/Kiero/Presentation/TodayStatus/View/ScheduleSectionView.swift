@@ -30,7 +30,6 @@ struct ScheduleSectionView: View {
                         showsCurrentScheduleText: shouldShowCurrentScheduleText(at: index),
                         showsNextScheduleText: shouldShowNextScheduleText(at: index),
                         isHighlighted: highlightedIndex == index,
-                        isLast: index == schedules.count - 1,
                         onTapSchedule: onTapSchedule
                     )
                     .padding(.horizontal, 29)
