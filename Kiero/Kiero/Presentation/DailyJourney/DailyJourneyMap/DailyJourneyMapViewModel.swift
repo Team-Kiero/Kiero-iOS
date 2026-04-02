@@ -77,7 +77,8 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
         }
     }
     
-    @objc private func handleSseEvent(_ notification: Notification) {
+    @objc
+    private func handleSseEvent(_ notification: Notification) {
         guard let payload = notification.userInfo?["payload"] as? SseEventPayload else { return }
         guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
                 || payload.eventType == "SCHEDULE_MODIFIED"
