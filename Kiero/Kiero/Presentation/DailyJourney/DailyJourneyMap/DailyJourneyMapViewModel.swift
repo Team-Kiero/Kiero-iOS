@@ -12,6 +12,7 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     
     @Published var scheduleData: DailyJourneyMapData?
     @Published var isFireLit: Bool = false
+    @Published var isFireNotLit: Bool = false
     @Published var todayDateText: String = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
@@ -114,7 +115,8 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
                 self.todayDateText = formatter.string(from: Date())
             }
             self.scheduleData = mapData
-            self.isFireLit = journeyDTO.scheduleStatus == .fireLit || journeyDTO.scheduleStatus == .fireNotLit
+            self.isFireLit = journeyDTO.scheduleStatus == .fireLit
+            self.isFireNotLit = journeyDTO.scheduleStatus == .fireNotLit
         }
         .store(in: &cancellables)
     }

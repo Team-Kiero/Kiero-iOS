@@ -22,7 +22,7 @@ struct DailyJourneyScheduleTimeView: View {
         if isEnded {
             return .gray500.opacity(0.5)
         }
-        if isOngoing || isNext {
+        if isOngoing || isNext || status == "VERIFIED" {
             return .main
         }
         return .gray500

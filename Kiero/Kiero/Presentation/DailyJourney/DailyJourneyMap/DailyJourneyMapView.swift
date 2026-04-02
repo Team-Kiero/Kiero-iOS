@@ -105,7 +105,7 @@ private extension DailyJourneyMapView {
             .padding(.top, 12)
             .padding(.bottom, 25)
             
-            CustomScrollView(data: data, visibleHeight: visibleHeight, isFireLit: viewModel.isFireLit)
+            CustomScrollView(data: data, visibleHeight: visibleHeight, isFireLit: viewModel.isFireLit, isFireNotLit: viewModel.isFireNotLit)
         }
     }
     

@@ -11,6 +11,7 @@ struct CustomScrollView: View {
     let data: DailyJourneyMapData
     let visibleHeight: CGFloat
     var isFireLit: Bool = false
+    var isFireNotLit: Bool = false
     
     @State private var scrollOffset: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
@@ -26,12 +27,32 @@ struct CustomScrollView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 24) {
                     ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
-                        let effectiveStatus: String = (isFireLit && schedule.status == .VERIFIED) ? "COMPLETED" : schedule.status.rawValue
-                        let effectiveIsOngoing: Bool = isFireLit ? false : schedule.isOngoing
+                        let isTimeNotStarted: Bool = {
+                            guard isFireNotLit, schedule.status == .VERIFIED else { return false }
+                            let timeString = String(schedule.startTime.prefix(5))
+                            let formatter = DateFormatter()
+                            formatter.dateFormat = "HH:mm"
+                            formatter.locale = Locale(identifier: "ko_KR")
+                            guard let startDate = formatter.date(from: timeString) else { return false }
+                            let now = Date()
+                            let calendar = Calendar.current
+                            let startComponents = calendar.dateComponents([.hour, .minute], from: startDate)
+                            let nowComponents = calendar.dateComponents([.hour, .minute], from: now)
+                            let startMinutes = (startComponents.hour ?? 0) * 60 + (startComponents.minute ?? 0)
+                            let nowMinutes = (nowComponents.hour ?? 0) * 60 + (nowComponents.minute ?? 0)
+                            return nowMinutes < startMinutes
+                        }()
+                        
+                        let effectiveStatus: String = {
+                            if isFireLit && schedule.status == .VERIFIED { return "COMPLETED" }
+                            if isFireNotLit && schedule.status == .VERIFIED && !isTimeNotStarted { return "COMPLETED" }
+                            return schedule.status.rawValue
+                        }()
+                        let effectiveIsOngoing: Bool = (isFireLit || isFireNotLit) ? false : schedule.isOngoing
                         
                         let hasOngoing = data.schedules.contains { ($0.isOngoing && $0.status != .COMPLETED) || $0.status == .VERIFIED }
                         let isNext: Bool = {
-                            guard !isFireLit,
+                            guard !isFireLit, !isFireNotLit,
                                   !hasOngoing,
                                   !(schedule.isOngoing && schedule.status != .COMPLETED),
                                   schedule.status == .PENDING else { return false }
