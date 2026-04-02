@@ -114,7 +114,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
             let viewModel = GiveFireStoneViewModel(count: stoneCount)
             let vc = GiveFireStoneViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
-            
+            vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
