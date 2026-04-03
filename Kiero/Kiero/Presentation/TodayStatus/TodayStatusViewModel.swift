@@ -5,7 +5,6 @@
 //  Created by 신혜연 on 3/2/26.
 //
 
-
 import Combine
 import Foundation
 
@@ -33,10 +32,6 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
         let targetId = childId ?? latestChildId
         
-        print("📥 [TodayStatusVM] fetchTodayStatus called")
-        print("📥 [TodayStatusVM] latestChildId:", latestChildId)
-        print("📥 [TodayStatusVM] targetId:", targetId)
-        
         todayDate = Date().toFullDateString
         
         guard targetId != 0 else {
@@ -58,8 +53,6 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
                 }
             } receiveValue: { [weak self] dto in
                 guard let self else { return }
-                
-                print("📦 [TodayStatusVM] receiveValue - schedules count:", dto.schedules.count)
                 
                 self.completeMissions = dto.completeMissions.map { $0.toItem() }
                 self.incompleteMissions = dto.incompleteMissions.map { $0.toItem() }
@@ -140,10 +133,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
                             
                             print("📩 [TodayStatusVM] SSE EVENT:", payload.eventType, payload.childId as Any)
                             
-                            let shouldRefresh = self.shouldRefreshTodayStatus(for: payload)
-                            print("🧪 [TodayStatusVM] shouldRefresh:", shouldRefresh)
-                            
-                            if shouldRefresh {
+                            if self.shouldRefreshTodayStatus(for: payload) {
                                 DispatchQueue.main.async {
                                     self.scheduleRefresh()
                                 }
@@ -170,35 +160,27 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {
         let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
         
-        print("🧪 [TodayStatusVM] payload.childId:", payload.childId as Any)
-        print("🧪 [TodayStatusVM] latestChildId:", latestChildId)
-        
         if let childId = payload.childId,
            Int(childId) != latestChildId {
-            print("⛔️ [TodayStatusVM] childId mismatch")
             return false
         }
         
         switch payload.eventType {
         case "FEED_ITEM_CREATED",
-             "SCHEDULE_STATUS_UPDATED",
-             "DATE_CHANGED",
-             "TODAY_MISSION_COMPLETED",
-             "FIRE_LIT":
-            print("✅ [TodayStatusVM] refresh allowed")
+            "SCHEDULE_STATUS_UPDATED",
+            "DATE_CHANGED",
+            "TODAY_MISSION_COMPLETED",
+            "FIRE_LIT":
             return true
         default:
-            print("⛔️ [TodayStatusVM] unsupported event")
             return false
         }
     }
     
     private func scheduleRefresh() {
         refreshWorkItem?.cancel()
-        print("🔄 [TodayStatusVM] scheduleRefresh called")
         
         let workItem = DispatchWorkItem { [weak self] in
-            print("🚀 [TodayStatusVM] scheduleRefresh -> fetchTodayStatus")
             self?.fetchTodayStatus()
         }
         
