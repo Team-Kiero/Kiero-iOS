@@ -317,8 +317,8 @@ final class DialogBox: UIView {
             if isRecurring {
                 optionStack.isHidden = false
                 optionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-                onlyThisOption.setConfigurationTypo(.body4_12_R, text: " 이번 일정만 포함")
-                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 일정 포함")
+                onlyThisOption.setConfigurationTypo(.body4_12_R, text: " 이번 주차만 포함")
+                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 주차 포함")
                 onlyThisOption.isSelected = true
                 followingOption.isSelected = false
                 optionStack.addArrangedSubviews(onlyThisOption, followingOption)
