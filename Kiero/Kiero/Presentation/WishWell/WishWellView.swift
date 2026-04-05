@@ -14,9 +14,11 @@ final class WishWellView: BaseUIView {
     
     // MARK: - UI Component
     
-    private let emptyView = WishEmptyView().then {
-        $0.isHidden = true
-    }
+    private let wishEmptyView = ChildEmptyView(
+        title: "아직 등록된 보상이 없어!",
+        description: "부모님과 함께 나만의 보상을 정해볼까?",
+        topOffset: 76.5
+    )
     
     private let iconImage = UIImageView().then {
         $0.contentMode = .scaleAspectFit
@@ -84,7 +86,7 @@ final class WishWellView: BaseUIView {
     // MARK: - Setup Method
     
     override func setUI() {
-        addSubviews(nameStack, coinChip, container, line, wishCollectionView, emptyView)
+        addSubviews(nameStack, coinChip, container, line, wishCollectionView, wishEmptyView)
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         wishWellStack.addArrangedSubviews(wishWellIcon, wishWellLabel)
         totalStack.addArrangedSubviews(wishWellStack, wishMessage)
@@ -134,11 +136,10 @@ final class WishWellView: BaseUIView {
             $0.bottom.equalToSuperview().inset(100)
         }
         
-        emptyView.snp.makeConstraints {
-            $0.top.equalTo(line.snp.bottom)
-            $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(100)
-        }
+        wishEmptyView.snp.makeConstraints {
+                    $0.top.equalTo(line.snp.bottom)
+                    $0.horizontalEdges.bottom.equalToSuperview()
+                }
     }
     
     // MARK: - Configuration
@@ -152,10 +153,10 @@ final class WishWellView: BaseUIView {
     
     func updateEmptyState(isEmpty: Bool) {
         if isEmpty {
-            emptyView.isHidden = false
+            wishEmptyView.isHidden = false
             wishCollectionView.isHidden = true
         } else {
-            emptyView.isHidden = true
+            wishEmptyView.isHidden = true
             wishCollectionView.isHidden = false
         }
     }
