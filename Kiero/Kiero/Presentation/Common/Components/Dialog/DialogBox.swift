@@ -20,7 +20,6 @@ final class DialogBox: UIView {
         case wishWell(title: String, coin: String)
         case nextJourney
         case deleteSchedule(title: String, isRecurring: Bool)
-        case editSchedule(title: String, isRecurring: Bool)
         case deleteReward(title: String, coin: String)
         case deleteMission(title: String, coin: String)
         
@@ -34,7 +33,7 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
-            case .deleteSchedule(let title, _), .editSchedule(let title, _):
+            case .deleteSchedule(let title, _):
                 return title
             case .deleteReward(let title, _):
                 return title
@@ -55,8 +54,6 @@ final class DialogBox: UIView {
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
             case .deleteSchedule, .deleteReward, .deleteMission:
                 return "삭제하시겠습니까?"
-            case .editSchedule:
-                return "저장하시겠습니까?"
             }
         }
         
@@ -317,22 +314,6 @@ final class DialogBox: UIView {
         
         switch state {
         case .deleteSchedule(_, let isRecurring):
-            if isRecurring {
-                optionStack.isHidden = false
-                optionStack.distribution = .equalSpacing
-                
-                let spacer = UIView()
-                followingOption.setConfigurationTypo(.body4_12_R, text: " 이후 반복되는 일정 포함")
-                followingOption.isSelected = true
-                
-                optionStack.addArrangedSubviews(spacer, followingOption)
-                contentStack.setCustomSpacing(12, after: messageLabel)
-            } else {
-                optionStack.isHidden = true
-                contentStack.setCustomSpacing(0, after: messageLabel)
-            }
-            
-        case .editSchedule(_, let isRecurring):
             if isRecurring {
                 optionStack.isHidden = false
                 optionStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
