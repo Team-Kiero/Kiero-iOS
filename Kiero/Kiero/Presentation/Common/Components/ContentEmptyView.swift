@@ -1,5 +1,5 @@
 //
-//  ChildEmptyView.swift
+//  ContentEmptyView.swift
 //  Kiero
 //
 //  Created by 정윤아 on 4/6/26.
@@ -10,7 +10,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ChildEmptyView: BaseUIView {
+final class ContentEmptyView: BaseUIView {
     
     // MARK: - UI Components
     
