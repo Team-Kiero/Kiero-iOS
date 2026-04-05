@@ -1,8 +1,8 @@
 //
-//  CoinMissionEmptyView.swift
+//  ChildEmptyView.swift
 //  Kiero
 //
-//  Created by 정윤아 on 3/4/26.
+//  Created by 정윤아 on 4/6/26.
 //
 
 import UIKit
@@ -10,7 +10,9 @@ import UIKit
 import SnapKit
 import Then
 
-final class CoinMissionEmptyView: UIView {
+final class ChildEmptyView: BaseUIView {
+    
+    // MARK: - UI Components
     
     private let stackView = UIStackView().then {
         $0.axis = .vertical
@@ -27,33 +29,39 @@ final class CoinMissionEmptyView: UIView {
         $0.textColor = .gray500
         $0.numberOfLines = 0
         $0.textAlignment = .center
-        $0.setTypo(.title3_16_SB, text: "아직 등록된 미션이 없어!")
     }
     
     private let descriptionLabel = UILabel().then {
         $0.textColor = .gray700
         $0.numberOfLines = 0
         $0.textAlignment = .center
-        $0.setTypo(.body4_12_R, text: "부모님과 함께 나만의 미션을 정해볼까?")
     }
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setUI()
-        setLayout()
+    // MARK: - Init
+    
+    init(title: String, description: String, topOffset: CGFloat = 100) {
+        super.init(frame: .zero)
+        
+        configure(title: title, description: description)
+        updateTopOffset(topOffset)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setUI() {
+    // MARK: - Setup Method
+    
+    override func setUI() {
         addSubview(stackView)
-        stackView.addArrangedSubviews(iconImage, titleLabel, descriptionLabel)
+        stackView.addArrangedSubviews(
+            iconImage,
+            titleLabel,
+            descriptionLabel
+        )
     }
     
-    private func setLayout() {
-        
+    override func setLayout() {
         iconImage.snp.makeConstraints {
             $0.width.equalTo(69)
             $0.height.equalTo(52)
@@ -65,5 +73,18 @@ final class CoinMissionEmptyView: UIView {
         }
         
         stackView.setCustomSpacing(4, after: titleLabel)
+    }
+    
+    // MARK: - Methods
+    
+    private func configure(title: String, description: String) {
+        titleLabel.setTypo(.title3_16_SB, text: title)
+        descriptionLabel.setTypo(.body4_12_R, text: description)
+    }
+    
+    private func updateTopOffset(_ offset: CGFloat) {
+        stackView.snp.updateConstraints {
+            $0.top.equalToSuperview().offset(offset)
+        }
     }
 }
