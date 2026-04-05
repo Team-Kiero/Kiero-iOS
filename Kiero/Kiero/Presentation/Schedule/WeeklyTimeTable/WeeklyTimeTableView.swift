@@ -80,6 +80,9 @@ final class WeeklyTimeTableView: BaseUIView {
         gridBackgroundView.addSubviews(emptyView, cardContainerView)
         emptyView.addSubviews(emptyImageView, emptyTitleLabel, emptySubLabel)
         
+        scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 190, right: 0)
+        scrollView.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 190, right: 0)
+        
         self.daysDates = Date().daysOfWeek
         updateHeaderLabels()
         setTimeLabel()
@@ -96,7 +99,7 @@ final class WeeklyTimeTableView: BaseUIView {
         scrollView.snp.makeConstraints {
             $0.top.equalTo(headerStackView.snp.bottom)
             $0.horizontalEdges.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(100)
+            $0.bottom.equalToSuperview()
         }
         
         let totalGridHeight = CGFloat(endHour - startHour + 1) * hourHeight
@@ -104,7 +107,7 @@ final class WeeklyTimeTableView: BaseUIView {
         gridContainer.snp.makeConstraints {
             $0.edges.equalTo(scrollView.contentLayoutGuide)
             $0.width.equalTo(scrollView.frameLayoutGuide)
-            $0.height.equalTo(totalGridHeight + (verticalPadding * 2) + 20)
+            $0.height.equalTo(totalGridHeight + (verticalPadding * 2))
         }
         
         gridBackgroundView.snp.makeConstraints {

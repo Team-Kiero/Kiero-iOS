@@ -51,6 +51,9 @@ struct RewardView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.top, 66)
+                            
+                            Spacer()
+                                .frame(height: 153)
                         }
                     }
                 }

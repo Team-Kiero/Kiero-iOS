@@ -29,8 +29,8 @@ final class MissionView: BaseUIView {
         $0.dataSource = self
         $0.delegate = self
         $0.sectionHeaderTopPadding = 0
-        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
-        $0.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
+        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 172, right: 0)
+        $0.scrollIndicatorInsets = UIEdgeInsets(top: 0, left: 0, bottom: 172, right: 0)
         $0.contentInsetAdjustmentBehavior = .never
     }
     
