@@ -41,7 +41,6 @@ struct MissionBottomSheetContainerView: View {
                     
                     MissionBottomSheet(
                         selectedTab: $selectedTab,
-                        isPresented: .constant(true),
                         completeMissions: completeMissions,
                         incompleteMissions: incompleteMissions,
                         onClose: {

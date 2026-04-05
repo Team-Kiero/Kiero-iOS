@@ -10,7 +10,6 @@ import SwiftUI
 struct MissionBottomSheet: View {
 
     @Binding var selectedTab: MissionTab
-    @Binding var isPresented: Bool
 
     let completeMissions: [MissionItem]
     let incompleteMissions: [MissionItem]
