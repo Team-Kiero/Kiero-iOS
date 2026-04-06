@@ -61,6 +61,7 @@ private extension TodayStatusView {
                 .padding(.top, 18)
                 .padding(.bottom, 100)
             }
+            .scrollIndicators(.hidden)
         }
         .onChange(of: selectedSchedule != nil) { value in
             NotificationCenter.default.post(name: .dimNavigationBar, object: value)

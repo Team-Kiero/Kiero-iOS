@@ -92,6 +92,7 @@ private extension MissionBottomSheet {
                 }
                 .padding(.horizontal, 13)
             }
+            .scrollIndicators(.hidden)
             .frame(maxHeight: .infinity)
         }
     }
