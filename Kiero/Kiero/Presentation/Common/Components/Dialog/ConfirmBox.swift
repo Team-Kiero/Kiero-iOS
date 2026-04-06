@@ -173,6 +173,7 @@ final class ConfirmBox: UIView {
     private func didTapDim(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: gesture.view)
         if !self.frame.contains(location) {
+            didTapButton()
             dismiss()
         }
     }
