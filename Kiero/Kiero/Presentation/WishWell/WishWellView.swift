@@ -14,7 +14,7 @@ final class WishWellView: BaseUIView {
     
     // MARK: - UI Component
     
-    private let wishEmptyView = ChildEmptyView(
+    private let wishEmptyView = ContentEmptyView(
         title: "아직 등록된 보상이 없어!",
         description: "부모님과 함께 나만의 보상을 정해볼까?",
         topOffset: 76.5
