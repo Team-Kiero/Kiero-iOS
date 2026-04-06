@@ -46,9 +46,9 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
             .sink { completion in
                 switch completion {
                 case .finished:
-                    print("오늘 현황 조회 성공")
+                    print("✅ [TodayStatusVM] 오늘 현황 조회 성공")
                 case .failure(let error):
-                    print("오늘 현황 조회 실패: \(error)")
+                    print("❌ [TodayStatusVM] 오늘 현황 조회 실패: \(error)")
                     Toast.show(message: error.toastMessage)
                 }
             } receiveValue: { [weak self] dto in
@@ -167,10 +167,10 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         
         switch payload.eventType {
         case "FEED_ITEM_CREATED",
-             "SCHEDULE_STATUS_UPDATED",
-             "DATE_CHANGED",
-             "TODAY_MISSION_COMPLETED",
-             "FIRE_LIT":
+            "SCHEDULE_STATUS_UPDATED",
+            "DATE_CHANGED",
+            "TODAY_MISSION_COMPLETED",
+            "FIRE_LIT":
             return true
         default:
             return false

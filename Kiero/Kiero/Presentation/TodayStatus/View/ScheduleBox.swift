@@ -21,7 +21,6 @@ struct ScheduleBox: View {
     let showsCurrentScheduleText: Bool
     let showsNextScheduleText: Bool
     let isHighlighted: Bool
-    let isLast: Bool
     let onTapSchedule: (ScheduleItem) -> Void
     
     var body: some View {
@@ -69,15 +68,16 @@ struct ScheduleBox: View {
 }
 
 private extension ScheduleBox {
+    
     var timeColor: Color {
         if isHighlighted {
             return .main
         } else {
             switch schedule.status {
-            case .complete, .failed, .skipped, .verified:
-                return .gray400
             case .pending:
                 return .gray800
+            case .complete, .failed, .skipped, .verified:
+                return .gray400
             }
         }
     }
@@ -102,9 +102,11 @@ private extension ScheduleBox {
     var dotGlowColor: Color {
         if isFireLitToday {
             return .schedule1
-        } else if schedule.isNowSchedule {
+        }
+        else if isHighlighted {
             return .main
-        } else {
+        }
+        else {
             switch schedule.status {
             case .verified:
                 return .main
@@ -125,43 +127,27 @@ private extension ScheduleBox {
             )
         }
         else {
-            if isLast {
-                return LinearGradient(
-                    colors: [.clear, .clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            }
-            else if schedule.isNowSchedule {
+            switch schedule.status {
+            case .complete, .failed, .skipped:
                 return LinearGradient(
                     colors: [.gray400, .gray600],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-            }
-            else {
-                switch schedule.status {
-                case .complete, .failed, .skipped:
-                    return LinearGradient(
-                        colors: [.gray400, .gray600],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    
-                case .verified:
-                    return LinearGradient(
-                        colors: [.gray400, .gray800],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    
-                case .pending:
-                    return LinearGradient(
-                        colors: [.gray800, .kBlack],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                }
+                
+            case .verified:
+                return LinearGradient(
+                    colors: [.gray400, .gray800],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                
+            case .pending:
+                return LinearGradient(
+                    colors: [.gray800, .kBlack],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
             }
         }
     }

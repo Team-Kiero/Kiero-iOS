@@ -14,7 +14,20 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     
     init(viewModel: TodayStatusViewModel) {
         self.viewModel = viewModel
-        super.init(rootView: TodayStatusView(viewModel: viewModel))
+        
+        super.init(
+            rootView: TodayStatusView(
+                viewModel: viewModel,
+                onMissionSheetRequested: { _ in }
+            )
+        )
+        
+        self.rootView = TodayStatusView(
+            viewModel: viewModel,
+            onMissionSheetRequested: { [weak self] selectedTab in
+                self?.presentMissionBottomSheet(selectedTab: selectedTab)
+            }
+        )
     }
     
     @MainActor @preconcurrency required dynamic init?(coder aDecoder: NSCoder) {
@@ -35,6 +48,26 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         viewModel.unbindSSE()
+    }
+}
+
+private extension TodayStatusHostingController {
+    func presentMissionBottomSheet(selectedTab: MissionTab) {
+        NotificationCenter.default.post(name: .hideTabBar, object: true)
+        NotificationCenter.default.post(name: .dimNavigationBar, object: true)
+        
+        let sheetView = MissionBottomSheetContainerView(
+            selectedTab: selectedTab,
+            completeMissions: viewModel.completeMissions,
+            incompleteMissions: viewModel.incompleteMissions
+        )
+        
+        let vc = UIHostingController(rootView: sheetView)
+        vc.view.backgroundColor = .clear
+        vc.modalPresentationStyle = .overFullScreen
+        vc.modalTransitionStyle = .crossDissolve
+        
+        present(vc, animated: false)
     }
 }
 
