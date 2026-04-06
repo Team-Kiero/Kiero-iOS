@@ -49,14 +49,15 @@ struct RewardView: View {
                                         }
                                 }
                             }
-                            .padding(.horizontal, 16)
-                            .padding(.top, 66)
                             
                             Spacer()
                                 .frame(height: 153)
                         }
+                        .scrollIndicators(.hidden)
                     }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 66)
                 
                 VStack(spacing: 0) {
                     Spacer()
