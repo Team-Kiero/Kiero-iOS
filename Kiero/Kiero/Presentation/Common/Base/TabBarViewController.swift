@@ -135,7 +135,7 @@ private extension TabBarViewController {
             }
             
             customTabBar.setTabItems(
-                titles: ["오늘의 현황", "일정", "미션", "보상", "마이페이지"],
+                titles: ["오늘 현황", "일정", "미션", "보상", "마이페이지"],
                 icons: [.icMap, .icCalenderFill, .icMission, .icStar, .icProfile]
             )
         } else {
