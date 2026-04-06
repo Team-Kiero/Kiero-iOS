@@ -220,7 +220,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
                 guard let self = self else { return }
-                Toast.show(message: "미션이 등록되었어요.")
+                Toast.show(message: "미션이 등록되었어요.", bottomInset: 88)
                 
                 NotificationCenter.default.post(name: .hideTabBar, object: false)
                 NotificationCenter.default.post(name: .hideNavigationBar, object: false)

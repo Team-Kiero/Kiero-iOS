@@ -35,7 +35,11 @@ final class AddScheduleViewModel: BaseViewModel {
                     
                     switch error {
                     case .codeError(let message):
-                        self.errorMessage.send(message)
+                        if message.contains("불 피우기") {
+                            self.errorMessage.send("오늘 일정이 마감되어, 일정을 추가할 수 없어요.")
+                        } else {
+                            self.errorMessage.send(message)
+                        }
                     case .clientError(let code) where code == 400:
                         self.errorMessage.send("기존의 일정과 시간이 중복됩니다.")
                     default:

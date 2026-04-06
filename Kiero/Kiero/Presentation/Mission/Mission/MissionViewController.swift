@@ -44,8 +44,7 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     override func setLayout() {
         emptyView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(62)
-            $0.horizontalEdges.bottom.equalToSuperview()
+            $0.center.equalToSuperview()
         }
         
         missionView.snp.makeConstraints {

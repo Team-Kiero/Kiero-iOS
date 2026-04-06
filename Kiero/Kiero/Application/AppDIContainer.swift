@@ -83,15 +83,22 @@ extension AppDIContainer {
     }
     
     func makeAddScheduleViewController() -> UIViewController {
+        return makeAddScheduleViewController(isFireLit: false, scheduleList: [])
+    }
+    
+    func makeAddScheduleViewController(isFireLit: Bool, scheduleList: [Schedule]) -> AddScheduleViewController {
         let service = AddScheduleService()
         let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
         
         let viewModel = AddScheduleViewModel(service: service, childId: selectedChildId)
+        viewModel.isFireLit = isFireLit
+        viewModel.scheduleList = scheduleList
+        
         return AddScheduleViewController(viewModel: viewModel, diContainer: self)
     }
     
     func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController {
-        let vc = makeAddScheduleViewController() as! AddScheduleViewController
+        let vc = makeAddScheduleViewController(isFireLit: false, scheduleList: [])
         vc.isEditMode = true
         vc.editingSchedule = schedule
         return vc
