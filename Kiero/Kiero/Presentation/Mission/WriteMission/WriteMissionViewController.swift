@@ -143,7 +143,7 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
                 self?.isRequesting = false
-                Toast.show(message: message)
+                Toast.show(message: message, bottomInset: 88)
             }
             .store(in: &cancellables)
     }

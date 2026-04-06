@@ -226,13 +226,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             guard let self = self else { return }
             
             guard let title = self.titleTextField.text, !title.trimmingCharacters(in: .whitespaces).isEmpty else {
-                Toast.show(message: "일정 이름을 입력해주세요.")
+                Toast.show(message: "일정 이름을 입력해주세요.", bottomInset: 88)
                 return
             }
             
             let selectedIndices = self.weekdaySelectionView.selectedIndices.sorted()
             if selectedIndices.isEmpty {
-                Toast.show(message: "요일을 선택해주세요.")
+                Toast.show(message: "요일을 선택해주세요.", bottomInset: 88)
                 return
             }
             
@@ -242,7 +242,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             let endMin = Calendar.current.component(.hour, from: end) * 60 + Calendar.current.component(.minute, from: end)
             
             if startMin >= endMin {
-                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.")
+                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.", bottomInset: 88)
                 return
             }
             
@@ -266,17 +266,17 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 if hasToday {
                     if startMin < currentTimeMin {
-                        Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.")
+                        Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 88)
                         return
                     }
                     
                     if isFireLit {
-                        Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.")
+                        Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.", bottomInset: 88)
                         return
                     }
                     
                     if hasActedLaterSchedule(endMin: endMin, now: now) {
-                        Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.")
+                        Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.", bottomInset: 88)
                         return
                     }
                 }
@@ -286,7 +286,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 }
                 
                 if hasPastDate {
-                    Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.")
+                    Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 88)
                     return
                 }
             }
@@ -402,12 +402,12 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     )
                     
                     if shouldShowWarning {
-                        Toast.show(message: "일정 등록이 마감된 날이 있어, 오늘 이후부터 적용돼요.")
+                        Toast.show(message: "일정 등록이 마감된 날이 있어, 오늘 이후부터 적용돼요.", bottomInset: 88)
                     } else {
-                        Toast.show(message: "일정이 등록되었어요.")
+                        Toast.show(message: "일정이 등록되었어요.", bottomInset: 88)
                     }
                 } else {
-                    Toast.show(message: "일정이 등록되었어요.")
+                    Toast.show(message: "일정이 등록되었어요.", bottomInset: 88)
                 }
                 
                 if isRecurring && shouldShowWarning {
@@ -455,7 +455,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         viewModel.errorMessage
             .receive(on: DispatchQueue.main)
             .sink { [weak self] message in
-                Toast.show(message: message)
+                Toast.show(message: message, bottomInset: 88)
                 self?.navigationBar.isRightButtonEnabled = true
             }
             .store(in: &cancellables)
@@ -511,7 +511,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         if newDateWeekStart <= calendar.startOfDay(for: maxDate) {
             self.baseDate = newDate
         } else {
-            Toast.show(message: "현재 날짜 기준 12주 이내만 선택 가능합니다.")
+            Toast.show(message: "현재 날짜 기준 12주 이내만 선택 가능합니다.", bottomInset: 88)
         }
     }
     
@@ -725,7 +725,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let isSameColor = colorCode == schedule.scheduleColor
 
         if isSameName && isSameStart && isSameEnd && isSameColor {
-            Toast.show(message: "변경사항이 없어요.")
+            Toast.show(message: "변경사항이 없어요.", bottomInset: 88)
             return
         }
         
@@ -745,7 +745,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
             
             if hasPastDate {
-                Toast.show(message: "과거 날짜에는 일정을 등록할 수 없습니다.")
+                Toast.show(message: "과거 날짜에는 일정을 등록할 수 없습니다.", bottomInset: 88)
                 return
             }
         }
