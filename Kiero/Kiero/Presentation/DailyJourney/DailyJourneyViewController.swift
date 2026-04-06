@@ -18,6 +18,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
+    private var previousHasSchedule: Bool?
     
     // MARK: - Life Cycle
     
@@ -70,7 +71,14 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         output.viewData
             .receive(on: DispatchQueue.main)
             .sink { [weak self] viewData in
-                self?.mainView.updateData(with: viewData)
+                guard let self else { return }
+                
+                let wasEmpty = self.previousHasSchedule == false
+                let nowHasSchedule = viewData.isTimeViewActive
+                let shouldAnimate = wasEmpty && nowHasSchedule
+                
+                self.mainView.updateData(with: viewData, animated: shouldAnimate)
+                self.previousHasSchedule = nowHasSchedule
             }
             .store(in: &cancellables)
         
@@ -106,7 +114,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
             let viewModel = GiveFireStoneViewModel(count: stoneCount)
             let vc = GiveFireStoneViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
-            
+            vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }

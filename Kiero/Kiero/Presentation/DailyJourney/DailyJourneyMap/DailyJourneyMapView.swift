@@ -86,6 +86,7 @@ struct DailyJourneyMapView: View {
 private extension DailyJourneyMapView {
     func scheduleListContent(data: DailyJourneyMapData, scrollAreaHeight: CGFloat) -> some View {
         let bannerHeight: CGFloat = 12 + 36
+        let visibleHeight = scrollAreaHeight - 44 - bannerHeight
         
         return VStack(spacing: 0) {
             HStack {
@@ -104,34 +105,7 @@ private extension DailyJourneyMapView {
             .padding(.top, 12)
             .padding(.bottom, 25)
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    ForEach(Array(data.schedules.enumerated()), id: \.element.id) { index, schedule in
-                        let hasOngoing = data.schedules.contains { $0.isOngoing && $0.status != .COMPLETED }
-                        let isNext: Bool = {
-                            guard !hasOngoing,
-                                  !(schedule.isOngoing && schedule.status != .COMPLETED),
-                                  schedule.status == .PENDING else { return false }
-                            let isFirstPending = data.schedules.prefix(index).allSatisfy { $0.status != .PENDING || ($0.isOngoing && $0.status != .COMPLETED) }
-                            return isFirstPending
-                        }()
-                        
-                        DailyJourneyMapStateRowView(
-                            name: schedule.name,
-                            startTime: schedule.startTime,
-                            endTime: schedule.endTime,
-                            isOngoing: schedule.isOngoing,
-                            stoneType: schedule.stoneType.rawValue,
-                            status: schedule.status.rawValue,
-                            isNext: isNext
-                        )
-                    }
-                }
-                .padding(.top, 15)
-                .padding(.bottom, 40)
-            }
-            .frame(height: scrollAreaHeight - 44 - bannerHeight)
-            .scrollDisabled(data.schedules.count < 6)
+            CustomScrollView(data: data, visibleHeight: visibleHeight, isFireLit: viewModel.isFireLit, isFireNotLit: viewModel.isFireNotLit)
         }
     }
     

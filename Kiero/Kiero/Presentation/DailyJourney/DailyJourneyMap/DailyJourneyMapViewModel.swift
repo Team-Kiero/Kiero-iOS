@@ -11,6 +11,8 @@ import UIKit
 final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableObject {
     
     @Published var scheduleData: DailyJourneyMapData?
+    @Published var isFireLit: Bool = false
+    @Published var isFireNotLit: Bool = false
     @Published var todayDateText: String = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
@@ -56,20 +58,18 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
     // MARK: - SSE
     
     private func startSseConnection() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSseEvent(_:)),
+            name: .sseEventReceived,
+            object: nil
+        )
+        
         Task {
             do {
                 let token = try await TokenRefresher.shared.reissueSseAccessToken()
                 await MainActor.run {
-                    SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
-                        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                                || payload.eventType == "SCHEDULE_MODIFIED"
-                                || payload.eventType == "DATE_CHANGED" else { return }
-                        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
-                        if payload.eventType == "DATE_CHANGED" {
-                            self?.shouldUpdateDateOnNextFetch = true
-                        }
-                        self?.fetchJourneyList()
-                    }
+                    SseStreamManager.shared.startIfNeeded(initialToken: token) { _ in }
                 }
             } catch {
                 print("❌ [DailyJourneyMapVM] SSE 토큰 발급 실패: \(error)")
@@ -77,27 +77,49 @@ final class DailyJourneyMapViewModel: BaseViewModel, ViewModelType, ObservableOb
         }
     }
     
+    @objc
+    private func handleSseEvent(_ notification: Notification) {
+        guard let payload = notification.userInfo?["payload"] as? SseEventPayload else { return }
+        guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
+                || payload.eventType == "SCHEDULE_MODIFIED"
+                || payload.eventType == "DATE_CHANGED" else { return }
+        print("📩 [DailyJourneyMapVM] SSE Event: \(payload.eventType)")
+        if payload.eventType == "DATE_CHANGED" {
+            shouldUpdateDateOnNextFetch = true
+        }
+        fetchJourneyList()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     // MARK: - Network
     
     private func fetchJourneyList() {
-        DailyJourneyMapService.shared.fetchJourneyList()
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    print("❌ DailyJourneyMap fetch 에러: \(error)")
-                }
-            } receiveValue: { [weak self] data in
-                guard let self else { return }
-                if self.shouldUpdateDateOnNextFetch {
-                    self.shouldUpdateDateOnNextFetch = false
-                    let formatter = DateFormatter()
-                    formatter.locale = Locale(identifier: "ko_KR")
-                    formatter.dateFormat = "M월 d일 EEEE"
-                    self.todayDateText = formatter.string(from: Date())
-                }
-                self.scheduleData = data
+        Publishers.Zip(
+            DailyJourneyMapService.shared.fetchJourneyList(),
+            DailyJourneyService.shared.updateDailyJourney()
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { completion in
+            if case .failure(let error) = completion {
+                print("❌ DailyJourneyMap fetch 에러: \(error)")
             }
-            .store(in: &cancellables)
+        } receiveValue: { [weak self] (mapData, journeyDTO) in
+            guard let self else { return }
+            if self.shouldUpdateDateOnNextFetch {
+                self.shouldUpdateDateOnNextFetch = false
+                let formatter = DateFormatter()
+                formatter.locale = Locale(identifier: "ko_KR")
+                formatter.dateFormat = "M월 d일 EEEE"
+                self.todayDateText = formatter.string(from: Date())
+            }
+            self.scheduleData = mapData
+            self.isFireLit = journeyDTO.scheduleStatus == .fireLit
+            self.isFireNotLit = journeyDTO.scheduleStatus == .fireNotLit
+        }
+        .store(in: &cancellables)
     }
     
 }

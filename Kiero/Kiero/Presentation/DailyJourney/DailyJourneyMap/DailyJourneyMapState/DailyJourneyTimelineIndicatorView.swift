@@ -20,18 +20,18 @@ struct DailyJourneyTimelineIndicatorView: View {
         !isEnded
     }
     
+    private var isHighlighted: Bool {
+        !isEnded && (isOngoing || isNext || status == "VERIFIED")
+    }
+
     private var iconColor: Color {
-        if isEnded {
-            return .white.opacity(0.5)
-        }
-        if isOngoing || isNext {
-            return .main
-        }
+        if isEnded { return .white.opacity(0.5) }
+        if isHighlighted { return .main }
         return .white
     }
-    
+
     private var hasGlow: Bool {
-        !isEnded && (isOngoing || isNext)
+        isHighlighted
     }
     
     var body: some View {
