@@ -56,7 +56,7 @@ final class CoinMissionView: BaseUIView {
         $0.register(DailyMissionCell.self, forCellWithReuseIdentifier: DailyMissionCell.identifier)
     }
     
-    private let emptyView = ChildEmptyView(
+    private let emptyView = ContentEmptyView(
         title: "아직 등록된 미션이 없어!",
         description: "부모님과 함께 나만의 미션을 정해볼까?",
         topOffset: 100
