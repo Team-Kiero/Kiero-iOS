@@ -257,7 +257,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
             let isFireLit = self.viewModel?.isFireLit ?? false
-            
             let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
             
             if !isRecurring {
@@ -276,22 +275,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         return
                     }
                     
-                    let scheduleList = viewModel?.scheduleList ?? []
-                    let dateFormatter = DateFormatter()
-                    dateFormatter.dateFormat = "yyyy-MM-dd"
-                    
-                    let hasActedLaterSchedule = scheduleList.contains { other in
-                        guard let otherStart = other.startTime.toDate(format: "HH:mm:ss"),
-                              let otherDateStr = other.date,
-                              let otherDate = dateFormatter.date(from: otherDateStr) else { return false }
-                        guard calendar.isDate(otherDate, inSameDayAs: now) else { return false }
-                        let otherStartMin = calendar.component(.hour, from: otherStart) * 60 + calendar.component(.minute, from: otherStart)
-                        let isAfter = otherStartMin >= endMin
-                        let isActed = other.scheduleStatus != nil && other.scheduleStatus != "PENDING"
-                        return isAfter && isActed
-                    }
-                    
-                    if hasActedLaterSchedule {
+                    if hasActedLaterSchedule(endMin: endMin, now: now) {
                         Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.")
                         return
                     }
@@ -302,7 +286,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 }
                 
                 if hasPastDate {
-                    Toast.show(message: "과거 날짜에는 일정을 추가할 수 없습니다.")
+                    Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.")
                     return
                 }
             }
@@ -397,15 +381,28 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
                 let isCurrentWeek = weekDates.first! <= today && weekDates.last! >= today
                 let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60
-                             + calendar.component(.minute, from: self.currentStartTime ?? now)
+                + calendar.component(.minute, from: self.currentStartTime ?? now)
+                let endMin = calendar.component(.hour, from: self.currentEndTime ?? now) * 60
+                + calendar.component(.minute, from: self.currentEndTime ?? now)
+                
+                var shouldShowWarning = false
                 
                 if isRecurring {
                     let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
                     let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
                     let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
+                    let isFireLit = self.viewModel?.isFireLit ?? false
+                    let hasActedLater = isTodaySelected && hasActedLaterSchedule(endMin: endMin, now: now)
+
+                    shouldShowWarning = isCurrentWeek && (
+                        hasPastDayInWeek ||
+                        isTodayTimePast ||
+                        (isTodaySelected && isFireLit) ||
+                        hasActedLater
+                    )
                     
-                    if isCurrentWeek && (hasPastDayInWeek || isTodayTimePast) {
-                        Toast.show(message: "일정이 등록되었어요. 오늘은 마감되어 다음부터 적용돼요.")
+                    if shouldShowWarning {
+                        Toast.show(message: "일정 등록이 마감된 날이 있어, 오늘 이후부터 적용돼요.")
                     } else {
                         Toast.show(message: "일정이 등록되었어요.")
                     }
@@ -413,7 +410,27 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     Toast.show(message: "일정이 등록되었어요.")
                 }
                 
-                if let firstIndex = selectedIndices.first {
+                if isRecurring && shouldShowWarning {
+                    guard let nextWeekDate = calendar.date(byAdding: .weekOfYear, value: 1, to: weekDates[selectedIndices[0]]) else {
+                        self.dismiss(animated: true)
+                        return
+                    }
+                    
+                    let actualSchedule = Schedule(
+                        id: Int(Date().timeIntervalSince1970 * 1000),
+                        name: name,
+                        isRecurring: true,
+                        startTime: startTime,
+                        endTime: endTime,
+                        scheduleColor: colorName,
+                        colorCode: hexCode,
+                        dayOfWeek: selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", "),
+                        date: nil,
+                        scheduleStatus: nil
+                    )
+                    self.onScheduleAdded?(actualSchedule, nextWeekDate)
+                    
+                } else if let firstIndex = selectedIndices.first {
                     let targetDate = weekDates[firstIndex]
                     
                     let actualSchedule = Schedule(
@@ -428,7 +445,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd"),
                         scheduleStatus: nil
                     )
-                    
                     self.onScheduleAdded?(actualSchedule, targetDate)
                 }
                 
@@ -457,6 +473,24 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 }
             }
             .store(in: &cancellables)
+    }
+    
+    private func hasActedLaterSchedule(endMin: Int, now: Date) -> Bool {
+        let calendar = Calendar.current
+        let scheduleList = viewModel?.scheduleList ?? []
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        return scheduleList.contains { other in
+            guard let otherStart = other.startTime.toDate(format: "HH:mm:ss"),
+                  let otherDateStr = other.date,
+                  let otherDate = dateFormatter.date(from: otherDateStr) else { return false }
+            guard calendar.isDate(otherDate, inSameDayAs: now) else { return false }
+            let otherStartMin = calendar.component(.hour, from: otherStart) * 60 + calendar.component(.minute, from: otherStart)
+            let isAfter = otherStartMin >= endMin
+            let isActed = other.scheduleStatus != nil && other.scheduleStatus != "PENDING"
+            return isAfter && isActed
+        }
     }
     
     private func moveWeek(value: Int) {
@@ -570,7 +604,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     @objc
     private func repeatSwitchChanged() {
         if repeatSwitch.isOn {
-            weekdaySelectionView.isSingleSelectionMode = false
+            weekdaySelectionView.selectionMode = .normal
         }
     }
     
@@ -605,7 +639,21 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         guard let schedule = editingSchedule else { return }
         navigationBar.setTitle("일정 수정")
         titleTextField.text = schedule.name
-        repeatSwitch.isOn = schedule.isRecurring
+        weekdaySelectionView.selectionMode = .edit
+
+        repeatSwitch.isHidden = true
+        if schedule.isRecurring {
+            repeatLabel.text = "매주 반복"
+            repeatLabel.isHidden = false
+            repeatLabel.textColor = .gray500
+            
+            repeatLabel.snp.remakeConstraints {
+                $0.centerY.equalTo(daySectionTitle)
+                $0.trailing.equalToSuperview().inset(27)
+            }
+        } else {
+            repeatLabel.isHidden = true
+        }
         
         if schedule.isRecurring, let dayOfWeek = schedule.dayOfWeek {
             if let dateStr = schedule.date {
@@ -621,7 +669,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             weekdaySelectionView.setSelectedIndices(indices)
             updatePagingTitle()
         } else if let dateStr = schedule.date {
-            weekdaySelectionView.isSingleSelectionMode = false
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
             
@@ -665,97 +712,57 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let startTimeStr = (currentStartTime ?? Date()).toString(format: "HH:mm:ss")
         let endTimeStr = (currentEndTime ?? Date()).toString(format: "HH:mm:ss")
         let isRecurring = repeatSwitch.isOn
-        let wasRecurring = schedule.isRecurring
         let weekDates = baseDate.daysOfWeek
         let selectedIndices = weekdaySelectionView.selectedIndices.sorted()
         
         let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
         let dayOfWeekStr: String? = isRecurring ? selectedIndices.map { dayLabels[$0] }.joined(separator: ", ") : nil
         let datesStr: String? = isRecurring ? nil : selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
+
+        let isSameName = (titleTextField.text ?? "") == schedule.name
+        let isSameStart = startTimeStr == schedule.startTime
+        let isSameEnd = endTimeStr == schedule.endTime
+        let isSameColor = colorCode == schedule.scheduleColor
+
+        if isSameName && isSameStart && isSameEnd && isSameColor {
+            Toast.show(message: "변경사항이 없어요.")
+            return
+        }
         
-        let originalDayIndices: Set<Int> = {
-            guard let dayOfWeek = schedule.dayOfWeek else { return [] }
-            let dayLabelsKor = ["월": 0, "화": 1, "수": 2, "목": 3, "금": 4, "토": 5, "일": 6]
-            return Set(dayOfWeek.components(separatedBy: ", ").compactMap { dayLabelsKor[$0.trimmingCharacters(in: .whitespaces)] })
-        }()
-        let currentDayIndices = Set(selectedIndices)
-        let isDayChanged = originalDayIndices != currentDayIndices
-        let isRecurringChanged = wasRecurring != isRecurring
+        if !isRecurring {
+            let calendar = Calendar.current
+            let today = calendar.startOfDay(for: Date())
+            let now = Date()
+            let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+            let startMin = calendar.component(.hour, from: currentStartTime ?? now) * 60 + calendar.component(.minute, from: currentStartTime ?? now)
+            
+            let hasPastDate = selectedIndices.contains { index in
+                let date = weekDates[index]
+                let dateStart = calendar.startOfDay(for: date)
+                if dateStart < today { return true }
+                if dateStart == today && startMin < currentTimeMin { return true }
+                return false
+            }
+            
+            if hasPastDate {
+                Toast.show(message: "과거 날짜에는 일정을 등록할 수 없습니다.")
+                return
+            }
+        }
         
-        let shouldShowDialog = wasRecurring && !isDayChanged && !isRecurringChanged
+        let finalRequest = EditScheduleRequestDTO(
+            name: titleTextField.text ?? "",
+            isRecurring: isRecurring,
+            startTime: startTimeStr,
+            endTime: endTimeStr,
+            scheduleColor: colorCode,
+            dayOfWeek: dayOfWeekStr,
+            dates: datesStr,
+            isIncludeFollowing: true
+        )
         
-        if shouldShowDialog {
-            let dialog = DialogBox()
-            dialog.configure(state: .editSchedule(title: titleTextField.text ?? schedule.name, isRecurring: wasRecurring))
-            
-            dialog.onTapCancel = { [weak self] in
-                self?.dismiss(animated: false)
-            }
-            
-            dialog.onTapClose = { [weak self] in
-                self?.dismiss(animated: false)
-            }
-            
-            dialog.onTapConfirm = { [weak self] in
-                guard let self = self else { return }
-                self.dismiss(animated: false)
-                
-                let isIncludeFollowing: Bool? = dialog.isFollowingSelected
-                
-                let finalRequest = EditScheduleRequestDTO(
-                    name: self.titleTextField.text ?? "",
-                    isRecurring: isRecurring,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    scheduleColor: colorCode,
-                    dayOfWeek: dayOfWeekStr,
-                    dates: datesStr,
-                    isIncludeFollowing: isIncludeFollowing
-                )
-                
-                self.onEditConfirmed?(finalRequest, isIncludeFollowing ?? false) { success in
-                    if success { self.dismiss(animated: true) }
-                }
-            }
-            
-            dialog.show(in: self)
-            
-        } else {
-            if !isRecurring {
-                let calendar = Calendar.current
-                let today = calendar.startOfDay(for: Date())
-                let now = Date()
-                let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-                let startMin = calendar.component(.hour, from: currentStartTime ?? now) * 60 + calendar.component(.minute, from: currentStartTime ?? now)
-                
-                let hasPastDate = selectedIndices.contains { index in
-                    let date = weekDates[index]
-                    let dateStart = calendar.startOfDay(for: date)
-                    if dateStart < today { return true }
-                    if dateStart == today && startMin < currentTimeMin { return true }
-                    return false
-                }
-                
-                if hasPastDate {
-                    Toast.show(message: "과거 날짜에는 일정을 등록할 수 없습니다.")
-                    return
-                }
-            }
-            
-            let finalRequest = EditScheduleRequestDTO(
-                name: self.titleTextField.text ?? "",
-                isRecurring: isRecurring,
-                startTime: startTimeStr,
-                endTime: endTimeStr,
-                scheduleColor: colorCode,
-                dayOfWeek: dayOfWeekStr,
-                dates: datesStr,
-                isIncludeFollowing: nil
-            )
-            
-            self.onEditConfirmed?(finalRequest, false) { success in
-                if success { self.dismiss(animated: true) }
-            }
+        self.onEditConfirmed?(finalRequest, true) { success in
+            if success { self.dismiss(animated: true) }
         }
     }
 }

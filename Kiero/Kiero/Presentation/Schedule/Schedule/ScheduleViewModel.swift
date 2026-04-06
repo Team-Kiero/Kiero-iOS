@@ -128,24 +128,6 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                     if schedule.isRecurring {
                         let isViewingCurrentWeek = calendar.isDate(refDate, inSameDayAs: now) ||
                                                   (currentWeekRange.first! <= now && currentWeekRange.last! >= now)
-                        
-                        if isViewingCurrentWeek {
-                            let scheduleIndices = schedule.dayIndices
-                            
-                            let isAllPast = scheduleIndices.allSatisfy { dayIndex in
-                                if dayIndex < currentWeekDayIndex { return true }
-                                if dayIndex == currentWeekDayIndex {
-                                    if let scheduleTime = schedule.startTime.toDate(format: "HH:mm:ss") {
-                                        let nowMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-                                        let scheduleMin = calendar.component(.hour, from: scheduleTime) * 60 + calendar.component(.minute, from: scheduleTime)
-                                        return scheduleMin < nowMin
-                                    }
-                                }
-                                return false
-                            }
-                            
-                            if isAllPast { return false }
-                        }
                         return true
                     } else {
                         guard let dateStr = schedule.date else { return false }

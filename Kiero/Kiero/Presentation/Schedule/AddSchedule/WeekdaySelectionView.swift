@@ -14,9 +14,15 @@ final class WeekdaySelectionView: UIView {
     
     // MARK: - Properties
     
+    enum SelectionMode {
+        case normal
+        case single
+        case edit
+    }
+    
     private let days = ["월", "화", "수", "목", "금", "토", "일"]
     private var dayButtons: [UIButton] = []
-    var isSingleSelectionMode: Bool = false
+    var selectionMode: SelectionMode = .normal
     
     private(set) var selectedIndices = Set<Int>()
     
@@ -95,40 +101,45 @@ final class WeekdaySelectionView: UIView {
         
         indices.forEach { index in
             guard index < dayButtons.count else { return }
-            dayButtons[index].isSelected = true
-            dayButtons[index].layer.borderWidth = 1.0
+            
+            if selectionMode == .edit {
+                dayButtons[index].setTitleColor(.white, for: .normal)
+                dayButtons[index].setTypo(.body1_18_R, text: days[index], for: .normal)
+                dayButtons[index].layer.borderColor = UIColor.white.cgColor
+                dayButtons[index].layer.borderWidth = 1.0
+            }
             selectedIndices.insert(index)
         }
         
         everyDayButton.isSelected = (selectedIndices.count == 7)
-        everyDayButton.isHidden = isSingleSelectionMode
+        everyDayButton.isHidden = selectionMode != .normal
     }
     
     @objc
     private func dayButtonTapped(_ sender: UIButton) {
-        if isSingleSelectionMode {
+        switch selectionMode {
+        case .edit:
+            Toast.show(message: "요일은 수정할 수 없어요. 삭제 후 등록해주세요.")
+            return
+        case .single:
             dayButtons.forEach {
                 $0.isSelected = false
                 $0.layer.borderWidth = 0
             }
             selectedIndices.removeAll()
-            
             sender.isSelected = true
             sender.layer.borderWidth = 1.0
             selectedIndices.insert(sender.tag)
-            return
+        case .normal:
+            sender.isSelected.toggle()
+            sender.layer.borderWidth = sender.isSelected ? 1.0 : 0
+            if sender.isSelected {
+                selectedIndices.insert(sender.tag)
+            } else {
+                selectedIndices.remove(sender.tag)
+            }
+            everyDayButton.isSelected = (selectedIndices.count == 7)
         }
-        
-        sender.isSelected.toggle()
-        sender.layer.borderWidth = sender.isSelected ? 1.0 : 0
-        
-        if sender.isSelected {
-            selectedIndices.insert(sender.tag)
-        } else {
-            selectedIndices.remove(sender.tag)
-        }
-        
-        everyDayButton.isSelected = (selectedIndices.count == 7)
     }
     
     @objc

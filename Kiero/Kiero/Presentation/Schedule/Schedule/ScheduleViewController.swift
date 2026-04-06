@@ -78,7 +78,11 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     private func presentAddSchedule() {
         guard let viewModel = self.viewModel else { return }
-        guard let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController() as? AddScheduleViewController else { return }
+        
+        let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController(
+            isFireLit: viewModel.isFireLit,
+            scheduleList: viewModel.scheduleList.value
+        )
         
         let calendar = Calendar.current
         let now = Date()
@@ -91,8 +95,6 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         
         let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek) ? now : viewModel.currentReferenceDate.value
         
-        addScheduleVC.viewModel?.scheduleList = viewModel.scheduleList.value
-        addScheduleVC.viewModel?.isFireLit = viewModel.isFireLit
         addScheduleVC.baseDate = targetDate
         
         addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in
