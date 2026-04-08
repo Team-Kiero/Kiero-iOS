@@ -72,7 +72,7 @@ struct RewardEditView: View {
                 HStack(spacing: 4) {
                     Image(.ic3DCoin)
                     
-                    Text("보상")
+                    Text("금화")
                         .font(Font(UIFont.body2_16_R))
                         .foregroundStyle(.white)
                 }
