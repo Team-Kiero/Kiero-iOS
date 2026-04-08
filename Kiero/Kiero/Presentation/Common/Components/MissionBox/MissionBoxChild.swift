@@ -90,6 +90,8 @@ final class MissionBoxChild: UIView {
         $0.alignment = .center
     }
     
+    private let spacer = UIView()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setStyle()
@@ -112,7 +114,7 @@ final class MissionBoxChild: UIView {
     private func setUI() {
         addSubview(missionBox)
         titleStack.addArrangedSubviews(rewardLabel, titleLabel)
-        missionBox.addArrangedSubviews(titleStack, completeButton)
+        missionBox.addArrangedSubviews(titleStack, spacer, completeButton)
         
         completeButton.addTarget(self, action: #selector(didTapComplete), for: .touchUpInside)
     }
@@ -121,7 +123,10 @@ final class MissionBoxChild: UIView {
         missionBox.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(13)
             $0.verticalEdges.equalToSuperview().inset(13.5)
-            $0.width.equalTo(343).priority(.low)
+        }
+        
+        spacer.snp.makeConstraints {
+            $0.width.greaterThanOrEqualTo(10)
         }
         
         completeButton.snp.makeConstraints {

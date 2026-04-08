@@ -103,7 +103,7 @@ extension CoinMissionViewController: UICollectionViewDataSource {
 
 extension CoinMissionViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.bounds.width - 31)
+        let width = (collectionView.bounds.width)
         return CGSize(width: width, height: 10)
     }
 }
