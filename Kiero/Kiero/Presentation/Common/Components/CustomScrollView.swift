@@ -44,11 +44,15 @@ struct CustomScrollView: View {
                         }()
                         
                         let effectiveStatus: String = {
+                            if schedule.status == .VERIFIED && schedule.isOngoing { return schedule.status.rawValue }
                             if isFireLit && schedule.status == .VERIFIED { return "COMPLETED" }
                             if isFireNotLit && schedule.status == .VERIFIED && !isTimeNotStarted { return "COMPLETED" }
                             return schedule.status.rawValue
                         }()
-                        let effectiveIsOngoing: Bool = (isFireLit || isFireNotLit) ? false : schedule.isOngoing
+                        let effectiveIsOngoing: Bool = {
+                            if schedule.status == .VERIFIED && schedule.isOngoing { return true }
+                            return (isFireLit || isFireNotLit) ? false : schedule.isOngoing
+                        }()
                         
                         let hasOngoing = data.schedules.contains { ($0.isOngoing && $0.status != .COMPLETED) || $0.status == .VERIFIED }
                         let isNext: Bool = {
