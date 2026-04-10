@@ -22,7 +22,7 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
     var initialImage: UIImage?
     
     private var isAnimationFinished = false
-    private var isApiSuccess = false
+    private var isApiCompleted = false
     
     private let viewDidAppearSubject = PassthroughSubject<Void, Never>()
     private let completeButtonTapSubject = PassthroughSubject<Void, Never>()
@@ -81,11 +81,11 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
     }
     
     private func checkAndPopViewController() {
-        if isAnimationFinished && isApiSuccess {
-            print("✅ 모든 조건 충족 (애니메이션 끝 + 인증 성공) -> 화면 이동")
+        if isAnimationFinished && isApiCompleted {
+            print("✅ 모든 조건 충족 (애니메이션 끝 + 인증 응답 수신) -> 화면 이동")
             self.navigationController?.popViewController(animated: true)
         } else {
-            print("⏳ 대기 중... (애니메이션 완료: \(isAnimationFinished), API 성공: \(isApiSuccess))")
+            print("⏳ 대기 중... (애니메이션 완료: \(isAnimationFinished), API 완료: \(isApiCompleted))")
         }
     }
     
@@ -130,11 +130,13 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
                 switch event {
                 case .success:
                     print("🎉 서버 인증 성공~~ 룰루~~")
-                    self.isApiSuccess = true
+                    self.isApiCompleted = true
                     self.checkAndPopViewController()
                     
                 case .failure(let errorMessage):
                     print("❌ 인증 실패: \(errorMessage)")
+                    self.isApiCompleted = true
+                    self.checkAndPopViewController()
                 }
             }
             .store(in: &cancellables)
