@@ -59,7 +59,7 @@ final class CoinMissionView: BaseUIView {
     private let emptyView = ContentEmptyView(
         title: "아직 등록된 미션이 없어!",
         description: "부모님과 함께 나만의 미션을 정해볼까?",
-        topOffset: 100
+        topOffset: 353
     ).then {
         $0.isHidden = true
     }
@@ -69,13 +69,13 @@ final class CoinMissionView: BaseUIView {
     override func setUI() {
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         addSubviews(
+            emptyView,
             nameStack,
             coinChip,
             characterImg,
             speechField,
             missionLabel,
-            missionCollectionView,
-            emptyView
+            missionCollectionView
         )
     }
     
@@ -102,7 +102,7 @@ final class CoinMissionView: BaseUIView {
         }
         
         speechField.snp.makeConstraints {
-            $0.top.equalTo(nameStack.snp.bottom).offset(82)
+            $0.top.equalToSuperview().offset(171)
             $0.horizontalEdges.equalToSuperview()
         }
         
@@ -118,7 +118,7 @@ final class CoinMissionView: BaseUIView {
         }
         
         emptyView.snp.makeConstraints {
-            $0.top.equalTo(speechField.snp.bottom)
+            $0.top.equalToSuperview()
             $0.horizontalEdges.bottom.equalToSuperview()
         }
     }
