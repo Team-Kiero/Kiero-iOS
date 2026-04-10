@@ -159,12 +159,13 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
+        guard textField.markedTextRange == nil else { return }
         guard let text = textField.text else { return }
         
         if text.count > 15 {
-            let index = text.index(text.startIndex, offsetBy: 15)
-            let newString = String(text[..<index])
-            textField.text = newString
+            textField.text = String(text.prefix(15))
+            let endPosition = textField.endOfDocument
+            textField.selectedTextRange = textField.textRange(from: endPosition, to: endPosition)
             Toast.show(message: "미션이 최대 글자수 15자를 초과하였습니다.")
         }
     }
@@ -203,18 +204,6 @@ final class WriteMissionViewController: BaseViewController<WriteMissionViewModel
 }
 
 extension WriteMissionViewController: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        
-        let newLength = text.count + string.count - range.length
-        
-        if newLength > 15 {
-            Toast.show(message: "미션이 최대 글자수 15자를 초과하였습니다.")
-            return false
-        }
-        return true
-    }
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true

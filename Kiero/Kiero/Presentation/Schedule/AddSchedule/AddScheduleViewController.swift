@@ -610,13 +610,15 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     @objc
     private func textFieldDidChange(_ textField: UITextField) {
+        guard textField.markedTextRange == nil else { return }
         guard let text = textField.text else { return }
-        
-        if text.count > 8 {
-            let index = text.index(text.startIndex, offsetBy: 8)
-            let newString = String(text[..<index])
-            textField.text = newString
-        }
+        guard text.count > 8 else { return }
+
+        let truncated = String(text.prefix(8))
+        textField.text = truncated
+
+        let endPosition = textField.endOfDocument
+        textField.selectedTextRange = textField.textRange(from: endPosition, to: endPosition)
     }
     
     @objc
@@ -768,12 +770,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
 }
 
 extension AddScheduleViewController: UITextFieldDelegate {
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 8
-    }
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true

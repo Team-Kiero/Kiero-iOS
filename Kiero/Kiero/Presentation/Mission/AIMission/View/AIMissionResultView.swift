@@ -102,6 +102,7 @@ final class AIMissionResultView: BaseUIView {
     
     private func setDelegate() {
         nameTextField.delegate = self
+        nameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         let backgroundTap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         self.addGestureRecognizer(backgroundTap)
@@ -134,19 +135,24 @@ final class AIMissionResultView: BaseUIView {
         self.endEditing(true)
     }
     
+    @objc
+    private func textFieldDidChange(_ textField: UITextField) {
+        guard textField.markedTextRange == nil else { return }
+        guard let text = textField.text else { return }
+        
+        if text.count > 15 {
+            textField.text = String(text.prefix(15))
+            let endPosition = textField.endOfDocument
+            textField.selectedTextRange = textField.textRange(from: endPosition, to: endPosition)
+        }
+    }
+    
     func updateReward(to value: Int) {
         rewardView.selectReward(value)
     }
 }
 
 extension AIMissionResultView: UITextFieldDelegate {
-    
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        guard let text = textField.text else { return true }
-        let newLength = text.count + string.count - range.length
-        return newLength <= 15
-    }
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
