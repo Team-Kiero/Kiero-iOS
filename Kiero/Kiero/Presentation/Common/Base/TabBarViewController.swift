@@ -219,9 +219,11 @@ private extension TabBarViewController {
             $0.edges.equalToSuperview()
         }
         
-        view.bringSubviewToFront(customNavigationBar)
-        view.bringSubviewToFront(customTabBar)
-        view.bringSubviewToFront(chromeDimView)
+        view.bringToFront(
+            customNavigationBar,
+            customTabBar,
+            chromeDimView
+        )
     }
     
     func bindNotifications() {
@@ -426,9 +428,11 @@ extension TabBarViewController: UINavigationControllerDelegate {
             updateNavigationBar()
         }
         
-        view.bringSubviewToFront(customNavigationBar)
-        view.bringSubviewToFront(customTabBar)
-        view.bringSubviewToFront(chromeDimView)
+        view.bringToFront(
+            customNavigationBar,
+            customTabBar,
+            chromeDimView
+        )
     }
 }
 
@@ -505,5 +509,13 @@ private extension TabBarViewController {
                 }
             }
             .store(in: &cancellables)
+    }
+}
+
+private extension TabBarViewController {
+    func setHieraarchy() {
+        view.bringSubviewToFront(customNavigationBar)
+        view.bringSubviewToFront(customTabBar)
+        view.bringSubviewToFront(chromeDimView)
     }
 }
