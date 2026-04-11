@@ -15,6 +15,8 @@ struct RewardBox: View {
             Text("\(reward.title)")
                 .font(Font(UIFont.body3_14_R))
                 .foregroundStyle(.white)
+                .lineLimit(1)
+                .truncationMode(.tail)
             
             ChipItemWrapper(
                 style: .usedCoinChip,

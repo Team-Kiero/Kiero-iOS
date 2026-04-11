@@ -69,7 +69,7 @@ final class ContentEmptyView: BaseUIView {
         
         stackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(100)
+            $0.top.equalToSuperview()
         }
         
         stackView.setCustomSpacing(4, after: titleLabel)

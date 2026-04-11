@@ -24,15 +24,15 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
     @Published var selectedReward: Reward? = nil
     @Published var showDeleteDialog: Bool = false
     
-    var currentChildId: Int = 0
-    
-    let scrollToTop = PassthroughSubject<Void, Never>()
+    var currentChildId: Int {
+        UserDefaults.standard.integer(forKey: "selectedChildId")
+    }
     
     override init() {
         super.init()
-        
-        self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
     }
+    
+    let scrollToTop = PassthroughSubject<Void, Never>()
     
     func fetchCoupons(childId: Int? = nil) {
         let targetId = childId ?? self.currentChildId

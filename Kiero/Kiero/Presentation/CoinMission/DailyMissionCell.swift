@@ -26,6 +26,7 @@ class DailyMissionCell: UICollectionViewCell {
     private let missionStack = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 18
+        $0.alignment = .fill
         $0.distribution = .fill
     }
     
@@ -58,7 +59,7 @@ class DailyMissionCell: UICollectionViewCell {
         missionStack.snp.makeConstraints {
             $0.top.equalTo(dateLabel.snp.bottom).offset(18)
             $0.horizontalEdges.equalToSuperview().inset(15.5)
-            $0.bottom.equalToSuperview().priority(.low)
+            $0.bottom.equalToSuperview()
         }
     }
     

@@ -64,15 +64,15 @@ struct RewardEditView: View {
                 .padding(.vertical, 9)
                 .padding(.bottom, 15)
                 .onChange(of: rewardTitle) { newValue in
-                    if newValue.count > 13 {
-                        rewardTitle = String(newValue.prefix(13))
+                    if newValue.count > 15 {
+                        rewardTitle = String(newValue.prefix(15))
                     }
                 }
                 
                 HStack(spacing: 4) {
                     Image(.ic3DCoin)
                     
-                    Text("보상")
+                    Text("금화")
                         .font(Font(UIFont.body2_16_R))
                         .foregroundStyle(.white)
                 }

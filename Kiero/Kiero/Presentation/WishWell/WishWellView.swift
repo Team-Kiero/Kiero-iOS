@@ -17,7 +17,7 @@ final class WishWellView: BaseUIView {
     private let wishEmptyView = ContentEmptyView(
         title: "아직 등록된 보상이 없어!",
         description: "부모님과 함께 나만의 보상을 정해볼까?",
-        topOffset: 76.5
+        topOffset: 353
     )
     
     private let iconImage = UIImageView().then {
@@ -86,7 +86,7 @@ final class WishWellView: BaseUIView {
     // MARK: - Setup Method
     
     override func setUI() {
-        addSubviews(nameStack, coinChip, container, line, wishCollectionView, wishEmptyView)
+        addSubviews(wishEmptyView, nameStack, coinChip, container, line, wishCollectionView)
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         wishWellStack.addArrangedSubviews(wishWellIcon, wishWellLabel)
         totalStack.addArrangedSubviews(wishWellStack, wishMessage)
@@ -137,9 +137,9 @@ final class WishWellView: BaseUIView {
         }
         
         wishEmptyView.snp.makeConstraints {
-                    $0.top.equalTo(line.snp.bottom)
-                    $0.horizontalEdges.bottom.equalToSuperview()
-                }
+            $0.top.equalToSuperview()
+            $0.horizontalEdges.bottom.equalToSuperview()
+        }
     }
     
     // MARK: - Configuration
