@@ -511,11 +511,3 @@ private extension TabBarViewController {
             .store(in: &cancellables)
     }
 }
-
-private extension TabBarViewController {
-    func setHieraarchy() {
-        view.bringSubviewToFront(customNavigationBar)
-        view.bringSubviewToFront(customTabBar)
-        view.bringSubviewToFront(chromeDimView)
-    }
-}
