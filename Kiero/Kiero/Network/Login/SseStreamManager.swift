@@ -22,6 +22,7 @@ final class SseStreamManager {
     private var isRunning = false
     
     private var isConnecting = false
+    private var storedOnEvent: ((SseEventPayload) -> Void)?
     
     init(sseURL: URL) {
         self.sseURL = sseURL
@@ -39,6 +40,7 @@ final class SseStreamManager {
         }
         isRunning = true
         sseAccessToken = initialToken
+        storedOnEvent = onEvent
         
         // 최초 연결
         Task { @MainActor [weak self] in
@@ -116,6 +118,23 @@ final class SseStreamManager {
         client?.connect()
     }
     
+    func resume() {
+        guard !isRunning, let onEvent = storedOnEvent else { return }
+        isRunning = true
+
+        Task {
+            do {
+                let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                self.sseAccessToken = newToken
+                await MainActor.run { [weak self] in
+                    self?.connect(onEvent: onEvent)
+                }
+            } catch {
+                print("❌ [SSEManager] resume failed:", error)
+            }
+        }
+    }
+
     func pause() {
         client?.disconnect()
         client = nil
