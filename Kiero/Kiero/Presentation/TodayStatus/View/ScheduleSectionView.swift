@@ -46,7 +46,6 @@ struct ScheduleSectionView: View {
 }
 
 private extension ScheduleSectionView {
-    
     var nowMinutes: Int {
         let components = Calendar.current.dateComponents([.hour, .minute], from: Date())
         let hour = components.hour ?? 0
@@ -87,63 +86,51 @@ private extension ScheduleSectionView {
         }
     }
     
-    var firstUpcomingIndex: Int? {
-        schedules.firstIndex { schedule in
-            startMinutes(of: schedule) > nowMinutes && schedule.status == .pending
+    var initialHighlightedIndex: Int? {
+        if let actualCurrentIndex {
+            return actualCurrentIndex
+        }
+        
+        return schedules.firstIndex { schedule in
+            startMinutes(of: schedule) > nowMinutes
         }
     }
     
-    func nextUpcomingIndex(after index: Int) -> Int? {
-        guard index + 1 < schedules.count else { return nil }
-        
-        return schedules[(index + 1)...].firstIndex { schedule in
-            startMinutes(of: schedule) > nowMinutes && schedule.status == .pending
-        }
+    func nextIndex(after index: Int) -> Int? {
+        let next = index + 1
+        return schedules.indices.contains(next) ? next : nil
     }
     
     var highlightedIndex: Int? {
-        guard !schedules.isEmpty else { return nil }
+        guard let startIndex = initialHighlightedIndex else { return nil }
         
-        if let currentIndex = actualCurrentIndex {
-            let current = schedules[currentIndex]
-            
-            switch current.status {
+        var currentIndex: Int? = startIndex
+        
+        while let index = currentIndex {
+            switch schedules[index].status {
             case .pending, .verified:
-                return currentIndex
+                return index
                 
             case .complete, .skipped:
-                return nextUpcomingIndex(after: currentIndex)
+                currentIndex = nextIndex(after: index)
                 
             case .failed:
                 return nil
             }
         }
         
-        return firstUpcomingIndex
-    }
-    
-    var nextScheduleTextIndex: Int? {
-        guard let highlightedIndex else { return nil }
-        
-        if shouldShowCurrentScheduleText(at: highlightedIndex) {
-            return nil
-        }
-        
-        return highlightedIndex
+        return nil
     }
     
     func shouldShowCurrentScheduleText(at index: Int) -> Bool {
-        guard schedules.indices.contains(index) else { return false }
-        guard let currentIndex = actualCurrentIndex else { return false }
+        guard let actualCurrentIndex else { return false }
+        guard let highlightedIndex else { return false }
         
-        let status = schedules[index].status
-        return index == currentIndex && (status == .pending || status == .verified)
+        return index == actualCurrentIndex && index == highlightedIndex
     }
     
     func shouldShowNextScheduleText(at index: Int) -> Bool {
-        guard schedules.indices.contains(index) else { return false }
-        guard let nextScheduleTextIndex else { return false }
-        
-        return index == nextScheduleTextIndex
+        guard let highlightedIndex else { return false }
+        return index == highlightedIndex && !shouldShowCurrentScheduleText(at: index)
     }
 }

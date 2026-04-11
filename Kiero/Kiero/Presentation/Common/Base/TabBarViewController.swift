@@ -64,6 +64,12 @@ public final class TabBarViewController: UITabBarController {
         isParent: isParent
     )
     
+    private lazy var chromeDimView = UIView().then {
+        $0.backgroundColor = UIColor.kBlack
+        $0.alpha = 0
+        $0.isUserInteractionEnabled = false
+    }
+    
     private var customTabBarBottomConstraint: Constraint?
     
     public init(factory: ViewControllerFactory, isParent: Bool) {
@@ -86,6 +92,7 @@ public final class TabBarViewController: UITabBarController {
         setViewControllers()
         setCustomNavigationBarUI()
         setCustomTabBarUI()
+        setChromeDimViewUI()
         bindNotifications()
         bindUnreadState()
         bindSSEEvents()
@@ -205,6 +212,20 @@ private extension TabBarViewController {
         }
     }
     
+    func setChromeDimViewUI() {
+        view.addSubview(chromeDimView)
+        
+        chromeDimView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        view.bringToFront(
+            customNavigationBar,
+            customTabBar,
+            chromeDimView
+        )
+    }
+    
     func bindNotifications() {
         NotificationCenter.default.addObserver(
             self,
@@ -316,8 +337,7 @@ private extension TabBarViewController {
         guard let isDimmed = notification.object as? Bool else { return }
         
         UIView.animate(withDuration: 0.25) {
-            self.customNavigationBar.alpha = isDimmed ? 0.25 : 1.0
-            self.customTabBar.alpha = isDimmed ? 0 : 1.0
+            self.chromeDimView.alpha = isDimmed ? 0.75 : 0.0
         }
     }
     
@@ -408,8 +428,11 @@ extension TabBarViewController: UINavigationControllerDelegate {
             updateNavigationBar()
         }
         
-        view.bringSubviewToFront(customNavigationBar)
-        view.bringSubviewToFront(customTabBar)
+        view.bringToFront(
+            customNavigationBar,
+            customTabBar,
+            chromeDimView
+        )
     }
 }
 

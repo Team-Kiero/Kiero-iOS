@@ -38,7 +38,7 @@ struct MissionBottomSheet: View {
         }
         .padding(.top, 8)
         .frame(maxWidth: .infinity)
-        .frame(maxHeight: 750, alignment: .top)
+        .frame(maxHeight: .infinity, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 15)
                 .fill(Color.gray900)
@@ -100,9 +100,9 @@ private extension MissionBottomSheet {
     var currentMissions: [MissionItem] {
         switch selectedTab {
         case .complete:
-            return Array(completeMissions.reversed())
+            return Array(completeMissions)
         case .incomplete:
-            return Array(incompleteMissions.reversed())
+            return Array(incompleteMissions)
         }
     }
 }
