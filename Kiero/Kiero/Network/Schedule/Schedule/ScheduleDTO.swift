@@ -36,13 +36,9 @@ struct DeleteScheduleRequestDTO: Encodable {
 
 struct EditScheduleRequestDTO: Encodable {
     let name: String
-    let isRecurring: Bool
     let startTime: String
     let endTime: String
     let scheduleColor: String
-    let dayOfWeek: String?
-    let dates: String?
-    let isIncludeFollowing: Bool?
 }
 
 extension ScheduleResponseDTO {

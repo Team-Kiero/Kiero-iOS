@@ -92,14 +92,14 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         viewModel.editErrorMessage
             .receive(on: RunLoop.main)
             .sink { message in
-                Toast.show(message: message)
+                Toast.show(message: message, bottomInset: 88)
             }
             .store(in: &cancellables)
         
         viewModel.isEditSuccess
             .receive(on: RunLoop.main)
             .sink {
-                Toast.show(message: "일정이 수정되었어요.")
+                Toast.show(message: "일정이 수정되었어요.", bottomInset: 88)
             }
             .store(in: &cancellables)
     }
@@ -188,12 +188,12 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                 let editVC = AppDIContainer.shared.makeEditScheduleViewController(schedule: schedule)
                 editVC.modalPresentationStyle = .overFullScreen
                 
-                editVC.onEditConfirmed = { [weak self] request, _, completion in
-                    guard let self = self,
-                          let selectedDate = schedule.date else { return }
+                editVC.onEditConfirmed = { [weak self] request, selectedDate, _, completion in
+                    guard let self = self else { return }
                     self.viewModel?.editSchedule(
                         scheduleId: schedule.id,
                         selectedDate: selectedDate,
+                        isRecurring: schedule.isRecurring,
                         request: request,
                         completion: completion
                     )
@@ -221,13 +221,14 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                 }
                 dialog.onTapConfirm = { [weak self] in
                     guard let self else { return }
+                    let isIncludeFollowing: Bool = schedule.isRecurring ? dialog.isFollowingSelected : false
                     dialog.dismiss()
                     
                     guard let selectedDate = schedule.date else { return }
-                    let isIncludeFollowing: Bool = schedule.isRecurring ? dialog.isFollowingSelected : false
                     self.viewModel?.deleteSchedule(
                         scheduleId: schedule.id,
                         selectedDate: selectedDate,
+                        isRecurring: schedule.isRecurring,
                         isIncludeFollowing: isIncludeFollowing
                     )
                 }

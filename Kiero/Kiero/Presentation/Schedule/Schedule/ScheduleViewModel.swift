@@ -190,10 +190,28 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
     }
     
-    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) {
+    func deleteSchedule(scheduleId: Int, selectedDate: String, isRecurring: Bool, isIncludeFollowing: Bool) {
+        var startDate: String? = nil
+        var endDate: String? = nil
+        var selDate: String? = nil
+        
+        if isRecurring {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            if let date = formatter.date(from: selectedDate) {
+                let days = date.daysOfWeek
+                startDate = days.first?.toString(format: "yyyy-MM-dd")
+                endDate = days.last?.toString(format: "yyyy-MM-dd")
+            }
+        } else {
+            selDate = selectedDate
+        }
+        
         service.deleteSchedule(
             scheduleId: scheduleId,
-            selectedDate: selectedDate,
+            selectedDate: selDate,
+            startDate: startDate,
+            endDate: endDate,
             isIncludeFollowing: isIncludeFollowing
         )
         .receive(on: RunLoop.main)
@@ -207,26 +225,45 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         .store(in: &cancellables)
     }
     
-    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO, completion: @escaping (Bool) -> Void) {
-        service.editSchedule(scheduleId: scheduleId, selectedDate: selectedDate, request: request)
-            .receive(on: RunLoop.main)
-            .sink(receiveCompletion: { [weak self] result in
-                if case .failure(let error) = result {
-                    switch error {
-                    case .codeError(let message):
-                        self?.editErrorMessage.send(message)
-                    case .clientError(let code) where code == 400:
-                        self?.editErrorMessage.send("기존의 일정과 시간이 중복됩니다.")
-                    default:
-                        self?.editErrorMessage.send("일정 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
-                    }
-                    completion(false)
+    func editSchedule(scheduleId: Int, selectedDate: String, isRecurring: Bool, request: EditScheduleRequestDTO, completion: @escaping (Bool) -> Void) {
+        var startDate: String? = nil
+        var endDate: String? = nil
+        
+        if isRecurring {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            if let date = formatter.date(from: selectedDate) {
+                let days = date.daysOfWeek
+                startDate = days.first?.toString(format: "yyyy-MM-dd")
+                endDate = days.last?.toString(format: "yyyy-MM-dd")
+            }
+        }
+        
+        service.editSchedule(
+            scheduleId: scheduleId,
+            selectedDate: selectedDate,
+            startDate: startDate,
+            endDate: endDate,
+            request: request
+        )
+        .receive(on: RunLoop.main)
+        .sink(receiveCompletion: { [weak self] result in
+            if case .failure(let error) = result {
+                switch error {
+                case .codeError(let message):
+                    self?.editErrorMessage.send(message)
+                case .clientError(let code) where code == 400:
+                    self?.editErrorMessage.send("기존의 일정과 시간이 중복됩니다.")
+                default:
+                    self?.editErrorMessage.send("일정 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
                 }
-            }, receiveValue: { [weak self] in
-                self?.isEditSuccess.send(())
-                self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
-                completion(true)
-            })
-            .store(in: &cancellables)
+                completion(false)
+            }
+        }, receiveValue: { [weak self] in
+            self?.isEditSuccess.send(())
+            self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
+            completion(true)
+        })
+        .store(in: &cancellables)
     }
 }

@@ -42,9 +42,9 @@ enum EndPoint {
     case fetchSchedules(childId: Int, startDate: String, endDate: String)
     case postSchedule(childId: Int, request: AddScheduleRequestDTO)
     case fetchDefaultColor(childId: Int)
-    case editSchedule(scheduleId: Int, selectedDate: String)
-    case deleteSchedule(scheduleId: Int, selectedDate: String)
-    
+    case editSchedule(scheduleId: Int, selectedDate: String, startDate: String?, endDate: String?)
+    case deleteSchedule(scheduleId: Int, selectedDate: String?, startDate: String?, endDate: String?)
+
     // Mission
     case fetchMissions(childId: Int?)
     case updateMission(missionId: Int, request: WriteMissionRequestDTO)
@@ -170,10 +170,19 @@ enum EndPoint {
             return "/api/v1/feeds/unread"
         case .completeMission(let missionId):
             return "/api/v1/missions/\(missionId)/complete"
-        case .deleteSchedule(let scheduleId, let selectedDate):
-            return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
-        case .editSchedule(let scheduleId, let selectedDate):
-            return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
+        case .deleteSchedule(let scheduleId, let selectedDate, let startDate, let endDate):
+            if let selectedDate = selectedDate {
+                return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
+            } else if let start = startDate, let end = endDate {
+                return "/api/v1/schedules/\(scheduleId)?startDate=\(start)&endDate=\(end)"
+            }
+            return "/api/v1/schedules/\(scheduleId)"
+        case .editSchedule(let scheduleId, let selectedDate, let startDate, let endDate):
+            if let start = startDate, let end = endDate {
+                return "/api/v1/schedules/\(scheduleId)?startDate=\(start)&endDate=\(end)"
+            } else {
+                return "/api/v1/schedules/\(scheduleId)?selectedDate=\(selectedDate)"
+            }
         case .updateMission(let missionId, _), .deleteMission(let missionId):
             return "/api/v1/missions/\(missionId)"
         case .fetchTodayStatus(let childId):

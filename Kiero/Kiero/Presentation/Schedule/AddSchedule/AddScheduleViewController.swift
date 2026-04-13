@@ -26,7 +26,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     var isEditMode: Bool = false
     var editingSchedule: Schedule?
-    var onEditConfirmed: ((EditScheduleRequestDTO, Bool, @escaping (Bool) -> Void) -> Void)?
+    var onEditConfirmed: ((EditScheduleRequestDTO, String, Bool, @escaping (Bool) -> Void) -> Void)?
     
     private let colorReverseMapping: [String: UIColor] = [
         "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,
@@ -713,13 +713,9 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let colorCode = colorMapping[currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
         let startTimeStr = (currentStartTime ?? Date()).toString(format: "HH:mm:ss")
         let endTimeStr = (currentEndTime ?? Date()).toString(format: "HH:mm:ss")
-        let isRecurring = repeatSwitch.isOn
+        let isRecurring = schedule.isRecurring
         let weekDates = baseDate.daysOfWeek
         let selectedIndices = weekdaySelectionView.selectedIndices.sorted()
-        
-        let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-        let dayOfWeekStr: String? = isRecurring ? selectedIndices.map { dayLabels[$0] }.joined(separator: ", ") : nil
-        let datesStr: String? = isRecurring ? nil : selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
 
         let isSameName = (titleTextField.text ?? "") == schedule.name
         let isSameStart = startTimeStr == schedule.startTime
@@ -752,18 +748,22 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
         }
         
+        let selectedDate: String
+        if isRecurring {
+            let firstIndex = selectedIndices.first ?? 0
+            selectedDate = weekDates[firstIndex].toString(format: "yyyy-MM-dd")
+        } else {
+            selectedDate = schedule.date ?? weekDates[selectedIndices.first ?? 0].toString(format: "yyyy-MM-dd")
+        }
+        
         let finalRequest = EditScheduleRequestDTO(
             name: titleTextField.text ?? "",
-            isRecurring: isRecurring,
             startTime: startTimeStr,
             endTime: endTimeStr,
-            scheduleColor: colorCode,
-            dayOfWeek: dayOfWeekStr,
-            dates: datesStr,
-            isIncludeFollowing: true
+            scheduleColor: colorCode
         )
         
-        self.onEditConfirmed?(finalRequest, true) { success in
+        self.onEditConfirmed?(finalRequest, selectedDate, true) { success in
             if success { self.dismiss(animated: true) }
         }
     }

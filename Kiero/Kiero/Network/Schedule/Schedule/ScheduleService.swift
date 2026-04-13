@@ -13,8 +13,8 @@ protocol ScheduleServiceType {
     func fetchSchedules(childId: Int, startDate: Date, endDate: Date) -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), NetworkError>
     func deleteChildDummyData() -> AnyPublisher<Void, NetworkError>
     func logout() -> AnyPublisher<Void, NetworkError>
-    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError>
-    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError>
+    func deleteSchedule(scheduleId: Int, selectedDate: String?, startDate: String?, endDate: String?, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError>
+    func editSchedule(scheduleId: Int, selectedDate: String, startDate: String?, endDate: String?, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError>
 }
 
 final class ScheduleService: ScheduleServiceType {
@@ -81,20 +81,28 @@ final class ScheduleService: ScheduleServiceType {
         }.eraseToAnyPublisher()
     }
     
-    func deleteSchedule(scheduleId: Int, selectedDate: String, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError> {
+    func deleteSchedule(scheduleId: Int, selectedDate: String?, startDate: String?, endDate: String?, isIncludeFollowing: Bool) -> AnyPublisher<Void, NetworkError> {
         let endPoint = EndPoint.deleteSchedule(
             scheduleId: scheduleId,
-            selectedDate: selectedDate
+            selectedDate: selectedDate,
+            startDate: startDate,
+            endDate: endDate
         )
-        let requestBody = DeleteScheduleRequestDTO(isIncludeFollowing: isIncludeFollowing)
         
         return Future<Void, NetworkError> { promise in
             Task {
                 do {
-                    let _: EmptyResponse = try await BaseService.shared.request(
-                        endPoint: endPoint,
-                        body: requestBody
-                    )
+                    if let _ = startDate {
+                        let requestBody = DeleteScheduleRequestDTO(isIncludeFollowing: isIncludeFollowing)
+                        let _: EmptyResponse = try await BaseService.shared.request(
+                            endPoint: endPoint,
+                            body: requestBody
+                        )
+                    } else {
+                        let _: EmptyResponse = try await BaseService.shared.request(
+                            endPoint: endPoint
+                        )
+                    }
                     promise(.success(()))
                 } catch {
                     promise(.failure(error as? NetworkError ?? .unknownError))
@@ -103,8 +111,13 @@ final class ScheduleService: ScheduleServiceType {
         }.eraseToAnyPublisher()
     }
     
-    func editSchedule(scheduleId: Int, selectedDate: String, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError> {
-        let endPoint = EndPoint.editSchedule(scheduleId: scheduleId, selectedDate: selectedDate)
+    func editSchedule(scheduleId: Int, selectedDate: String, startDate: String?, endDate: String?, request: EditScheduleRequestDTO) -> AnyPublisher<Void, NetworkError> {
+        let endPoint = EndPoint.editSchedule(
+            scheduleId: scheduleId,
+            selectedDate: selectedDate,
+            startDate: startDate,
+            endDate: endDate
+        )
         return Future<Void, NetworkError> { promise in
             Task {
                 do {
