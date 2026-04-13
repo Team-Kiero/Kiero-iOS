@@ -266,17 +266,17 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 if hasToday {
                     if startMin < currentTimeMin {
-                        Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 88)
+                        Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 65)
                         return
                     }
                     
                     if isFireLit {
-                        Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.", bottomInset: 88)
+                        Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.", bottomInset: 65)
                         return
                     }
                     
                     if hasActedLaterSchedule(endMin: endMin, now: now) {
-                        Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.", bottomInset: 88)
+                        Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.", bottomInset: 65)
                         return
                     }
                 }
