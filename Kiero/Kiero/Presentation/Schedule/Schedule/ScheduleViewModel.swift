@@ -122,11 +122,11 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                 let calendar = Calendar.current
                 let now = Date()
                 let currentWeekRange = refDate.daysOfWeek
-                let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+                _ = (calendar.component(.weekday, from: now) + 5) % 7
 
                 return schedules.filter { schedule in
                     if schedule.isRecurring {
-                        let isViewingCurrentWeek = calendar.isDate(refDate, inSameDayAs: now) ||
+                        _ = calendar.isDate(refDate, inSameDayAs: now) ||
                                                   (currentWeekRange.first! <= now && currentWeekRange.last! >= now)
                         return true
                     } else {
