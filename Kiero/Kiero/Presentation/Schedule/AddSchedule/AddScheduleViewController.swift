@@ -748,13 +748,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             }
         }
         
-        let selectedDate: String
-        if isRecurring {
-            let firstIndex = selectedIndices.first ?? 0
-            selectedDate = weekDates[firstIndex].toString(format: "yyyy-MM-dd")
-        } else {
-            selectedDate = schedule.date ?? weekDates[selectedIndices.first ?? 0].toString(format: "yyyy-MM-dd")
-        }
+        let selectedDate = schedule.date ?? weekDates[selectedIndices.first ?? 0].toString(format: "yyyy-MM-dd")
         
         let finalRequest = EditScheduleRequestDTO(
             name: titleTextField.text ?? "",
