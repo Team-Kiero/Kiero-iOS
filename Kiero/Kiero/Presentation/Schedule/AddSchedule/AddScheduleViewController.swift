@@ -236,13 +236,19 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
+            let calendar = Calendar.current
+            let now = Date()
+            let today = calendar.startOfDay(for: now)
+            
             let start = self.currentStartTime ?? Date()
             let end = self.currentEndTime ?? Date()
-            let startMin = Calendar.current.component(.hour, from: start) * 60 + Calendar.current.component(.minute, from: start)
-            let endMin = Calendar.current.component(.hour, from: end) * 60 + Calendar.current.component(.minute, from: end)
+            
+            let startMin = calendar.component(.hour, from: start) * 60 + calendar.component(.minute, from: start)
+            let endMin = calendar.component(.hour, from: end) * 60 + calendar.component(.minute, from: end)
+            let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
             
             if startMin >= endMin {
-                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.", bottomInset: 88)
+                Toast.show(message: "종료시간은 시작시간보다 늦어야 합니다.", bottomInset: 65)
                 return
             }
             
@@ -251,15 +257,46 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 return
             }
             
-            let calendar = Calendar.current
-            let now = Date()
-            let today = calendar.startOfDay(for: now)
             let weekDates = self.baseDate.daysOfWeek
             let isRecurring = self.repeatSwitch.isOn
             let isFireLit = self.viewModel?.isFireLit ?? false
-            let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+            let colorCode = self.colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
+            let startTimeStr = start.toString(format: "HH:mm:ss")
+            let endTimeStr = end.toString(format: "HH:mm:ss")
             
-            if !isRecurring {
+            let requestDTO: AddScheduleRequestDTO
+
+            if isRecurring {
+                let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
+                var firstDate = weekDates[selectedIndices[0]]
+                let currentWeekStart = calendar.startOfDay(for: Date().daysOfWeek.first!)
+                let lookingWeekStart = calendar.startOfDay(for: weekDates.first!)
+                
+                if currentWeekStart == lookingWeekStart {
+                    let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+                    let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                    
+                    if isTodaySelected && (isFireLit || startMin < currentTimeMin) {
+                        if let nextWeekDate = calendar.date(byAdding: .day, value: 7, to: firstDate) {
+                            firstDate = nextWeekDate
+                            Toast.show(message: "일정 등록이 마감된 날이 있어, 다음 주부터 적용돼요.", bottomInset: 88)
+                        }
+                    }
+                }
+                
+                requestDTO = AddScheduleRequestDTO(
+                    name: title,
+                    isRecurring: true,
+                    firstOrderDate: firstDate.toString(format: "yyyy-MM-dd"),
+                    startTime: startTimeStr,
+                    endTime: endTimeStr,
+                    scheduleColor: colorCode,
+                    dayOfWeek: dayOfWeekStr,
+                    dates: nil
+                )
+                
+            } else {
                 let hasToday = selectedIndices.contains { index in
                     calendar.isDate(weekDates[index], inSameDayAs: today)
                 }
@@ -269,12 +306,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                         Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 65)
                         return
                     }
-                    
                     if isFireLit {
                         Toast.show(message: "오늘 일정이 마감되어, 일정을 추가할 수 없어요.", bottomInset: 65)
                         return
                     }
-                    
                     if hasActedLaterSchedule(endMin: endMin, now: now) {
                         Toast.show(message: "이후의 일정이 이미 시작되어, 일정을 추가할 수 없어요.", bottomInset: 65)
                         return
@@ -284,39 +319,13 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 let hasPastDate = selectedIndices.contains { index in
                     calendar.startOfDay(for: weekDates[index]) < today
                 }
-                
                 if hasPastDate {
                     Toast.show(message: "이미 지난 시간에는 일정을 등록할 수 없어요.", bottomInset: 88)
                     return
                 }
-            }
-            
-            self.navigationBar.isRightButtonEnabled = false
-            
-            let colorCode = self.colorMapping[self.currentSelectedColor ?? .schedule1] ?? "SCHEDULE1"
-            let startTimeStr = start.toString(format: "HH:mm:ss")
-            let endTimeStr = end.toString(format: "HH:mm:ss")
-            
-            if isRecurring {
-                let dayLabels = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
-                let dayOfWeekStr = selectedIndices.map { dayLabels[$0] }.joined(separator: ", ")
-                let firstOrderDate = weekDates[selectedIndices[0]].toString(format: "yyyy-MM-dd")
                 
-                let requestDTO = AddScheduleRequestDTO(
-                    name: title,
-                    isRecurring: true,
-                    firstOrderDate: firstOrderDate,
-                    startTime: startTimeStr,
-                    endTime: endTimeStr,
-                    scheduleColor: colorCode,
-                    dayOfWeek: dayOfWeekStr,
-                    dates: nil
-                )
-                viewModel?.addSchedule(request: requestDTO)
-            } else {
                 let datesStr = selectedIndices.map { weekDates[$0].toString(format: "yyyy-MM-dd") }.joined(separator: ", ")
-                
-                let requestDTO = AddScheduleRequestDTO(
+                requestDTO = AddScheduleRequestDTO(
                     name: title,
                     isRecurring: false,
                     firstOrderDate: nil,
@@ -326,9 +335,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     dayOfWeek: nil,
                     dates: datesStr
                 )
-                viewModel?.addSchedule(request: requestDTO)
             }
             
+            self.navigationBar.isRightButtonEnabled = false
+            viewModel?.addSchedule(request: requestDTO)
             self.view.endEditing(true)
         }
         
@@ -376,77 +386,52 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 let calendar = Calendar.current
                 let now = Date()
-                let today = calendar.startOfDay(for: now)
-                let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-                let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
-                let isCurrentWeek = weekDates.first! <= today && weekDates.last! >= today
-                let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60
-                + calendar.component(.minute, from: self.currentStartTime ?? now)
-                let endMin = calendar.component(.hour, from: self.currentEndTime ?? now) * 60
-                + calendar.component(.minute, from: self.currentEndTime ?? now)
+                _ = calendar.startOfDay(for: now)
                 
-                var shouldShowWarning = false
+                var finalTargetDate = weekDates[selectedIndices.first ?? 0]
+                var wasWarningShown = false
                 
                 if isRecurring {
-                    let hasPastDayInWeek = selectedIndices.contains { $0 < currentWeekDayIndex }
-                    let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
-                    let isTodayTimePast = isTodaySelected && (startMin < currentTimeMin)
-                    let isFireLit = self.viewModel?.isFireLit ?? false
-                    let hasActedLater = isTodaySelected && hasActedLaterSchedule(endMin: endMin, now: now)
-
-                    shouldShowWarning = isCurrentWeek && (
-                        hasPastDayInWeek ||
-                        isTodayTimePast ||
-                        (isTodaySelected && isFireLit) ||
-                        hasActedLater
-                    )
+                    let currentWeekStart = calendar.startOfDay(for: now.daysOfWeek.first!)
+                    let lookingWeekStart = calendar.startOfDay(for: weekDates.first!)
                     
-                    if shouldShowWarning {
-                        Toast.show(message: "일정 등록이 마감된 날이 있어, 오늘 이후부터 적용돼요.", bottomInset: 88)
-                    } else {
-                        Toast.show(message: "일정이 등록되었어요.", bottomInset: 88)
+                    if currentWeekStart == lookingWeekStart {
+                        let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
+                        let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                        let isFireLit = self.viewModel?.isFireLit ?? false
+                        
+                        let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60 + calendar.component(.minute, from: self.currentStartTime ?? now)
+                        let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
+                        
+                        if isTodaySelected && (isFireLit || startMin < currentTimeMin) {
+                            if let nextWeek = calendar.date(byAdding: .day, value: 7, to: finalTargetDate) {
+                                finalTargetDate = nextWeek
+                                wasWarningShown = true
+                            }
+                        }
                     }
+                }
+                
+                if isRecurring && wasWarningShown {
+                    Toast.show(message: "일정 등록이 마감된 날이 있어, 다음 주부터 적용돼요.", bottomInset: 88)
                 } else {
                     Toast.show(message: "일정이 등록되었어요.", bottomInset: 88)
                 }
                 
-                if isRecurring && shouldShowWarning {
-                    guard let nextWeekDate = calendar.date(byAdding: .weekOfYear, value: 1, to: weekDates[selectedIndices[0]]) else {
-                        self.dismiss(animated: true)
-                        return
-                    }
-                    
-                    let actualSchedule = Schedule(
-                        id: Int(Date().timeIntervalSince1970 * 1000),
-                        name: name,
-                        isRecurring: true,
-                        startTime: startTime,
-                        endTime: endTime,
-                        scheduleColor: colorName,
-                        colorCode: hexCode,
-                        dayOfWeek: selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", "),
-                        date: nil,
-                        scheduleStatus: nil
-                    )
-                    self.onScheduleAdded?(actualSchedule, nextWeekDate)
-                    
-                } else if let firstIndex = selectedIndices.first {
-                    let targetDate = weekDates[firstIndex]
-                    
-                    let actualSchedule = Schedule(
-                        id: Int(Date().timeIntervalSince1970 * 1000),
-                        name: name,
-                        isRecurring: isRecurring,
-                        startTime: startTime,
-                        endTime: endTime,
-                        scheduleColor: colorName,
-                        colorCode: hexCode,
-                        dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
-                        date: isRecurring ? nil : targetDate.toString(format: "yyyy-MM-dd"),
-                        scheduleStatus: nil
-                    )
-                    self.onScheduleAdded?(actualSchedule, targetDate)
-                }
+                let actualSchedule = Schedule(
+                    id: Int(Date().timeIntervalSince1970 * 1000),
+                    name: name,
+                    isRecurring: isRecurring,
+                    startTime: startTime,
+                    endTime: endTime,
+                    scheduleColor: colorName,
+                    colorCode: hexCode,
+                    dayOfWeek: isRecurring ? selectedIndices.map { ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"][$0] }.joined(separator: ", ") : nil,
+                    date: isRecurring ? nil : finalTargetDate.toString(format: "yyyy-MM-dd"),
+                    scheduleStatus: nil
+                )
+                
+                self.onScheduleAdded?(actualSchedule, finalTargetDate)
                 
                 self.dismiss(animated: true)
             }
