@@ -176,7 +176,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         weekdaySelectionView.snp.makeConstraints {
             $0.top.equalTo(daySectionTitle.snp.bottom).offset(17)
-            $0.horizontalEdges.equalToSuperview().inset(19)
+            $0.horizontalEdges.equalToSuperview().inset(25)
         }
         
         timeSectionTitle.snp.makeConstraints {
@@ -651,7 +651,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             
             repeatLabel.snp.remakeConstraints {
                 $0.centerY.equalTo(daySectionTitle)
-                $0.trailing.equalToSuperview().inset(27)
+                $0.trailing.equalToSuperview().inset(25)
             }
         } else {
             repeatLabel.isHidden = true
@@ -723,7 +723,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         let isSameColor = colorCode == schedule.scheduleColor
 
         if isSameName && isSameStart && isSameEnd && isSameColor {
-            Toast.show(message: "변경사항이 없어요.", bottomInset: 88)
+            Toast.show(message: "변경사항이 없어요.", bottomInset: 65)
             return
         }
         
