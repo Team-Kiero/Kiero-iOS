@@ -119,7 +119,7 @@ final class WeekdaySelectionView: UIView {
     private func dayButtonTapped(_ sender: UIButton) {
         switch selectionMode {
         case .edit:
-            Toast.show(message: "요일은 수정할 수 없어요. 삭제 후 등록해주세요.")
+            Toast.show(message: "요일은 수정할 수 없어요. 삭제 후 등록해주세요.", bottomInset: 65)
             return
         case .single:
             dayButtons.forEach {
