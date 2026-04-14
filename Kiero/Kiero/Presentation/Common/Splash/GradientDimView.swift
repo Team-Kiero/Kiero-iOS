@@ -37,7 +37,7 @@ final class GradientDimView: UIView {
     private func updateGradient() {
         let h = max(bounds.height, 1)
 
-        var l1 = clamp(fadeStartY / h)
+        let l1 = clamp(fadeStartY / h)
         var l2 = clamp(solidStartY / h)
 
         if l2 < l1 { l2 = l1 }
