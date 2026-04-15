@@ -18,7 +18,8 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
         super.init(
             rootView: TodayStatusView(
                 viewModel: viewModel,
-                onMissionSheetRequested: { _ in }
+                onMissionSheetRequested: { _ in },
+                onScheduleOverlayRequested: { _ in }
             )
         )
         
@@ -26,6 +27,9 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
             viewModel: viewModel,
             onMissionSheetRequested: { [weak self] selectedTab in
                 self?.presentMissionBottomSheet(selectedTab: selectedTab)
+            },
+            onScheduleOverlayRequested: { [weak self] schedule in
+                self?.presentScheduleImageOverlay(for: schedule)
             }
         )
     }
@@ -66,6 +70,21 @@ private extension TodayStatusHostingController {
         vc.view.backgroundColor = .clear
         vc.modalPresentationStyle = .overFullScreen
         vc.modalTransitionStyle = .crossDissolve
+        
+        present(vc, animated: false)
+    }
+    
+    func presentScheduleImageOverlay(for schedule: ScheduleItem) {
+        NotificationCenter.default.post(name: .dimNavigationBar, object: true)
+        
+        let overlayView = ScheduleImageOverlayContainerView(
+            schedule: schedule,
+            viewModel: viewModel
+        )
+        
+        let vc = UIHostingController(rootView: overlayView)
+        vc.view.backgroundColor = .clear
+        vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: false)
     }

@@ -17,16 +17,13 @@ struct TodayStatusView: View {
     @ObservedObject var viewModel: TodayStatusViewModel
     
     let onMissionSheetRequested: (MissionTab) -> Void
-    
-    @State private var selectedSchedule: ScheduleItem?
+    let onScheduleOverlayRequested: (ScheduleItem) -> Void
     
     var body: some View {
         ZStack {
             backgroundView
             mainContent
-            popupOverlay
         }
-        .animation(.easeInOut(duration: 0.25), value: selectedSchedule != nil)
     }
 }
 
@@ -54,41 +51,13 @@ private extension TodayStatusView {
                     schedules: viewModel.schedules,
                     isFireLitToday: viewModel.isFireLitToday,
                     onTapSchedule: { schedule in
-                        selectedSchedule = schedule
-                        viewModel.didTapScheduleCard(schedule)
+                        onScheduleOverlayRequested(schedule)
                     }
                 )
                 .padding(.top, 18)
                 .padding(.bottom, 100)
             }
             .scrollIndicators(.hidden)
-        }
-        .onChange(of: selectedSchedule != nil) { value in
-            NotificationCenter.default.post(name: .dimNavigationBar, object: value)
-        }
-    }
-    
-    @ViewBuilder
-    var popupOverlay: some View {
-        if let selectedSchedule {
-            Color.kBlack.opacity(0.75)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    self.selectedSchedule = nil
-                    viewModel.selectedScheduleImageURL = nil
-                }
-            
-            ScheduleImageOverlayView(
-                title: selectedSchedule.title,
-                imageURL: viewModel.selectedScheduleImageURL,
-                onClose: {
-                    self.selectedSchedule = nil
-                    viewModel.selectedScheduleImageURL = nil
-                }
-            )
-            .padding(.horizontal, 16)
-            .transition(.scale.combined(with: .opacity))
-            .zIndex(2)
         }
     }
     
