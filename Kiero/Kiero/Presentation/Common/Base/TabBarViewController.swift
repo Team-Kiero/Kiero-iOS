@@ -247,6 +247,13 @@ private extension TabBarViewController {
             name: .hideNavigationBar,
             object: nil
         )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleRefreshUnreadBadge(_:)),
+            name: .refreshUnreadBadge,
+            object: nil
+        )
     }
     
     func updateCustomTabBarSelection() {
@@ -351,6 +358,11 @@ private extension TabBarViewController {
             self.customNavigationBar.isUserInteractionEnabled = !isHidden
         }
     }
+    
+    @objc
+    private func handleRefreshUnreadBadge(_ notification: Notification) {
+        fetchInitialUnreadStatus()
+    }
 }
 
 // MARK: - UITabBarControllerDelegate
@@ -444,6 +456,8 @@ private extension TabBarViewController {
                 guard let self else { return }
                 self.hasUnreadNotification = hasUnread
                 self.customNavigationBar.isNotificationActive = hasUnread
+                
+                self.updateNavigationBar()
             }
             .store(in: &cancellables)
     }

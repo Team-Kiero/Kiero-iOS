@@ -34,18 +34,12 @@ final class FeedService: FeedServiceType {
     
     func fetchUnreadFeed() -> AnyPublisher<UnreadNotificationDTO, NetworkError> {
         let endPoint = EndPoint.fetchUnreadFeed
-
+        
         return Future<UnreadNotificationDTO, NetworkError> { promise in
             Task {
                 do {
-                    let response: BaseResponse<UnreadNotificationDTO> = try await BaseService.shared.request(endPoint: endPoint)
-
-                    guard let data = response.data else {
-                        promise(.failure(.unknownError))
-                        return
-                    }
-
-                    promise(.success(data))
+                    let response: UnreadNotificationDTO = try await BaseService.shared.request(endPoint: endPoint)
+                    promise(.success(response))
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {

@@ -33,8 +33,8 @@ struct FeedMetadataDTO: Decodable {
 }
 
 struct UnreadNotificationDTO: Decodable {
-    let hasUnread: Bool
     let unreadChildIds: [Int]
+    let hasUnread: Bool
 }
 
 extension FeedResponseDTO {
