@@ -44,7 +44,7 @@ final class WishBox: UIView {
     private let wishBox = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .fill
-        $0.spacing = 14
+        $0.spacing = 12
     }
     
     override init(frame: CGRect) {

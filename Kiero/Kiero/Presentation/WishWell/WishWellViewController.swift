@@ -108,7 +108,7 @@ extension WishWellViewController: UICollectionViewDataSource {
 extension WishWellViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (collectionView.bounds.width - (16 * 2) - 13) / 2
-        return CGSize(width: width, height: 113)
+        return CGSize(width: width, height: 116)
     }
 }
 
