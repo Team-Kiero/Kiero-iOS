@@ -166,27 +166,51 @@ final class SseStreamManager {
                     self?.onRefreshWillStart?()
                 }
                 
-                do {
-                    let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
-                    
-                    let shouldProceed = self.withLock { () -> Bool in
-                        guard self.isRunning else {
-                            self.isRefreshing = false
-                            return false
+                let retryDelays: [UInt64] = [
+                    0,
+                    3 * 1_000_000_000,
+                    5 * 1_000_000_000
+                ]
+                
+                var refreshed = false
+                
+                for (index, delay) in retryDelays.enumerated() {
+                    if delay > 0 {
+                        do {
+                            try await Task.sleep(nanoseconds: delay)
+                        } catch {
+                            return
                         }
-                        
-                        self.sseAccessToken = newToken
-                        return true
                     }
                     
-                    guard shouldProceed else { continue }
-                    
-                    self.connectCandidate(token: newToken, onEvent: onEvent)
-                } catch {
+                    do {
+                        let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                        
+                        let shouldProceed = self.withLock { () -> Bool in
+                            guard self.isRunning else {
+                                self.isRefreshing = false
+                                return false
+                            }
+                            
+                            self.sseAccessToken = newToken
+                            return true
+                        }
+                        
+                        guard shouldProceed else { break }
+                        
+                        self.connectCandidate(token: newToken, onEvent: onEvent)
+                        refreshed = true
+                        break
+                    } catch {
+                        print("❌ [SSEManager] refresh retry \(index + 1) failed:", error)
+                    }
+                }
+                
+                if !refreshed {
                     self.withLock {
                         self.isRefreshing = false
                     }
-                    print("❌ [SSEManager] refresh token failed:", error)
+                    print("❌ [SSEManager] refresh failed after retries")
                 }
             }
         }
@@ -405,7 +429,7 @@ final class SseStreamManager {
             print("⚠️ [SSEManager] candidate failed, keep existing active connection")
         }
     }
-
+    
     private func recoverActiveConnection(using context: ActiveRecoveryContext) async {
         guard let onEvent = context.onEvent else {
             withLock { isRecoveringActive = false }
@@ -451,7 +475,7 @@ final class SseStreamManager {
             print("❌ [SSEManager] active recovery failed:", error)
         }
     }
-
+    
     private func shouldSkipDuplicateEvent(_ payload: SseEventPayload) -> Bool {
         withLock {
             cleanupExpiredEventHashesLocked()
@@ -478,7 +502,7 @@ final class SseStreamManager {
         let digest = SHA256.hash(data: Data(raw.utf8))
         return digest.map { String(format: "%02x", $0) }.joined()
     }
-
+    
     @discardableResult
     private func withLock<T>(_ work: () -> T) -> T {
         lock.lock()
