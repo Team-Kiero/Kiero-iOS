@@ -31,6 +31,7 @@ final class SseStreamManager {
     
     private var isRunning = false
     private var isRefreshing = false
+    private var isRecoveringActive = false
     
     private var storedOnEvent: EventHandler?
     
@@ -111,6 +112,7 @@ final class SseStreamManager {
             
             isRunning = false
             isRefreshing = false
+            isRecoveringActive = false
             
             return (active, candidate, task)
         }
@@ -198,6 +200,14 @@ final class SseStreamManager {
         token: String,
         onEvent: @escaping EventHandler
     ) {
+        let oldActive = withLock { () -> SseClient? in
+            let old = activeClient
+            activeClient = nil
+            activeClientID = nil
+            return old
+        }
+        oldActive?.disconnect()
+        
         let clientID = UUID()
         
         let client = makeClient(
@@ -283,7 +293,7 @@ final class SseStreamManager {
                 self?.handleConnected(clientID: id, role: role)
             },
             onError: { [weak self] error in
-                self?.handleError(error, clientID: id, role: role)
+                self?.handleError(error, clientID: id, role: role, onEvent: onEvent)
             }
         )
     }
@@ -291,9 +301,21 @@ final class SseStreamManager {
     private func handleConnected(clientID: UUID, role: ClientRole) {
         switch role {
         case .active:
-            let isValid = withLock { activeClientID == clientID && isRunning }
-            guard isValid else { return }
-            print("✅ [SSEManager] active connected")
+            let shouldNotifyReconnect = withLock { () -> Bool in
+                guard activeClientID == clientID, isRunning else { return false }
+                
+                let wasRecovering = isRecoveringActive
+                isRecoveringActive = false
+                
+                print("✅ [SSEManager] active connected")
+                return wasRecovering
+            }
+            
+            if shouldNotifyReconnect {
+                DispatchQueue.main.async { [weak self] in
+                    self?.onReconnected?()
+                }
+            }
             
         case .candidate:
             let previousActive: SseClient? = withLock {
@@ -326,14 +348,47 @@ final class SseStreamManager {
     private func handleError(
         _ error: Error,
         clientID: UUID,
-        role: ClientRole
+        role: ClientRole,
+        onEvent: @escaping EventHandler
     ) {
         print("❌ [SSEManager] \(role) error:", error)
         
         switch role {
         case .active:
-            let isValid = withLock { activeClientID == clientID }
-            guard isValid else { return }
+            let recoveryContext: ActiveRecoveryContext? = withLock {
+                guard activeClientID == clientID else { return nil }
+                guard isRunning else { return nil }
+                
+                if isRefreshing {
+                    print("⚠️ [SSEManager] active error while refresh in progress, skip immediate recovery")
+                    return nil
+                }
+                
+                if isRecoveringActive {
+                    print("⚠️ [SSEManager] active recovery already in progress")
+                    return nil
+                }
+                
+                isRecoveringActive = true
+                
+                let currentToken = sseAccessToken
+                let oldActive = activeClient
+                activeClient = nil
+                activeClientID = nil
+                
+                return ActiveRecoveryContext(
+                    currentToken: currentToken,
+                    onEvent: onEvent,
+                    oldClient: oldActive
+                )
+            }
+            
+            guard let recoveryContext else { return }
+            recoveryContext.oldClient?.disconnect()
+            
+            Task { [weak self] in
+                await self?.recoverActiveConnection(using: recoveryContext)
+            }
         case .candidate:
             let candidateToDisconnect: SseClient? = withLock {
                 guard candidateClientID == clientID else { return nil }
@@ -348,6 +403,52 @@ final class SseStreamManager {
             
             candidateToDisconnect?.disconnect()
             print("⚠️ [SSEManager] candidate failed, keep existing active connection")
+        }
+    }
+
+    private func recoverActiveConnection(using context: ActiveRecoveryContext) async {
+        guard let onEvent = context.onEvent else {
+            withLock { isRecoveringActive = false }
+            return
+        }
+        
+        if let currentToken = context.currentToken, !currentToken.isEmpty {
+            let shouldReconnect = withLock { () -> Bool in
+                guard isRunning else {
+                    isRecoveringActive = false
+                    return false
+                }
+                return true
+            }
+            
+            if shouldReconnect {
+                print("🔄 [SSEManager] recover active with existing token")
+                connectActive(token: currentToken, onEvent: onEvent)
+                return
+            }
+        }
+        
+        do {
+            print("🔄 [SSEManager] recover active with reissued token")
+            let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
+            
+            let shouldReconnect = withLock { () -> Bool in
+                guard isRunning else {
+                    isRecoveringActive = false
+                    return false
+                }
+                
+                sseAccessToken = newToken
+                return true
+            }
+            
+            guard shouldReconnect else { return }
+            connectActive(token: newToken, onEvent: onEvent)
+        } catch {
+            withLock {
+                isRecoveringActive = false
+            }
+            print("❌ [SSEManager] active recovery failed:", error)
         }
     }
 
@@ -377,7 +478,9 @@ final class SseStreamManager {
         let digest = SHA256.hash(data: Data(raw.utf8))
         return digest.map { String(format: "%02x", $0) }.joined()
     }
-
+    
+    // MARK: - Lock Helper
+    
     @discardableResult
     private func withLock<T>(_ work: () -> T) -> T {
         lock.lock()
@@ -397,5 +500,11 @@ private extension SseStreamManager {
             case .candidate: return "candidate"
             }
         }
+    }
+    
+    struct ActiveRecoveryContext {
+        let currentToken: String?
+        let onEvent: EventHandler?
+        let oldClient: SseClient?
     }
 }
