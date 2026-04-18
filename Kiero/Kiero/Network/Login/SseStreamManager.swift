@@ -478,9 +478,7 @@ final class SseStreamManager {
         let digest = SHA256.hash(data: Data(raw.utf8))
         return digest.map { String(format: "%02x", $0) }.joined()
     }
-    
-    // MARK: - Lock Helper
-    
+
     @discardableResult
     private func withLock<T>(_ work: () -> T) -> T {
         lock.lock()
