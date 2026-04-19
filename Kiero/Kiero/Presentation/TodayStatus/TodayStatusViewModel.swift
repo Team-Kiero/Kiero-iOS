@@ -90,6 +90,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
                 }
                 
                 self.selectedScheduleImageURL = url
+                NotificationCenter.default.post(name: .refreshUnreadBadge, object: nil)
             }
             .store(in: &cancellables)
     }

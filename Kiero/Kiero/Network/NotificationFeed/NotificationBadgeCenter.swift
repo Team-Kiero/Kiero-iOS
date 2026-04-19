@@ -10,15 +10,16 @@ import Foundation
 
 extension Notification.Name {
     static let feedItemCreated = Notification.Name("feedItemCreated")
-    static let sseEventReceived = Notification.Name("sseEventReceived") 
+    static let sseEventReceived = Notification.Name("sseEventReceived")
+    static let refreshUnreadBadge = Notification.Name("refreshUnreadBadge")
 }
 
 final class NotificationBadgeCenter {
     static let shared = NotificationBadgeCenter()
     private init() {}
-
+    
     let hasUnreadSubject = CurrentValueSubject<Bool, Never>(false)
-
+    
     func setUnread(_ value: Bool) {
         hasUnreadSubject.send(value)
     }
