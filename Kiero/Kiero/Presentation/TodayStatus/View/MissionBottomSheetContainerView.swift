@@ -17,7 +17,7 @@ struct MissionBottomSheetContainerView: View {
     let completeMissions: [MissionItem]
     let incompleteMissions: [MissionItem]
     
-    private let topInsetFromScreen: CGFloat = 105
+    private let topSpacingFromSafeArea: CGFloat = 57
     
     init(
         selectedTab: MissionTab,
@@ -31,35 +31,35 @@ struct MissionBottomSheetContainerView: View {
     
     var body: some View {
         GeometryReader { proxy in
-            let screenHeight = proxy.size.height + proxy.safeAreaInsets.top + proxy.safeAreaInsets.bottom
-            let visibleTopInset = max(topInsetFromScreen - proxy.safeAreaInsets.top, 0)
-            let sheetHeight = screenHeight - topInsetFromScreen
+            let sheetTop = proxy.safeAreaInsets.top + topSpacingFromSafeArea
             
-            ZStack(alignment: .bottom) {
-                Color.kBlack.opacity(isVisible ? 0.75 : 0)
+            ZStack(alignment: .top) {
+                Color.clear
+                    .contentShape(Rectangle())
                     .ignoresSafeArea()
                     .onTapGesture {
                         close()
                     }
                 
-                MissionBottomSheet(
-                    selectedTab: $selectedTab,
-                    completeMissions: completeMissions,
-                    incompleteMissions: incompleteMissions,
-                    onClose: {
-                        close()
-                    }
-                )
-                .frame(
-                    maxWidth: .infinity,
-                    minHeight: sheetHeight,
-                    maxHeight: sheetHeight,
-                    alignment: .top
-                )
-                .offset(y: isVisible ? 0 : sheetHeight + 40)
+                VStack(spacing: 0) {
+                    Color.clear
+                        .frame(height: sheetTop)
+                    
+                    MissionBottomSheet(
+                        selectedTab: $selectedTab,
+                        completeMissions: completeMissions,
+                        incompleteMissions: incompleteMissions,
+                        onClose: {
+                            close()
+                        }
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .offset(y: isVisible ? 0 : proxy.size.height)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .ignoresSafeArea(edges: .bottom)
             }
-            .padding(.top, visibleTopInset)
-            .ignoresSafeArea(edges: .bottom)
+            .ignoresSafeArea()
             .onAppear {
                 withAnimation(.easeInOut(duration: 0.25)) {
                     isVisible = true
