@@ -275,13 +275,21 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 if currentWeekStart == lookingWeekStart {
                     let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
-                    let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
+                    let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
                     
-                    if isTodaySelected && (isFireLit || startMin < currentTimeMin) {
-                        if let nextWeekDate = calendar.date(byAdding: .day, value: 7, to: firstDate) {
-                            firstDate = nextWeekDate
-                            Toast.show(message: "일정 등록이 마감된 날이 있어, 다음 주부터 적용돼요.", bottomInset: 88)
+                    let validFirstIndex = selectedIndices.first { index in
+                        if index > currentWeekDayIndex { return true }
+                        if index == currentWeekDayIndex {
+                            return !isFireLit && startMin >= currentTimeMin
                         }
+                        return false
+                    }
+                    
+                    if let validIndex = validFirstIndex {
+                        firstDate = weekDates[validIndex]
+                    } else {
+                        firstDate = calendar.date(byAdding: .day, value: 7, to: weekDates[selectedIndices[0]])!
+                        Toast.show(message: "일정 등록이 마감된 날이 있어, 다음 주부터 적용돼요.", bottomInset: 88)
                     }
                 }
                 
@@ -397,17 +405,25 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                     
                     if currentWeekStart == lookingWeekStart {
                         let currentWeekDayIndex = (calendar.component(.weekday, from: now) + 5) % 7
-                        let isTodaySelected = selectedIndices.contains(currentWeekDayIndex)
                         let isFireLit = self.viewModel?.isFireLit ?? false
+                        let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60
+                                     + calendar.component(.minute, from: self.currentStartTime ?? now)
+                        let currentTimeMin = calendar.component(.hour, from: now) * 60
+                                           + calendar.component(.minute, from: now)
                         
-                        let startMin = calendar.component(.hour, from: self.currentStartTime ?? now) * 60 + calendar.component(.minute, from: self.currentStartTime ?? now)
-                        let currentTimeMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
-                        
-                        if isTodaySelected && (isFireLit || startMin < currentTimeMin) {
-                            if let nextWeek = calendar.date(byAdding: .day, value: 7, to: finalTargetDate) {
-                                finalTargetDate = nextWeek
-                                wasWarningShown = true
+                        let validFirstIndex = selectedIndices.first { index in
+                            if index > currentWeekDayIndex { return true }
+                            if index == currentWeekDayIndex {
+                                return !isFireLit && startMin >= currentTimeMin
                             }
+                            return false
+                        }
+                        
+                        if let validIndex = validFirstIndex {
+                            finalTargetDate = weekDates[validIndex]
+                        } else {
+                            finalTargetDate = calendar.date(byAdding: .day, value: 7, to: weekDates[selectedIndices[0]])!
+                            wasWarningShown = true
                         }
                     }
                 }
