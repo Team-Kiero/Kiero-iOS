@@ -128,8 +128,15 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
             .compactMap { $0.object as? SseEventPayload }
             .filter { $0.eventType == "CHILD_JOINED" }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] payload in
                 guard let self else { return }
+                
+                if let id = payload.childId, id != 0 {
+                    UserDefaults.standard.set(id, forKey: "selectedChildId")
+                    print("✅ selectedChildId saved from SSE:", id)
+                } else {
+                    print("⚠️ childId 없음, fallback 필요")
+                }
                 self.isChildJoined = true
                 
                 let expired = viewModel.isExpiredValue
