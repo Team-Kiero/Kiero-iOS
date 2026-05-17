@@ -92,7 +92,7 @@ extension MissionView: UITableViewDataSource {
         }
         
         let mission = missionGroups[indexPath.section].missions[indexPath.row]
-        cell.configure(name: mission.name, reward: mission.reward)
+        cell.configure(name: mission.name, reward: mission.reward, isCompleted: mission.isCompleted)
         
         return cell
     }

@@ -42,14 +42,20 @@ final class MissionViewModel: BaseViewModel {
                 let finalGroups = response.missionsByDate
                     .sorted { $0.dueAt < $1.dueAt }
                     .map { group -> MissionGroupDTO in
-                        let sortedMissions = group.missions.sorted { m1, m2 in
+                        let sortedMissions = group.missions.sorted { (m1: MissionItemDTO, m2: MissionItemDTO) in
+                            if m1.isCompleted != m2.isCompleted {
+                                return !m1.isCompleted
+                            }
+                            
+                            if m1.isCompleted && m2.isCompleted {
+                                return m1.id > m2.id
+                            }
+                            
                             let o1 = activityOrderMap[m1.id]
                             let o2 = activityOrderMap[m2.id]
-
                             guard o1 != nil || o2 != nil else { return m1.id > m2.id }
                             if o1 == nil { return false }
                             if o2 == nil { return true }
-
                             return o1! > o2!
                         }
                         return MissionGroupDTO(dueAt: group.dueAt, dayOfWeek: group.dayOfWeek, missions: sortedMissions)
