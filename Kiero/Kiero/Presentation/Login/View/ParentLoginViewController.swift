@@ -7,6 +7,7 @@
 
 import Combine
 import UIKit
+import AuthenticationServices
 
 import SnapKit
 import Then
@@ -16,6 +17,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     // MARK: - Properties
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
+    private let appleTap = PassthroughSubject<String, Never>()
+    
     private var loadingVC: UIViewController?
     
     // MARK: - UI Components
@@ -30,9 +33,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         $0.clipsToBounds = true
     }
     
-    private let kakaoLoginButton = UIButton().then {
-        $0.setBackgroundImage(.btnKakao, for: .normal)
-    }
+    private let kakaoLoginButton = LoginButton(type: .kakao)
+    private let appleLoginButton = LoginButton(type: .apple)
     
     override func setStyle() {
         parentImageView.transform = CGAffineTransform(rotationAngle: -(.pi / 180 * 35))
@@ -43,7 +45,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             parentNaviBar,
             parentBubble,
             parentImageView,
-            kakaoLoginButton
+            kakaoLoginButton,
+            appleLoginButton
         )
     }
     
@@ -66,12 +69,20 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         
         kakaoLoginButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalTo(appleLoginButton.snp.top).offset(-8)
+            $0.height.equalTo(49)
+        }
+        
+        appleLoginButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
+            $0.height.equalTo(49)
         }
     }
     
     override func addTarget() {
         kakaoLoginButton.addTarget(self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
+        appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
         parentNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
@@ -81,7 +92,10 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         super.bind(viewModel: viewModel)
         
         let output = viewModel.transform(
-            input: .init(kakaoButtonTapped: kakaoTap.eraseToAnyPublisher())
+            input: .init(
+                kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
+                appleButtonTapped: appleTap.eraseToAnyPublisher()
+            )
         )
         
         output.state
@@ -121,7 +135,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
 //        vc.modalPresentationStyle = .overFullScreen
 //        vc.modalTransitionStyle = .crossDissolve
 //        loadingVC = vc
-//        present(vc, animated: false)
+//        present(vc, animated: false)애
 //    }
 //    
 //    private func hideLoading() {
@@ -164,5 +178,42 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private func kakaoLoginButtonTapped() {
         view.endEditing(true)
         kakaoTap.send(())
+    }
+    
+    @objc
+    private func appleLoginButtonTapped() {
+        let provider = ASAuthorizationAppleIDProvider()
+        let request = provider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+
+        let controller = ASAuthorizationController(authorizationRequests: [request])
+        controller.delegate = self
+        controller.presentationContextProvider = self
+        controller.performRequests()
+    }
+}
+
+extension ParentLoginViewController: ASAuthorizationControllerDelegate {
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithAuthorization authorization: ASAuthorization) {
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let tokenData = credential.identityToken,
+              let tokenString = String(data: tokenData, encoding: .utf8) else { return }
+        
+        print("✅ Apple Identity Token:")
+        print(tokenString)
+        
+        appleTap.send(tokenString)
+    }
+
+    func authorizationController(controller: ASAuthorizationController,
+                                 didCompleteWithError error: Error) {
+        Toast.show(message: "애플 로그인에 실패했어요.", bottomInset: 80)
+    }
+}
+
+extension ParentLoginViewController: ASAuthorizationControllerPresentationContextProviding {
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        return view.window!
     }
 }

@@ -12,6 +12,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
+        let appleButtonTapped: AnyPublisher<String, Never>
     }
     
     struct Output {
@@ -34,6 +35,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         input.kakaoButtonTapped
             .sink { [weak self] in
                 self?.requestKakaoLogin()
+            }
+            .store(in: &cancellables)
+        
+        input.appleButtonTapped
+            .sink { [weak self] identityToken in
+                self?.requestAppleLogin(identityToken: identityToken)
             }
             .store(in: &cancellables)
         
@@ -102,5 +109,56 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
             }
         }
+    }
+    
+    private func requestAppleLogin(identityToken: String) {
+        // TODO: API 연결 시 아래 주석 해제하고 이 코드 삭제
+        routeSubject.send(.parentOnboarding)
+        
+        // TODO: API 연결 시 작업
+//        guard !isLoggingIn else { return }
+//        isLoggingIn = true
+//        
+//        stateSubject.send(.loading)
+//        
+//        Task { [weak self] in
+//            guard let self else { return }
+//            
+//            defer { self.isLoggingIn = false }
+//            
+//            do {
+//                let loginData: LoginData = try await BaseService.shared.request(
+//                    endPoint: .appleAccessToken(token: identityToken)
+//                )
+//                
+//                TokenManager.shared.saveAccessToken(loginData.accessToken)
+//                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
+//                TokenManager.shared.saveProfile(loginData.image)
+//                TokenManager.shared.saveUserName(loginData.name)
+//                TokenManager.shared.saveUserRole(loginData.role)
+//                
+//                let children: ChildListResponse = try await BaseService.shared.request(
+//                    endPoint: .fetchChildren
+//                )
+//                
+//                await MainActor.run {
+//                    self.stateSubject.send(.idle)
+//                    
+//                    if children.isEmpty {
+//                        self.routeSubject.send(.parentOnboarding)
+//                    } else {
+//                        self.routeSubject.send(.parentTab)
+//                    }
+//                }
+//            } catch let error as NetworkError {
+//                await MainActor.run {
+//                    self.stateSubject.send(.failure(error.errorDescription))
+//                }
+//            } catch {
+//                await MainActor.run {
+//                    self.stateSubject.send(.failure("알 수 없는 에러"))
+//                }
+//            }
+//        }
     }
 }
