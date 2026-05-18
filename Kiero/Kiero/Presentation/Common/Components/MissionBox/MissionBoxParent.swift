@@ -63,8 +63,6 @@ final class MissionBoxParent: UIView {
         $0.isHidden = true
     }
     
-    private let rewardBadge = UIView()
-    
     private let spacer = UIView()
     
     override init(frame: CGRect) {
