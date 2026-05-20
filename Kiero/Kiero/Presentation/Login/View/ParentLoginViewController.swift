@@ -200,9 +200,13 @@ extension ParentLoginViewController: ASAuthorizationControllerDelegate {
               let tokenData = credential.identityToken,
               let tokenString = String(data: tokenData, encoding: .utf8) else { return }
         
-        print("✅ Apple Identity Token:")
-        print(tokenString)
+        guard let codeData = credential.authorizationCode,
+                     let codeString = String(data: codeData, encoding: .utf8) else { return }
         
+        print("✅ Apple Identity Token:", tokenString)
+        print("✅ Apple Authorization Code:", codeString)
+        
+        // TODO: 서버에게 보낼 토큰 정하기
         appleTap.send(tokenString)
     }
 
