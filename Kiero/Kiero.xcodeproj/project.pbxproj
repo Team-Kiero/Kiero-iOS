@@ -32,6 +32,7 @@
 /* Begin PBXFileReference section */
 		2455DCEC2F23628F00836E3D /* Kiero_Child.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kiero_Child.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		24DF50CB2F0A5173007146AC /* Kiero_Parent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kiero_Parent.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		24E888302FBD9F6500CBA6B3 /* Kiero_Parent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kiero_Parent.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -106,6 +107,7 @@
 		24DF50C22F0A5173007146AC = {
 			isa = PBXGroup;
 			children = (
+				24E888302FBD9F6500CBA6B3 /* Kiero_Parent.entitlements */,
 				24DF50CD2F0A5173007146AC /* Kiero */,
 				F6B018502F136542007B1EE4 /* Frameworks */,
 				24DF50CC2F0A5173007146AC /* Products */,
@@ -345,6 +347,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconParent;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kiero_Parent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -377,6 +380,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconParent;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Kiero_Parent.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
