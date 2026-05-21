@@ -39,6 +39,13 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         viewWillDisappearSubject.send(())
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapGoToWishRoom))
+        rootView.goToWishRoom.addGestureRecognizer(tap)
+    }
+    
     // MARK: - Setup Methods
     
     override func setDelegate() {
@@ -79,6 +86,10 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
             .store(in: &cancellables)
         
         viewDidLoadSubject.send(())
+    }
+    
+    @objc private func didTapGoToWishRoom() {
+        // TODO: - WishRoomView로 이동
     }
 }
 
