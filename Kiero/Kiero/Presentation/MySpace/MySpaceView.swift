@@ -188,7 +188,3 @@ private extension MySpaceView {
 private enum StaticCancellables {
     static var bag = Set<AnyCancellable>()
 }
-
-#Preview {
-    MySpaceView(isPreview: true)
-}

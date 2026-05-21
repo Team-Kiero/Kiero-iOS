@@ -28,12 +28,3 @@ struct MenuListItem: View {
         }
     }
 }
-
-#Preview {
-    VStack(spacing: 0) {
-        MenuListItem(title: "키어로 이용 약속")
-        MenuListItem(title: "키어로 나가기")
-    }
-    .padding()
-    .background(.kBlack)
-}

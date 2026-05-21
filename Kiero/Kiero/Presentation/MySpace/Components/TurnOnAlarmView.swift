@@ -49,10 +49,3 @@ struct TurnOnAlarmView: View {
         .background(.gray900, in: RoundedRectangle(cornerRadius: 8))
     }
 }
-
-#Preview {
-    @Previewable @State var isOn = true
-    TurnOnAlarmView(isOn: $isOn)
-        .padding()
-        .background(.kBlack)
-}

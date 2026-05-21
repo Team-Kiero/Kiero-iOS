@@ -60,9 +60,3 @@ struct TermsView: View {
         .navigationBarHidden(true)
     }
 }
-
-#Preview {
-    NavigationStack {
-        TermsView()
-    }
-}

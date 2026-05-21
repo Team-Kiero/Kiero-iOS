@@ -49,9 +49,3 @@ struct GoToMySpaceView: View {
         }
     }
 }
-
-#Preview {
-    GoToMySpaceView()
-        .padding()
-        .background(.kBlack)
-}
