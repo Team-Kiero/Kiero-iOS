@@ -13,10 +13,13 @@ struct MySpaceView: View {
     @State private var isAlarmOn = false
     @State private var showNotificationDialog = false
     @State private var showLogoutDialog = false
+    @State private var showTerms = false
 
     private let userName = TokenManager.shared.getFirstName() ?? "말차라떼"
+    var isPreview = false
 
     var body: some View {
+        NavigationStack {
         ZStack {
             Color.kBlack.ignoresSafeArea()
 
@@ -53,7 +56,9 @@ struct MySpaceView: View {
                 TurnOnAlarmView(isOn: Binding(
                     get: { isAlarmOn },
                     set: { newValue in
-                        if newValue {
+                        if isPreview {
+                            isAlarmOn = newValue
+                        } else if newValue {
                             checkNotificationPermission()
                         } else {
                             isAlarmOn = false
@@ -65,7 +70,7 @@ struct MySpaceView: View {
 
                 VStack(spacing: 0) {
                     MenuListItem(title: "키어로 이용 약속") {
-                        // TODO: 이용 약관으로 이동
+                        showTerms = true
                     }
                     MenuListItem(title: "키어로 나가기") {
                         showLogoutDialog = true
@@ -117,9 +122,14 @@ struct MySpaceView: View {
                 .zIndex(1)
             }
         }
+        .navigationDestination(isPresented: $showTerms) {
+            TermsView()
+        }
+        .navigationBarHidden(true)
         .onAppear { refreshNotificationStatus() }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             refreshNotificationStatus()
+        }
         }
     }
 }
@@ -180,5 +190,5 @@ private enum StaticCancellables {
 }
 
 #Preview {
-    MySpaceView()
+    MySpaceView(isPreview: true)
 }
