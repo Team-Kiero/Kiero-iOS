@@ -83,8 +83,6 @@ struct MySpaceView: View {
                 Spacer()
             }
 
-            // MARK: - Notification Dialog
-
             if showNotificationDialog {
                 Color.kBlack.opacity(0.75)
                     .ignoresSafeArea()
@@ -101,8 +99,6 @@ struct MySpaceView: View {
                 .padding(.horizontal, 16)
                 .zIndex(1)
             }
-
-            // MARK: - Logout Dialog
 
             if showLogoutDialog {
                 Color.kBlack.opacity(0.75)
@@ -135,7 +131,7 @@ private extension MySpaceView {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
                 switch settings.authorizationStatus {
-                case .authorized, .provisional:
+                case .authorized, .provisional, .ephemeral:
                     isAlarmOn = true
                 case .denied:
                     showNotificationDialog = true
