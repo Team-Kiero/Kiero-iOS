@@ -60,7 +60,8 @@ struct WishRoomView: View {
         }
         .navigationBarHidden(true)
         .navigationDestination(isPresented: $viewModel.shouldNavigateToWishWell) {
-            WishWellViewWrapper()
+            // TODO: - 소원의 우물로 이동하기
+        }
     }
     
     private var totalCountBanner: some View {
@@ -108,11 +109,5 @@ struct WishRoomView: View {
                 WishRoomBox(type: .wish(wish), isToday: false)
             }
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        WishRoomView()
     }
 }
