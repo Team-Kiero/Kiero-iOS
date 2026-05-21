@@ -15,7 +15,7 @@ struct MySpaceView: View {
     @State private var showLogoutDialog = false
     @State private var showTerms = false
     
-    private let userName = TokenManager.shared.getFirstName() ?? "말차라떼"
+    private let userName = TokenManager.shared.getFirstName() ?? "꾸비"
     var isPreview = false
     
     var body: some View {
