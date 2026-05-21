@@ -111,7 +111,7 @@ enum EndPoint {
         case .kakaoLogin:
             return "/api/v1/parents/login/kakao"
         case .kakaoAccessToken:
-            return "/api/v1/parents/login/kakao/token"
+            return "/api/v1/parents/login/kakao/access-token"
         case .logout:
             return "/api/v1/tokens/logout"
         case .reissueAccessToken:
