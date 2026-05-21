@@ -1,5 +1,5 @@
 //
-//  GoToMySpaceView.swift
+//  WishSpaceCardView.swift
 //  Kiero
 //
 //  Created by Hyunseo Han on 5/21/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct GoToMySpaceView: View {
+struct WishSpaceCardView: View {
     var onTap: (() -> Void)?
     
     var body: some View {
@@ -17,6 +17,7 @@ struct GoToMySpaceView: View {
                     HStack(spacing: 7) {
                         Image(.icStarRound)
                             .resizable()
+                            .scaledToFit()
                             .frame(width: 18, height: 18)
                             .clipShape(Circle())
                             .overlay(
