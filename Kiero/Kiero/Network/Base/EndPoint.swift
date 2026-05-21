@@ -109,9 +109,9 @@ enum EndPoint {
         case .fetchChildren:
             return "/api/v1/parents/children"
         case .kakaoLogin:
-            return "/api/v1/parents/login"
+            return "/api/v1/parents/login/kakao"
         case .kakaoAccessToken:
-            return "/api/v1/parents/login/access-token"
+            return "/api/v1/parents/login/kakao/token"
         case .logout:
             return "/api/v1/tokens/logout"
         case .reissueAccessToken:
