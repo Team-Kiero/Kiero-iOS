@@ -133,3 +133,14 @@ final class TabBarView: UIView {
         itemViews.enumerated().forEach { $1.isSelected = ($0 == index) }
     }
 }
+
+#Preview("Child TabBar") {
+    let tabBar = TabBarView(cornerRadius: 0, isParent: false)
+    tabBar.setTabItems(
+        titles: ["오늘의 여정", "금화 미션", "소원의 우물", "나의 공간"],
+        icons: [.icMap, .icCoin, .icStar, .icProfile]
+    )
+    tabBar.updateSelection(0)
+    tabBar.backgroundColor = .kBlack
+    return tabBar
+}
