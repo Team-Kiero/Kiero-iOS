@@ -201,8 +201,7 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     func makeMySpaceViewController() -> UIViewController {
-        let viewModel = BaseViewModel()
-        return MySpaceViewController(viewModel: viewModel, diContainer: self)
+        return MySpaceHostingController()
     }
 }
 
