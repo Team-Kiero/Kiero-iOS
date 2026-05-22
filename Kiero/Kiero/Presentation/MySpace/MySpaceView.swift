@@ -13,128 +13,123 @@ struct MySpaceView: View {
     @State private var isAlarmOn = false
     @State private var showNotificationDialog = false
     @State private var showLogoutDialog = false
-    @State private var showTerms = false
     
     private let userName = TokenManager.shared.getFirstName() ?? "꾸비"
     var isPreview = false
     
+    let onWishSpaceTap: () -> Void
+    let onTermsTap: () -> Void
+    let onLogoutConfirm: () -> Void
+    
     var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.kBlack.ignoresSafeArea()
+        ZStack {
+            Color.kBlack.ignoresSafeArea()
+            
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    Image(.icKidProfile)
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                    
+                    Text(userName)
+                        .font(Font(UIFont.title3_16_SB))
+                        .foregroundStyle(.white)
+                    
+                    Text("의 공간")
+                        .font(Font(UIFont.title3_16_SB))
+                        .foregroundStyle(.white)
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 15)
                 
-                VStack(alignment: .leading, spacing: 0) {
-                    
-                    HStack(spacing: 0) {
-                        Image(.icKidProfile)
-                            .resizable()
-                            .frame(width: 40, height: 40)
-                        
-                        Text(userName)
-                            .font(Font(UIFont.title3_16_SB))
-                            .foregroundStyle(.white)
-                        
-                        Text("의 공간")
-                            .font(Font(UIFont.title3_16_SB))
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 15)
-                    
-                    WishSpaceCardView {
-                        // TODO: 소원의 공간으로 이동
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 20)
-                    
-                    Rectangle()
-                        .fill(.gray900)
-                        .frame(height: 1)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 17)
-                    
-                    TurnOnAlarmView(isOn: Binding(
-                        get: { isAlarmOn },
-                        set: { newValue in
-                            if isPreview {
-                                isAlarmOn = newValue
-                            } else if newValue {
-                                checkNotificationPermission()
-                            } else {
-                                isAlarmOn = false
-                            }
-                        }
-                    ))
+                WishSpaceCardView {
+                    onWishSpaceTap()
+                }
+                .padding(.horizontal, 16)
+                .padding(.top, 20)
+                
+                Rectangle()
+                    .fill(.gray900)
+                    .frame(height: 1)
                     .padding(.horizontal, 16)
                     .padding(.top, 17)
-                    
-                    VStack(spacing: 0) {
-                        MenuListItem(title: "키어로 이용 약속") {
-                            showTerms = true
-                        }
-                        MenuListItem(title: "키어로 나가기") {
-                            showLogoutDialog = true
+                
+                TurnOnAlarmView(isOn: Binding(
+                    get: { isAlarmOn },
+                    set: { newValue in
+                        if isPreview {
+                            isAlarmOn = newValue
+                        } else if newValue {
+                            checkNotificationPermission()
+                        } else {
+                            isAlarmOn = false
                         }
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    
-                    Text("앱 버전 v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
-                        .font(Font(UIFont.body4_12_R))
-                        .foregroundStyle(.gray500)
-                        .padding(.leading, 25)
-                        .padding(.top, 13)
-                    
-                    Spacer()
-                }
+                ))
+                .padding(.horizontal, 16)
+                .padding(.top, 17)
                 
-                if showNotificationDialog {
-                    Color.kBlack.opacity(0.75)
-                        .ignoresSafeArea()
-                        .onTapGesture { showNotificationDialog = false }
-                    
-                    DialogBoxWrapper(
-                        state: .childNotification,
-                        isPresented: $showNotificationDialog,
-                        onConfirm: {
-                            openAppSettings()
-                        }
-                    )
-                    .frame(width: 327, height: 216)
-                    .padding(.horizontal, 16)
-                    .zIndex(1)
+                VStack(spacing: 0) {
+                    MenuListItem(title: "키어로 이용 약속") {
+                        onTermsTap()
+                    }
+                    MenuListItem(title: "키어로 나가기") {
+                        showLogoutDialog = true
+                    }
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
                 
-                if showLogoutDialog {
-                    Color.kBlack.opacity(0.75)
-                        .ignoresSafeArea()
-                        .onTapGesture { showLogoutDialog = false }
-                    
-                    DialogBoxWrapper(
-                        state: .childLogout,
-                        isPresented: $showLogoutDialog,
-                        onConfirm: {
-                            performLogout()
-                        }
-                    )
-                    .frame(width: 327, height: 216)
-                    .padding(.horizontal, 16)
-                    .zIndex(1)
-                }
+                Text("앱 버전 v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
+                    .font(Font(UIFont.body4_12_R))
+                    .foregroundStyle(.gray500)
+                    .padding(.leading, 25)
+                    .padding(.top, 13)
+                
+                Spacer()
             }
-            .navigationDestination(isPresented: $showTerms) {
-                TermsView()
+            
+            if showNotificationDialog {
+                Color.kBlack.opacity(0.75)
+                    .ignoresSafeArea()
+                    .onTapGesture { showNotificationDialog = false }
+                
+                DialogBoxWrapper(
+                    state: .childNotification,
+                    isPresented: $showNotificationDialog,
+                    onConfirm: {
+                        openAppSettings()
+                    }
+                )
+                .frame(width: 327, height: 216)
+                .padding(.horizontal, 16)
+                .zIndex(1)
             }
-            .navigationBarHidden(true)
-            .onAppear { refreshNotificationStatus() }
-            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                refreshNotificationStatus()
+            
+            if showLogoutDialog {
+                Color.kBlack.opacity(0.75)
+                    .ignoresSafeArea()
+                    .onTapGesture { showLogoutDialog = false }
+                
+                DialogBoxWrapper(
+                    state: .childLogout,
+                    isPresented: $showLogoutDialog,
+                    onConfirm: {
+                        onLogoutConfirm()
+                    }
+                )
+                .frame(width: 327, height: 216)
+                .padding(.horizontal, 16)
+                .zIndex(1)
             }
+        }
+        .navigationBarHidden(true)
+        .onAppear { refreshNotificationStatus() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            refreshNotificationStatus()
         }
     }
 }
-
-// MARK: - Actions
 
 private extension MySpaceView {
     func checkNotificationPermission() {
@@ -162,8 +157,7 @@ private extension MySpaceView {
     func refreshNotificationStatus() {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
-                isAlarmOn = settings.authorizationStatus == .authorized
-                || settings.authorizationStatus == .provisional
+                isAlarmOn = settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
             }
         }
     }
@@ -172,19 +166,4 @@ private extension MySpaceView {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
         UIApplication.shared.open(url)
     }
-    
-    func performLogout() {
-        LogoutService.shared.logout()
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case .finished = completion {
-                    LogoutHelper.logoutToPickRole()
-                }
-            } receiveValue: { _ in }
-            .store(in: &StaticCancellables.bag)
-    }
-}
-
-private enum StaticCancellables {
-    static var bag = Set<AnyCancellable>()
 }

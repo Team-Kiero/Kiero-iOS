@@ -6,22 +6,37 @@
 //
 
 import SwiftUI
+import UIKit
 
 final class MySpaceHostingController: UIHostingController<MySpaceView> {
     
+    var onWishSpaceTap: (() -> Void)?
+    var onTermsTap: (() -> Void)?
+    var onLogoutConfirm: (() -> Void)?
+    
     init() {
-        super.init(rootView: MySpaceView())
+        super.init(
+            rootView: MySpaceView(
+                onWishSpaceTap: {},
+                onTermsTap: {},
+                onLogoutConfirm: {}
+            )
+        )
+        
+        self.rootView = MySpaceView(
+            onWishSpaceTap: { [weak self] in
+                self?.onWishSpaceTap?()
+            },
+            onTermsTap: { [weak self] in
+                self?.onTermsTap?()
+            },
+            onLogoutConfirm: { [weak self] in
+                self?.onLogoutConfirm?()
+            }
+        )
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-}
-
-extension MySpaceHostingController: TabBarReselectRefreshable {
-    func refreshOnTabReselect() {}
-}
-
-extension MySpaceHostingController: ScrollToTopAvailable {
-    func scrollToTop() {}
 }
