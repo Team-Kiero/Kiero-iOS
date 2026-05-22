@@ -62,18 +62,18 @@ struct WishRoomBox: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(wish.title)
                     .font(Font(UIFont.title3_16_SB))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
                 
                 HStack(spacing: 4) {
                     Text("획득일")
                         .font(Font(UIFont.body4_12_R))
-                        .foregroundColor(.gray400)
+                        .foregroundStyle(.gray400)
                     Text("|")
                         .font(Font(UIFont.body4_12_R))
-                        .foregroundColor(.gray400)
+                        .foregroundStyle(.gray400)
                     Text(wish.acquiredDate)
                         .font(Font(UIFont.body4_12_R))
-                        .foregroundColor(.gray400)
+                        .foregroundStyle(.gray400)
                 }
             }
             
@@ -87,7 +87,7 @@ struct WishRoomBox: View {
                 
                 Text("\(wish.cost) 사용")
                     .font(Font(UIFont.body6_10_R))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.white)
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
@@ -110,11 +110,11 @@ struct WishRoomBox: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("아직 빌었던 소원이 없어!")
                         .font(Font(UIFont.title3_16_SB))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                     
                     Text("오늘의 소원을 빌어볼까?")
                         .font(Font(UIFont.body4_12_R))
-                        .foregroundColor(.gray400)
+                        .foregroundStyle(.gray400)
                 }
                 
                 Spacer()
@@ -125,7 +125,7 @@ struct WishRoomBox: View {
             } label: {
                 Text("소원 빌러가기")
                     .font(Font(UIFont.title4_14_SB))
-                    .foregroundColor(.black)
+                    .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 10)
                     .background(
