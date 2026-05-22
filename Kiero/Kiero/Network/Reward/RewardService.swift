@@ -18,7 +18,7 @@ protocol RewardServiceType {
 final class RewardService: RewardServiceType {
     static let shared = RewardService()
     
-    private init() {}
+    init() {}
     
     func fetchCoupons(childId: Int) -> AnyPublisher<[Reward], NetworkError> {
         return Future<[Reward], NetworkError> { promise in

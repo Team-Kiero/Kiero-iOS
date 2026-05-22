@@ -17,7 +17,7 @@ final class TodayStatusService: TodayStatusServiceType {
     
     static let shared = TodayStatusService()
     
-    private init() {}
+    init() {}
     
     func fetchTodayStatus(childId: Int) -> AnyPublisher<TodayStatusDTO, NetworkError> {
         return Future<TodayStatusDTO, NetworkError> { promise in

@@ -8,30 +8,42 @@
 import Combine
 import Foundation
 
-final class LogoutService {
-    static let shared = LogoutService()
-    private init() {}
+protocol LogoutServiceType {
+    func logout() -> AnyPublisher<Void, NetworkError>
+}
+
+final class LogoutService: LogoutServiceType {
     
-    func logout() -> AnyPublisher<Void, Error> {
-        return Deferred {
+    init() {}
+    
+    func logout() -> AnyPublisher<Void, NetworkError> {
+        Deferred {
             Future { promise in
                 Task {
                     do {
-                        let _: BaseResponse<String?> = try await BaseService.shared.request(endPoint: .logout)
+                        let _: BaseResponse<String?> = try await BaseService.shared.request(
+                            endPoint: .logout
+                        )
                         
                         TokenManager.shared.clearAll()
                         
                         promise(.success(()))
-                    } catch {
+                    } catch let error as NetworkError {
                         if "\(error)".contains("noData") {
                             TokenManager.shared.clearAll()
                             promise(.success(()))
                         } else {
                             promise(.failure(error))
                         }
+                    } catch {
+                        if "\(error)".contains("noData") {
+                            TokenManager.shared.clearAll()
+                            promise(.success(()))
+                        } else {
+                            promise(.failure(.unknownError))
+                        }
                     }
                 }
-                
             }
         }
         .eraseToAnyPublisher()

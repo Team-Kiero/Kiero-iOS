@@ -8,9 +8,16 @@
 import Combine
 import UIKit
 
-final class DailyJourneyService {
+protocol DailyJourneyServiceType {
+    func updateDailyJourney() -> AnyPublisher<DailyJourneyDTO, NetworkError>
+    func skipJourney(scheduleDetailId: Int) -> AnyPublisher<DailyJourneyDTO, NetworkError>
+    func lightFire() -> AnyPublisher<FireLitData, NetworkError>
+    func verifyJourney(scheduleDetailId: Int, image: UIImage) -> AnyPublisher<Void, NetworkError>
+}
+
+final class DailyJourneyService: DailyJourneyServiceType {
     static let shared = DailyJourneyService()
-    private init() {}
+    init() {}
     
     func updateDailyJourney() -> AnyPublisher<DailyJourneyDTO, NetworkError> {
         return Future<DailyJourneyDTO, NetworkError> { promise in

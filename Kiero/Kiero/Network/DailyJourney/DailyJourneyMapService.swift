@@ -7,9 +7,13 @@
 
 import Combine
 
-final class DailyJourneyMapService {
+protocol DailyJourneyMapServiceType {
+    func fetchJourneyList() -> AnyPublisher<DailyJourneyMapData, NetworkError>
+}
+
+final class DailyJourneyMapService: DailyJourneyMapServiceType {
     static let shared = DailyJourneyMapService()
-    private init() {}
+    init() {}
     
     func fetchJourneyList() -> AnyPublisher<DailyJourneyMapData, NetworkError> {
         return Future<DailyJourneyMapData, NetworkError> { promise in

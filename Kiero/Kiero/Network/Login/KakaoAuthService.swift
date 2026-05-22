@@ -11,6 +11,10 @@ import Foundation
 import KakaoSDKAuth
 import KakaoSDKUser
 
+protocol KakaoAuthServiceType {
+    func loginWithKakao() async throws -> String
+}
+
 enum KakaoLoginError: Error {
     case cancelled
     case unknown(Error)
@@ -21,7 +25,7 @@ enum KakaoAuthError: Error {
 }
 
 final class KakaoAuthService: KakaoAuthServiceType {
-
+    
     func loginWithKakao() async throws -> String {
         if UserApi.isKakaoTalkLoginAvailable() {
             return try await loginWithKakaoTalk()
