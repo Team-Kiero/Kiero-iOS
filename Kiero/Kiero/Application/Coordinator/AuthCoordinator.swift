@@ -11,6 +11,7 @@ final class AuthCoordinator {
     
     private let window: UIWindow
     private let factory: ViewControllerFactory
+    
     private var navigationController: UINavigationController?
     private var childCoordinators: [any Coordinator] = []
     
@@ -29,10 +30,21 @@ final class AuthCoordinator {
             self?.handleAuthGateRoute(route)
         }
         
+        authGateVC.onLoginRoleSelected = { [weak self] role in
+            switch role {
+            case .parent:
+                self?.showParentLogin()
+                
+            case .child:
+                self?.showChildrenLogin()
+            }
+        }
+        
         let nav = UINavigationController(rootViewController: authGateVC)
         nav.setNavigationBarHidden(true, animated: false)
         
         self.navigationController = nav
+        
         window.rootViewController = nav
         window.makeKeyAndVisible()
     }
@@ -60,8 +72,10 @@ final class AuthCoordinator {
             switch route {
             case .parentOnboarding:
                 self?.showParentOnboardingAsRoot()
+                
             case .parentTab:
                 self?.showParentTab()
+                
             case .toast(let message):
                 Toast.show(message: message, bottomInset: 83)
             }
@@ -105,6 +119,7 @@ final class AuthCoordinator {
                     inviteCode: inviteCode,
                     issuedAt: issuedAt
                 )
+                
             case .logout:
                 self?.restart()
             }
@@ -112,8 +127,10 @@ final class AuthCoordinator {
         
         let nav = UINavigationController(rootViewController: vc)
         nav.setNavigationBarHidden(true, animated: false)
-        changeRoot(nav)
+        
         self.navigationController = nav
+        
+        changeRoot(nav)
     }
     
     private func showParentInvite(
@@ -135,8 +152,10 @@ final class AuthCoordinator {
         
         let nav = UINavigationController(rootViewController: vc)
         nav.setNavigationBarHidden(true, animated: false)
-        changeRoot(nav)
+        
         self.navigationController = nav
+        
+        changeRoot(nav)
     }
     
     private func showChildLoadingThenTab() {
@@ -151,20 +170,33 @@ final class AuthCoordinator {
     }
     
     private func showParentTab() {
-        let coordinator = TabCoordinator(factory: factory, isParent: true)
+        let coordinator = TabCoordinator(
+            factory: factory,
+            isParent: true
+        )
         
         childCoordinators.append(coordinator)
-        changeRoot(coordinator.start())
+        
+        let vc = coordinator.start()
+        
+        changeRoot(vc)
     }
-
+    
     private func showChildTab() {
-        let coordinator = TabCoordinator(factory: factory, isParent: false)
+        let coordinator = TabCoordinator(
+            factory: factory,
+            isParent: false
+        )
         
         childCoordinators.append(coordinator)
-        changeRoot(coordinator.start())
+        
+        let vc = coordinator.start()
+        
+        changeRoot(vc)
     }
     
     private func restart() {
+        childCoordinators.removeAll()
         start()
     }
     
