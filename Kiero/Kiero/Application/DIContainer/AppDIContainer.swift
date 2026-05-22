@@ -60,6 +60,9 @@ extension AppDIContainer {
 }
 
 extension AppDIContainer: ViewControllerFactory {
+    func makeMySpaceViewController() -> MySpaceHostingController {
+        MySpaceHostingController()
+    }
     
     func makeTabBarViewController(isParent: Bool) -> TabBarViewController {
         TabBarViewController(
