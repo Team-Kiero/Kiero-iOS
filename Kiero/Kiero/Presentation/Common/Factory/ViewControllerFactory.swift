@@ -7,26 +7,41 @@
 
 import UIKit
 
-public protocol ViewControllerFactory {
+protocol ViewControllerFactory {
+    
+    func makeAuthGateViewController() -> AuthGateViewController
+    func makeTabBarViewController(isParent: Bool) -> TabBarViewController
+    
     // 부모 탭
-    //func makeLoginViewController() -> UIViewController
-    //func makeParentOnboardingViewController() -> UIViewController
+
+    func makeParentOnboardingViewController() -> ParentOnboardingViewController
+    func makeParentInviteViewController(childLastName: String, childFirstName: String, inviteCode: String, issuedAt: Date) -> ParentInviteViewController
+    func makeParentLoginViewController() -> ParentLoginViewController
+    func makeTodayStatusViewController() -> TodayStatusHostingController
+    func makeScheduleViewController() -> ScheduleViewController
+    func makeRewardViewController() -> RewardHostingController
+    func makeMyPageViewController() -> MyPageHostingController
+    func makeNotificationFeedViewController() -> NotificationFeedViewController
+    func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController
     
-    func makeTodayStatusViewController() -> UIViewController
-    func makeScheduleViewController() -> UIViewController
-    func makeRewardViewController() -> UIViewController
-    func makeMyPageViewController() -> UIViewController
-    func makeNotificationFeedViewController() -> UIViewController
+    func makeAddScheduleViewController() -> AddScheduleViewController
+    func makeAddScheduleViewController(isFireLit: Bool, scheduleList: [Schedule]) -> AddScheduleViewController
+    func makeMissionViewController() -> MissionViewController
+    func makeWriteMissionViewController() -> WriteMissionViewController
+    func makeLoadingViewController() -> LoadingViewController
+    func makeAIMissionViewController() -> AIMissionViewController
     
-    func makeAddScheduleViewController() -> UIViewController
-    func makeMissionViewController() -> UIViewController
-    func makeWriteMissionViewController() -> UIViewController
-    func makeLoadingViewController() -> UIViewController
-    func makeAIMissionViewController() -> UIViewController
+    func makeTimeTableViewController(viewModel: ScheduleViewModel) -> TimeTableViewController
     
     // 아이 탭
-    func makeChildOnboardingViewController() -> UIViewController
-    func makeDailyJourneyViewController() -> UIViewController
-    func makeCoinMissionViewController() -> UIViewController
-    func makeWishWellViewController() -> UIViewController
+    
+    func makeDailyJourneyViewController() -> DailyJourneyViewController
+    func makeDailyJourneyMapViewController() -> DailyJourneyMapViewController
+    func makeGiveFireStoneViewController(count: Int) -> GiveFireStoneViewController
+    func makeChildrenLoginViewController() -> ChildrenLoginViewController
+    func makeChildOnboardingViewController() -> ChildrenOnboardingViewController
+    func makeChildLoadingViewController() -> ChildrenLoadingViewController
+    func makeCoinMissionViewController() -> CoinMissionViewController
+    func makeWishWellViewController() -> WishWellViewController
+    func makeMissionCompleteViewController(image: UIImage, stoneType: StoneType?, scheduleDetailId: Int?) -> MissionCompleteViewController
 }
