@@ -12,6 +12,13 @@ import Then
 
 final class MissionBoxParent: UIView {
     
+    // MARK: - State
+    
+    enum State {
+        case inProgress
+        case completed
+    }
+    
     // MARK: - UI Components
     
     private let titleLabel = UILabel().then {
@@ -24,6 +31,10 @@ final class MissionBoxParent: UIView {
     }
     
     private let rewardLabel = UILabel().then {
+        $0.textColor = .gray400
+    }
+
+    private let badgeRewardLabel = UILabel().then {
         $0.textColor = .gray500
     }
     
@@ -35,10 +46,24 @@ final class MissionBoxParent: UIView {
         $0.alignment = .center
     }
     
+    private let titleStack = UIStackView().then {
+        $0.axis = .vertical
+        $0.alignment = .leading
+        $0.spacing = 4
+    }
+    
     private let missionBox = UIStackView().then {
         $0.axis = .horizontal
         $0.alignment = .center
     }
+    
+    private let successLabel = UILabel().then {
+        $0.setTypo(.title4_14_SB, text: "성공!")
+        $0.textColor = .white.withAlphaComponent(0.5)
+        $0.isHidden = true
+    }
+    
+    private let spacer = UIView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -67,15 +92,24 @@ final class MissionBoxParent: UIView {
     
     private func setUI() {
         addSubview(missionBox)
-        missionBox.addArrangedSubviews(titleLabel, rewardStackView)
-        rewardStackView.addArrangedSubviews(rewardIcon, rewardLabel)
+        titleStack.addArrangedSubviews(rewardLabel, titleLabel)
+        missionBox.addArrangedSubviews(titleStack, spacer, rewardStackView, successLabel)
+        rewardStackView.addArrangedSubviews(rewardIcon, badgeRewardLabel)
     }
     
     private func setLayout() {
         missionBox.snp.makeConstraints {
             $0.leading.equalToSuperview().inset(13)
             $0.trailing.equalToSuperview().inset(13)
-            $0.verticalEdges.equalToSuperview().inset(20.5)
+            $0.verticalEdges.equalToSuperview().inset(0)
+        }
+        
+        snp.makeConstraints {
+            $0.height.equalTo(64)
+        }
+        
+        spacer.snp.makeConstraints {
+            $0.width.greaterThanOrEqualTo(10)
         }
         
         rewardStackView.snp.makeConstraints {
@@ -89,8 +123,42 @@ final class MissionBoxParent: UIView {
     
     // MARK: - Configuration
     
-    func configure(name: String, reward: Int) {
-        titleLabel.setTypo(.title3_16_SB, text: name)
-        rewardLabel.setTypo(.body6_10_R, text: "\(reward) 개")
+    func configure(name: String, reward: Int, isCompleted: Bool = false) {
+        rewardLabel.setTypo(.body4_12_R, text: "금화 \(reward) 개")
+        badgeRewardLabel.setTypo(.body6_10_R, text: "\(reward) 개")
+        apply(state: isCompleted ? .completed : .inProgress)
+        
+        if isCompleted {
+            titleLabel.setTypo(.body2_16_R, text: name)
+            titleLabel.textColor = .white.withAlphaComponent(0.5)
+        } else {
+            titleLabel.setTypo(.title3_16_SB, text: name)
+            titleLabel.textColor = .white
+        }
+    }
+    
+    private func apply(state: State) {
+        switch state {
+        case .inProgress:
+            backgroundColor = .gray900
+            titleLabel.textColor = .white
+            rewardLabel.isHidden = true
+            rewardStackView.isHidden = false
+            successLabel.isHidden = true
+            missionBox.snp.updateConstraints {
+                $0.trailing.equalToSuperview().inset(13)
+            }
+
+        case .completed:
+            backgroundColor = .gray900.withAlphaComponent(0.5)
+            titleLabel.textColor = .white.withAlphaComponent(0.5)
+            rewardLabel.textColor = .gray400.withAlphaComponent(0.5)
+            rewardLabel.isHidden = false
+            rewardStackView.isHidden = true
+            successLabel.isHidden = false
+            missionBox.snp.updateConstraints {
+                $0.trailing.equalToSuperview().inset(32)
+            }
+        }
     }
 }

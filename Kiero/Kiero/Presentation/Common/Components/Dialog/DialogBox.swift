@@ -22,6 +22,8 @@ final class DialogBox: UIView {
         case deleteSchedule(title: String, isRecurring: Bool)
         case deleteReward(title: String, coin: String)
         case deleteMission(title: String, coin: String)
+        case childNotification
+        case childLogout
         
         var title: String {
             switch self {
@@ -39,6 +41,10 @@ final class DialogBox: UIView {
                 return title
             case .deleteMission(let title, _):
                 return title
+            case .childNotification:
+                return "설정에서 알림을 켜줘!"
+            case .childLogout:
+                return "키어로에서 나갈 거야?"
             }
         }
         
@@ -54,6 +60,10 @@ final class DialogBox: UIView {
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
             case .deleteSchedule, .deleteReward, .deleteMission:
                 return "삭제하시겠습니까?"
+            case .childNotification:
+                return "알림을 받으려면 설정에서 키어로 알림을 허용해줘!"
+            case .childLogout:
+                return "다시 들어오려면 초대코드가 필요해!"
             }
         }
         
@@ -74,9 +84,19 @@ final class DialogBox: UIView {
                 return false
             }
         }
-        
+
         var cancelButtonTitle: String { "취소" }
-        var confirmButtonTitle: String { "확인" }
+
+        var confirmButtonTitle: String {
+            switch self {
+            case .childNotification:
+                return "설정으로 이동"
+            case .childLogout:
+                return "나가기"
+            default:
+                return "확인"
+            }
+        }
     }
     
     // MARK: - Properties

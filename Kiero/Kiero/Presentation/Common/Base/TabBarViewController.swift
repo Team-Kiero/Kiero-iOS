@@ -207,11 +207,23 @@ private extension TabBarViewController {
             let dailyJourneyNav = UINavigationController()
             let coinMissionNav = UINavigationController()
             let wishWellNav = UINavigationController()
+            let dailyJourneyVC = factory.makeDailyJourneyViewController()
+            let coinMissionVC = factory.makeCoinMissionViewController()
+            let wishWellVC = factory.makeWishWellViewController()
+            let mySpaceVC = factory.makeMySpaceViewController()
             
             let dailyJourneyCoordinator = DailyJourneyCoordinator(
                 navigationController: dailyJourneyNav,
                 factory: factory
             )
+            viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC, mySpaceVC].map {
+                let nav = UINavigationController(rootViewController: $0)
+                nav.isNavigationBarHidden = true
+                nav.delegate = self
+                nav.view.backgroundColor = .kBlack
+                $0.view.backgroundColor = .kBlack
+                return nav
+            }
             
             let coinMissionCoordinator = CoinMissionCoordinator(
                 navigationController: coinMissionNav,
@@ -242,8 +254,8 @@ private extension TabBarViewController {
             ].map(configureNavigationController)
             
             customTabBar.setTabItems(
-                titles: ["오늘의 여정", "금화 미션", "소원의 우물"],
-                icons: [.icMap, .icCoin, .icStar]
+                titles: ["오늘의 여정", "금화 미션", "소원의 우물", "나의 공간"],
+                icons: [.icMap, .icCoin, .icStar, .icProfile]
             )
         }
         

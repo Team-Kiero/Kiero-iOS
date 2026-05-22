@@ -49,7 +49,15 @@ final class MissionViewModel: BaseViewModel {
                 let finalGroups = response.missionsByDate
                     .sorted { $0.dueAt < $1.dueAt }
                     .map { group -> MissionGroupDTO in
-                        let sortedMissions = group.missions.sorted { m1, m2 in
+                        let sortedMissions = group.missions.sorted { (m1: MissionItemDTO, m2: MissionItemDTO) in
+                            if m1.isCompleted != m2.isCompleted {
+                                return !m1.isCompleted
+                            }
+                            
+                            if m1.isCompleted && m2.isCompleted {
+                                return m1.id > m2.id
+                            }
+                            
                             let o1 = activityOrderMap[m1.id]
                             let o2 = activityOrderMap[m2.id]
                             
