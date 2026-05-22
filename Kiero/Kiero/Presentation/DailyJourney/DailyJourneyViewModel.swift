@@ -16,11 +16,13 @@ enum DailyJourneyRoute {
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
-    private let wishWellService = WishWellService()
-    public var currentScheduleDetailId: Int?
+    private let dailyJourneyService: DailyJourneyServiceType
+    private let wishWellService: WishWellServiceType
+    
+    var currentScheduleDetailId: Int?
     private(set) var currentStoneType: StoneType?
     private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
-    public var currentEarnedStoneCount: Int = 0
+    var currentEarnedStoneCount: Int = 0
     
     // MARK: - Input & Output
     
@@ -42,23 +44,37 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private let routeSubject = PassthroughSubject<DailyJourneyRoute, Never>()
     private let viewDataSubject = PassthroughSubject<DailyJourneyModel, Never>()
     
+    // MARK: - Init
+    
+    init(
+        dailyJourneyService: DailyJourneyServiceType,
+        wishWellService: WishWellServiceType
+    ) {
+        self.dailyJourneyService = dailyJourneyService
+        self.wishWellService = wishWellService
+        super.init()
+    }
+    
     // MARK: - Transform
     
     func transform(input: Input) -> Output {
         input.viewWillAppear
-            .sink { [weak self] in 
+            .sink { [weak self] in
                 self?.fetchDailyJourney()
                 self?.startSseConnection()
             }
             .store(in: &cancellables)
         
         input.nextJourneyButtonTap
-            .sink { [weak self] in self?.routeSubject.send(.showNextJourneyDialogBox) }
+            .sink { [weak self] in
+                self?.routeSubject.send(.showNextJourneyDialogBox)
+            }
             .store(in: &cancellables)
         
         input.verifyButtonTap
             .sink { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
+                
                 switch self.currentButtonType {
                 case .verify:
                     self.routeSubject.send(.showCamera)
@@ -71,7 +87,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
         
         input.skipConfirmTap
-            .sink { [weak self] in self?.skipSchedule() }
+            .sink { [weak self] in
+                self?.skipSchedule()
+            }
             .store(in: &cancellables)
         
         return Output(
@@ -84,22 +102,26 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private func fetchDailyJourney() {
         Publishers.Zip(
-            DailyJourneyService.shared.updateDailyJourney(),
-            self.wishWellService.fetchMyInfo()
+            dailyJourneyService.updateDailyJourney(),
+            wishWellService.fetchMyInfo()
         )
         .receive(on: DispatchQueue.main)
         .sink { completion in
             if case .failure(let error) = completion {
                 print("❌ Fetch Error: \(error)")
             }
-        } receiveValue: { [weak self] (scheduleDTO, childInfo) in
-            guard let self = self else { return }
+        } receiveValue: { [weak self] scheduleDTO, childInfo in
+            guard let self else { return }
             
             self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
             self.currentStoneType = scheduleDTO.stoneType
             self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
             
-            let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
+            let model = self.convertDTOToModel(
+                schedule: scheduleDTO,
+                child: childInfo
+            )
+            
             self.viewDataSubject.send(model)
         }
         .store(in: &cancellables)
@@ -110,10 +132,10 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         guard let id = currentScheduleDetailId else { return }
         
-        DailyJourneyService.shared.skipJourney(scheduleDetailId: id)
+        dailyJourneyService.skipJourney(scheduleDetailId: id)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 switch completion {
                 case .finished:
@@ -129,8 +151,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
     }
     
-    
-    
     // MARK: - SSE Logic
     
     func startSseConnection() {
@@ -141,6 +161,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             
             if token == nil {
                 print("⚠️ [DailyJourneyViewModel] No SSE Token found. Reissuing...")
+                
                 do {
                     token = try await TokenRefresher.shared.reissueSseAccessToken()
                     print("✅ [DailyJourneyViewModel] SSE Token reissued successfully.")
@@ -155,8 +176,9 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             await MainActor.run {
                 SseStreamManager.shared.startIfNeeded(initialToken: validToken) { [weak self] payload in
                     guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                       || payload.eventType == "SCHEDULE_MODIFIED"
-                       || payload.eventType == "DATE_CHANGED" else { return }
+                            || payload.eventType == "SCHEDULE_MODIFIED"
+                            || payload.eventType == "DATE_CHANGED" else { return }
+                    
                     print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
                     self?.fetchDailyJourney()
                 }
@@ -166,7 +188,10 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Converter
     
-    private func convertDTOToModel(schedule: DailyJourneyDTO, child: ChildrenInfo) -> DailyJourneyModel {
+    private func convertDTOToModel(
+        schedule: DailyJourneyDTO,
+        child: ChildrenInfo
+    ) -> DailyJourneyModel {
         
         let earnedStones = schedule.earnedStones ?? 0
         let totalSchedule = schedule.totalSchedule
@@ -178,30 +203,33 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let orderText = convertToKoreanOrdinal(schedule.scheduleOrder)
         let scheduleName = schedule.name ?? ""
         let stoneTypeName = convertStoneTypeToKorean(schedule.stoneType)
-        let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
-        let isTimeViewActive = (timeText != "-")
+        let timeText = formatTimeRange(
+            start: schedule.startTime,
+            end: schedule.endTime
+        )
+        let isTimeViewActive = timeText != "-"
         
-        let isLastJourney = (schedule.scheduleOrder > 0 && totalSchedule == 1)
+        let isLastJourney = schedule.scheduleOrder > 0 && totalSchedule == 1
         
-        let isCurrentTimeMatched = isCurrentTimeInSchedule(start: schedule.startTime, end: schedule.endTime)
+        let isCurrentTimeMatched = isCurrentTimeInSchedule(
+            start: schedule.startTime,
+            end: schedule.endTime
+        )
         
         let buttonType: DailyJourneyModel.ActionButtonType
-        let isScheduleActive = (schedule.scheduleStatus == .nowScheduleExist ||
-                                schedule.scheduleStatus == .firstSchedule ||
-                                schedule.scheduleStatus == .nextScheduleExist)
+        let isScheduleActive = schedule.scheduleStatus == .nowScheduleExist ||
+            schedule.scheduleStatus == .firstSchedule ||
+            schedule.scheduleStatus == .nextScheduleExist
         
         if isScheduleActive && !schedule.isNowScheduleVerified {
             buttonType = .verify
-        }
-        else if schedule.scheduleStatus == .fireNotLit && earnedStones > 0 {
+        } else if schedule.scheduleStatus == .fireNotLit && earnedStones > 0 {
             buttonType = .lightFire
-        }
-        else {
+        } else {
             buttonType = .hidden
         }
         
         self.currentButtonType = buttonType
-        
         
         switch schedule.scheduleStatus {
         case .firstSchedule, .nowScheduleExist, .nextScheduleExist:
@@ -238,7 +266,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             )
             
         case .noSchedule:
-            let hasCompletedAnySchedule = (totalSchedule > 0 && earnedStones > 0)
+            let hasCompletedAnySchedule = totalSchedule > 0 && earnedStones > 0
             
             let bubbleText = hasCompletedAnySchedule
             ? "오늘의 여정은 모두 끝났어.\n내일도 우리 함께하자!"
@@ -337,21 +365,27 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let todayComponents = calendar.dateComponents([.year, .month, .day], from: now)
         
         guard let startDateOrigin = formatter.date(from: start),
-              let endDateOrigin = formatter.date(from: end) else { return false }
-        
-        let startComponents = calendar.dateComponents([.hour, .minute, .second], from: startDateOrigin)
-        let endComponents = calendar.dateComponents([.hour, .minute, .second], from: endDateOrigin)
-        
-        guard let startDate = calendar.date(byAdding: startComponents, to: calendar.date(from: todayComponents)!),
-              let endDate = calendar.date(byAdding: endComponents, to: calendar.date(from: todayComponents)!) else {
+              let endDateOrigin = formatter.date(from: end),
+              let todayDate = calendar.date(from: todayComponents) else {
             return false
         }
         
+        let startComponents = calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: startDateOrigin
+        )
+        
+        let endComponents = calendar.dateComponents(
+            [.hour, .minute, .second],
+            from: endDateOrigin
+        )
+        
+        guard let startDate = calendar.date(byAdding: startComponents, to: todayDate),
+              let endDate = calendar.date(byAdding: endComponents, to: todayDate) else {
+            return false
+        }
         return now >= startDate && now <= endDate
     }
-    
-    // MARK: - Helper Methods
-    
     private func formatTimeRange(start: String?, end: String?) -> String {
         guard let start = start, let end = end else { return "-" }
         let inputFormatter = DateFormatter()

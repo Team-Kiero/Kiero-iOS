@@ -20,16 +20,31 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     var currentChildId: Int = 0
     
+    private let todayStatusService: TodayStatusServiceType
+    private let userSessionStorage: UserSessionStorageType
+    private let sseTokenRefresher: SseTokenRefresherType
+    private let sseManager: SseStreamManager
+    
     private var refreshWorkItem: DispatchWorkItem?
     private var isSseBound = false
     
-    override init() {
+    init(
+        todayStatusService: TodayStatusServiceType,
+        userSessionStorage: UserSessionStorageType,
+        sseTokenRefresher: SseTokenRefresherType,
+        sseManager: SseStreamManager
+    ) {
+        self.todayStatusService = todayStatusService
+        self.userSessionStorage = userSessionStorage
+        self.sseTokenRefresher = sseTokenRefresher
+        self.sseManager = sseManager
         super.init()
-        self.currentChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        
+        self.currentChildId = userSessionStorage.selectedChildId
     }
     
     func fetchTodayStatus(childId: Int? = nil) {
-        let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let latestChildId = userSessionStorage.selectedChildId
         let targetId = childId ?? latestChildId
         
         todayDate = Date().toFullDateString
@@ -41,7 +56,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         
         self.currentChildId = targetId
         
-        TodayStatusService.shared.fetchTodayStatus(childId: targetId)
+        todayStatusService.fetchTodayStatus(childId: targetId)
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -64,7 +79,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     }
     
     func postScheduleImage(scheduleDetailId: Int) {
-        TodayStatusService.shared.postScheduleImage(scheduleDetailId: scheduleDetailId)
+        todayStatusService.postScheduleImage(scheduleDetailId: scheduleDetailId)
             .receive(on: DispatchQueue.main)
             .sink { completion in
                 switch completion {
@@ -106,28 +121,28 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
-                let token = try await TokenRefresher.shared.reissueSseAccessToken()
+                let token = try await sseTokenRefresher.reissueSseAccessToken()
                 
                 await MainActor.run {
                     self.isSseBound = true
                     
                     print("✅ [TodayStatusVM] SSE 연결 시작")
                     
-                    SseStreamManager.shared.onRefreshWillStart = { [weak self] in
+                    self.sseManager.onRefreshWillStart = { [weak self] in
                         DispatchQueue.main.async {
                             print("🔄 [TodayStatusVM] onRefreshWillStart")
                             self?.scheduleRefresh()
                         }
                     }
                     
-                    SseStreamManager.shared.onReconnected = { [weak self] in
+                    self.sseManager.onReconnected = { [weak self] in
                         DispatchQueue.main.async {
                             print("🔄 [TodayStatusVM] onReconnected")
                             self?.scheduleRefresh()
                         }
                     }
                     
-                    SseStreamManager.shared.startIfNeeded(
+                    self.sseManager.startIfNeeded(
                         initialToken: token,
                         onEvent: { [weak self] payload in
                             guard let self else { return }
@@ -159,7 +174,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     }
     
     private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {
-        let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let latestChildId = userSessionStorage.selectedChildId
         
         if let childId = payload.childId,
            Int(childId) != latestChildId {

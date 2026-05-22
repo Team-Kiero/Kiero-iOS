@@ -11,6 +11,8 @@ import Foundation
 final class WishWellViewModel: BaseViewModel, ViewModelType {
     
     private let service: WishWellServiceType
+    private let sseTokenRefresher: SseTokenRefresherType
+    private let sseManager: SseStreamManager
     
     private var userInfoSubject = CurrentValueSubject<ChildrenInfo?, Never>(nil)
     private var couponsSubject = CurrentValueSubject<[Coupon], Never>([])
@@ -40,10 +42,14 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
         let purchaseCompleted: AnyPublisher<Coupon, Never>
     }
     
-    // MARK: - Init
-    
-    init(service: WishWellServiceType) {
+    init(
+        service: WishWellServiceType,
+        sseTokenRefresher: SseTokenRefresherType,
+        sseManager: SseStreamManager
+    ) {
         self.service = service
+        self.sseTokenRefresher = sseTokenRefresher
+        self.sseManager = sseManager
         super.init()
     }
     
@@ -62,7 +68,8 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
                 self?.isLoadingSubject.send(true)
             })
             .flatMap { [weak self] couponId -> AnyPublisher<Coupon, Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher()}
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
                 return self.service.purchaseCoupon(couponId: couponId)
                     .handleEvents(receiveOutput: { [weak self] purchased in
                         self?.purchaseCompletedSubject.send(purchased)
@@ -108,13 +115,13 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
     private func fetchInitialData() {
         isLoadingSubject.send(true)
         
-        let me = self.service.fetchMyInfo()
+        let me = service.fetchMyInfo()
             .catch { [weak self] err -> Just<ChildrenInfo> in
                 self?.errorMessageSubject.send(err.errorDescription)
                 return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
             }
         
-        let coupons = self.service.fetchCoupons()
+        let coupons = service.fetchCoupons()
             .catch { [weak self] err -> Just<[Coupon]> in
                 self?.errorMessageSubject.send(err.errorDescription)
                 return Just([])
@@ -134,22 +141,18 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
         fetchInitialData()
     }
     
-    // MARK: - SSE Connection
-    
     private func startSSEIfNeeded() {
         guard !sseStarted else { return }
         sseStarted = true
         
         Task { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             
             do {
-                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                let initialToken = try await sseTokenRefresher.reissueSseAccessToken()
                 
-                await MainActor.run { [weak self] in
-                    guard let self = self else { return }
-                    
-                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
+                await MainActor.run {
+                    self.sseManager.startIfNeeded(initialToken: initialToken) { [weak self] payload in
                         self?.handleCouponSse(payload: payload)
                     }
                     print("✅ [WishWellVM] SSE started")
@@ -162,7 +165,7 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
     }
     
     private func stopSSE() {
-        SseStreamManager.shared.stop()
+        sseManager.stop()
         sseStarted = false
         print("🛑 [WishWellVM] SSE stopped")
     }

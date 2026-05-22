@@ -10,6 +10,8 @@ import Foundation
 
 final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     
+    // MARK: - Input & Output
+    
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
     }
@@ -19,16 +21,30 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         let route: AnyPublisher<LoginRoute, Never>
     }
     
+    // MARK: - Dependencies
+    
+    private let authService: AuthServiceType
+    private let authTokenStorage: AuthTokenStorageType
+    
+    // MARK: - Properties
+    
     private let stateSubject = CurrentValueSubject<LoginState, Never>(.idle)
     private let routeSubject = PassthroughSubject<LoginRoute, Never>()
     
-    private let kakaoService: any KakaoAuthServiceType
     private var isLoggingIn = false
     
-    init(kakaoService: any KakaoAuthServiceType = KakaoAuthService()) {
-        self.kakaoService = kakaoService
+    // MARK: - Init
+    
+    init(
+        authService: AuthServiceType,
+        authTokenStorage: AuthTokenStorageType
+    ) {
+        self.authService = authService
+        self.authTokenStorage = authTokenStorage
         super.init()
     }
+    
+    // MARK: - Transform
     
     func transform(input: Input) -> Output {
         input.kakaoButtonTapped
@@ -43,6 +59,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         )
     }
     
+    // MARK: - Login
+    
     private func requestKakaoLogin() {
         guard !isLoggingIn else { return }
         isLoggingIn = true
@@ -55,26 +73,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             defer { self.isLoggingIn = false }
             
             do {
-                let kakaoToken = try await kakaoService.loginWithKakao()
-                
-                let loginData: LoginData = try await BaseService.shared.request(
-                    endPoint: .kakaoAccessToken(token: kakaoToken)
-                )
-                
-                TokenManager.shared.saveAccessToken(loginData.accessToken)
-                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
-                TokenManager.shared.saveProfile(loginData.image)
-                TokenManager.shared.saveUserName(loginData.name)
-                TokenManager.shared.saveUserRole(loginData.role)
-                TokenManager.shared.saveProfile(loginData.image)
-                
-                let children: ChildListResponse = try await BaseService.shared.request(
-                    endPoint: .fetchChildren
-                )
-                
+                let loginData = try await authService.parentLogin()
+                authTokenStorage.saveAccessToken(loginData.accessToken)
+                authTokenStorage.saveRefreshToken(loginData.refreshToken)
+                authTokenStorage.saveProfile(loginData.image)
+                authTokenStorage.saveUserName(loginData.name)
+                authTokenStorage.saveUserRole(loginData.role)
+                let children = try await authService.fetchChildren()
                 await MainActor.run {
                     self.stateSubject.send(.idle)
-                    
                     if children.isEmpty {
                         self.routeSubject.send(.parentOnboarding)
                     } else {

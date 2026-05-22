@@ -12,11 +12,16 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
     
     let earnedStoneCount: Int
     
-    init(count: Int) {
-        self.earnedStoneCount = count
-    }
+    private let dailyJourneyService: DailyJourneyServiceType
     
-    // MARK: - Input & Output
+    init(
+        count: Int,
+        dailyJourneyService: DailyJourneyServiceType
+    ) {
+        self.earnedStoneCount = count
+        self.dailyJourneyService = dailyJourneyService
+        super.init()
+    }
     
     struct Input {
         let didTapGiveButton: AnyPublisher<Void, Never>
@@ -29,16 +34,11 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
         let showError: AnyPublisher<String, Never>
     }
     
-    // MARK: - Properties
-    
     private let transitionSubject = PassthroughSubject<Void, Never>()
     private let resultSubject = PassthroughSubject<(Int, [String]), Never>()
     private let errorSubject = PassthroughSubject<String, Never>()
     
-    // MARK: - Transform
-    
     func transform(input: Input) -> Output {
-        
         input.didTapGiveButton
             .sink { [weak self] in
                 self?.transitionSubject.send(())
@@ -58,12 +58,10 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
         )
     }
     
-    // MARK: - Network Logic
-    
     private func requestLightFire() {
         print("🚀 [GiveFireStoneVM] 마음의 불 피우기 API 요청 시작")
         
-        DailyJourneyService.shared.lightFire()
+        dailyJourneyService.lightFire()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] completion in
                 if case .failure(let error) = completion {
@@ -72,7 +70,6 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
                 }
             } receiveValue: { [weak self] data in
                 print("✅ [GiveFireStoneVM] 성공! 획득 코인: \(data.earnedCoinAmount), 불조각: \(data.gotStones)")
-                
                 self?.resultSubject.send((data.earnedCoinAmount, data.gotStones))
             }
             .store(in: &cancellables)

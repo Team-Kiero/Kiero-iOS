@@ -21,7 +21,7 @@ final class MissionCompleteViewModel: BaseViewModel, ViewModelType {
     var receivedStoneType: StoneType?
     var scheduleDetailId: Int?
     
-    // MARK: - Input & Output
+    private let dailyJourneyService: DailyJourneyServiceType
     
     struct Input {
         let viewDidAppear: AnyPublisher<Void, Never>
@@ -39,7 +39,10 @@ final class MissionCompleteViewModel: BaseViewModel, ViewModelType {
         case failure(String)
     }
     
-    // MARK: - Transform
+    init(dailyJourneyService: DailyJourneyServiceType) {
+        self.dailyJourneyService = dailyJourneyService
+        super.init()
+    }
     
     func transform(input: Input) -> Output {
         let eventSubject = PassthroughSubject<Event, Never>()
@@ -48,7 +51,12 @@ final class MissionCompleteViewModel: BaseViewModel, ViewModelType {
         let viewDataPublisher = input.viewDidAppear
             .map { [weak self] _ -> MissionCompleteViewData in
                 guard let self = self else {
-                    return MissionCompleteViewData(capturedImage: nil, stoneImage: UIImage(), message: "", highlightKeyword: "")
+                    return MissionCompleteViewData(
+                        capturedImage: nil,
+                        stoneImage: UIImage(),
+                        message: "",
+                        highlightKeyword: ""
+                    )
                 }
                 
                 let stoneType = self.receivedStoneType ?? .courage
@@ -71,11 +79,13 @@ final class MissionCompleteViewModel: BaseViewModel, ViewModelType {
                 guard let self = self,
                       let id = self.scheduleDetailId,
                       let image = self.capturedImage else {
-                    return Just(.failure("필수 데이터(ID 또는 이미지)가 없습니다.")).eraseToAnyPublisher()
+                    return Just(.failure("필수 데이터(ID 또는 이미지)가 없습니다."))
+                        .eraseToAnyPublisher()
                 }
                 
-                return DailyJourneyService.shared.verifyJourney(scheduleDetailId: id, image: image)
-                    .map { _ in .success }
+                return self.dailyJourneyService
+                    .verifyJourney(scheduleDetailId: id, image: image)
+                    .map { _ in Event.success }
                     .catch { error in
                         Just(.failure(error.localizedDescription))
                     }

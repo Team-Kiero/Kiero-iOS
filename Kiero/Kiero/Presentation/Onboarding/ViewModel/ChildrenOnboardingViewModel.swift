@@ -33,6 +33,7 @@ final class ChildrenOnboardingViewModel: BaseViewModel, ViewModelType {
     init(items: [SpeechItem], userName: String) {
         self.items = items
         self.userName = userName
+        super.init()
     }
     
     // MARK: - Transform

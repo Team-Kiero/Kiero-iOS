@@ -16,43 +16,54 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     
     let scrollToTop = PassthroughSubject<Void, Never>()
     
-    override init() {
+    private let logoutService: LogoutServiceType
+    private let scheduleService: ScheduleServiceType
+    private let authTokenStorage: AuthTokenStorageType
+    
+    init(
+        logoutService: LogoutServiceType,
+        scheduleService: ScheduleServiceType,
+        authTokenStorage: AuthTokenStorageType
+    ) {
+        self.logoutService = logoutService
+        self.scheduleService = scheduleService
+        self.authTokenStorage = authTokenStorage
         super.init()
+        
         fetchUserInfo()
         fetchChildCount()
     }
     
     func requestLogout() {
-            LogoutService.shared.logout()
-                .receive(on: DispatchQueue.main)
-                .sink { completion in
-                    switch completion {
-                    case .finished:
-                        print("로그아웃 완료")
-                        LogoutHelper.logoutToPickRole()
-                    case .failure(let error):
-                        print("로그아웃 실패: \(error)")
-                    }
-                } receiveValue: { _ in }
-                .store(in: &cancellables)
-        }
+        logoutService.logout()
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("로그아웃 완료")
+                    LogoutHelper.logoutToPickRole()
+                case .failure(let error):
+                    print("로그아웃 실패: \(error)")
+                }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
+    }
     
     func fetchChildCount() {
-        ScheduleService.shared.fetchChildren()
-                .receive(on: DispatchQueue.main)
-                .sink { completion in
-                    if case .failure(let error) = completion {
-                        print("자녀 수 조회 실패: \(error)")
-                    }
-                } receiveValue: { [weak self] children in
-                    self?.connectedChild = children.count
+        scheduleService.fetchChildren()
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                if case .failure(let error) = completion {
+                    print("자녀 수 조회 실패: \(error)")
                 }
-                .store(in: &cancellables)
-        }
-    
+            } receiveValue: { [weak self] children in
+                self?.connectedChild = children.count
+            }
+            .store(in: &cancellables)
+    }
     
     func fetchUserInfo() {
-        self.userName = TokenManager.shared.getUserName() ?? ""
-        self.userImage = TokenManager.shared.getProfile()
+        userName = authTokenStorage.userName ?? ""
+        userImage = authTokenStorage.profile
     }
 }

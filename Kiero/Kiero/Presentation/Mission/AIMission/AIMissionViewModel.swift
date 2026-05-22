@@ -9,15 +9,21 @@ import Foundation
 import Combine
 
 final class AIMissionViewModel: BaseViewModel {
+    
     private let service: AIMissionServiceType
+    private let userSessionStorage: UserSessionStorageType
     
     let suggestionResult = PassthroughSubject<[SuggestedMissionDTO], Never>()
     let isLoading = CurrentValueSubject<Bool, Never>(false)
     let bulkCreateSuccess = PassthroughSubject<Void, Never>()
     let errorMessage = PassthroughSubject<String, Never>()
 
-    init(service: AIMissionServiceType) {
+    init(
+        service: AIMissionServiceType,
+        userSessionStorage: UserSessionStorageType
+    ) {
         self.service = service
+        self.userSessionStorage = userSessionStorage
         super.init()
     }
 
@@ -45,26 +51,47 @@ final class AIMissionViewModel: BaseViewModel {
     }
     
     func createBulkMissions(missions: [Mission]) {
-        self.isLoading.send(true)
+        isLoading.send(true)
         
         let items = missions.map {
-            MissionBulkItemDTO(name: $0.name, reward: $0.reward, dueAt: $0.dueAt)
+            MissionBulkItemDTO(
+                name: $0.name,
+                reward: $0.reward,
+                dueAt: $0.dueAt
+            )
         }
         
-        let childId = UserDefaults.standard.integer(forKey: "selectedChildId")
+        let childId = userSessionStorage.selectedChildId
         
-        service.postBulkMissions(childId: childId, missions: items)
-            .sink { [weak self] completion in
-                self?.isLoading.send(false)
-            } receiveValue: { [weak self] response in
-                let sortedAiIds = response.sorted { $0.name < $1.name }.reversed().map { $0.id }
-                
-                var recentActivity = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []
-                recentActivity.append(contentsOf: sortedAiIds)
-                UserDefaults.standard.set(recentActivity, forKey: "recentActivityIds")
-                
-                self?.bulkCreateSuccess.send(())
+        service.postBulkMissions(
+            childId: childId,
+            missions: items
+        )
+        .sink { [weak self] completion in
+            self?.isLoading.send(false)
+            if case .failure(let error) = completion {
+                print("❌ 벌크 미션 생성 실패: \(error)")
+                self?.errorMessage.send("미션 저장에 실패했어요.")
             }
-            .store(in: &cancellables)
+        } receiveValue: { [weak self] response in
+            let sortedAiIds = response
+                .sorted { $0.name < $1.name }
+                .reversed()
+                .map { $0.id }
+            
+            var recentActivity = UserDefaults.standard.array(
+                forKey: "recentActivityIds"
+            ) as? [Int] ?? []
+            
+            recentActivity.append(contentsOf: sortedAiIds)
+            
+            UserDefaults.standard.set(
+                recentActivity,
+                forKey: "recentActivityIds"
+            )
+            
+            self?.bulkCreateSuccess.send(())
+        }
+        .store(in: &cancellables)
     }
 }

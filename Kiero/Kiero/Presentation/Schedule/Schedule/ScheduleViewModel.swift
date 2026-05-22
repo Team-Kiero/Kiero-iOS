@@ -5,14 +5,17 @@
 //  Created by 신혜연 on 1/12/26.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Properties
     
     private let service: ScheduleServiceType
+    private var userSessionStorage: UserSessionStorageType
+    private let authTokenStorage: AuthTokenStorageType
+    
     private let childId = CurrentValueSubject<Int, Never>(0)
     
     private(set) var scheduleList = CurrentValueSubject<[Schedule], Never>([])
@@ -40,45 +43,68 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Life Cycle
     
-    init(service: ScheduleServiceType, childId: Int) {
+    init(
+        service: ScheduleServiceType,
+        childId: Int,
+        userSessionStorage: UserSessionStorageType,
+        authTokenStorage: AuthTokenStorageType
+    ) {
         self.service = service
+        self.userSessionStorage = userSessionStorage
+        self.authTokenStorage = authTokenStorage
         super.init()
+        
+        if childId != 0 {
+            self.childId.send(childId)
+        }
         
         fetchInitialChildId()
     }
     
     private func fetchInitialChildId() {
+        if childId.value != 0 {
+            return
+        }
+        
         service.fetchChildren()
             .sink { _ in } receiveValue: { [weak self] children in
+                guard let self else { return }
+                
                 if let firstChildId = children.first?.childId {
-                    self?.childId.send(firstChildId)
-                    UserDefaults.standard.set(firstChildId, forKey: "selectedChildId")
-                    print("📍 [저장 완료] childId \(firstChildId)를 UserDefaults에 저장했습니다.")
+                    self.childId.send(firstChildId)
+                    self.userSessionStorage.selectedChildId = firstChildId
+                    print("📍 [저장 완료] childId \(firstChildId)를 UserSessionStorage에 저장했습니다.")
                 }
             }
             .store(in: &cancellables)
     }
     
     func refreshSchedules() {
-        self.childId.send(self.childId.value)
+        childId.send(childId.value)
     }
     
     func transform(input: Input) -> Output {
         Publishers.CombineLatest(childId, currentReferenceDate)
             .filter { id, _ in id != 0 }
-            .flatMap { [weak self] (id, date) -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), Never> in
-                guard let self = self else {
-                    return Just((isFireLit: false, schedules: [Schedule]())).eraseToAnyPublisher()
+            .flatMap { [weak self] id, date -> AnyPublisher<(isFireLit: Bool, schedules: [Schedule]), Never> in
+                guard let self else {
+                    return Just((isFireLit: false, schedules: [])).eraseToAnyPublisher()
                 }
                 
                 let days = date.daysOfWeek
-                guard let startDate = days.first, let endDate = days.last else {
-                    return Just((isFireLit: false, schedules: [Schedule]())).eraseToAnyPublisher()
+                
+                guard let startDate = days.first,
+                      let endDate = days.last else {
+                    return Just((isFireLit: false, schedules: [])).eraseToAnyPublisher()
                 }
                 
-                return self.service.fetchSchedules(childId: id, startDate: startDate, endDate: endDate)
-                    .replaceError(with: (isFireLit: false, schedules: [Schedule]()))
-                    .eraseToAnyPublisher()
+                return self.service.fetchSchedules(
+                    childId: id,
+                    startDate: startDate,
+                    endDate: endDate
+                )
+                .replaceError(with: (isFireLit: false, schedules: []))
+                .eraseToAnyPublisher()
             }
             .sink { [weak self] result in
                 self?.isFireLit = result.isFireLit
@@ -88,53 +114,89 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
         
         input.prevWeekTapped
             .sink { [weak self] in
-                guard let self = self else { return }
-                if let newDate = Calendar.current.date(byAdding: .weekOfYear, value: -1, to: self.currentReferenceDate.value),
-                   self.isWithinRange(date: newDate) {
+                guard let self else { return }
+                
+                guard let newDate = Calendar.current.date(
+                    byAdding: .weekOfYear,
+                    value: -1,
+                    to: self.currentReferenceDate.value
+                ) else { return }
+                
+                if self.isWithinRange(date: newDate) {
                     self.currentReferenceDate.send(newDate)
                 }
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         input.nextWeekTapped
             .sink { [weak self] in
-                guard let self = self else { return }
-                if let newDate = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: self.currentReferenceDate.value),
-                   self.isWithinRange(date: newDate) {
+                guard let self else { return }
+                
+                guard let newDate = Calendar.current.date(
+                    byAdding: .weekOfYear,
+                    value: 1,
+                    to: self.currentReferenceDate.value
+                ) else { return }
+                
+                if self.isWithinRange(date: newDate) {
                     self.currentReferenceDate.send(newDate)
                 }
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         let headerInfo = currentReferenceDate
             .map { [weak self] date -> (title: String, leftEnabled: Bool, rightEnabled: Bool) in
                 let title = self?.formatWeekTitle(from: date) ?? ""
-                let leftEnabled = self?.isWithinRange(date: Calendar.current.date(byAdding: .weekOfYear, value: -1, to: date)!) ?? false
-                let rightEnabled = self?.isWithinRange(date: Calendar.current.date(byAdding: .weekOfYear, value: 1, to: date)!) ?? false
                 
-                return (title: title, leftEnabled: leftEnabled, rightEnabled: rightEnabled)
-            }.eraseToAnyPublisher()
+                let previousDate = Calendar.current.date(
+                    byAdding: .weekOfYear,
+                    value: -1,
+                    to: date
+                )
+                
+                let nextDate = Calendar.current.date(
+                    byAdding: .weekOfYear,
+                    value: 1,
+                    to: date
+                )
+                
+                let leftEnabled = previousDate.map {
+                    self?.isWithinRange(date: $0) ?? false
+                } ?? false
+                
+                let rightEnabled = nextDate.map {
+                    self?.isWithinRange(date: $0) ?? false
+                } ?? false
+                
+                return (
+                    title: title,
+                    leftEnabled: leftEnabled,
+                    rightEnabled: rightEnabled
+                )
+            }
+            .eraseToAnyPublisher()
         
         let weeklyDates = currentReferenceDate
             .map { $0.daysOfWeek }
             .eraseToAnyPublisher()
 
         let filteredSchedules = Publishers.CombineLatest(scheduleList, currentReferenceDate)
-            .map { (schedules, refDate) -> [Schedule] in
-                let calendar = Calendar.current
-                let now = Date()
+            .map { schedules, refDate -> [Schedule] in
                 let currentWeekRange = refDate.daysOfWeek
-                _ = (calendar.component(.weekday, from: now) + 5) % 7
-
+                
                 return schedules.filter { schedule in
                     if schedule.isRecurring {
-                        _ = calendar.isDate(refDate, inSameDayAs: now) ||
-                                                  (currentWeekRange.first! <= now && currentWeekRange.last! >= now)
                         return true
                     } else {
                         guard let dateStr = schedule.date else { return false }
-                        return currentWeekRange.map { $0.toString(format: "yyyy-MM-dd") }.contains(dateStr)
+                        
+                        return currentWeekRange
+                            .map { $0.toString(format: "yyyy-MM-dd") }
+                            .contains(dateStr)
                     }
                 }
-            }.eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
         
         return Output(
             headerInfo: headerInfo,
@@ -144,17 +206,26 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     }
     
     private func formatWeekTitle(from date: Date) -> String {
-        return date.weekOfMonthString
+        date.weekOfMonthString
     }
     
     private func isWithinRange(date: Date) -> Bool {
         let calendar = Calendar.current
         let now = calendar.startOfDay(for: Date())
         
-        guard let minDate = calendar.date(byAdding: .weekOfYear, value: -12, to: now),
-              let maxDate = calendar.date(byAdding: .weekOfYear, value: 12, to: now) else { return false }
+        guard let minDate = calendar.date(
+            byAdding: .weekOfYear,
+            value: -12,
+            to: now
+        ),
+        let maxDate = calendar.date(
+            byAdding: .weekOfYear,
+            value: 12,
+            to: now
+        ) else { return false }
         
         let targetDate = calendar.startOfDay(for: date)
+        
         return targetDate >= minDate && targetDate <= maxDate
     }
     
@@ -175,7 +246,10 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             }
             .flatMap { [weak self] _ -> AnyPublisher<Void, NetworkError> in
                 print("🚀 [2단계] 부모 로그아웃 API 요청 전송")
-                guard let self = self else { return Fail(error: .unknownError).eraseToAnyPublisher() }
+                guard let self else {
+                    return Fail(error: .unknownError).eraseToAnyPublisher()
+                }
+                
                 return self.service.logout()
             }
             .sink { completion in
@@ -184,54 +258,67 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                 }
             } receiveValue: { [weak self] _ in
                 print("✅ 서버 로그아웃 응답 성공")
-                TokenManager.shared.clearAll()
+                self?.authTokenStorage.clearAll()
                 self?.logoutSuccess.send(())
             }
             .store(in: &cancellables)
     }
     
-    func deleteSchedule(scheduleId: Int, selectedDate: String, isRecurring: Bool, isIncludeFollowing: Bool) {
+    func deleteSchedule(
+        scheduleId: Int,
+        selectedDate: String,
+        isRecurring: Bool,
+        isIncludeFollowing: Bool
+    ) {
         var startDate: String? = nil
         var endDate: String? = nil
-        var selDate: String? = nil
+        var selectedDateForRequest: String? = nil
         
         if isRecurring {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
+            
             if let date = formatter.date(from: selectedDate) {
                 let days = date.daysOfWeek
                 startDate = days.first?.toString(format: "yyyy-MM-dd")
                 endDate = days.last?.toString(format: "yyyy-MM-dd")
             }
         } else {
-            selDate = selectedDate
+            selectedDateForRequest = selectedDate
         }
         
         service.deleteSchedule(
             scheduleId: scheduleId,
-            selectedDate: selDate,
+            selectedDate: selectedDateForRequest,
             startDate: startDate,
             endDate: endDate,
             isIncludeFollowing: isIncludeFollowing
         )
         .receive(on: RunLoop.main)
-        .sink(receiveCompletion: { completion in
-            if case .failure(_) = completion {
-                self.deleteErrorMessage.send("일정 삭제에 실패했어요. 잠시 후 다시 시도해주세요.")
+        .sink { [weak self] completion in
+            if case .failure = completion {
+                self?.deleteErrorMessage.send("일정 삭제에 실패했어요. 잠시 후 다시 시도해주세요.")
             }
-        }, receiveValue: { [weak self] in
+        } receiveValue: { [weak self] in
             self?.refreshSchedules()
-        })
+        }
         .store(in: &cancellables)
     }
     
-    func editSchedule(scheduleId: Int, selectedDate: String, isRecurring: Bool, request: EditScheduleRequestDTO, completion: @escaping (Bool) -> Void) {
+    func editSchedule(
+        scheduleId: Int,
+        selectedDate: String,
+        isRecurring: Bool,
+        request: EditScheduleRequestDTO,
+        completion: @escaping (Bool) -> Void
+    ) {
         var startDate: String? = nil
         var endDate: String? = nil
         
         if isRecurring {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy-MM-dd"
+            
             if let date = formatter.date(from: selectedDate) {
                 let days = date.daysOfWeek
                 startDate = days.first?.toString(format: "yyyy-MM-dd")
@@ -247,7 +334,7 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
             request: request
         )
         .receive(on: RunLoop.main)
-        .sink(receiveCompletion: { [weak self] result in
+        .sink { [weak self] result in
             if case .failure(let error) = result {
                 switch error {
                 case .codeError(let message):
@@ -257,13 +344,14 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
                 default:
                     self?.editErrorMessage.send("일정 수정에 실패했어요. 잠시 후 다시 시도해주세요.")
                 }
+                
                 completion(false)
             }
-        }, receiveValue: { [weak self] in
+        } receiveValue: { [weak self] in
             self?.isEditSuccess.send(())
             self?.currentReferenceDate.send(self?.currentReferenceDate.value ?? Date())
             completion(true)
-        })
+        }
         .store(in: &cancellables)
     }
 }

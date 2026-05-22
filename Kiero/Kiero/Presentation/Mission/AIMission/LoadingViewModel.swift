@@ -18,13 +18,18 @@ final class LoadingViewModel: BaseViewModel {
     }
 
     private func startTimeoutTimer() {
-        timerCancellable = Timer.publish(every: 15.0, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                print("⏳ [Loading] 15초 타임아웃 발생")
-                self?.timeoutTrigger.send(())
-                self?.timerCancellable?.cancel()
-            }
+        timerCancellable = Timer.publish(
+            every: 15.0,
+            on: .main,
+            in: .common
+        )
+        .autoconnect()
+        .sink { [weak self] _ in
+            print("⏳ [Loading] 15초 타임아웃 발생")
+            
+            self?.timeoutTrigger.send(())
+            self?.timerCancellable?.cancel()
+        }
     }
     
     func stopTimer() {

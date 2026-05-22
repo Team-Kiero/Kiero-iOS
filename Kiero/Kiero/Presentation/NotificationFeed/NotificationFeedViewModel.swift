@@ -12,11 +12,12 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private let feedService: FeedServiceType
     private let scheduleService: ScheduleServiceType
+    private var userSessionStorage: UserSessionStorageType
     private let pageSize: Int
     
     private var childId: Int {
-        get { UserDefaults.standard.integer(forKey: "selectedChildId") }
-        set { UserDefaults.standard.set(newValue, forKey: "selectedChildId") }
+        get { userSessionStorage.selectedChildId }
+        set { userSessionStorage.selectedChildId = newValue }
     }
     
     private let itemsSubject = CurrentValueSubject<[FeedItem], Never>([])
@@ -34,10 +35,12 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     init(
         feedService: FeedServiceType,
         scheduleService: ScheduleServiceType,
+        userSessionStorage: UserSessionStorageType,
         pageSize: Int = 20
     ) {
         self.feedService = feedService
         self.scheduleService = scheduleService
+        self.userSessionStorage = userSessionStorage
         self.pageSize = pageSize
         super.init()
     }
@@ -57,44 +60,53 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     func transform(input: Input) -> Output {
         
-        let idTrigger = Publishers.Merge3(input.viewDidload, input.refresh, sseRefreshSubject)
-            .handleEvents(receiveOutput: { [weak self] _ in
-                self?.isLoadingSubject.send(true)
-                self?.nextCursor = nil
-            })
-            .flatMap { [weak self] _ -> AnyPublisher<Int, Never> in
-                guard let self = self else { return Just(0).eraseToAnyPublisher() }
-                
-                if self.childId != 0 {
-                    return Just(self.childId).eraseToAnyPublisher()
-                }
-                
-                return self.scheduleService.fetchChildren()
-                    .map { children -> Int in
-                        if let firstId = children.first?.childId {
-                            self.childId = firstId
-                            return firstId
-                        }
-                        return 0
-                    }
-                    .replaceError(with: 0)
-                    .eraseToAnyPublisher()
+        let idTrigger = Publishers.Merge3(
+            input.viewDidload,
+            input.refresh,
+            sseRefreshSubject
+        )
+        .handleEvents(receiveOutput: { [weak self] _ in
+            self?.isLoadingSubject.send(true)
+            self?.nextCursor = nil
+        })
+        .flatMap { [weak self] _ -> AnyPublisher<Int, Never> in
+            guard let self else { return Just(0).eraseToAnyPublisher() }
+            
+            if self.childId != 0 {
+                return Just(self.childId).eraseToAnyPublisher()
             }
-            .share()
+            
+            return self.scheduleService.fetchChildren()
+                .map { children -> Int in
+                    if let firstId = children.first?.childId {
+                        self.childId = firstId
+                        return firstId
+                    }
+                    return 0
+                }
+                .replaceError(with: 0)
+                .eraseToAnyPublisher()
+        }
+        .share()
         
         idTrigger
             .filter { $0 != 0 }
             .flatMap { [weak self] id -> AnyPublisher<FeedPage, Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.feedService.fetchFeeds(childId: Int64(id), size: self.pageSize, cursor: nil)
-                    .catch { [weak self] _ in
-                        self?.isLoadingSubject.send(false)
-                        return Empty<FeedPage, Never>()
-                    }
-                    .eraseToAnyPublisher()
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                return self.feedService.fetchFeeds(
+                    childId: Int64(id),
+                    size: self.pageSize,
+                    cursor: nil
+                )
+                .catch { [weak self] _ in
+                    self?.isLoadingSubject.send(false)
+                    return Empty<FeedPage, Never>()
+                }
+                .eraseToAnyPublisher()
             }
             .sink { [weak self] page in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.cachedChildName = page.childName
                 
@@ -111,23 +123,30 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
         
         input.loadMore
             .filter { [weak self] in
-                guard let self = self else { return false }
-                return self.canLoadMore && !self.isLoadingMoreSubject.value && !self.isLoadingSubject.value
+                guard let self else { return false }
+                return self.canLoadMore &&
+                !self.isLoadingMoreSubject.value &&
+                !self.isLoadingSubject.value
             }
             .handleEvents(receiveOutput: { [weak self] _ in
                 self?.isLoadingMoreSubject.send(true)
             })
             .flatMap { [weak self] _ -> AnyPublisher<FeedPage, Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.feedService.fetchFeeds(childId: Int64(self.childId), size: self.pageSize, cursor: self.nextCursor)
-                    .catch { [weak self] _ in
-                        self?.isLoadingMoreSubject.send(false)
-                        return Empty<FeedPage, Never>()
-                    }
-                    .eraseToAnyPublisher()
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                
+                return self.feedService.fetchFeeds(
+                    childId: Int64(self.childId),
+                    size: self.pageSize,
+                    cursor: self.nextCursor
+                )
+                .catch { [weak self] _ in
+                    self?.isLoadingMoreSubject.send(false)
+                    return Empty<FeedPage, Never>()
+                }
+                .eraseToAnyPublisher()
             }
             .sink { [weak self] page in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 self.cachedChildName = page.childName
                 
@@ -288,7 +307,7 @@ extension NotificationFeedViewModel {
               sections[indexPath.section].items.indices.contains(indexPath.row) else { return }
         
         let before = sections[indexPath.section].items[indexPath.row]
-        if case let .finishSchedule(key, _, _, _, _, isExpanded) = before{
+        if case let .finishSchedule(key, _, _, _, _, isExpanded) = before {
             if isExpanded {
                 expandedKeys.remove(key)
             } else {

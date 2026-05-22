@@ -16,52 +16,60 @@ enum AuthGateRoute {
 }
 
 final class AuthGateViewModel {
-    
+
+    private let authTokenStorage: AuthTokenStorageType
+    private let scheduleService: ScheduleServiceType
+
     private let routeSubject = PassthroughSubject<AuthGateRoute, Never>()
-    var route: AnyPublisher<AuthGateRoute, Never> { routeSubject.eraseToAnyPublisher() }
-    
+    var route: AnyPublisher<AuthGateRoute, Never> {
+        routeSubject.eraseToAnyPublisher()
+    }
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        authTokenStorage: AuthTokenStorageType,
+        scheduleService: ScheduleServiceType
+    ) {
+        self.authTokenStorage = authTokenStorage
+        self.scheduleService = scheduleService
+    }
+
     func decideRoute() {
-        
-        guard TokenManager.shared.getAccessToken() != nil else {
+        guard authTokenStorage.accessToken != nil else {
             routeSubject.send(.pickRole)
             return
         }
-        
-        
-        let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
-        
+
+        let role = (authTokenStorage.userRole ?? "").lowercased()
+
         if role.contains("parent") {
             decideParentRoute()
             return
         }
-        
+
         if role.contains("child") {
             routeSubject.send(.childTab)
             return
         }
-        
+
         routeSubject.send(.pickRole)
     }
-    
+
     private func decideParentRoute() {
-        Task {
-            do {
-                let children: [ChildrenData] = try await BaseService.shared.request(
-                    endPoint: .fetchChildren
-                )
-                
-                await MainActor.run {
-                    if children.isEmpty {
-                        self.routeSubject.send(.parentOnboarding)
-                    } else {
-                        self.routeSubject.send(.parentTab)
-                    }
+        scheduleService.fetchChildren()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] completion in
+                if case .failure = completion {
+                    self?.routeSubject.send(.parentOnboarding)
                 }
-            } catch {
-                await MainActor.run {
-                    self.routeSubject.send(.parentOnboarding)
+            } receiveValue: { [weak self] children in
+                if children.isEmpty {
+                    self?.routeSubject.send(.parentOnboarding)
+                } else {
+                    self?.routeSubject.send(.parentTab)
                 }
             }
-        }
+            .store(in: &cancellables)
     }
 }

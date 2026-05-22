@@ -20,6 +20,11 @@ enum ChildLoginState: Equatable {
 
 final class ChildrenLoginViewModel: BaseViewModel {
 
+    // MARK: - Dependencies
+
+    private let authService: AuthServiceType
+    private let authTokenStorage: AuthTokenStorageType
+
     // MARK: - Publisher
 
     private let stateSubject = CurrentValueSubject<ChildLoginState, Never>(.idle)
@@ -33,14 +38,31 @@ final class ChildrenLoginViewModel: BaseViewModel {
         routeSubject.eraseToAnyPublisher()
     }
 
+    // MARK: - Init
+
+    init(
+        authService: AuthServiceType,
+        authTokenStorage: AuthTokenStorageType
+    ) {
+        self.authService = authService
+        self.authTokenStorage = authTokenStorage
+        super.init()
+    }
+
     // MARK: - Public Action
 
-    func signup(lastName: String, firstName: String, inviteCode: String) {
+    func signup(
+        lastName: String,
+        firstName: String,
+        inviteCode: String
+    ) {
         let last = lastName.trimmingCharacters(in: .whitespacesAndNewlines)
         let first = firstName.trimmingCharacters(in: .whitespacesAndNewlines)
         let code = inviteCode.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        guard !last.isEmpty, !first.isEmpty, !code.isEmpty else { return }
+        guard !last.isEmpty,
+              !first.isEmpty,
+              !code.isEmpty else { return }
 
         stateSubject.send(.loading)
 
@@ -48,26 +70,17 @@ final class ChildrenLoginViewModel: BaseViewModel {
             guard let self else { return }
 
             do {
-                let body = ChildSignupRequest(
+                let data = try await authService.childSignup(
                     lastName: last,
                     firstName: first,
                     inviteCode: code
                 )
 
-                let data: ChildSignupData = try await BaseService.shared.request(
-                    endPoint: .childSignup(
-                        lastName: last,
-                        firstName: first,
-                        inviteCode: code
-                    ),
-                    body: body
-                )
-
-                TokenManager.shared.saveAccessToken(data.accessToken)
-                TokenManager.shared.saveRefreshToken(data.refreshToken)
-                TokenManager.shared.saveUserRole(data.role)
-                TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
-                TokenManager.shared.saveFirstName(data.firstName)
+                authTokenStorage.saveAccessToken(data.accessToken)
+                authTokenStorage.saveRefreshToken(data.refreshToken)
+                authTokenStorage.saveUserRole(data.role)
+                authTokenStorage.saveUserName("\(data.lastName)\(data.firstName)")
+                authTokenStorage.saveFirstName(data.firstName)
 
                 await MainActor.run {
                     self.stateSubject.send(.idle)
@@ -78,9 +91,12 @@ final class ChildrenLoginViewModel: BaseViewModel {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.toastMessage))
                 }
+
             } catch {
                 await MainActor.run {
-                    self.stateSubject.send(.failure("이름이나 초대코드를 다시 확인해줘!"))
+                    self.stateSubject.send(
+                        .failure("이름이나 초대코드를 다시 확인해줘!")
+                    )
                 }
             }
         }

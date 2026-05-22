@@ -14,6 +14,10 @@ final class ParentInviteViewModel: BaseViewModel {
     let childFirstName: String
     var childName: String { "\(childLastName)\(childFirstName)" }
 
+    private let inviteService: ParentInviteServiceType
+    private let authTokenStorage: AuthTokenStorageType
+    private var userSessionStorage: UserSessionStorageType
+
     private let expiresIn: TimeInterval
     private var expiresAt: Date
 
@@ -31,20 +35,38 @@ final class ParentInviteViewModel: BaseViewModel {
     private let expiredEventSubject = PassthroughSubject<Void, Never>()
     var expiredEvent: AnyPublisher<Void, Never> { expiredEventSubject.eraseToAnyPublisher() }
 
-    private var timerCancellable: AnyCancellable?
+    private let childJoinedSubject = PassthroughSubject<Void, Never>()
+    var childJoined: AnyPublisher<Void, Never> { childJoinedSubject.eraseToAnyPublisher() }
 
     private let isReissuingSubject = CurrentValueSubject<Bool, Never>(false)
     var isReissuing: AnyPublisher<Bool, Never> { isReissuingSubject.eraseToAnyPublisher() }
+
+    private var timerCancellable: AnyCancellable?
+    private var isChecking = false
+
+    var userName: String {
+        authTokenStorage.userName ?? ""
+    }
+
+    var profileURL: String {
+        authTokenStorage.profile ?? ""
+    }
 
     init(
         childLastName: String,
         childFirstName: String,
         inviteCode: String,
         issuedAt: Date,
+        inviteService: ParentInviteServiceType,
+        authTokenStorage: AuthTokenStorageType,
+        userSessionStorage: UserSessionStorageType,
         expiresIn: TimeInterval = 10 * 60
     ) {
         self.childLastName = childLastName
         self.childFirstName = childFirstName
+        self.inviteService = inviteService
+        self.authTokenStorage = authTokenStorage
+        self.userSessionStorage = userSessionStorage
 
         self.expiresIn = expiresIn
         self.expiresAt = issuedAt.addingTimeInterval(expiresIn)
@@ -64,12 +86,11 @@ final class ParentInviteViewModel: BaseViewModel {
 
         Task { [weak self] in
             guard let self else { return }
-            do {
-                let req = InviteCodeRequest(childLastName: childLastName, childFirstName: childFirstName)
 
-                let data: InviteCodeData = try await BaseService.shared.request(
-                    endPoint: .postInviteCode,
-                    body: req
+            do {
+                let data = try await inviteService.reissueInviteCode(
+                    childLastName: childLastName,
+                    childFirstName: childFirstName
                 )
 
                 await MainActor.run {
@@ -84,6 +105,38 @@ final class ParentInviteViewModel: BaseViewModel {
                 }
             }
         }
+    }
+
+    func checkConnectionOnce() {
+        guard !isChecking else { return }
+        guard isExpiredValue == false else { return }
+
+        isChecking = true
+
+        Task { [weak self] in
+            guard let self else { return }
+
+            defer { self.isChecking = false }
+
+            do {
+                let data = try await inviteService.checkConnection(
+                    childLastName: childLastName,
+                    childFirstName: childFirstName
+                )
+
+                if data.isRegistered {
+                    await MainActor.run {
+                        self.childJoinedSubject.send(())
+                    }
+                }
+            } catch {
+                // 조용히 무시
+            }
+        }
+    }
+
+    func saveSelectedChildId(_ id: Int) {
+        userSessionStorage.selectedChildId = id
     }
 
     private func restartCountdown() {
