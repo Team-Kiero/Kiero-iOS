@@ -175,4 +175,8 @@ extension MainFeatureDIContainer {
         
         return MyPageHostingController(viewModel: viewModel)
     }
+    
+    func makeMySpaceViewController() -> MySpaceHostingController {
+        return MySpaceHostingController()
+    }
 }

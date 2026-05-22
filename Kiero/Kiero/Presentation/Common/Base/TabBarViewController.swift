@@ -207,23 +207,12 @@ private extension TabBarViewController {
             let dailyJourneyNav = UINavigationController()
             let coinMissionNav = UINavigationController()
             let wishWellNav = UINavigationController()
-            let dailyJourneyVC = factory.makeDailyJourneyViewController()
-            let coinMissionVC = factory.makeCoinMissionViewController()
-            let wishWellVC = factory.makeWishWellViewController()
-            let mySpaceVC = factory.makeMySpaceViewController()
+            let mySpaceNav = UINavigationController()
             
             let dailyJourneyCoordinator = DailyJourneyCoordinator(
                 navigationController: dailyJourneyNav,
                 factory: factory
             )
-            viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC, mySpaceVC].map {
-                let nav = UINavigationController(rootViewController: $0)
-                nav.isNavigationBarHidden = true
-                nav.delegate = self
-                nav.view.backgroundColor = .kBlack
-                $0.view.backgroundColor = .kBlack
-                return nav
-            }
             
             let coinMissionCoordinator = CoinMissionCoordinator(
                 navigationController: coinMissionNav,
@@ -235,22 +224,32 @@ private extension TabBarViewController {
                 factory: factory
             )
             
+            let mySpaceCoordinator = MySpaceCoordinator(
+                navigationController: mySpaceNav,
+                factory: factory,
+                logoutService: LogoutService()
+            )
+            
             childCoordinators.append(dailyJourneyCoordinator)
             childCoordinators.append(coinMissionCoordinator)
             childCoordinators.append(wishWellCoordinator)
+            childCoordinators.append(mySpaceCoordinator)
             
             let dailyJourneyVC = dailyJourneyCoordinator.start()
             let coinMissionVC = coinMissionCoordinator.start()
             let wishWellVC = wishWellCoordinator.start()
+            let mySpaceVC = mySpaceCoordinator.start()
             
             dailyJourneyNav.setViewControllers([dailyJourneyVC], animated: false)
             coinMissionNav.setViewControllers([coinMissionVC], animated: false)
             wishWellNav.setViewControllers([wishWellVC], animated: false)
+            mySpaceNav.setViewControllers([mySpaceVC], animated: false)
             
             viewControllers = [
                 dailyJourneyNav,
                 coinMissionNav,
-                wishWellNav
+                wishWellNav,
+                mySpaceNav
             ].map(configureNavigationController)
             
             customTabBar.setTabItems(

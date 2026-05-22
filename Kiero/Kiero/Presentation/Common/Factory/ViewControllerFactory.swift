@@ -44,5 +44,5 @@ protocol ViewControllerFactory {
     func makeCoinMissionViewController() -> CoinMissionViewController
     func makeWishWellViewController() -> WishWellViewController
     func makeMissionCompleteViewController(image: UIImage, stoneType: StoneType?, scheduleDetailId: Int?) -> MissionCompleteViewController
-    func makeMySpaceViewController() -> UIViewController
+    func makeMySpaceViewController() -> MySpaceHostingController
 }
