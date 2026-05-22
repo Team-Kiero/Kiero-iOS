@@ -3,11 +3,18 @@ import SnapKit
 import Then
 
 extension UIViewController {
-    func showLogoutDialog(onConfirm: @escaping () -> Void) {
-        let targetView: UIView = self.tabBarController?.view ?? self.navigationController?.view ?? self.view
+    
+    func showLogoutDialog(
+        onConfirm: @escaping () -> Void
+    ) {
+        let targetView: UIView =
+            self.tabBarController?.view
+            ?? self.navigationController?.view
+            ?? self.view
         
         let dimmedView = UIView().then {
-            $0.backgroundColor = UIColor.kBlack.withAlphaComponent(0.75)
+            $0.backgroundColor =
+                UIColor.kBlack.withAlphaComponent(0.75)
             $0.alpha = 1
         }
         
@@ -16,7 +23,10 @@ extension UIViewController {
             $0.alpha = 1
         }
         
-        targetView.addSubviews(dimmedView, dialogBox)
+        targetView.addSubviews(
+            dimmedView,
+            dialogBox
+        )
         
         dimmedView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -31,25 +41,26 @@ extension UIViewController {
         targetView.bringSubviewToFront(dialogBox)
         
         dialogBox.onTapCancel = { [weak self] in
-            self?.dismissDialog(dimmedView, dialogBox)
+            self?.dismissDialog(
+                dimmedView,
+                dialogBox
+            )
         }
         
         dialogBox.onTapConfirm = { [weak self] in
-            self?.dismissDialog(dimmedView, dialogBox)
+            self?.dismissDialog(
+                dimmedView,
+                dialogBox
+            )
+            
             onConfirm()
         }
     }
     
-    func navigateToPickRole() {
-        let roleSelectionVC = PickRoleViewController(viewModel: PickRoleViewModel(), diContainer: AppDIContainer.shared)
-        let nav = UINavigationController(rootViewController: roleSelectionVC)
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav, animated: true)
-        }
-    }
-    
-    func dismissDialog(_ dimmed: UIView, _ dialog: UIView) {
+    func dismissDialog(
+        _ dimmed: UIView,
+        _ dialog: UIView
+    ) {
         dimmed.removeFromSuperview()
         dialog.removeFromSuperview()
     }

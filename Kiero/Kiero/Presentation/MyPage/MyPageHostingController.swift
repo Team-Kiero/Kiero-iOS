@@ -9,11 +9,31 @@ import SwiftUI
 
 final class MyPageHostingController: UIHostingController<MyPageView> {
     
-    private let viewModel: MyPageViewModel
+    let viewModel: MyPageViewModel
+    
+    var onChildConnectionTap: (() -> Void)?
+    var onLogoutConfirm: (() -> Void)?
     
     init(viewModel: MyPageViewModel) {
         self.viewModel = viewModel
-        super.init(rootView: MyPageView(viewModel: viewModel))
+        
+        super.init(
+            rootView: MyPageView(
+                viewModel: viewModel,
+                onChildConnectionTap: {},
+                onLogoutConfirm: {}
+            )
+        )
+        
+        self.rootView = MyPageView(
+            viewModel: viewModel,
+            onChildConnectionTap: { [weak self] in
+                self?.onChildConnectionTap?()
+            },
+            onLogoutConfirm: { [weak self] in
+                self?.onLogoutConfirm?()
+            }
+        )
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {

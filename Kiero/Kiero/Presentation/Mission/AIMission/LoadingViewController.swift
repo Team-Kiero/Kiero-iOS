@@ -14,8 +14,6 @@ import Then
 
 final class LoadingViewController: BaseViewController<LoadingViewModel> {
     
-    // MARK: - UI Components
-    
     private let containerStackView = UIStackView().then {
         $0.axis = .vertical
         $0.spacing = 17
@@ -34,15 +32,11 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
         $0.numberOfLines = 0
     }
     
-    // MARK: - Life Cycle
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setWebPImage()
     }
-    
-    // MARK: - Setup Methods
     
     override func setUI() {
         view.addSubview(containerStackView)
@@ -91,8 +85,4 @@ final class LoadingViewController: BaseViewController<LoadingViewModel> {
             ]
         )
     }
-}
-
-#Preview {
-    AppDIContainer.shared.makeLoadingViewController()
 }

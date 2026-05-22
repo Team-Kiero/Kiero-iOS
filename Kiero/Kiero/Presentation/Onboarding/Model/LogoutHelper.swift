@@ -8,14 +8,21 @@
 import UIKit
 
 enum LogoutHelper {
+    
     static func logoutToPickRole() {
         TokenManager.shared.clearAll()
         AppDIContainer.shared.sseManager.stop()
-
-        let nav = UINavigationController(rootViewController: AuthGateViewController())
-
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
+        
+        guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate,
+              let window = sceneDelegate.window else {
+            return
         }
+        
+        let coordinator = AuthCoordinator(
+            window: window,
+            factory: AppDIContainer.shared
+        )
+        
+        coordinator.start()
     }
 }

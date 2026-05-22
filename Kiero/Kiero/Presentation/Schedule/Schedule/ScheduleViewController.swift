@@ -11,17 +11,28 @@ import Combine
 import SnapKit
 import Then
 
-class ScheduleViewController: BaseViewController<ScheduleViewModel> {
+final class ScheduleViewController: BaseViewController<ScheduleViewModel> {
+    
+    // MARK: - Properties
+    
+    var onAddScheduleTap: ((Bool, [Schedule], Date) -> Void)?
+    var onLogout: (() -> Void)?
+    
+    let scheduleChildVC: TimeTableViewController
     
     // MARK: - UI Components
     
-    private lazy var scheduleChildVC: TimeTableViewController = {
-        guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
-        let vc = AppDIContainer.shared.makeTimeTableViewController(viewModel: viewModel)
-        return vc
-    }()
-    
     private let floatingButton = FloatingButton(type: .schedule)
+    
+    // MARK: - Init
+    
+    init(
+        viewModel: ScheduleViewModel,
+        scheduleChildVC: TimeTableViewController
+    ) {
+        self.scheduleChildVC = scheduleChildVC
+        super.init(viewModel: viewModel)
+    }
     
     // MARK: - Life Cycle
     
@@ -57,58 +68,37 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     private func setAction() {
         floatingButton.tapAction = { [weak self] in
-            self?.presentAddSchedule()
+            self?.requestAddSchedule()
         }
     }
     
-    private func isPastWeek() -> Bool {
-        guard let viewModel = self.viewModel else { return false }
+    private func requestAddSchedule() {
+        guard let viewModel else { return }
         
         let calendar = Calendar.current
         let now = Date()
         
-        guard let currentWeekStart = now.daysOfWeek.first else { return false }
-        let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
+        guard let currentWeekStart = now.daysOfWeek.first,
+              let referenceWeekStart = viewModel.currentReferenceDate.value.daysOfWeek.first else {
+            return
+        }
         
-        guard let referenceWeekStart = viewModel.currentReferenceDate.value.daysOfWeek.first else { return false }
+        let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
         let startOfReferenceWeek = calendar.startOfDay(for: referenceWeekStart)
         
-        return startOfReferenceWeek < startOfCurrentWeek
-    }
-    
-    private func presentAddSchedule() {
-        guard let viewModel = self.viewModel else { return }
+        let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek)
+        ? now
+        : viewModel.currentReferenceDate.value
         
-        let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController(
-            isFireLit: viewModel.isFireLit,
-            scheduleList: viewModel.scheduleList.value
+        onAddScheduleTap?(
+            viewModel.isFireLit,
+            viewModel.scheduleList.value,
+            targetDate
         )
-        
-        let calendar = Calendar.current
-        let now = Date()
-        
-        let currentWeekStart = now.daysOfWeek.first!
-        let startOfCurrentWeek = calendar.startOfDay(for: currentWeekStart)
-        
-        let referenceWeekStart = viewModel.currentReferenceDate.value.daysOfWeek.first!
-        let startOfReferenceWeek = calendar.startOfDay(for: referenceWeekStart)
-        
-        let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek) ? now : viewModel.currentReferenceDate.value
-        
-        addScheduleVC.baseDate = targetDate
-        
-        addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in
-            guard let self = self else { return }            
-            self.viewModel?.currentReferenceDate.send(targetDate)
-        }
-        
-        let nav = UINavigationController(rootViewController: addScheduleVC)
-        nav.modalPresentationStyle = .fullScreen
-        self.present(nav, animated: true)
     }
     
     override func bindViewModel() {
-        guard let viewModel = viewModel else { return }
+        guard let viewModel else { return }
         
         let input = ScheduleViewModel.Input(
             viewDidLoad: Just(()).eraseToAnyPublisher(),
@@ -126,29 +116,32 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
                     leftEnabled: info.leftEnabled,
                     rightEnabled: info.rightEnabled
                 )
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
             
         output.filteredSchedules
             .receive(on: DispatchQueue.main)
             .sink { [weak self] schedules in
                 self?.scheduleChildVC.updateSchedules(schedules)
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
 
         output.weeklyDates
             .receive(on: DispatchQueue.main)
             .sink { [weak self] dates in
                 self?.scheduleChildVC.updateWeeklyDates(dates)
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         viewModel.logoutSuccess
             .receive(on: DispatchQueue.main)
             .sink { [weak self] in
-                self?.navigateToPickRole()
-            }.store(in: &cancellables)
+                self?.onLogout?()
+            }
+            .store(in: &cancellables)
     }
     
-    private func presentNotificationFeed() {
-        let notificationVC = diContainer.makeNotificationFeedViewController()
-        self.navigationController?.pushViewController(notificationVC, animated: true)
+    func updateReferenceDate(_ date: Date) {
+        viewModel?.currentReferenceDate.send(date)
     }
 }

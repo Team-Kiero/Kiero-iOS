@@ -5,25 +5,21 @@
 //  Created by 신혜연 on 1/15/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 import SnapKit
 import Then
 
 final class MissionViewController: BaseViewController<MissionViewModel> {
     
-    // MARK: - UI Components
+    var onAddMissionDirectlyTap: (() -> Void)?
+    var onAddMissionByAITap: (() -> Void)?
+    var onEditMissionTap: ((MissionItemDTO, String, DetailBottomSheet) -> Void)?
     
     private let emptyView = EmptyView(text: "등록된 미션이 없어요.\n우측 하단 버튼을 눌러 미션을 추가해보세요!")
     private let missionView = MissionView()
     private let floatingButton = FloatingButton(type: .mission)
-    
-    // MARK: - Life Cycle
-    
-    public override init(viewModel: MissionViewModel, diContainer: any ViewControllerFactory) {
-        super.init(viewModel: viewModel, diContainer: diContainer)
-    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -32,11 +28,8 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setAction()
     }
-    
-    // MARK: - Setup Methods
 
     override func setUI() {
         view.addSubviews(emptyView, missionView, floatingButton)
@@ -73,11 +66,13 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         let menuView = MissionFloatingMenuView()
         
         menuView.onMenuSelected = { [weak self] index in
-            guard let self = self else { return }
             switch index {
-            case 0: self.presentAddMissionDirectly()
-            case 1: self.presentAddMissionByAI()
-            default: break
+            case 0:
+                self?.onAddMissionDirectlyTap?()
+            case 1:
+                self?.onAddMissionByAITap?()
+            default:
+                break
             }
         }
         
@@ -94,42 +89,42 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
             )
         )
         
-        let bottomSheet = DetailBottomSheet(data: detailData, showEditDelete: !mission.isCompleted)
+        let bottomSheet = DetailBottomSheet(
+            data: detailData,
+            showEditDelete: !mission.isCompleted
+        )
         
-        bottomSheet.onEditTap = { [weak self] in
-            guard let self = self else { return }
-            guard let editVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else {
-                return
-            }
-            editVC.configureEditMode(with: mission, dueAt: dueAt)
-            
-            NotificationCenter.default.post(name: .hideTabBar, object: true)
-            NotificationCenter.default.post(name: .hideNavigationBar, object: true)
-            
-            editVC.modalPresentationStyle = .fullScreen
-            bottomSheet.dismiss(animated: false) {
-                self.present(editVC, animated: true)
-            }
+        bottomSheet.onEditTap = { [weak self, weak bottomSheet] in
+            guard let self, let bottomSheet else { return }
+            self.onEditMissionTap?(mission, dueAt, bottomSheet)
         }
         
-        bottomSheet.onDeleteTap = { [weak self] in
-            guard let self = self else { return }
+        bottomSheet.onDeleteTap = { [weak self, weak bottomSheet] in
+            guard let self, let bottomSheet else { return }
+            
             bottomSheet.dismiss(animated: false) {
                 let dialog = DialogBox()
-                dialog.configure(state: .deleteMission(title: mission.name, coin: "\(mission.reward)"))
+                dialog.configure(
+                    state: .deleteMission(
+                        title: mission.name,
+                        coin: "\(mission.reward)"
+                    )
+                )
                 
-                dialog.onTapClose = { [weak self] in
-                    guard let self = self else { return }
+                dialog.onTapClose = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
                     dialog.dismiss()
                     self.present(bottomSheet, animated: false)
                 }
-                dialog.onTapCancel = { [weak self] in
-                    guard let self = self else { return }
+                
+                dialog.onTapCancel = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
                     dialog.dismiss()
                     self.present(bottomSheet, animated: false)
                 }
-                dialog.onTapConfirm = { [weak self] in
-                    guard let self = self else { return }
+                
+                dialog.onTapConfirm = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
                     dialog.dismiss()
                     self.viewModel?.deleteMission(id: mission.id)
                 }
@@ -138,14 +133,14 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
             }
         }
         
-        self.present(bottomSheet, animated: false)
+        present(bottomSheet, animated: false)
     }
     
     override func bindViewModel() {
         viewModel?.$missionGroups
             .receive(on: RunLoop.main)
             .sink { [weak self] groups in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 let hasData = !groups.isEmpty
                 self.emptyView.isHidden = hasData
@@ -156,26 +151,5 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
                 }
             }
             .store(in: &cancellables)
-    }
-    
-    private func presentNotificationFeed() {
-        let notificationVC = diContainer.makeNotificationFeedViewController()
-        self.navigationController?.pushViewController(notificationVC, animated: true)
-    }
-    
-    private func presentAddMissionDirectly() {
-        let vc = diContainer.makeWriteMissionViewController()
-        NotificationCenter.default.post(name: .hideTabBar, object: true)
-        NotificationCenter.default.post(name: .hideNavigationBar, object: true)
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true)
-    }
-    
-    private func presentAddMissionByAI() {
-        let vc = diContainer.makeAIMissionViewController()
-        NotificationCenter.default.post(name: .hideTabBar, object: true)
-        NotificationCenter.default.post(name: .hideNavigationBar, object: true)
-        vc.modalPresentationStyle = .fullScreen
-        self.present(vc, animated: true)
     }
 }

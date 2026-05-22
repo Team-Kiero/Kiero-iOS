@@ -15,10 +15,11 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     
     // MARK: - Properties
     
+    var onRoute: ((ChildLoginRoute) -> Void)?
+    
     private var isLastValid = false
     private var isFirstValid = false
     private var isCodeValid = false
-    
     
     // MARK: - UI Components
     
@@ -96,7 +97,12 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     }
     
     override func addTarget() {
-        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
+        startButton.addTarget(
+            self,
+            action: #selector(startButtonDidTap),
+            for: .touchUpInside
+        )
+        
         childNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
@@ -128,23 +134,20 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
         
         viewModel.route
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] (route: ChildLoginRoute) in
-                guard let self else { return }
-                switch route {
-                case .childOnboarding:
-                    self.navigateToChildOnboarding()
-                }
+            .sink { [weak self] route in
+                self?.onRoute?(route)
             }
             .store(in: &cancellables)
         
         viewModel.state
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] (state: ChildLoginState) in
+            .sink { [weak self] state in
                 guard let self else { return }
                 
                 switch state {
                 case .idle:
                     self.startButton.isEnabled = false
+                    
                 case .loading:
                     self.startButton.isEnabled = false
                     
@@ -155,6 +158,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                 }
             }
             .store(in: &cancellables)
+        
         updateStartButton()
     }
     
@@ -168,17 +172,16 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
         let first = firstNameTextField.innerTextField.text ?? ""
         let code = codeTextField.innerTextField.text ?? ""
         
-        viewModel?.signup(lastName: last, firstName: first, inviteCode: code)
+        viewModel?.signup(
+            lastName: last,
+            firstName: first,
+            inviteCode: code
+        )
     }
     
     private func updateStartButton() {
         let enabled = isLastValid && isFirstValid && isCodeValid
         startButton.isEnabled = enabled
-    }
-    
-    private func navigateToChildOnboarding() {
-        let vc = AppDIContainer.shared.makeChildOnboardingViewController()
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -194,4 +197,3 @@ extension ChildrenLoginViewController: UITextFieldDelegate {
         return true
     }
 }
-

@@ -16,12 +16,15 @@ final class AuthGateViewController: UIViewController {
     // MARK: - Properties
 
     private let viewModel: AuthGateViewModel
+
+    var onRoute: ((AuthGateRoute) -> Void)?
+    var onLoginRoleSelected: ((LoginUser) -> Void)?
+
     private var cancellables = Set<AnyCancellable>()
     private var pendingWork: DispatchWorkItem?
-    
+
     private var dimPanelBottomConstraint: Constraint?
     private var pickRoleBottomConstraint: Constraint?
-
 
     private var overlayPrepared = false
 
@@ -47,12 +50,14 @@ final class AuthGateViewController: UIViewController {
 
     // MARK: - Init
 
-    init(viewModel: AuthGateViewModel = AuthGateViewModel()) {
+    init(viewModel: AuthGateViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     // MARK: - Life Cycle
 
@@ -95,6 +100,7 @@ final class AuthGateViewController: UIViewController {
         let work = DispatchWorkItem { [weak self] in
             self?.handle(by: route)
         }
+
         pendingWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
     }
@@ -108,22 +114,15 @@ final class AuthGateViewController: UIViewController {
                 self?.showPickRoleOverlaySequence()
             }
 
-        case .parentOnboarding:
-            let vc = AppDIContainer.shared.makeParentOnboardingViewController()
-            changeRoot(UINavigationController(rootViewController: vc))
-
-        case .parentTab:
-            changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: true))
-
-        case .childTab:
-            changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: false))
+        case .parentOnboarding, .parentTab, .childTab:
+            onRoute?(route)
         }
     }
 
     private func prepareOverlaysIfNeeded() {
         guard !overlayPrepared else { return }
         overlayPrepared = true
-        
+
         view.addSubviews(dimPanelView, pickRoleView)
 
         dimPanelView.snp.makeConstraints {
@@ -144,48 +143,30 @@ final class AuthGateViewController: UIViewController {
         }
 
         pickRoleView.onTapStart = { [weak self] role in
-            self?.goLoginFlow(for: role)
+            self?.onLoginRoleSelected?(role)
         }
     }
 
     private func showPickRoleOverlaySequence() {
         view.layoutIfNeeded()
 
-        UIView.animate(withDuration: IntroTiming.dimDuration,
-                       delay: 0,
-                       options: [.curveEaseOut]) {
+        UIView.animate(
+            withDuration: IntroTiming.dimDuration,
+            delay: 0,
+            options: [.curveEaseOut]
+        ) {
             self.dimPanelView.alpha = 1
             self.dimPanelBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
         }
 
-        UIView.animate(withDuration: IntroTiming.pickRoleDuration,
-                       delay: IntroTiming.pickRoleDelayAfterDimStart,
-                       options: [.curveEaseOut]) {
+        UIView.animate(
+            withDuration: IntroTiming.pickRoleDuration,
+            delay: IntroTiming.pickRoleDelayAfterDimStart,
+            options: [.curveEaseOut]
+        ) {
             self.pickRoleBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
-        }
-    }
-
-    // MARK: - Navigation
-
-    private func goLoginFlow(for role: LoginUser) {
-        let vc: UIViewController
-        switch role {
-        case .parent:
-            let vm = ParentLoginViewModel()
-            vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-            
-        case .child:
-            vc = ChildrenLoginViewController(viewModel: ChildrenLoginViewModel(), diContainer: AppDIContainer.shared)
-        }
-        navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.pushViewController(vc, animated: true)
-    }
-
-    private func changeRoot(_ vc: UIViewController) {
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(vc)
         }
     }
 }

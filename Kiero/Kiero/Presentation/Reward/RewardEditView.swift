@@ -26,13 +26,16 @@ struct RewardEditView: View {
     
     var mode: RewardMode
     var onSave: (String, Int) -> Void
+    var onClose: () -> Void
     
     @State private var rewardTitle: String = ""
     @State private var coinCount: Int = 20
     
-    init(mode: RewardMode, onSave: @escaping (String, Int) -> Void) {
+    init(mode: RewardMode, onSave: @escaping (String, Int) -> Void, onClose: @escaping () -> Void) {
         self.mode = mode
         self.onSave = onSave
+        self.onClose = onClose
+        
         if case let .edit(reward) = mode {
             _rewardTitle = State(initialValue: reward.title)
             _coinCount = State(initialValue: reward.cost)
@@ -45,7 +48,10 @@ struct RewardEditView: View {
             
             VStack(alignment: .leading, spacing: 0) {
                 NavigationBarWrapper(type: .closeDone(title: mode.title),
-                                     onLeftTap: { dismiss() },
+                                     onLeftTap: {
+                    onClose()
+                    dismiss()
+                },
                                      onRightTap: { saveAction() }
                 )
                 .frame(height: 37)
@@ -137,7 +143,8 @@ struct RewardEditView: View {
         }
         .onTapGesture {
             isTextFieldFocused = false
-            isCoinFieldFocused = false}
+            isCoinFieldFocused = false
+        }
     }
     
     private func validateCoinRange() {
@@ -175,11 +182,12 @@ struct RewardEditView: View {
         switch mode {
         case .add:
             Toast.show(message: "보상이 등록되었습니다.", bottomInset: 88)
-        case .edit(_):
+        case .edit:
             Toast.show(message: "보상이 수정되었습니다.", bottomInset: 88)
         }
         
         onSave(rewardTitle, coinCount)
+        onClose()
         dismiss()
     }
 }

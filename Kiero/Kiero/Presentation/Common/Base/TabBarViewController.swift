@@ -27,8 +27,17 @@ struct TabNavigationBarStyle {
 
 public final class TabBarViewController: UITabBarController {
     
-    private let feedService: FeedServiceType = FeedService()
+    var onNotificationTap: ((UINavigationController) -> Void)?
+    
+    private let factory: ViewControllerFactory
+    private let isParent: Bool
+    private let feedService: FeedServiceType
+    private let sseTokenRefresher: SseTokenRefresherType
+    private let sseManager: SseStreamManager
+    
     private var cancellables = Set<AnyCancellable>()
+    private var childCoordinators: [any Coordinator] = []
+    
     private var hasUnreadNotification = false
     private var globalSseStarted = false
     private var isShowingNotificationFeed = false
@@ -46,9 +55,6 @@ public final class TabBarViewController: UITabBarController {
             updateNavigationBar()
         }
     }
-    
-    private let factory: ViewControllerFactory
-    private let isParent: Bool
     
     private lazy var customNavigationBar = NavigationBar(type: .main()).then {
         $0.rightButtonAction = { [weak self] in
@@ -70,15 +76,24 @@ public final class TabBarViewController: UITabBarController {
         $0.isUserInteractionEnabled = false
     }
     
-    private var customTabBarBottomConstraint: Constraint?
-    
-    public init(factory: ViewControllerFactory, isParent: Bool) {
+    init(
+        factory: ViewControllerFactory,
+        isParent: Bool,
+        feedService: FeedServiceType,
+        sseTokenRefresher: SseTokenRefresherType,
+        sseManager: SseStreamManager
+    ) {
         self.factory = factory
         self.isParent = isParent
+        self.feedService = feedService
+        self.sseTokenRefresher = sseTokenRefresher
+        self.sseManager = sseManager
         super.init(nibName: nil, bundle: nil)
     }
     
-    required init?(coder: NSCoder) { fatalError() }
+    required init?(coder: NSCoder) {
+        fatalError()
+    }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -101,6 +116,7 @@ public final class TabBarViewController: UITabBarController {
             fetchInitialUnreadStatus()
             startGlobalFeedSSEIfNeeded()
         }
+        
         updateNavigationBar()
     }
     
@@ -109,8 +125,6 @@ public final class TabBarViewController: UITabBarController {
         delegate = self
     }
 }
-
-// MARK: - Setup
 
 private extension TabBarViewController {
     
@@ -125,39 +139,107 @@ private extension TabBarViewController {
     }
     
     func setViewControllers() {
+        childCoordinators.removeAll()
+        
         if isParent {
-            let statusVC = factory.makeTodayStatusViewController()
-            let scheduleVC = factory.makeScheduleViewController()
-            let missionVC = factory.makeMissionViewController()
-            let rewardVC = factory.makeRewardViewController()
-            let myPageVC = factory.makeMyPageViewController()
+            let statusNav = UINavigationController()
+            let scheduleNav = UINavigationController()
+            let missionNav = UINavigationController()
+            let rewardNav = UINavigationController()
+            let myPageNav = UINavigationController()
             
-            viewControllers = [statusVC, scheduleVC, missionVC, rewardVC, myPageVC].map {
-                let nav = UINavigationController(rootViewController: $0)
-                nav.isNavigationBarHidden = true
-                nav.delegate = self
-                nav.view.backgroundColor = .kBlack
-                $0.view.backgroundColor = .kBlack
-                return nav
-            }
+            let statusCoordinator = TodayStatusCoordinator(
+                navigationController: statusNav,
+                factory: factory
+            )
+            
+            let scheduleCoordinator = ScheduleCoordinator(
+                navigationController: scheduleNav,
+                factory: factory
+            )
+            
+            let missionCoordinator = MissionCoordinator(
+                navigationController: missionNav,
+                factory: factory
+            )
+            
+            let rewardCoordinator = RewardCoordinator(
+                navigationController: rewardNav,
+                factory: factory
+            )
+            
+            let myPageCoordinator = MyPageCoordinator(
+                navigationController: myPageNav,
+                factory: factory
+            )
+            
+            childCoordinators.append(statusCoordinator)
+            childCoordinators.append(scheduleCoordinator)
+            childCoordinators.append(missionCoordinator)
+            childCoordinators.append(rewardCoordinator)
+            childCoordinators.append(myPageCoordinator)
+            
+            let statusVC = statusCoordinator.start()
+            let scheduleVC = scheduleCoordinator.start()
+            let missionVC = missionCoordinator.start()
+            let rewardVC = rewardCoordinator.start()
+            let myPageVC = myPageCoordinator.start()
+            
+            statusNav.setViewControllers([statusVC], animated: false)
+            scheduleNav.setViewControllers([scheduleVC], animated: false)
+            missionNav.setViewControllers([missionVC], animated: false)
+            rewardNav.setViewControllers([rewardVC], animated: false)
+            myPageNav.setViewControllers([myPageVC], animated: false)
+            
+            viewControllers = [
+                statusNav,
+                scheduleNav,
+                missionNav,
+                rewardNav,
+                myPageNav
+            ].map(configureNavigationController)
             
             customTabBar.setTabItems(
                 titles: ["오늘 현황", "일정", "미션", "보상", "마이페이지"],
                 icons: [.icMap, .icCalenderFill, .icMission, .icStar, .icProfile]
             )
         } else {
-            let dailyJourneyVC = factory.makeDailyJourneyViewController()
-            let coinMissionVC = factory.makeCoinMissionViewController()
-            let wishWellVC = factory.makeWishWellViewController()
+            let dailyJourneyNav = UINavigationController()
+            let coinMissionNav = UINavigationController()
+            let wishWellNav = UINavigationController()
             
-            viewControllers = [dailyJourneyVC, coinMissionVC, wishWellVC].map {
-                let nav = UINavigationController(rootViewController: $0)
-                nav.isNavigationBarHidden = true
-                nav.delegate = self
-                nav.view.backgroundColor = .kBlack
-                $0.view.backgroundColor = .kBlack
-                return nav
-            }
+            let dailyJourneyCoordinator = DailyJourneyCoordinator(
+                navigationController: dailyJourneyNav,
+                factory: factory
+            )
+            
+            let coinMissionCoordinator = CoinMissionCoordinator(
+                navigationController: coinMissionNav,
+                factory: factory
+            )
+            
+            let wishWellCoordinator = WishWellCoordinator(
+                navigationController: wishWellNav,
+                factory: factory
+            )
+            
+            childCoordinators.append(dailyJourneyCoordinator)
+            childCoordinators.append(coinMissionCoordinator)
+            childCoordinators.append(wishWellCoordinator)
+            
+            let dailyJourneyVC = dailyJourneyCoordinator.start()
+            let coinMissionVC = coinMissionCoordinator.start()
+            let wishWellVC = wishWellCoordinator.start()
+            
+            dailyJourneyNav.setViewControllers([dailyJourneyVC], animated: false)
+            coinMissionNav.setViewControllers([coinMissionVC], animated: false)
+            wishWellNav.setViewControllers([wishWellVC], animated: false)
+            
+            viewControllers = [
+                dailyJourneyNav,
+                coinMissionNav,
+                wishWellNav
+            ].map(configureNavigationController)
             
             customTabBar.setTabItems(
                 titles: ["오늘의 여정", "금화 미션", "소원의 우물"],
@@ -166,6 +248,14 @@ private extension TabBarViewController {
         }
         
         customTabBar.updateSelection(0)
+    }
+
+    func configureNavigationController(_ nav: UINavigationController) -> UINavigationController {
+        nav.isNavigationBarHidden = true
+        nav.delegate = self
+        nav.view.backgroundColor = .kBlack
+        nav.viewControllers.first?.view.backgroundColor = .kBlack
+        return nav
     }
     
     func setCustomNavigationBarUI() {
@@ -176,6 +266,7 @@ private extension TabBarViewController {
             $0.horizontalEdges.equalToSuperview()
             $0.height.equalTo(45)
         }
+        
         customNavigationBar.isHidden = !isParent
     }
     
@@ -195,19 +286,19 @@ private extension TabBarViewController {
         customTabBar.onTabSelected = { [weak self] index in
             guard let self else { return }
             
-            let isReclick = (self.selectedIndex == index)
+            let isReclick = self.selectedIndex == index
             self.selectedIndex = index
             
-            if let selectedVC = self.viewControllers?[index] {
-                let targetVC = (selectedVC as? UINavigationController)?.viewControllers.first ?? selectedVC
-                
-                if isReclick {
-                    if let scheduleVC = targetVC as? ScheduleViewController {
-                        scheduleVC.viewModel?.currentReferenceDate.send(Date())
-                    }
-                    self.refreshOnReselect(targetVC)
-                    self.scrollToTop(viewController: targetVC)
+            guard let selectedVC = self.viewControllers?[index] else { return }
+            let targetVC = (selectedVC as? UINavigationController)?.viewControllers.first ?? selectedVC
+            
+            if isReclick {
+                if let scheduleVC = targetVC as? ScheduleViewController {
+                    scheduleVC.viewModel?.currentReferenceDate.send(Date())
                 }
+                
+                self.refreshOnReselect(targetVC)
+                self.scrollToTop(viewController: targetVC)
             }
         }
     }
@@ -264,8 +355,6 @@ private extension TabBarViewController {
     }
 }
 
-// MARK: - Navigation Bar
-
 private extension TabBarViewController {
     
     func updateNavigationBar() {
@@ -295,28 +384,45 @@ private extension TabBarViewController {
     }
     
     func handleNavigationBarRightTap() {
-        let notificationVC = factory.makeNotificationFeedViewController()
-        notificationVC.hidesBottomBarWhenPushed = true
-        
         NotificationBadgeCenter.shared.setUnread(false)
         
         guard let nav = selectedViewController as? UINavigationController else { return }
-        nav.pushViewController(notificationVC, animated: true)
+        onNotificationTap?(nav)
     }
     
     func navigationBarStyle(for index: Int) -> TabNavigationBarStyle? {
         if isParent {
             switch index {
             case 0:
-                return .init(title: nil, type: .main(title: nil), isNotificationActive: hasUnreadNotification)
+                return .init(
+                    title: nil,
+                    type: .main(title: nil),
+                    isNotificationActive: hasUnreadNotification
+                )
             case 1:
-                return .init(title: "일정", type: .main(title: "일정"), isNotificationActive: hasUnreadNotification)
+                return .init(
+                    title: "일정",
+                    type: .main(title: "일정"),
+                    isNotificationActive: hasUnreadNotification
+                )
             case 2:
-                return .init(title: "미션", type: .main(title: "미션"), isNotificationActive: hasUnreadNotification)
+                return .init(
+                    title: "미션",
+                    type: .main(title: "미션"),
+                    isNotificationActive: hasUnreadNotification
+                )
             case 3:
-                return .init(title: "보상", type: .main(title: "보상"), isNotificationActive: hasUnreadNotification)
+                return .init(
+                    title: "보상",
+                    type: .main(title: "보상"),
+                    isNotificationActive: hasUnreadNotification
+                )
             case 4:
-                return .init(title: "마이페이지", type: .main(title: "마이페이지"), isNotificationActive: hasUnreadNotification)
+                return .init(
+                    title: "마이페이지",
+                    type: .main(title: "마이페이지"),
+                    isNotificationActive: hasUnreadNotification
+                )
             default:
                 return nil
             }
@@ -326,9 +432,8 @@ private extension TabBarViewController {
     }
 }
 
-// MARK: - Notification Handlers
-
 private extension TabBarViewController {
+    
     @objc
     func handleTabBarHidden(_ notification: Notification) {
         guard let isHidden = notification.object as? Bool else { return }
@@ -340,7 +445,7 @@ private extension TabBarViewController {
     }
     
     @objc
-    private func handleChromeAlpha(_ notification: Notification) {
+    func handleChromeAlpha(_ notification: Notification) {
         guard let isDimmed = notification.object as? Bool else { return }
         
         UIView.animate(withDuration: 0.25) {
@@ -349,7 +454,7 @@ private extension TabBarViewController {
     }
     
     @objc
-    private func handleNavigationBarHidden(_ notification: Notification) {
+    func handleNavigationBarHidden(_ notification: Notification) {
         guard let isHidden = notification.object as? Bool else { return }
         
         UIView.animate(withDuration: 0.25) {
@@ -360,17 +465,19 @@ private extension TabBarViewController {
     }
     
     @objc
-    private func handleRefreshUnreadBadge(_ notification: Notification) {
+    func handleRefreshUnreadBadge(_ notification: Notification) {
         fetchInitialUnreadStatus()
     }
 }
 
-// MARK: - UITabBarControllerDelegate
-
 extension TabBarViewController: UITabBarControllerDelegate {
     
-    public func tabBarController(_ tabBarController: UITabBarController, didSelect viewController: UIViewController) {
+    public func tabBarController(
+        _ tabBarController: UITabBarController,
+        didSelect viewController: UIViewController
+    ) {
         let targetVC: UIViewController
+        
         if let nav = viewController as? UINavigationController {
             targetVC = nav.viewControllers.first ?? viewController
         } else {
@@ -378,6 +485,7 @@ extension TabBarViewController: UITabBarControllerDelegate {
         }
         
         scrollToTop(viewController: targetVC)
+        
         if tabBarController.selectedViewController === viewController {
             (targetVC as? TabBarReselectRefreshable)?.refreshOnTabReselect()
         }
@@ -409,14 +517,14 @@ extension TabBarViewController: UITabBarControllerDelegate {
                 scrollView.setContentOffset(.zero, animated: false)
                 return
             }
+            
             findScrollViewAndScrollToTop(in: subview)
         }
     }
 }
 
-// MARK: - UINavigationControllerDelegate
-
 extension TabBarViewController: UINavigationControllerDelegate {
+    
     public func navigationController(
         _ navigationController: UINavigationController,
         willShow viewController: UIViewController,
@@ -449,14 +557,15 @@ extension TabBarViewController: UINavigationControllerDelegate {
 }
 
 private extension TabBarViewController {
+    
     func bindUnreadState() {
         NotificationBadgeCenter.shared.hasUnreadSubject
             .receive(on: DispatchQueue.main)
             .sink { [weak self] hasUnread in
                 guard let self else { return }
+                
                 self.hasUnreadNotification = hasUnread
                 self.customNavigationBar.isNotificationActive = hasUnread
-                
                 self.updateNavigationBar()
             }
             .store(in: &cancellables)
@@ -488,10 +597,10 @@ private extension TabBarViewController {
             guard let self else { return }
             
             do {
-                let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
+                let initialToken = try await sseTokenRefresher.reissueSseAccessToken()
                 
                 await MainActor.run {
-                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { payload in
+                    self.sseManager.startIfNeeded(initialToken: initialToken) { payload in
                         print("📡 raw SSE event:", payload.eventType)
                     }
                     print("✅ [TabBar] global SSE started")
@@ -508,6 +617,7 @@ private extension TabBarViewController {
             .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
             .sink { [weak self] payload in
                 guard let self else { return }
+                
                 print("📡 TabBar received SSE:", payload.eventType)
                 
                 guard payload.eventType == "FEED_ITEM_CREATED" else { return }

@@ -15,6 +15,8 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
     
     // MARK: - Properties
     
+    var onEditScheduleTap: ((Schedule, DetailBottomSheet) -> Void)?
+    
     override var viewModel: ScheduleViewModel? {
         didSet {
             guard let vm = viewModel else { return }
@@ -37,10 +39,10 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         super.viewDidLoad()
     }
     
-    override init(viewModel: ScheduleViewModel, diContainer: any ViewControllerFactory) {
-        super.init(viewModel: viewModel, diContainer: diContainer)
+    override init(viewModel: ScheduleViewModel) {
+        super.init(viewModel: viewModel)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -75,19 +77,22 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
                     isLeftEnabled: info.leftEnabled,
                     isRightEnabled: info.rightEnabled
                 )
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         output.filteredSchedules
             .receive(on: RunLoop.main)
             .sink { [weak self] schedules in
                 self?.scheduleView.updateSchedules(schedules)
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         output.weeklyDates
             .receive(on: RunLoop.main)
             .sink { [weak self] dates in
                 self?.scheduleView.timeTableView.updateDaysDates(dates)
-            }.store(in: &cancellables)
+            }
+            .store(in: &cancellables)
         
         viewModel.editErrorMessage
             .receive(on: RunLoop.main)
@@ -125,13 +130,17 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         let calendar = Calendar.current
         
         if let dateStr = schedule.date {
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                if let scheduleDate = formatter.date(from: dateStr) {
-                    let startOfToday = calendar.startOfDay(for: now)
-                    if scheduleDate < startOfToday { return false }
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd"
+            
+            if let scheduleDate = formatter.date(from: dateStr) {
+                let startOfToday = calendar.startOfDay(for: now)
+                
+                if scheduleDate < startOfToday {
+                    return false
                 }
             }
+        }
         
         let nowMin = calendar.component(.hour, from: now) * 60 + calendar.component(.minute, from: now)
         
@@ -140,7 +149,10 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         
         if isToday, let startDate = schedule.startTime.toDate(format: "HH:mm:ss") {
             let startMin = calendar.component(.hour, from: startDate) * 60 + calendar.component(.minute, from: startDate)
-            if startMin <= nowMin { return false }
+            
+            if startMin <= nowMin {
+                return false
+            }
         }
         
         if let status = schedule.scheduleStatus, status != "PENDING" {
@@ -154,13 +166,20 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
             let hasActedLaterSchedule = allSchedules.contains { other in
                 guard other.id != schedule.id,
                       other.date == schedule.date,
-                      let otherStart = other.startTime.toDate(format: "HH:mm:ss") else { return false }
+                      let otherStart = other.startTime.toDate(format: "HH:mm:ss") else {
+                    return false
+                }
+                
                 let otherStartMin = calendar.component(.hour, from: otherStart) * 60 + calendar.component(.minute, from: otherStart)
                 let isAfter = otherStartMin >= endMin
                 let isActed = other.scheduleStatus != nil && other.scheduleStatus != "PENDING"
+                
                 return isAfter && isActed
             }
-            if hasActedLaterSchedule { return false }
+            
+            if hasActedLaterSchedule {
+                return false
+            }
         }
         
         return true
@@ -182,49 +201,46 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         let canEdit = shouldShowEditDeleteButtons(for: schedule)
         let bottomSheet = DetailBottomSheet(data: detailData, showEditDelete: canEdit)
         
-        bottomSheet.onEditTap = { [weak self] in
-            guard let self = self else { return }
-            bottomSheet.dismiss(animated: false) {
-                let editVC = AppDIContainer.shared.makeEditScheduleViewController(schedule: schedule)
-                editVC.modalPresentationStyle = .overFullScreen
-                
-                editVC.onEditConfirmed = { [weak self] request, selectedDate, _, completion in
-                    guard let self = self else { return }
-                    self.viewModel?.editSchedule(
-                        scheduleId: schedule.id,
-                        selectedDate: selectedDate,
-                        isRecurring: schedule.isRecurring,
-                        request: request,
-                        completion: completion
-                    )
-                }
-                
-                self.present(editVC, animated: true)
-            }
+        bottomSheet.onEditTap = { [weak self, weak bottomSheet] in
+            guard let self, let bottomSheet else { return }
+            self.onEditScheduleTap?(schedule, bottomSheet)
         }
         
-        bottomSheet.onDeleteTap = { [weak self] in
-            guard let self else { return }
+        bottomSheet.onDeleteTap = { [weak self, weak bottomSheet] in
+            guard let self, let bottomSheet else { return }
+            
             bottomSheet.dismiss(animated: false) {
                 let dialog = DialogBox()
-                dialog.configure(state: .deleteSchedule(title: schedule.name, isRecurring: schedule.isRecurring))
+                dialog.configure(
+                    state: .deleteSchedule(
+                        title: schedule.name,
+                        isRecurring: schedule.isRecurring
+                    )
+                )
                 
-                dialog.onTapClose = { [weak self] in
-                    guard let self else { return }
+                dialog.onTapClose = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
                     dialog.dismiss()
                     self.present(bottomSheet, animated: false)
                 }
-                dialog.onTapCancel = { [weak self] in
-                    guard let self else { return }
+                
+                dialog.onTapCancel = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
                     dialog.dismiss()
                     self.present(bottomSheet, animated: false)
                 }
-                dialog.onTapConfirm = { [weak self] in
-                    guard let self else { return }
-                    let isIncludeFollowing: Bool = schedule.isRecurring ? dialog.isFollowingSelected : false
+                
+                dialog.onTapConfirm = { [weak self, weak dialog] in
+                    guard let self, let dialog else { return }
+                    
+                    let isIncludeFollowing: Bool = schedule.isRecurring
+                    ? dialog.isFollowingSelected
+                    : false
+                    
                     dialog.dismiss()
                     
                     guard let selectedDate = schedule.date else { return }
+                    
                     self.viewModel?.deleteSchedule(
                         scheduleId: schedule.id,
                         selectedDate: selectedDate,
@@ -237,7 +253,7 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
             }
         }
         
-        self.present(bottomSheet, animated: false)
+        present(bottomSheet, animated: false)
     }
 }
 

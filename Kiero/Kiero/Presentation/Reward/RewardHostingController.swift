@@ -11,11 +11,31 @@ import UIKit
 
 final class RewardHostingController: UIHostingController<RewardView> {
     
-    private let viewModel: RewardViewModel
+    let viewModel: RewardViewModel
+    
+    var onAddRewardTap: (() -> Void)?
+    var onEditRewardTap: ((Reward) -> Void)?
     
     init(viewModel: RewardViewModel) {
         self.viewModel = viewModel
-        super.init(rootView: RewardView(viewModel: viewModel))
+        
+        super.init(
+            rootView: RewardView(
+                viewModel: viewModel,
+                onAddRewardTap: {},
+                onEditRewardTap: { _ in }
+            )
+        )
+        
+        self.rootView = RewardView(
+            viewModel: viewModel,
+            onAddRewardTap: { [weak self] in
+                self?.onAddRewardTap?()
+            },
+            onEditRewardTap: { [weak self] reward in
+                self?.onEditRewardTap?(reward)
+            }
+        )
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
@@ -27,12 +47,11 @@ extension RewardHostingController: TabBarReselectRefreshable {
     func refreshOnTabReselect() {
         viewModel.fetchCoupons()
     }
-    
 }
 
 extension RewardHostingController: ScrollToTopAvailable {
     func scrollToTop() {
-        findScrollViewAndScrollToTop(in: self.view)
+        findScrollViewAndScrollToTop(in: view)
     }
     
     private func findScrollViewAndScrollToTop(in view: UIView) {

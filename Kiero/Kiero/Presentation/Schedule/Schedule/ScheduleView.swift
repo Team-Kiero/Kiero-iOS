@@ -55,7 +55,3 @@ final class ScheduleView: BaseUIView {
         timeTableView.updateEmptyState(isEmpty: schedules.isEmpty)
     }
 }
-
-#Preview {
-    ScheduleView()
-}

@@ -5,19 +5,25 @@
 //  Created by Hyunseo Han on 1/13/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel> {
+
+    var onMapTap: (() -> Void)?
+    var onGiveFireStone: ((Int) -> Void)?
+    var onMissionComplete: ((UIImage, StoneType?, Int?) -> Void)?
     
     // MARK: - Properties
     
     private let mainView = DailyJourneyView()
+    
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
     private let nextButtonTapSubject = PassthroughSubject<Void, Never>()
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
+    
     private var previousHasSchedule: Bool?
     
     // MARK: - Life Cycle
@@ -40,20 +46,27 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         viewWillDisappearSubject.send(())
     }
     
+    // MARK: - Setup
+    
     override func addTarget() {
         super.addTarget()
+        
         mainView.onNextJourneyTap = { [weak self] in
             self?.didTapNextButton()
         }
-        mainView.verifyPhotoButton.addTarget(self, action: #selector(didTapVerifyButton), for: .touchUpInside)
+        
+        mainView.verifyPhotoButton.addTarget(
+            self,
+            action: #selector(didTapVerifyButton),
+            for: .touchUpInside
+        )
         
         mainView.onMapButtonTap = { [weak self] in
-            let viewModel = DailyJourneyMapViewModel()
-            let mapVC = DailyJourneyMapViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
-            mapVC.hidesBottomBarWhenPushed = true
-            self?.navigationController?.pushViewController(mapVC, animated: true)
+            self?.onMapTap?()
         }
     }
+    
+    // MARK: - Bind
     
     override func bind(viewModel: DailyJourneyViewModel) {
         super.bind(viewModel: viewModel)
@@ -77,7 +90,11 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
                 let nowHasSchedule = viewData.isTimeViewActive
                 let shouldAnimate = wasEmpty && nowHasSchedule
                 
-                self.mainView.updateData(with: viewData, animated: shouldAnimate)
+                self.mainView.updateData(
+                    with: viewData,
+                    animated: shouldAnimate
+                )
+                
                 self.previousHasSchedule = nowHasSchedule
             }
             .store(in: &cancellables)
@@ -90,6 +107,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             .store(in: &cancellables)
     }
     
+    // MARK: - Action
+    
     @objc
     private func didTapNextButton() {
         nextButtonTapSubject.send(())
@@ -100,6 +119,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         verifyButtonTapSubject.send(())
     }
     
+    // MARK: - Route
+    
     private func handleRoute(_ route: DailyJourneyRoute) {
         switch route {
         case .showNextJourneyDialogBox:
@@ -109,23 +130,23 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             openCamera()
             
         case .tryLightFire:
-            print("🔥 마음의 불꽃 피우기 화면(GiveFireStoneView)으로 이동")
-            
-            let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
-            let viewModel = GiveFireStoneViewModel(count: stoneCount)
-            let vc = GiveFireStoneViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
-            vc.hidesBottomBarWhenPushed = true
-            self.navigationController?.pushViewController(vc, animated: true)
+            let stoneCount = viewModel?.currentEarnedStoneCount ?? 0
+            onGiveFireStone?(stoneCount)
         }
     }
     
+    // MARK: - UI
+    
     private func showNextJourneyDialog() {
         let dialogBox = DialogBox()
+        
         dialogBox.configure(state: .nextJourney)
+        
         dialogBox.onTapConfirm = { [weak self] in
             dialogBox.dismiss()
             self?.skipConfirmSubject.send(())
         }
+        
         dialogBox.show(in: self)
     }
     
@@ -136,30 +157,32 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         }
         
         let picker = UIImagePickerController()
+        
         picker.sourceType = .camera
         picker.cameraCaptureMode = .photo
         picker.delegate = self
         picker.modalPresentationStyle = .fullScreen
         
-        self.present(picker, animated: true)
+        present(picker, animated: true)
     }
     
     private func moveToMissionCompleteView(with image: UIImage) {
-        let completeViewModel = MissionCompleteViewModel()
-        completeViewModel.capturedImage = image
-        completeViewModel.receivedStoneType = self.viewModel?.currentStoneType
-        completeViewModel.scheduleDetailId = self.viewModel?.currentScheduleDetailId
-        
-        let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
-        completeVC.initialImage = image
-        
-        self.navigationController?.pushViewController(completeVC, animated: true)
+        onMissionComplete?(
+            image,
+            viewModel?.currentStoneType,
+            viewModel?.currentScheduleDetailId
+        )
     }
 }
 
-extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        
+extension DailyJourneyViewController:
+    UINavigationControllerDelegate,
+    UIImagePickerControllerDelegate {
+    
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+    ) {
         guard let capturedImage = info[.originalImage] as? UIImage else {
             picker.dismiss(animated: true)
             return
@@ -170,12 +193,15 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
         }
     }
     
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+    func imagePickerControllerDidCancel(
+        _ picker: UIImagePickerController
+    ) {
         picker.dismiss(animated: true)
     }
 }
 
 extension DailyJourneyViewController: TabBarReselectRefreshable {
+    
     func refreshOnTabReselect() {
         viewWillAppearSubject.send(())
     }

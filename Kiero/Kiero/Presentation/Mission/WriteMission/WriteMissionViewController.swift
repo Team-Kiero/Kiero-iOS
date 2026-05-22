@@ -209,7 +209,3 @@ extension WriteMissionViewController: UITextFieldDelegate {
         return true
     }
 }
-
-#Preview {
-    AppDIContainer.shared.makeWriteMissionViewController()
-}

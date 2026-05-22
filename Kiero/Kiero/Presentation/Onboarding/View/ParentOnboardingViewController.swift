@@ -15,10 +15,10 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     
     // MARK: - Properties
     
+    var onRoute: ((ParentOnboardingRoute) -> Void)?
+    
     private var isLastValid = false
     private var isFirstValid = false
-    private let userName = TokenManager.shared.getUserName() ?? ""
-    private let profileURL = TokenManager.shared.getProfile() ?? ""
     
     // MARK: - UI Components
     
@@ -93,9 +93,9 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         lastNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         firstNameTextField.innerTextField.addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         
-        profileBox.onTap = {
-            self.showLogoutDialog {
-                self.viewModel?.logout()
+        profileBox.onTap = { [weak self] in
+            self?.showLogoutDialog {
+                self?.viewModel?.logout()
             }
         }
     }
@@ -109,8 +109,8 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         super.bind(viewModel: viewModel)
         
         profileBox.configure(
-            name: TokenManager.shared.getUserName() ?? "",
-            url: TokenManager.shared.getProfile() ?? ""
+            name: viewModel.userName,
+            url: viewModel.profileURL
         )
         
         lastNameTextField.onValidationChanged = { [weak self] isValid in
@@ -126,18 +126,7 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
         viewModel.route
             .receive(on: DispatchQueue.main)
             .sink { [weak self] route in
-                guard let self else { return }
-                print("✅ [VC] route received:", route)
-                print("nav:", self.navigationController as Any)
-                switch route {
-                case .invite(let last, let first, let inviteCode, let issuedAt):
-                    self.navigateToInviteView(childLastName: last,
-                                              childFirstName: first,
-                                              inviteCode: inviteCode,
-                                              issuedAt: issuedAt)
-                case .logout:
-                    LogoutHelper.logoutToPickRole()
-                }
+                self?.onRoute?(route)
             }
             .store(in: &cancellables)
         
@@ -167,26 +156,6 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private func updateGenerateButton() {
         let enabled = isLastValid && isFirstValid
         generateButton.isEnabled = enabled
-    }
-    
-    private func navigateToInviteView(
-        childLastName: String,
-        childFirstName: String,
-        inviteCode: String,
-        issuedAt: Date
-    ) {
-        let vm = ParentInviteViewModel(
-            childLastName: childLastName,
-            childFirstName: childFirstName,
-            inviteCode: inviteCode,
-            issuedAt: issuedAt
-        )
-        
-        let vc = ParentInviteViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-        let nav = UINavigationController(rootViewController: vc)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
-        }
     }
 }
 

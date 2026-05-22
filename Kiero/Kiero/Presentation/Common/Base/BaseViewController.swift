@@ -5,8 +5,8 @@
 //  Created by 신혜연 on 1/8/26.
 //
 
-import UIKit
 import Combine
+import UIKit
 
 open class BaseViewController<VM: BaseViewModel>: UIViewController {
     
@@ -14,13 +14,11 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
     
     public var cancellables = Set<AnyCancellable>()
     public var viewModel: VM?
-    public let diContainer: any ViewControllerFactory
     
     // MARK: - Init
     
-    public init(viewModel: VM, diContainer: any ViewControllerFactory) {
+    init(viewModel: VM) {
         self.viewModel = viewModel
-        self.diContainer = diContainer
         super.init(nibName: nil, bundle: nil)
         bind(viewModel: viewModel)
     }
@@ -33,6 +31,7 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
     // MARK: - Life Cycle
     
     open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         navigationController?.isNavigationBarHidden = true
     }
     
@@ -55,7 +54,7 @@ open class BaseViewController<VM: BaseViewModel>: UIViewController {
     open func setLayout() {}
     open func addTarget() {}
     open func setDelegate() {}
-    open func bindViewModel() { }
+    open func bindViewModel() {}
     
     // MARK: - Bind Method
     

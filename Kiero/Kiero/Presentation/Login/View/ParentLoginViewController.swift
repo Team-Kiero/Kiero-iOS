@@ -15,6 +15,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     // MARK: - Properties
     
+    var onRoute: ((LoginRoute) -> Void)?
+    
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private var loadingVC: UIViewController?
     
@@ -71,7 +73,12 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     }
     
     override func addTarget() {
-        kakaoLoginButton.addTarget(self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
+        kakaoLoginButton.addTarget(
+            self,
+            action: #selector(kakaoLoginButtonTapped),
+            for: .touchUpInside
+        )
+        
         parentNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
@@ -81,7 +88,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         super.bind(viewModel: viewModel)
         
         let output = viewModel.transform(
-            input: .init(kakaoButtonTapped: kakaoTap.eraseToAnyPublisher())
+            input: .init(
+                kakaoButtonTapped: kakaoTap.eraseToAnyPublisher()
+            )
         )
         
         output.state
@@ -91,15 +100,12 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
                 
                 switch state {
                 case .idle:
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     
                 case .loading:
-                    //self.showLoading()
                     self.kakaoLoginButton.isEnabled = false
                     
                 case .failure(let message):
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     Toast.show(message: message, bottomInset: 83)
                 }
@@ -109,55 +115,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         output.route
             .receive(on: DispatchQueue.main)
             .sink { [weak self] route in
-                guard let self else { return }
-                self.handle(by: route)
+                self?.onRoute?(route)
             }
             .store(in: &cancellables)
-    }
-    
-//    private func showLoading() {
-//        guard loadingVC == nil else { return }
-//        let vc = AppDIContainer.shared.makeChildLoadingViewController()
-//        vc.modalPresentationStyle = .overFullScreen
-//        vc.modalTransitionStyle = .crossDissolve
-//        loadingVC = vc
-//        present(vc, animated: false)
-//    }
-//    
-//    private func hideLoading() {
-//        guard let vc = loadingVC else { return }
-//        loadingVC = nil
-//        vc.dismiss(animated: false)
-//    }
-    
-    private func navigateToParentOnboarding() {
-        let vm = ParentOnboardingViewModel()
-        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(onboardingVC)
-        }
-    }
-    
-    private func handle(by route: LoginRoute) {
-        switch route {
-        case .parentOnboarding:
-            let onboardingVC = AppDIContainer.shared.makeParentOnboardingViewController()
-            if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                sceneDelegate.changeRootViewController(onboardingVC)
-            }
-        case .parentTab:
-            let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-            changeRoot(tab)
-        case let .toast(message):
-            Toast.show(message: message, bottomInset: 83)
-        }
-    }
-    
-    private func changeRoot(_ vc: UIViewController) {
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(vc)
-        }
     }
     
     @objc

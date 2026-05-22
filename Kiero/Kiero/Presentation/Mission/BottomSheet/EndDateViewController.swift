@@ -232,7 +232,3 @@ extension EndDateViewController: UICollectionViewDelegateFlowLayout {
         }
     }
 }
-
-#Preview {
-    EndDateViewController()
-}

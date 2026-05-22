@@ -15,6 +15,8 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     // MARK: - Properties
     
+    var onFinish: (() -> Void)?
+    
     private let nextTap = PassthroughSubject<Void, Never>()
     
     private var currentSpeech: SpeechField?
@@ -65,15 +67,19 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     }
     
     override func addTarget() {
-        mainSF.onTap = {
-            self.didTapNext()
+        mainSF.onTap = { [weak self] in
+            self?.didTapNext()
         }
         
-        noSF.onTap = {
-            self.didTapNext()
+        noSF.onTap = { [weak self] in
+            self?.didTapNext()
         }
         
-        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
+        startButton.addTarget(
+            self,
+            action: #selector(startButtonDidTap),
+            for: .touchUpInside
+        )
     }
     
     override func bind(viewModel: ChildrenOnboardingViewModel) {
@@ -160,21 +166,8 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
         nextTap.send(())
     }
     
-    private func navigateToChildrenTap() {
-        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: false)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(tab)
-        }
-    }
-    
     @objc
     private func startButtonDidTap() {
-        let loadingVC = AppDIContainer.shared.makeChildLoadingViewController()
-        loadingVC.modalPresentationStyle = .fullScreen
-        present(loadingVC, animated: false)
-        
-        DispatchQueue.main.asyncAfter (deadline: .now() + 4) { [weak self] in
-            self?.navigateToChildrenTap()
-        }
+        onFinish?()
     }
 }

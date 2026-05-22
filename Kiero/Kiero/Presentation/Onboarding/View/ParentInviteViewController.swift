@@ -11,10 +11,15 @@ import UIKit
 import SnapKit
 import Then
 
+enum ParentInviteRoute {
+    case parentTab
+}
+
 final class ParentInviteViewController: BaseViewController<ParentInviteViewModel> {
     
+    var onRoute: ((ParentInviteRoute) -> Void)?
+    
     private var isChildJoined = false
-    private var isChecking = false
 
     private let profileBox = ProfileBox(name: "사용자", profileURL: "")
     private let titleLabel = UILabel().then {
@@ -24,7 +29,6 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     }
     
     private let textField = TextField(type: .parent(.totalName))
-    
     private let inviteView = InviteCodeView()
     
     private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
@@ -76,7 +80,11 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     }
     
     override func addTarget() {
-        startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
+        startButton.addTarget(
+            self,
+            action: #selector(startButtonDidTap),
+            for: .touchUpInside
+        )
         
         profileBox.onTap = { [weak self] in
             self?.showLogoutDialog {
@@ -89,29 +97,33 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
         super.bind(viewModel: viewModel)
 
         profileBox.configure(
-            name: TokenManager.shared.getUserName() ?? "",
-            url: TokenManager.shared.getProfile() ?? ""
+            name: viewModel.userName,
+            url: viewModel.profileURL
         )
         
         textField.setText(text: viewModel.childName)
         textField.isEditable = false
         
-        Publishers.CombineLatest3(viewModel.inviteCode, viewModel.remainingText, viewModel.isExpired)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] code, time, expired in
-                guard let self else { return }
-                
-                self.inviteView.configure(
-                    code: code,
-                    remainingTime: time,
-                    isExpired: expired
-                )
-                
-                let enabled = (!expired) && self.isChildJoined
-                self.startButton.isEnabled = enabled
-                self.startButton.alpha = enabled ? 1.0 : 0.5
-            }
-            .store(in: &cancellables)
+        Publishers.CombineLatest3(
+            viewModel.inviteCode,
+            viewModel.remainingText,
+            viewModel.isExpired
+        )
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] code, time, expired in
+            guard let self else { return }
+            
+            self.inviteView.configure(
+                code: code,
+                remainingTime: time,
+                isExpired: expired
+            )
+            
+            let enabled = !expired && self.isChildJoined
+            self.startButton.isEnabled = enabled
+            self.startButton.alpha = enabled ? 1.0 : 0.5
+        }
+        .store(in: &cancellables)
         
         viewModel.inviteCode
             .removeDuplicates()
@@ -132,17 +144,30 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
                 guard let self else { return }
                 
                 if let id = payload.childId, id != 0 {
-                    UserDefaults.standard.set(id, forKey: "selectedChildId")
+                    viewModel.saveSelectedChildId(Int(id))
                     print("✅ selectedChildId saved from SSE:", id)
                 } else {
-                    print("⚠️ childId 없음, fallback 필요")
+                    print("⚠️ childId 없음")
+                    viewModel.checkConnectionOnce()
                 }
+
                 self.isChildJoined = true
                 
                 let expired = viewModel.isExpiredValue
-                let enabled = (!expired) && self.isChildJoined
+                let enabled = !expired && self.isChildJoined
                 self.startButton.isEnabled = enabled
                 self.startButton.alpha = enabled ? 1.0 : 0.5
+            }
+            .store(in: &cancellables)
+        
+        viewModel.childJoined
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                guard let self else { return }
+                
+                self.isChildJoined = true
+                self.startButton.isEnabled = true
+                self.startButton.alpha = 1.0
             }
             .store(in: &cancellables)
         
@@ -160,42 +185,6 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     
     @objc
     private func startButtonDidTap() {
-        navigateToParentTap()
-    }
-    
-    private func checkConnectionOnce() {
-        guard !isChecking else { return }
-        guard let viewModel else { return }
-        guard viewModel.isExpiredValue == false else { return }
-        guard isChildJoined == false else { return }
-        
-        isChecking = true
-        Task { [weak self] in
-            defer { self?.isChecking = false }
-            do {
-                let data: ChildRegistrationStatusDTO = try await BaseService.shared.request(
-                    endPoint: .checkConnection(
-                        lastName: viewModel.childLastName,
-                        firstName: viewModel.childFirstName
-                    )
-                )
-                if data.isRegistered {
-                    await MainActor.run {
-                        self?.isChildJoined = true
-                        self?.startButton.isEnabled = true
-                        self?.startButton.alpha = 1.0
-                    }
-                }
-            } catch {
-                // 조용히 무시(폴백이니까)
-            }
-        }
-    }
-    
-    private func navigateToParentTap() {
-        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(tab)
-        }
+        onRoute?(.parentTab)
     }
 }
