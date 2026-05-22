@@ -89,7 +89,8 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     }
     
     @objc private func didTapGoToWishRoom() {
-        // TODO: - WishRoomView로 이동
+        let wishRoomVC = diContainer.makeWishRoomViewController()
+        navigationController?.pushViewController(wishRoomVC, animated: true)
     }
 }
 

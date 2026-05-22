@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct WishRoomView: View {
-    @StateObject private var viewModel = WishRoomViewModel()
+    @ObservedObject var viewModel: WishRoomViewModel
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -59,9 +59,6 @@ struct WishRoomView: View {
             .background(.kBlack)
         }
         .navigationBarHidden(true)
-        .navigationDestination(isPresented: $viewModel.shouldNavigateToWishWell) {
-            // TODO: - 소원의 우물로 이동하기
-        }
     }
     
     private var totalCountBanner: some View {

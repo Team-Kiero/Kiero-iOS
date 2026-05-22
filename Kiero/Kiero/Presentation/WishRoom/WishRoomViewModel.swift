@@ -11,7 +11,8 @@ final class WishRoomViewModel: ObservableObject {
     
     @Published var todayWishes: [WishItem] = []
     @Published var previousWishes: [WishItem] = []
-    @Published var shouldNavigateToWishWell: Bool = false
+    
+    var onNavigateToWishWell: (() -> Void)?
     
     var totalWishCount: Int {
         todayWishes.count + previousWishes.count
@@ -46,6 +47,6 @@ final class WishRoomViewModel: ObservableObject {
     // MARK: - Actions
     
     func navigateToMakeWish() {
-        shouldNavigateToWishWell = true
+        onNavigateToWishWell?()
     }
 }

@@ -197,6 +197,15 @@ extension AppDIContainer {
     }
 }
 
+// MARK: - WishRoom
+
+extension AppDIContainer {
+    func makeWishRoomViewController() -> UIViewController {
+        let viewModel = WishRoomViewModel()
+        return WishRoomHostingController(viewModel: viewModel)
+    }
+}
+
 // MARK: - MySpace
 
 extension AppDIContainer {
