@@ -197,6 +197,14 @@ extension AppDIContainer {
     }
 }
 
+// MARK: - MySpace
+
+extension AppDIContainer {
+    func makeMySpaceViewController() -> UIViewController {
+        return MySpaceHostingController()
+    }
+}
+
 // MARK: - TodayStatus
 
 extension AppDIContainer {

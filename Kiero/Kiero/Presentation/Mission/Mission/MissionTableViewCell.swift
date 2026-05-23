@@ -42,7 +42,7 @@ final class MissionTableViewCell: UITableViewCell {
         }
     }
     
-    func configure(name: String, reward: Int) {
-        missionBox.configure(name: name, reward: reward)
+    func configure(name: String, reward: Int, isCompleted: Bool = false) {
+        missionBox.configure(name: name, reward: reward, isCompleted: isCompleted)
     }
 }
