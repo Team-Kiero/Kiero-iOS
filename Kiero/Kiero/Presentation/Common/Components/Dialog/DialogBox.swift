@@ -23,6 +23,7 @@ final class DialogBox: UIView {
         case deleteReward(title: String, coin: String)
         case deleteMission(title: String, coin: String)
         case childNotification
+        case notificationRequest
         case childLogout
         case endJourney
 
@@ -46,11 +47,13 @@ final class DialogBox: UIView {
                 return title
             case .childNotification:
                 return "설정에서 알림을 켜줘!"
+            case .notificationRequest:
+                return "오늘의 여정을 놓치지 않게 해줄게!"
             case .childLogout:
                 return "키어로에서 나갈 거야?"
             }
         }
-        
+
         var message: String {
             switch self {
             case .missionComplete:
@@ -67,6 +70,8 @@ final class DialogBox: UIView {
                 return "삭제하시겠습니까?"
             case .childNotification:
                 return "알림을 받으려면 설정에서 키어로 알림을 허용해줘!"
+            case .notificationRequest:
+                return "여정의 중요한 알림을 받아볼 수 있어."
             case .childLogout:
                 return "다시 들어오려면 초대코드가 필요해!"
             }
@@ -90,12 +95,23 @@ final class DialogBox: UIView {
             }
         }
 
+        var isCancelButtonHidden: Bool {
+            switch self {
+            case .notificationRequest:
+                return true
+            default:
+                return false
+            }
+        }
+
         var cancelButtonTitle: String { "취소" }
 
         var confirmButtonTitle: String {
             switch self {
             case .childNotification:
                 return "설정으로 이동"
+            case .notificationRequest:
+                return "알림받기"
             case .childLogout:
                 return "나가기"
             case .endJourney:
@@ -325,6 +341,7 @@ final class DialogBox: UIView {
         cancelButton.setTypo(.title3_16_SB, text: state.cancelButtonTitle, for: .normal)
         confirmButton.setTypo(.title3_16_SB, text: state.confirmButtonTitle, for: .normal)
         closeButton.isHidden = state.isCloseButtonHidden
+        cancelButton.isHidden = state.isCancelButtonHidden
         
         if let coin = state.coinText {
             coinStack.isHidden = false
