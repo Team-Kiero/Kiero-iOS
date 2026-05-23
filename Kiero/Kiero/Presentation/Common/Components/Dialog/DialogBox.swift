@@ -24,7 +24,8 @@ final class DialogBox: UIView {
         case deleteMission(title: String, coin: String)
         case childNotification
         case childLogout
-        
+        case endJourney
+
         var title: String {
             switch self {
             case .missionComplete(let title):
@@ -35,6 +36,8 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
+            case .endJourney:
+                return "오늘의 여정을 끝낼거야?"
             case .deleteSchedule(let title, _):
                 return title
             case .deleteReward(let title, _):
@@ -58,6 +61,8 @@ final class DialogBox: UIView {
                 return "금화를 사용해 소원을 빌까?"
             case .nextJourney:
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
+            case .endJourney:
+                return "한 번 오늘 여정을 끝내면\n다시 오늘의 여정으로 돌아올 수 없어!"
             case .deleteSchedule, .deleteReward, .deleteMission:
                 return "삭제하시겠습니까?"
             case .childNotification:
@@ -93,6 +98,8 @@ final class DialogBox: UIView {
                 return "설정으로 이동"
             case .childLogout:
                 return "나가기"
+            case .endJourney:
+                return "끝내기"
             default:
                 return "확인"
             }
