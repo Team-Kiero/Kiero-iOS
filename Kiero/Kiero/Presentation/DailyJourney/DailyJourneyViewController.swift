@@ -104,7 +104,10 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         switch route {
         case .showNextJourneyDialogBox:
             showNextJourneyDialog()
-            
+
+        case .showEndJourneyDialogBox:
+            showEndJourneyDialog()
+
         case .showCamera:
             openCamera()
             
@@ -122,6 +125,16 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private func showNextJourneyDialog() {
         let dialogBox = DialogBox()
         dialogBox.configure(state: .nextJourney)
+        dialogBox.onTapConfirm = { [weak self] in
+            dialogBox.dismiss()
+            self?.skipConfirmSubject.send(())
+        }
+        dialogBox.show(in: self)
+    }
+
+    private func showEndJourneyDialog() {
+        let dialogBox = DialogBox()
+        dialogBox.configure(state: .endJourney)
         dialogBox.onTapConfirm = { [weak self] in
             dialogBox.dismiss()
             self?.skipConfirmSubject.send(())

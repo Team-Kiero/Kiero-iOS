@@ -10,6 +10,7 @@ import UIKit
 
 enum DailyJourneyRoute {
     case showNextJourneyDialogBox
+    case showEndJourneyDialogBox
     case showCamera
     case tryLightFire
 }
@@ -21,6 +22,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private(set) var currentStoneType: StoneType?
     private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
     public var currentEarnedStoneCount: Int = 0
+    private var isCurrentlyLastJourney = false
     
     // MARK: - Input & Output
     
@@ -53,7 +55,13 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             .store(in: &cancellables)
         
         input.nextJourneyButtonTap
-            .sink { [weak self] in self?.routeSubject.send(.showNextJourneyDialogBox) }
+            .sink { [weak self] in
+                if self?.isCurrentlyLastJourney == true {
+                    self?.routeSubject.send(.showEndJourneyDialogBox)
+                } else {
+                    self?.routeSubject.send(.showNextJourneyDialogBox)
+                }
+            }
             .store(in: &cancellables)
         
         input.verifyButtonTap
@@ -182,7 +190,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let isTimeViewActive = (timeText != "-")
         
         let isLastJourney = (schedule.scheduleOrder > 0 && totalSchedule == 1)
-        
+        self.isCurrentlyLastJourney = isLastJourney
+
         let isCurrentTimeMatched = isCurrentTimeInSchedule(start: schedule.startTime, end: schedule.endTime)
         
         let buttonType: DailyJourneyModel.ActionButtonType
@@ -231,7 +240,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 maxFireStoneCount: totalSchedule,
                 scheduleOrder: schedule.scheduleOrder,
                 scheduleOrderText: orderText,
-                speechFieldType: isLastJourney ? .no : .gray,
+                speechFieldType: isLastJourney ? .endJourney : .gray,
                 chipItemType: .inProgressChip,
                 isTimeViewActive: isTimeViewActive,
                 actionButtonType: buttonType
