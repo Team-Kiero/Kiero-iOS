@@ -7,6 +7,7 @@
 
 import UIKit
 import Combine
+import UserNotifications
 
 final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel> {
     
@@ -19,6 +20,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let verifyButtonTapSubject = PassthroughSubject<Void, Never>()
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
     private var previousHasSchedule: Bool?
+    private var hasCheckedNotification = false
     
     // MARK: - Life Cycle
     
@@ -33,6 +35,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewWillAppearSubject.send(())
+        checkNotificationPermissionIfNeeded()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -141,7 +144,29 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         }
         dialogBox.show(in: self)
     }
-    
+
+    private func checkNotificationPermissionIfNeeded() {
+        guard !hasCheckedNotification else { return }
+        hasCheckedNotification = true
+
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            guard settings.authorizationStatus == .notDetermined else { return }
+            DispatchQueue.main.async {
+                self?.showNotificationRequestDialog()
+            }
+        }
+    }
+
+    private func showNotificationRequestDialog() {
+        let dialogBox = DialogBox()
+        dialogBox.configure(state: .notificationRequest)
+        dialogBox.onTapConfirm = {
+            dialogBox.dismiss()
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+        }
+        dialogBox.show(in: self)
+    }
+
     private func openCamera() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             print("카메라를 사용할 수 없습니다.")
