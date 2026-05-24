@@ -7,7 +7,6 @@
 
 import Combine
 import UIKit
-import AuthenticationServices
 
 import SnapKit
 import Then
@@ -17,7 +16,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     // MARK: - Properties
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
-    private let appleTap = PassthroughSubject<String, Never>()
+    private let appleTap = PassthroughSubject<Void, Never>()
     
     private var loadingVC: UIViewController?
     
@@ -182,42 +181,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     @objc
     private func appleLoginButtonTapped() {
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
-        controller.performRequests()
-    }
-}
-
-extension ParentLoginViewController: ASAuthorizationControllerDelegate {
-    func authorizationController(controller: ASAuthorizationController,
-                                 didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-              let tokenData = credential.identityToken,
-              let tokenString = String(data: tokenData, encoding: .utf8) else { return }
-        
-        guard let codeData = credential.authorizationCode,
-                     let codeString = String(data: codeData, encoding: .utf8) else { return }
-        
-        print("✅ Apple Identity Token:", tokenString)
-        print("✅ Apple Authorization Code:", codeString)
-        
-        // TODO: 서버에게 보낼 토큰 정하기
-        appleTap.send(tokenString)
-    }
-
-    func authorizationController(controller: ASAuthorizationController,
-                                 didCompleteWithError error: Error) {
-        Toast.show(message: "애플 로그인에 실패했어요.", bottomInset: 80)
-    }
-}
-
-extension ParentLoginViewController: ASAuthorizationControllerPresentationContextProviding {
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return view.window!
+        appleTap.send(())
     }
 }
