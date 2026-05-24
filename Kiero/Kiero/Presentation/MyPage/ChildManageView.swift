@@ -25,8 +25,11 @@ struct ChildManageView: View {
             Color.kBlack.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                NavigationBarWrapper(type: .back(title: "자녀 관리"))
+                NavigationBarWrapper(type: .back(title: "자녀 관리"), onLeftTap: {
+                    dismiss()
+                })
                     .frame(height: 32)
+                    .padding(.top, 13)
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text("자녀 연결 관리")
@@ -60,8 +63,6 @@ struct ChildManageView: View {
         .navigationBarHidden(true)
     }
 }
-
-// MARK: - UI
 
 private extension ChildManageView {
     var childNameCard: some View {
@@ -109,8 +110,4 @@ private extension ChildManageView {
             }
         }
     }
-}
-
-#Preview {
-    ChildManageView()
 }

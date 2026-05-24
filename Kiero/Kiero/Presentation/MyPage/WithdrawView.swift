@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct WithdrawView: View {
+    @Environment(\.dismiss) private var dismiss
+    
     @State private var isChecked = false
     
     var body: some View {
@@ -15,8 +17,11 @@ struct WithdrawView: View {
             Color.kBlack.ignoresSafeArea()
             
             VStack(spacing: 0) {
-                NavigationBarWrapper(type: .back(title: "회원 탈퇴"))
+                NavigationBarWrapper(type: .back(title: "회원 탈퇴"), onLeftTap: {
+                    dismiss()
+                })
                     .frame(height: 32)
+                    .padding(.top, 13)
                 
                 contentBox
                     .padding(.top, 32)
@@ -82,8 +87,4 @@ private extension WithdrawView {
             }
         }
     }
-}
-
-#Preview {
-    WithdrawView()
 }

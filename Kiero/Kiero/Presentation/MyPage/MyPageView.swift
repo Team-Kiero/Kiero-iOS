@@ -17,8 +17,12 @@ struct MyPageView: View {
     @State private var showNotificationDialog: Bool = false
     @State private var hasNotification: Bool = false
     
-    @State private var isNavigatingToNotification = false
+    @State private var isNavigatingToChildManage = false
+    @State private var isNavigatingToWithdraw = false
     @State private var isAlarmOn: Bool = false
+    
+    let onChildManageTap: (() -> Void)?
+    let onWithdrawTap: (() -> Void)?
     
     var body: some View {
         NavigationStack {
@@ -54,7 +58,7 @@ struct MyPageView: View {
                             .padding(.bottom, 11)
                         
                         Button(action: {
-                            print("자녀 연결 관리")
+                            onChildManageTap?()
                         }){
                             HStack(spacing: 0) {
                                 Text("자녀 연결 관리")
@@ -120,7 +124,7 @@ struct MyPageView: View {
                         .padding(.leading, 8)
                         
                         Button {
-                            print("회원 탈퇴")
+                            onWithdrawTap?()
                         } label: {
                             Text("회원 탈퇴")
                                 .font(Font(UIFont.body4_12_R))
@@ -136,15 +140,28 @@ struct MyPageView: View {
                     .padding(.horizontal, 16)
                     
                 }
-                .navigationDestination(isPresented: $isNavigatingToNotification) {
-                    NotificationFeedWrapper()
+                .navigationDestination(isPresented: $isNavigatingToChildManage) {
+                    ChildManageView()
                         .toolbar(.hidden, for: .navigationBar)
-                        .ignoresSafeArea()
                         .onAppear {
                             NotificationCenter.default.post(name: .hideTabBar, object: true)
+                            NotificationCenter.default.post(name: .hideNavigationBar, object: true)
                         }
                         .onDisappear {
                             NotificationCenter.default.post(name: .hideTabBar, object: false)
+                            NotificationCenter.default.post(name: .hideNavigationBar, object: false)
+                        }
+                }
+                .navigationDestination(isPresented: $isNavigatingToWithdraw) {
+                    WithdrawView()
+                        .toolbar(.hidden, for: .navigationBar)
+                        .onAppear {
+                            NotificationCenter.default.post(name: .hideTabBar, object: true)
+                            NotificationCenter.default.post(name: .hideNavigationBar, object: true)
+                        }
+                        .onDisappear {
+                            NotificationCenter.default.post(name: .hideTabBar, object: false)
+                            NotificationCenter.default.post(name: .hideNavigationBar, object: false)
                         }
                 }
                 
@@ -265,8 +282,4 @@ struct ConnectionChip: View {
             .background(.gray900, in: Capsule())
             .overlay(Capsule().stroke(count == 0 ? .main : .gray500, lineWidth: 1))
     }
-}
-
-#Preview {
-    MyPageView()
 }
