@@ -24,6 +24,7 @@ final class DialogBox: UIView {
         case deleteMission(title: String, coin: String)
         case childNotification
         case childLogout
+        case parentNotification
         
         var title: String {
             switch self {
@@ -45,6 +46,8 @@ final class DialogBox: UIView {
                 return "설정에서 알림을 켜줘!"
             case .childLogout:
                 return "키어로에서 나갈 거야?"
+            case .parentNotification:
+                return "설정에서 알림을 켜주세요."
             }
         }
         
@@ -64,6 +67,8 @@ final class DialogBox: UIView {
                 return "알림을 받으려면 설정에서 키어로 알림을 허용해줘!"
             case .childLogout:
                 return "다시 들어오려면 초대코드가 필요해!"
+            case .parentNotification:
+                return "아이의 일정과 미션 알림을 받으려면\n설정에서 키어로 알림을 켜주세요."
             }
         }
         
@@ -93,6 +98,8 @@ final class DialogBox: UIView {
                 return "설정으로 이동"
             case .childLogout:
                 return "나가기"
+            case .parentNotification:
+                return "기기 설정으로 이동하기"
             default:
                 return "확인"
             }
