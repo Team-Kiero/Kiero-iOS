@@ -49,7 +49,7 @@ final class WishWellView: BaseUIView {
     private let wishWellStack = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .center
-        $0.spacing = 10
+        $0.spacing = 4
     }
     
     private let wishMessage = UILabel().then {
@@ -57,10 +57,23 @@ final class WishWellView: BaseUIView {
         $0.setTypo(.body4_12_R, text: "미션을 통해 얻은 금화로 소원을 살 수 있어!")
     }
     
+    private(set) var goToWishRoom = UIButton().then {
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.body4_12_R,
+            .foregroundColor: UIColor.main,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: UIColor.main,
+            .baselineOffset: 2
+        ]
+        let attributedTitle = NSAttributedString(string: "내가 빈 소원 보러가기", attributes: attributes)
+        $0.setAttributedTitle(attributedTitle, for: .normal)
+        $0.backgroundColor = .gray900
+    }
+    
     private let totalStack = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .center
-        $0.spacing = 14
+        $0.spacing = 7
     }
     
     private let container = UIView().then {
@@ -89,8 +102,10 @@ final class WishWellView: BaseUIView {
         addSubviews(wishEmptyView, nameStack, coinChip, container, line, wishCollectionView)
         nameStack.addArrangedSubviews(iconImage, nameLabel)
         wishWellStack.addArrangedSubviews(wishWellIcon, wishWellLabel)
-        totalStack.addArrangedSubviews(wishWellStack, wishMessage)
+        totalStack.addArrangedSubviews(wishWellStack, wishMessage, goToWishRoom)
         container.addSubview(totalStack)
+        
+        totalStack.setCustomSpacing(14, after: wishMessage)
     }
     
     override func setLayout() {
@@ -113,10 +128,15 @@ final class WishWellView: BaseUIView {
             $0.size.equalTo(24)
         }
         
+        goToWishRoom.snp.makeConstraints {
+            $0.height.equalTo(20)
+            $0.width.equalTo(108)
+        }
+        
         container.snp.makeConstraints {
             $0.top.equalTo(nameStack.snp.bottom).offset(15)
             $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(147)
+            $0.height.equalTo(157)
         }
         
         totalStack.snp.makeConstraints {
