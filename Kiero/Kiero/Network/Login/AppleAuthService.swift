@@ -73,9 +73,12 @@ extension AppleAuthService: ASAuthorizationControllerDelegate {
             authorizationCode: authorizationCode,
             name: name
         )
+        
+        #if DEBUG
         print("✅ identityToken:", identityToken)
         print("✅ authorizationCode:", authorizationCode)
         print("✅ name:", name ?? "nil")
+        #endif
         
         continuation?.resume(returning: result)
         continuation = nil
