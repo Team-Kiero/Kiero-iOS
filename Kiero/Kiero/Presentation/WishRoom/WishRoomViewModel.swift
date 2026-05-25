@@ -30,6 +30,8 @@ final class WishRoomViewModel: ObservableObject {
     
     // MARK: - Mock Data
     
+    // TODO: - Api 연결 후 삭제
+    
     private func loadMockData() {
         todayWishes = [
             WishItem(id: 1, title: "상헌 아트디렉터되기", acquiredDate: "5월 10일", cost: 100),
