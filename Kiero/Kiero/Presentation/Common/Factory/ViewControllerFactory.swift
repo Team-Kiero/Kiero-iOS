@@ -29,4 +29,5 @@ public protocol ViewControllerFactory {
     func makeDailyJourneyViewController() -> UIViewController
     func makeCoinMissionViewController() -> UIViewController
     func makeWishWellViewController() -> UIViewController
+    func makeMySpaceViewController() -> UIViewController
 }
