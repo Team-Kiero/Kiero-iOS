@@ -42,8 +42,7 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let tap = UITapGestureRecognizer(target: self, action: #selector(didTapGoToWishRoom))
-        rootView.goToWishRoom.addGestureRecognizer(tap)
+        rootView.goToWishRoom.addTarget(self, action: #selector(didTapGoToWishRoom), for: .touchUpInside)
     }
     
     // MARK: - Setup Methods
