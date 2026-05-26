@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Security
 
 final class TokenManager {
     static let shared = TokenManager()
@@ -24,64 +25,64 @@ final class TokenManager {
     }
 
     func saveAccessToken(_ access: String) {
-        userDefaults.set(access, forKey: Key.access)
+        save(key: Key.access, value: access)
     }
 
     func getAccessToken() -> String? {
-        userDefaults.string(forKey: Key.access)
+        load(key: Key.access)
     }
 
     func saveRefreshToken(_ refresh: String) {
-        userDefaults.set(refresh, forKey: Key.refresh)
+        save(key: Key.refresh, value: refresh)
     }
 
     func getRefreshToken() -> String? {
-        userDefaults.string(forKey: Key.refresh)
+        load(key: Key.refresh)
     }
-    
+
+    func saveSseToken(_ sse: String) {
+        save(key: Key.sse, value: sse)
+    }
+
+    func getSseToken() -> String? {
+        load(key: Key.sse)
+    }
+
     func saveUserRole(_ role: String) {
         userDefaults.set(role, forKey: Key.role)
     }
-    
+
     func getUserRole() -> String? {
         userDefaults.string(forKey: Key.role)
     }
-    
+
     func saveUserName(_ name: String) {
         userDefaults.set(name, forKey: Key.name)
     }
-    
+
     func getUserName() -> String? {
         userDefaults.string(forKey: Key.name)
     }
-    
+
     func saveFirstName(_ name: String) {
-        UserDefaults.standard.set(name, forKey: Key.nameKey)
+        userDefaults.set(name, forKey: Key.nameKey)
     }
-    
+
     func getFirstName() -> String? {
-        UserDefaults.standard.string(forKey: Key.nameKey)
+        userDefaults.string(forKey: Key.nameKey)
     }
-    
+
     func saveProfile(_ profile: String) {
         userDefaults.set(profile, forKey: Key.profile)
     }
-    
+
     func getProfile() -> String? {
         userDefaults.string(forKey: Key.profile)
     }
-    
-    func saveSseToken(_ sse: String) {
-        userDefaults.set(sse, forKey: Key.sse)
-    }
-    
-    func getSseToken() -> String? {
-        userDefaults.string(forKey: Key.sse)
-    }
 
     func clearTokens() {
-        userDefaults.removeObject(forKey: Key.access)
-        userDefaults.removeObject(forKey: Key.refresh)
+        delete(key: Key.access)
+        delete(key: Key.refresh)
     }
 
     func clearUserInfo() {
@@ -98,5 +99,50 @@ final class TokenManager {
 
     var isLoggedIn: Bool {
         getAccessToken() != nil && getRefreshToken() != nil
+    }
+
+    // MARK: - Keychain Helpers
+
+    private func save(key: String, value: String) {
+        guard let data = value.data(using: .utf8) else { return }
+
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key
+        ]
+
+        SecItemDelete(query as CFDictionary)
+
+        let attributes: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key,
+            kSecValueData: data,
+            kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlock
+        ]
+
+        SecItemAdd(attributes as CFDictionary, nil)
+    }
+
+    private func load(key: String) -> String? {
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key,
+            kSecReturnData: true,
+            kSecMatchLimit: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard let data = result as? Data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func delete(key: String) {
+        let query: [CFString: Any] = [
+            kSecClass: kSecClassGenericPassword,
+            kSecAttrAccount: key
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
