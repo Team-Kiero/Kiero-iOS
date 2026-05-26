@@ -17,6 +17,7 @@ struct ChildManageView: View {
     
     @State private var connectionState: ChildConnectionState = .connected
     
+    // TODO: - API 연결시 삭제
     private let childName = "최근영"
     private let inviteCode = "별빛기사단918"
     

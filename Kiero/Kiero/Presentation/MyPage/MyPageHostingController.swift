@@ -13,7 +13,7 @@ final class MyPageHostingController: UIHostingController<MyPageView> {
     
     init(viewModel: MyPageViewModel) {
         self.viewModel = viewModel
-        super.init(rootView: MyPageView(viewModel: viewModel, onChildManageTap: nil, onWithdrawTap: nil))
+        super.init(rootView: MyPageView(viewModel: viewModel, onChildManageTap: nil, onDeleteAccountTap: nil))
         
         self.rootView = MyPageView(
             viewModel: viewModel,
@@ -22,8 +22,8 @@ final class MyPageHostingController: UIHostingController<MyPageView> {
                 vc.hidesBottomBarWhenPushed = true
                 self?.navigationController?.pushViewController(vc, animated: true)
             },
-            onWithdrawTap: { [weak self] in
-                let vc = UIHostingController(rootView: WithdrawView())
+            onDeleteAccountTap: { [weak self] in
+                let vc = UIHostingController(rootView: DeleteAccountView())
                 vc.hidesBottomBarWhenPushed = true
                 self?.navigationController?.pushViewController(vc, animated: true)
             }

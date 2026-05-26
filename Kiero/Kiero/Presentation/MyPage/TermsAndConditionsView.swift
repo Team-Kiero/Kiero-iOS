@@ -1,5 +1,5 @@
 //
-//  TOSView.swift
+//  TermsAndConditionsView.swift
 //  Kiero
 //
 //  Created by 안치욱 on 5/23/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct TOSView: View {
+struct TermsAndConditionsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             
@@ -19,10 +19,10 @@ struct TOSView: View {
             
             VStack(spacing: 0) {
                 MenuListItem(title: "서비스 이용약관") {
-                    openURL("https://ruddy-adapter-e98.notion.site/KIERO-3608ff4aed3f80ef98b9ffdbe219dc5d")
+                    // TODO: - API 연결
                 }
                 MenuListItem(title: "개인정보 처리방침") {
-                    openURL("https://ruddy-adapter-e98.notion.site/KIERO-3608ff4aed3f80a08517ca7a45179336")
+                    // TODO: - API 연결
                 }
             }
         }

@@ -1,5 +1,5 @@
 //
-//  WithdrawView.swift
+//  DeleteAccountView.swift
 //  Kiero
 //
 //  Created by 안치욱 on 5/24/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct WithdrawView: View {
+struct DeleteAccountView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var isChecked = false
@@ -42,7 +42,7 @@ struct WithdrawView: View {
     }
 }
 
-private extension WithdrawView {
+private extension DeleteAccountView {
     var contentBox: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("""

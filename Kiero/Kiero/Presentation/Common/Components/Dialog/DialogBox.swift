@@ -27,7 +27,7 @@ final class DialogBox: UIView {
         case childLogout
         case endJourney
         case parentNotification
-        case requestNotification
+        case parentRequestNotification
         
         var title: String {
             switch self {
@@ -55,7 +55,7 @@ final class DialogBox: UIView {
                 return "키어로에서 나갈 거야?"
             case .parentNotification:
                 return "설정에서 알림을 켜주세요."
-            case .requestNotification:
+            case .parentRequestNotification:
                 return "아이의 여정을 알려드릴게요."
             }
         }
@@ -82,7 +82,7 @@ final class DialogBox: UIView {
                 return "다시 들어오려면 초대코드가 필요해!"
             case .parentNotification:
                 return "아이의 일정과 미션 알림을 받으려면\n설정에서 키어로 알림을 켜주세요."
-            case .requestNotification:
+            case .parentRequestNotification:
                 return "일정 인증, 미션 완료, 쿠폰 사용처럼\n중요한 순간을 알림으로 받아보세요."
             }
         }
@@ -116,7 +116,7 @@ final class DialogBox: UIView {
 
         var cancelButtonTitle: String {
             switch self {
-            case .requestNotification:
+            case .parentRequestNotification:
                 return "나중에 할게요"
             default:
                 return "취소"
@@ -135,7 +135,7 @@ final class DialogBox: UIView {
                 return "끝내기"
             case .parentNotification:
                 return "기기 설정으로 이동하기"
-            case .requestNotification:
+            case .parentRequestNotification:
                 return "알림 받기"
             default:
                 return "확인"
