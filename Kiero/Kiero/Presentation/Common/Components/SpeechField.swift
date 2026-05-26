@@ -16,18 +16,19 @@ final class SpeechField: UIView {
         case no
         case gray
         case main
-        
+        case endJourney
+
         var textColor: UIColor {
             switch self {
             case .no:
                 return .clear
-            case .gray:
+            case .gray, .endJourney:
                 return .gray600
             case .main:
                 return .main
             }
         }
-        
+
         var buttonTitle: String {
             switch self {
             case .no:
@@ -36,6 +37,8 @@ final class SpeechField: UIView {
                 return "다음 여정으로"
             case .main:
                 return "다음"
+            case .endJourney:
+                return "여정 끝내기"
             }
         }
     }
@@ -166,7 +169,7 @@ final class SpeechField: UIView {
         case .main:
             addGestureRecognizer(tap)
             buttonContainerView.isUserInteractionEnabled = false
-        case .gray:
+        case .gray, .endJourney:
             buttonContainerView.addGestureRecognizer(tap)
             buttonContainerView.isUserInteractionEnabled = true
         case .no:

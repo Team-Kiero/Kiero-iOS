@@ -59,7 +59,7 @@ final class DialogBox: UIView {
                 return "아이의 여정을 알려드릴게요."
             }
         }
-        
+
         var message: String {
             switch self {
             case .missionComplete:

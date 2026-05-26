@@ -39,6 +39,12 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
         viewWillDisappearSubject.send(())
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        rootView.goToWishRoom.addTarget(self, action: #selector(didTapGoToWishRoom), for: .touchUpInside)
+    }
+    
     // MARK: - Setup Methods
     
     override func setDelegate() {
@@ -79,6 +85,11 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
             .store(in: &cancellables)
         
         viewDidLoadSubject.send(())
+    }
+    
+    @objc private func didTapGoToWishRoom() {
+        let wishRoomVC = diContainer.makeWishRoomViewController()
+        navigationController?.pushViewController(wishRoomVC, animated: true)
     }
 }
 
