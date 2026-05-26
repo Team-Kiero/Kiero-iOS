@@ -111,7 +111,7 @@ private extension TodayStatusHostingController {
     
     func showNotificationRequestDialog() {
         let dialogBox = DialogBox()
-        dialogBox.configure(state: .requestNotification)
+        dialogBox.configure(state: .parentRequestNotification)
         dialogBox.onTapConfirm = {
             dialogBox.dismiss()
             UNUserNotificationCenter.current()
