@@ -32,6 +32,8 @@
 /* Begin PBXFileReference section */
 		2455DCEC2F23628F00836E3D /* Kiero_Child.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kiero_Child.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		24DF50CB2F0A5173007146AC /* Kiero_Parent.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Kiero_Parent.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AEB0F9DD2FC5CBC900964FED /* Kiero_Parent.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kiero_Parent.entitlements; sourceTree = "<group>"; };
+		AEB0F9DE2FC5CBE000964FED /* Kiero_Child.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Kiero_Child.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -39,6 +41,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Config.xcconfig,
+				"GoogleService-Info-Parent.plist",
 				ParentInfo.plist,
 			);
 			target = 2455DCD02F23628F00836E3D /* Kiero_Child */;
@@ -48,6 +51,7 @@
 			membershipExceptions = (
 				ChildInfo.plist,
 				Config.xcconfig,
+				"GoogleService-Info-Child.plist",
 			);
 			target = 24DF50CA2F0A5173007146AC /* Kiero_Parent */;
 		};
@@ -106,6 +110,8 @@
 		24DF50C22F0A5173007146AC = {
 			isa = PBXGroup;
 			children = (
+				AEB0F9DE2FC5CBE000964FED /* Kiero_Child.entitlements */,
+				AEB0F9DD2FC5CBC900964FED /* Kiero_Parent.entitlements */,
 				24DF50CD2F0A5173007146AC /* Kiero */,
 				F6B018502F136542007B1EE4 /* Frameworks */,
 				24DF50CC2F0A5173007146AC /* Products */,
@@ -227,6 +233,7 @@
 				F6B01F152F1779EC007B1EE4 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */,
 				AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -280,6 +287,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconChild;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = Kiero_Child.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -313,6 +321,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconChild;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				CODE_SIGN_ENTITLEMENTS = Kiero_Child.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -626,6 +635,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.0.0;
+			};
+		};
+		AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.13.0;
 			};
 		};
 		AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */ = {
