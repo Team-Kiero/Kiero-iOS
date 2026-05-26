@@ -7,10 +7,12 @@
 
 import SwiftUI
 import UIKit
+import UserNotifications
 
 final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
     
     private let viewModel: TodayStatusViewModel
+    private var hasCheckedNotification = false
     
     init(viewModel: TodayStatusViewModel) {
         self.viewModel = viewModel
@@ -47,6 +49,11 @@ final class TodayStatusHostingController: UIHostingController<TodayStatusView> {
         super.viewWillAppear(animated)
         viewModel.fetchTodayStatus()
         viewModel.bindSSEIfNeeded()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        checkNotificationPermissionIfNeeded()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -87,6 +94,30 @@ private extension TodayStatusHostingController {
         vc.modalPresentationStyle = .overFullScreen
         
         present(vc, animated: false)
+    }
+    
+    func checkNotificationPermissionIfNeeded() {
+        guard !hasCheckedNotification else { return }
+        hasCheckedNotification = true
+        
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            guard settings.authorizationStatus == .notDetermined else { return }
+            
+            DispatchQueue.main.async {
+                self?.showNotificationRequestDialog()
+            }
+        }
+    }
+    
+    func showNotificationRequestDialog() {
+        let dialogBox = DialogBox()
+        dialogBox.configure(state: .parentRequestNotification)
+        dialogBox.onTapConfirm = {
+            dialogBox.dismiss()
+            UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+        }
+        dialogBox.show(in: self)
     }
 }
 

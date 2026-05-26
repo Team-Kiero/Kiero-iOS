@@ -26,7 +26,9 @@ final class DialogBox: UIView {
         case notificationRequest
         case childLogout
         case endJourney
-
+        case parentNotification
+        case parentRequestNotification
+        
         var title: String {
             switch self {
             case .missionComplete(let title):
@@ -51,6 +53,10 @@ final class DialogBox: UIView {
                 return "오늘의 여정을 놓치지 않게 해줄게!"
             case .childLogout:
                 return "키어로에서 나갈 거야?"
+            case .parentNotification:
+                return "설정에서 알림을 켜주세요."
+            case .parentRequestNotification:
+                return "아이의 여정을 알려드릴게요."
             }
         }
 
@@ -74,6 +80,10 @@ final class DialogBox: UIView {
                 return "여정의 중요한 알림을 받아볼 수 있어."
             case .childLogout:
                 return "다시 들어오려면 초대코드가 필요해!"
+            case .parentNotification:
+                return "아이의 일정과 미션 알림을 받으려면\n설정에서 키어로 알림을 켜주세요."
+            case .parentRequestNotification:
+                return "일정 인증, 미션 완료, 쿠폰 사용처럼\n중요한 순간을 알림으로 받아보세요."
             }
         }
         
@@ -94,17 +104,24 @@ final class DialogBox: UIView {
                 return false
             }
         }
-
+        
         var isCancelButtonHidden: Bool {
             switch self {
-            case .notificationRequest:
+            case .notificationRequest, .parentNotification:
                 return true
             default:
                 return false
             }
         }
 
-        var cancelButtonTitle: String { "취소" }
+        var cancelButtonTitle: String {
+            switch self {
+            case .parentRequestNotification:
+                return "나중에 할게요"
+            default:
+                return "취소"
+            }
+        }
 
         var confirmButtonTitle: String {
             switch self {
@@ -116,6 +133,10 @@ final class DialogBox: UIView {
                 return "나가기"
             case .endJourney:
                 return "끝내기"
+            case .parentNotification:
+                return "기기 설정으로 이동하기"
+            case .parentRequestNotification:
+                return "알림 받기"
             default:
                 return "확인"
             }

@@ -13,7 +13,21 @@ final class MyPageHostingController: UIHostingController<MyPageView> {
     
     init(viewModel: MyPageViewModel) {
         self.viewModel = viewModel
-        super.init(rootView: MyPageView(viewModel: viewModel))
+        super.init(rootView: MyPageView(viewModel: viewModel, onChildManageTap: nil, onDeleteAccountTap: nil))
+        
+        self.rootView = MyPageView(
+            viewModel: viewModel,
+            onChildManageTap: { [weak self] in
+                let vc = UIHostingController(rootView: ChildManageView())
+                vc.hidesBottomBarWhenPushed = true
+                self?.navigationController?.pushViewController(vc, animated: true)
+            },
+            onDeleteAccountTap: { [weak self] in
+                let vc = UIHostingController(rootView: DeleteAccountView())
+                vc.hidesBottomBarWhenPushed = true
+                self?.navigationController?.pushViewController(vc, animated: true)
+            }
+        )
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
