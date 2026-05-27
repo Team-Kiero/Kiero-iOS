@@ -131,9 +131,9 @@ struct MySpaceView: View {
                 WishRoomView(viewModel: WishRoomViewModel())
             }
             .navigationBarHidden(true)
-            .onAppear { refreshNotificationStatus() }
+            .onAppear { fetchProfile() }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                refreshNotificationStatus()
+                fetchProfile()
             }
         }
     }
@@ -164,13 +164,13 @@ private extension MySpaceView {
         }
     }
     
-    func refreshNotificationStatus() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            DispatchQueue.main.async {
-                isAlarmOn = settings.authorizationStatus == .authorized
-                || settings.authorizationStatus == .provisional
+    func fetchProfile() {
+        WishWellService().fetchMyInfo()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in } receiveValue: { info in
+                isAlarmOn = info.pushNotificationEnabled
             }
-        }
+            .store(in: &StaticCancellables.bag)
     }
     
     func openAppSettings() {
