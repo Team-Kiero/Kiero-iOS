@@ -18,6 +18,10 @@
 		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
+		AE418AB42FC6CCE8000B043E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB32FC6CCE8000B043E /* FirebaseMessaging */; };
+		AE418AB62FC6CCF0000B043E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB52FC6CCF0000B043E /* FirebaseCore */; };
+		AE418AB82FC6CCFE000B043E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB72FC6CCFE000B043E /* FirebaseCore */; };
+		AE418ABA2FC6CD03000B043E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB92FC6CD03000B043E /* FirebaseMessaging */; };
 		AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B372F4C5C20007319A0 /* KingfisherWebP */; };
 		AEF67B3A2F4C5C46007319A0 /* KingfisherWebP in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B392F4C5C46007319A0 /* KingfisherWebP */; };
 		AEF67B502F4C6C41007319A0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B4F2F4C6C41007319A0 /* Lottie */; };
@@ -74,8 +78,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AE418ABA2FC6CD03000B043E /* FirebaseMessaging in Frameworks */,
 				2455DCE02F23628F00836E3D /* Kingfisher in Frameworks */,
 				2455DCE12F23628F00836E3D /* CombineMoya in Frameworks */,
+				AE418AB82FC6CCFE000B043E /* FirebaseCore in Frameworks */,
 				2455DCE22F23628F00836E3D /* KakaoSDKUser in Frameworks */,
 				2455DCE32F23628F00836E3D /* KakaoSDK in Frameworks */,
 				2455DCE42F23628F00836E3D /* SnapKit in Frameworks */,
@@ -100,6 +106,8 @@
 				24DF52422F0A64A0007146AC /* Then in Frameworks */,
 				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 				F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */,
+				AE418AB42FC6CCE8000B043E /* FirebaseMessaging in Frameworks */,
+				AE418AB62FC6CCF0000B043E /* FirebaseCore in Frameworks */,
 				AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -164,6 +172,8 @@
 				2455DCDC2F23628F00836E3D /* Kingfisher */,
 				AEF67B392F4C5C46007319A0 /* KingfisherWebP */,
 				AEF67B512F4C6C53007319A0 /* Lottie */,
+				AE418AB72FC6CCFE000B043E /* FirebaseCore */,
+				AE418AB92FC6CD03000B043E /* FirebaseMessaging */,
 			);
 			productName = Kiero;
 			productReference = 2455DCEC2F23628F00836E3D /* Kiero_Child.app */;
@@ -196,6 +206,8 @@
 				F6B01F162F1779EC007B1EE4 /* Kingfisher */,
 				AEF67B372F4C5C20007319A0 /* KingfisherWebP */,
 				AEF67B4F2F4C6C41007319A0 /* Lottie */,
+				AE418AB32FC6CCE8000B043E /* FirebaseMessaging */,
+				AE418AB52FC6CCF0000B043E /* FirebaseCore */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero_Parent.app */;
@@ -288,6 +300,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Kiero_Child.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -305,6 +318,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Child;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -322,6 +336,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_ENTITLEMENTS = Kiero_Child.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -339,6 +354,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Child;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -355,6 +371,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIconParent;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Kiero_Parent.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -372,6 +389,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Parent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -405,6 +423,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Parent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -734,6 +753,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */;
 			productName = Then;
+		};
+		AE418AB32FC6CCE8000B043E /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		AE418AB52FC6CCF0000B043E /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		AE418AB72FC6CCFE000B043E /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		AE418AB92FC6CD03000B043E /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		AEF67B372F4C5C20007319A0 /* KingfisherWebP */ = {
 			isa = XCSwiftPackageProductDependency;
