@@ -17,7 +17,11 @@ struct RequiredTermsBottomSheetView: View {
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.top, 20)
-                .padding(.horizontal, 16)
+            
+            Divider()
+                .frame(height: 1)
+                .padding(.top, 8)
+                .foregroundColor(.gray800)
 
             VStack(spacing: 0) {
                 TermsAgreementRow(title: "(필수) KIERO 이용약관 동의")
@@ -26,23 +30,14 @@ struct RequiredTermsBottomSheetView: View {
             }
             .padding(.bottom, 20)
 
-            Button {
+            CTAButtonWrapper(title: "확인", style: .main, size: .h49) {
                 onConfirm()
-            } label: {
-                Text("확인")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .background(Color(red: 0.06, green: 0.86, blue: 0.78))
-                    .cornerRadius(4)
             }
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 24)
+        .padding(.horizontal, 16)
         .padding(.bottom, 34)
-        .background(Color(red: 0.13, green: 0.14, blue: 0.16))
-        .cornerRadius(8, corners: [.topLeft, .topRight])
+        .background(.kBlack)
+        .cornerRadius(15, corners: [.topLeft, .topRight])
     }
 }
 
@@ -64,11 +59,17 @@ private struct TermsAgreementRow: View {
 
                 Spacer()
 
-                Image(.btnUncheck)
+                Image(.icRight)
                     .resizable()
                     .frame(width: 24, height: 24)
             }
             .frame(height: 36)
         }
+    }
+}
+
+#Preview {
+    RequiredTermsBottomSheetView {
+        print("확인 버튼 탭")
     }
 }
