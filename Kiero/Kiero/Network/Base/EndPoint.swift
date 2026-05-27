@@ -44,7 +44,7 @@ enum EndPoint {
     case fetchDefaultColor(childId: Int)
     case editSchedule(scheduleId: Int, selectedDate: String, startDate: String?, endDate: String?)
     case deleteSchedule(scheduleId: Int, selectedDate: String?, startDate: String?, endDate: String?)
-
+    
     // Mission
     case fetchMissions(childId: Int?)
     case updateMission(missionId: Int, request: WriteMissionRequestDTO)
@@ -75,7 +75,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms:
             return .child
         default:
             return .parent
@@ -92,6 +92,9 @@ enum EndPoint {
     
     // MissionComplete
     case completeSchedule(scheduleDetailId: Int)
+    
+    // Terms
+    case fetchChildTerms
     
     // GiveFireStone
     case fireLit
@@ -154,6 +157,8 @@ enum EndPoint {
             return "/api/v1/presigned-url/schedules"
         case .completeSchedule(let scheduleDetailId):
             return "/api/v1/schedules/verify/\(scheduleDetailId)"
+        case .fetchChildTerms:
+            return "/api/v1/terms/children"
         case .fireLit:
             return "/api/v1/schedules/fire-lit"
         case .fetchDefaultColor(let childId):
@@ -194,7 +199,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchChildTerms:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"
