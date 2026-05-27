@@ -81,6 +81,10 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
                 
+                if let fcmToken = FCMTokenManager.shared.getToken() {
+                    Task { await FCMTokenManager.shared.sendTokenToServer(fcmToken) }
+                }
+                
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )

@@ -68,6 +68,10 @@ final class ChildrenLoginViewModel: BaseViewModel {
                 TokenManager.shared.saveUserRole(data.role)
                 TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
                 TokenManager.shared.saveFirstName(data.firstName)
+                
+                if let fcmToken = FCMTokenManager.shared.getToken() {
+                    Task { await FCMTokenManager.shared.sendTokenToServer(fcmToken) }
+                }
 
                 await MainActor.run {
                     self.stateSubject.send(.idle)
