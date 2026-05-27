@@ -6,36 +6,111 @@
 //
 
 import UIKit
+import UserNotifications
 
 import KakaoSDKCommon
+import FirebaseCore
+import FirebaseMessaging
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate,
+    UNUserNotificationCenterDelegate, MessagingDelegate {
 
+    func application(_ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        
+        // 기존 카카오 SDK
         KakaoSDK.initSDK(appKey: Config.kakaoAppKey)
-        
+
+        // Firebase 초기화
+        let googleServiceFileName: String
+
+        if Bundle.main.bundleIdentifier == "com.Kiero.Parent" {
+            googleServiceFileName = "GoogleService-Info-Parent"
+        } else {
+            googleServiceFileName = "GoogleService-Info-Child"
+        }
+
+        if let filePath = Bundle.main.path(forResource: googleServiceFileName, ofType: "plist"),
+           let options = FirebaseOptions(contentsOfFile: filePath) {
+            FirebaseApp.configure(options: options)
+        } else {
+            print("❌ GoogleService-Info.plist를 찾을 수 없음")
+        }
+
+        // 알림 권한 요청
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .badge, .sound]
+        ) { granted, error in
+            print("알림 권한 허용 여부: \(granted)")
+        }
+        application.registerForRemoteNotifications()
+
+        Messaging.messaging().delegate = self
+
+        // 1. 앱이 완전히 꺼진 상태에서 알림 탭
+        if let userInfo = launchOptions?[.remoteNotification] as? [String: Any] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.handleNotification(userInfo)
+            }
+        }
+
         return true
     }
 
-    // MARK: UISceneSession Lifecycle
+    // MARK: - APNs 토큰 → FCM에 전달
 
-    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
+    func application(_ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+
+    // MARK: - FCM 토큰 수신
+
+    func messaging(_ messaging: Messaging,
+        didReceiveRegistrationToken fcmToken: String?) {
+        guard let token = fcmToken else { return }
+        print("FCM Token: \(token)")
+
+        FCMTokenManager.shared.saveToken(token)
+
+        if TokenManager.shared.getAccessToken() != nil {
+            Task { await FCMTokenManager.shared.sendTokenToServer(token) }
+        }
+    }
+
+    // MARK: - 알림 탭 처리
+
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void) {
+
+        let userInfo = response.notification.request.content.userInfo
+        handleNotification(userInfo)
+        completionHandler()
+    }
+
+    // MARK: - 공통 알림 처리
+
+    private func handleNotification(_ userInfo: [AnyHashable: Any]) {
+        guard let idString = userInfo["notification_id"] as? String,
+              let notificationId = Int(idString) else { return }
+
+        // TODO: 딥링크 구현 시 AppCoordinator 연결
+        // AppCoordinator.shared.handleDeepLink(notificationId: notificationId)
+        print("알림 탭 - notification_id: \(notificationId)")
+    }
+
+    // MARK: - UISceneSession Lifecycle
+
+    func application(_ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 
-    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    func application(_ application: UIApplication,
+        didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
     }
-
-
 }
-
