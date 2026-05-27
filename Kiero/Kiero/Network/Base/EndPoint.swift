@@ -75,7 +75,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus:
             return .child
         default:
             return .parent
@@ -95,6 +95,9 @@ enum EndPoint {
     
     // Terms
     case fetchChildTerms
+
+    // Parent Withdrawal
+    case checkParentWithdrawalStatus
     
     // GiveFireStone
     case fireLit
@@ -159,6 +162,8 @@ enum EndPoint {
             return "/api/v1/schedules/verify/\(scheduleDetailId)"
         case .fetchChildTerms:
             return "/api/v1/terms/children"
+        case .checkParentWithdrawalStatus:
+            return "/api/v1/children/parent-withdrawal-status"
         case .fireLit:
             return "/api/v1/schedules/fire-lit"
         case .fetchDefaultColor(let childId):
@@ -199,7 +204,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchChildTerms:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchChildTerms, .checkParentWithdrawalStatus:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"
