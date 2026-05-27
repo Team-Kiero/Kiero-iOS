@@ -39,7 +39,6 @@ struct MySpaceView: View {
                             .foregroundStyle(.white)
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 15)
                     
                     WishSpaceCardView {
                         // TODO: 소원의 공간으로 이동
@@ -87,6 +86,8 @@ struct MySpaceView: View {
                     
                     Spacer()
                 }
+                .padding(.top, 59)
+                .ignoresSafeArea(edges: .top)
                 
                 if showNotificationDialog {
                     Color.kBlack.opacity(0.75)
