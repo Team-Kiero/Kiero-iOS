@@ -14,6 +14,7 @@ struct MySpaceView: View {
     @State private var showNotificationDialog = false
     @State private var showLogoutDialog = false
     @State private var showTerms = false
+    @State private var showWishRoom = false
     
     private let userName = TokenManager.shared.getFirstName() ?? "꾸비"
     var isPreview = false
@@ -41,7 +42,7 @@ struct MySpaceView: View {
                     .padding(.horizontal, 16)
                     
                     WishSpaceCardView {
-                        // TODO: 소원의 공간으로 이동
+                        showWishRoom = true
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 20)
@@ -125,6 +126,9 @@ struct MySpaceView: View {
             }
             .navigationDestination(isPresented: $showTerms) {
                 TermsView()
+            }
+            .navigationDestination(isPresented: $showWishRoom) {
+                WishRoomView(viewModel: WishRoomViewModel())
             }
             .navigationBarHidden(true)
             .onAppear { refreshNotificationStatus() }
