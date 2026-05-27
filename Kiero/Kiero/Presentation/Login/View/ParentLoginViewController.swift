@@ -104,15 +104,12 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
                 
                 switch state {
                 case .idle:
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     
                 case .loading:
-                    //self.showLoading()
                     self.kakaoLoginButton.isEnabled = false
                     
                 case .failure(let message):
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     Toast.show(message: message, bottomInset: 83)
                 }
@@ -127,21 +124,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             }
             .store(in: &cancellables)
     }
-    
-//    private func showLoading() {
-//        guard loadingVC == nil else { return }
-//        let vc = AppDIContainer.shared.makeChildLoadingViewController()
-//        vc.modalPresentationStyle = .overFullScreen
-//        vc.modalTransitionStyle = .crossDissolve
-//        loadingVC = vc
-//        present(vc, animated: false)애
-//    }
-//    
-//    private func hideLoading() {
-//        guard let vc = loadingVC else { return }
-//        loadingVC = nil
-//        vc.dismiss(animated: false)
-//    }
     
     private func navigateToParentOnboarding() {
         let vm = ParentOnboardingViewModel()
