@@ -8,7 +8,7 @@
 struct LoginData: Codable {
     let name: String
     let email: String
-    let image: String
+    let image: String?
     let role: String
     let accessToken: String
     let refreshToken: String

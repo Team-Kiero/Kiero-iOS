@@ -12,6 +12,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
+        let appleButtonTapped: AnyPublisher<Void, Never>
     }
     
     struct Output {
@@ -23,10 +24,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     private let routeSubject = PassthroughSubject<LoginRoute, Never>()
     
     private let kakaoService: any KakaoAuthServiceType
+    private let appleService: any AppleAuthServiceType
     private var isLoggingIn = false
     
-    init(kakaoService: any KakaoAuthServiceType = KakaoAuthService()) {
+    init(
+        kakaoService: any KakaoAuthServiceType = KakaoAuthService(),
+        appleService: any AppleAuthServiceType = AppleAuthService()
+    ) {
         self.kakaoService = kakaoService
+        self.appleService = appleService
         super.init()
     }
     
@@ -34,6 +40,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         input.kakaoButtonTapped
             .sink { [weak self] in
                 self?.requestKakaoLogin()
+            }
+            .store(in: &cancellables)
+        
+        input.appleButtonTapped
+            .sink { [weak self] in
+                self?.requestAppleLogin()
             }
             .store(in: &cancellables)
         
@@ -63,10 +75,11 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 TokenManager.shared.saveRefreshToken(loginData.refreshToken)
-                TokenManager.shared.saveProfile(loginData.image)
+                if let image = loginData.image {
+                    TokenManager.shared.saveProfile(image)
+                }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                TokenManager.shared.saveProfile(loginData.image)
                 
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
@@ -92,6 +105,73 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                     }
                 }
                 
+            } catch let error as NetworkError {
+                await MainActor.run {
+                    self.stateSubject.send(.failure(error.errorDescription))
+                }
+            } catch {
+                await MainActor.run {
+                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                }
+            }
+        }
+    }
+    
+    private func requestAppleLogin() {
+        guard !isLoggingIn else { return }
+        isLoggingIn = true
+        stateSubject.send(.loading)
+        
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.isLoggingIn = false }
+            
+            do {
+                let credential = try await appleService.loginWithApple()
+                
+                let loginData: LoginData = try await BaseService.shared.request(
+                    endPoint: .appleLogin(
+                        identityToken: credential.identityToken,
+                        authorizationCode: credential.authorizationCode,
+                        name: credential.name
+                    ),
+                    body: AppleLoginRequestDTO(
+                        identityToken: credential.identityToken,
+                        authorizationCode: credential.authorizationCode,
+                        name: credential.name
+                    )
+                )
+                
+                TokenManager.shared.saveAccessToken(loginData.accessToken)
+                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
+                if let image = loginData.image {
+                    TokenManager.shared.saveProfile(image)
+                }
+                TokenManager.shared.saveUserName(loginData.name)
+                TokenManager.shared.saveUserRole(loginData.role)
+                
+                let children: ChildListResponse = try await BaseService.shared.request(
+                    endPoint: .fetchChildren
+                )
+                
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    if children.isEmpty {
+                        self.routeSubject.send(.parentOnboarding)
+                    } else {
+                        self.routeSubject.send(.parentTab)
+                    }
+                }
+            } catch let error as AppleLoginError {
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    switch error {
+                    case .cancelled:
+                        break
+                    default:
+                        self.routeSubject.send(.toast("애플 로그인에 실패했어요."))
+                    }
+                }
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))

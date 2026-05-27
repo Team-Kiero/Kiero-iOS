@@ -11,21 +11,36 @@ struct CTAButtonWrapper: View {
     let title: String
     let style: CTAButton.Style
     let size: CTAButton.Size
+    
+    var enabledStyle: CTAButton.Style? = nil
+    var disabledStyle: CTAButton.Style? = nil
+    var isEnabled: Bool = true
     var onTap: (() -> Void)?
     
+    private var currentStyle: CTAButton.Style {
+        guard let enabledStyle,
+              let disabledStyle else {
+            return style
+        }
+        
+        return isEnabled ? enabledStyle : disabledStyle
+    }
+    
     var body: some View {
-        Button(action: {
+        Button {
+            guard isEnabled else { return }
             onTap?()
-        }) {
+        } label: {
             Text(title)
                 .font(Font(size.typo.font))
-                .foregroundColor(Color(style.titleColor))
+                .foregroundColor(Color(currentStyle.titleColor))
                 .frame(maxWidth: .infinity)
                 .frame(height: size.height)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(style.backgroundColor))
+                        .fill(Color(currentStyle.backgroundColor))
                 )
         }
+        .disabled(!isEnabled)
     }
 }

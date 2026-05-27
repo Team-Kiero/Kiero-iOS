@@ -23,7 +23,11 @@ final class DialogBox: UIView {
         case deleteReward(title: String, coin: String)
         case deleteMission(title: String, coin: String)
         case childNotification
+        case notificationRequest
         case childLogout
+        case endJourney
+        case parentNotification
+        case parentRequestNotification
         
         var title: String {
             switch self {
@@ -35,6 +39,8 @@ final class DialogBox: UIView {
                 return title
             case .nextJourney:
                 return "다음 여정으로 갈거야?"
+            case .endJourney:
+                return "오늘의 여정을 끝낼거야?"
             case .deleteSchedule(let title, _):
                 return title
             case .deleteReward(let title, _):
@@ -43,11 +49,17 @@ final class DialogBox: UIView {
                 return title
             case .childNotification:
                 return "설정에서 알림을 켜줘!"
+            case .notificationRequest:
+                return "오늘의 여정을 놓치지 않게 해줄게!"
             case .childLogout:
                 return "키어로에서 나갈 거야?"
+            case .parentNotification:
+                return "설정에서 알림을 켜주세요."
+            case .parentRequestNotification:
+                return "아이의 여정을 알려드릴게요."
             }
         }
-        
+
         var message: String {
             switch self {
             case .missionComplete:
@@ -58,12 +70,20 @@ final class DialogBox: UIView {
                 return "금화를 사용해 소원을 빌까?"
             case .nextJourney:
                 return "한번 다음 여정으로 넘어가면\n다시 지금 여정으로 돌아올 수 없어!"
+            case .endJourney:
+                return "한 번 오늘 여정을 끝내면\n다시 오늘의 여정으로 돌아올 수 없어!"
             case .deleteSchedule, .deleteReward, .deleteMission:
                 return "삭제하시겠습니까?"
             case .childNotification:
                 return "알림을 받으려면 설정에서 키어로 알림을 허용해줘!"
+            case .notificationRequest:
+                return "여정의 중요한 알림을 받아볼 수 있어."
             case .childLogout:
                 return "다시 들어오려면 초대코드가 필요해!"
+            case .parentNotification:
+                return "아이의 일정과 미션 알림을 받으려면\n설정에서 키어로 알림을 켜주세요."
+            case .parentRequestNotification:
+                return "일정 인증, 미션 완료, 쿠폰 사용처럼\n중요한 순간을 알림으로 받아보세요."
             }
         }
         
@@ -84,15 +104,39 @@ final class DialogBox: UIView {
                 return false
             }
         }
+        
+        var isCancelButtonHidden: Bool {
+            switch self {
+            case .notificationRequest, .parentNotification:
+                return true
+            default:
+                return false
+            }
+        }
 
-        var cancelButtonTitle: String { "취소" }
+        var cancelButtonTitle: String {
+            switch self {
+            case .parentRequestNotification:
+                return "나중에 할게요"
+            default:
+                return "취소"
+            }
+        }
 
         var confirmButtonTitle: String {
             switch self {
             case .childNotification:
                 return "설정으로 이동"
+            case .notificationRequest:
+                return "알림받기"
             case .childLogout:
                 return "나가기"
+            case .endJourney:
+                return "끝내기"
+            case .parentNotification:
+                return "기기 설정으로 이동하기"
+            case .parentRequestNotification:
+                return "알림 받기"
             default:
                 return "확인"
             }
@@ -318,6 +362,7 @@ final class DialogBox: UIView {
         cancelButton.setTypo(.title3_16_SB, text: state.cancelButtonTitle, for: .normal)
         confirmButton.setTypo(.title3_16_SB, text: state.confirmButtonTitle, for: .normal)
         closeButton.isHidden = state.isCloseButtonHidden
+        cancelButton.isHidden = state.isCancelButtonHidden
         
         if let coin = state.coinText {
             coinStack.isHidden = false
