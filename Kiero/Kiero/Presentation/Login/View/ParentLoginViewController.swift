@@ -16,6 +16,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     // MARK: - Properties
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
+    private let appleTap = PassthroughSubject<Void, Never>()
+    
     private var loadingVC: UIViewController?
     
     // MARK: - UI Components
@@ -30,9 +32,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         $0.clipsToBounds = true
     }
     
-    private let kakaoLoginButton = UIButton().then {
-        $0.setBackgroundImage(.btnKakao, for: .normal)
-    }
+    private let kakaoLoginButton = LoginButton(type: .kakao)
+    private let appleLoginButton = LoginButton(type: .apple)
     
     override func setStyle() {
         parentImageView.transform = CGAffineTransform(rotationAngle: -(.pi / 180 * 35))
@@ -43,7 +44,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             parentNaviBar,
             parentBubble,
             parentImageView,
-            kakaoLoginButton
+            kakaoLoginButton,
+            appleLoginButton
         )
     }
     
@@ -66,12 +68,20 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         
         kakaoLoginButton.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalTo(appleLoginButton.snp.top).offset(-8)
+            $0.height.equalTo(49)
+        }
+        
+        appleLoginButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(17)
+            $0.height.equalTo(49)
         }
     }
     
     override func addTarget() {
         kakaoLoginButton.addTarget(self, action: #selector(kakaoLoginButtonTapped), for: .touchUpInside)
+        appleLoginButton.addTarget(self, action: #selector(appleLoginButtonTapped), for: .touchUpInside)
         parentNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
@@ -81,7 +91,10 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         super.bind(viewModel: viewModel)
         
         let output = viewModel.transform(
-            input: .init(kakaoButtonTapped: kakaoTap.eraseToAnyPublisher())
+            input: .init(
+                kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
+                appleButtonTapped: appleTap.eraseToAnyPublisher()
+            )
         )
         
         output.state
@@ -91,15 +104,12 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
                 
                 switch state {
                 case .idle:
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     
                 case .loading:
-                    //self.showLoading()
                     self.kakaoLoginButton.isEnabled = false
                     
                 case .failure(let message):
-                    //self.hideLoading()
                     self.kakaoLoginButton.isEnabled = true
                     Toast.show(message: message, bottomInset: 83)
                 }
@@ -114,21 +124,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             }
             .store(in: &cancellables)
     }
-    
-//    private func showLoading() {
-//        guard loadingVC == nil else { return }
-//        let vc = AppDIContainer.shared.makeChildLoadingViewController()
-//        vc.modalPresentationStyle = .overFullScreen
-//        vc.modalTransitionStyle = .crossDissolve
-//        loadingVC = vc
-//        present(vc, animated: false)
-//    }
-//    
-//    private func hideLoading() {
-//        guard let vc = loadingVC else { return }
-//        loadingVC = nil
-//        vc.dismiss(animated: false)
-//    }
     
     private func navigateToParentOnboarding() {
         let vm = ParentOnboardingViewModel()
@@ -164,5 +159,10 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private func kakaoLoginButtonTapped() {
         view.endEditing(true)
         kakaoTap.send(())
+    }
+    
+    @objc
+    private func appleLoginButtonTapped() {
+        appleTap.send(())
     }
 }

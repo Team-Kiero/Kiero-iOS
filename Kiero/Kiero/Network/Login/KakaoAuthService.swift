@@ -21,7 +21,7 @@ enum KakaoAuthError: Error {
 }
 
 final class KakaoAuthService: KakaoAuthServiceType {
-
+    
     func loginWithKakao() async throws -> String {
         if UserApi.isKakaoTalkLoginAvailable() {
             return try await loginWithKakaoTalk()
@@ -29,7 +29,7 @@ final class KakaoAuthService: KakaoAuthServiceType {
             return try await loginWithKakaoAccount()
         }
     }
-
+    
     private func loginWithKakaoTalk() async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             UserApi.shared.loginWithKakaoTalk { token, error in
@@ -45,7 +45,7 @@ final class KakaoAuthService: KakaoAuthServiceType {
             }
         }
     }
-
+    
     private func loginWithKakaoAccount() async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             UserApi.shared.loginWithKakaoAccount { token, error in
@@ -61,29 +61,29 @@ final class KakaoAuthService: KakaoAuthServiceType {
             }
         }
     }
-
+    
     // MARK: - Error Mapping
-
+    
     private func mapKakaoError(_ error: Error) -> Error {
         if isCancelled(error) {
             return KakaoLoginError.cancelled
         }
         return KakaoLoginError.unknown(error)
     }
-
+    
     private func isCancelled(_ error: Error) -> Bool {
-            let ns = error as NSError
-
-            if ns.domain == NSURLErrorDomain,
-               ns.code == NSURLErrorCancelled {
-                return true
-            }
-
-            if let cause = ns.userInfo["AuthErrorCause"] as? String,
-               cause.lowercased().contains("cancel") {
-                return true
-            }
-
-            return false
+        let ns = error as NSError
+        
+        if ns.domain == NSURLErrorDomain,
+           ns.code == NSURLErrorCancelled {
+            return true
         }
+        
+        if let cause = ns.userInfo["AuthErrorCause"] as? String,
+           cause.lowercased().contains("cancel") {
+            return true
+        }
+        
+        return false
+    }
 }
