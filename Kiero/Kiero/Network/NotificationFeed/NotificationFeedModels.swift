@@ -14,6 +14,7 @@ struct FeedPage {
 }
 
 struct FeedItem: Hashable {
+    let feedId: Int64? 
     let eventType: FeedEventType
     let occurredAt: String
     let metadata: FeedMetadata
@@ -30,6 +31,7 @@ struct FeedMetadata: Hashable {
     let content: String?
     let imageUrl: String?
     let amount: Int?
+    let scheduleDetailId: Int64?
 }
 
 struct FeedSection {

@@ -22,12 +22,13 @@ final class NotificationFeed: UIView {
             childName: String,
             schedule: String,
             proofImageUrl: String?,
-            isExpanded: Bool
+            isExpanded: Bool,
+            scheduleDetailId: Int64?
         )
         case finishAllSchedule(
             time: String,
             childName: String,
-            coinEarned: Int,
+            coinEarned: Int
         )
         case useCoupon(
             time: String,
@@ -165,7 +166,7 @@ final class NotificationFeed: UIView {
         let style: UIFont.NotoSans = .title3_16_SB
         
         switch state {
-        case let .finishSchedule(_, time, childName, schedule, proofImageUrl, isExpanded):
+        case let .finishSchedule(_, time, childName, schedule, proofImageUrl, isExpanded, _):
             timeLabel.setTypo(.body4_12_R, text: time)
             downButton.isHidden = false
             let subject = "\(childName)\(childName.subjectMarker)"
@@ -311,14 +312,15 @@ extension NotificationFeed.State {
 
     mutating func toggleExpanded() {
         switch self {
-        case let .finishSchedule(key, time, childName, schedule, url, isExpanded):
+        case let .finishSchedule(key, time, childName, schedule, url, isExpanded, scheduleDetailId):
             self = .finishSchedule(
                 key: key,
                 time: time,
                 childName: childName,
                 schedule: schedule,
                 proofImageUrl: url,
-                isExpanded: !isExpanded
+                isExpanded: !isExpanded,
+                scheduleDetailId: scheduleDetailId
             )
         default:
             break
@@ -327,7 +329,7 @@ extension NotificationFeed.State {
 
     var dateKey: String {
         switch self {
-        case let .finishSchedule(_, time, _, _, _, _),
+        case let .finishSchedule(_, time, _, _, _, _, _),
              let .finishMission(time, _, _, _),
              let .useCoupon(time, _, _, _),
              let .finishAllSchedule(time, _, _):

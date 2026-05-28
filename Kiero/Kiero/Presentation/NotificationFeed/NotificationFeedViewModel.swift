@@ -227,7 +227,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private func makeState(from item: FeedItem, childName: String) -> NotificationFeed.State {
         let (_, time) = splitOccurredAt(item.occurredAt)
-        
+
         switch item.eventType {
         case .mission:
             return .finishMission(
@@ -242,14 +242,14 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 occurredAt: item.occurredAt,
                 metadata: item.metadata
             )
-            
             return .finishSchedule(
                 key: key,
                 time: time,
                 childName: childName,
                 schedule: item.metadata.content ?? "",
                 proofImageUrl: item.metadata.imageUrl,
-                isExpanded: expandedKeys.contains(key)
+                isExpanded: expandedKeys.contains(key),
+                scheduleDetailId: item.metadata.scheduleDetailId
             )
         case .coupon:
             return .useCoupon(
@@ -288,7 +288,7 @@ extension NotificationFeedViewModel {
               sections[indexPath.section].items.indices.contains(indexPath.row) else { return }
         
         let before = sections[indexPath.section].items[indexPath.row]
-        if case let .finishSchedule(key, _, _, _, _, isExpanded) = before{
+        if case let .finishSchedule(key, _, _, _, _, isExpanded, _) = before {
             if isExpanded {
                 expandedKeys.remove(key)
             } else {
