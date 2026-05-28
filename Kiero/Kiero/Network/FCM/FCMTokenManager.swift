@@ -12,7 +12,19 @@ final class FCMTokenManager {
     private init() {}
     
     func saveToken(_ token: String) {
+        let isNewToken = UserDefaults.standard.string(forKey: "fcmToken") != token
         UserDefaults.standard.set(token, forKey: "fcmToken")
+        
+        guard TokenManager.shared.getAccessToken() != nil else {
+            return
+        }
+        
+        if isNewToken {
+            print("📱 FCM 토큰 새로 발급 → 서버 전송")
+            Task {
+                await sendTokenToServer(token)
+            }
+        }
     }
     
     func getToken() -> String? {
