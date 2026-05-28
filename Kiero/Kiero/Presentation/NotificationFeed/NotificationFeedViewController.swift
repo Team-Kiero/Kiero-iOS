@@ -22,6 +22,8 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     
     private var renderedSections: [FeedSection] = []
     
+    var deepLinkTargetId: Int64?
+    
     // MARK: - Life Cycle
     
     override func loadView() { view = contentView }
@@ -79,10 +81,57 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                 
                 let isEmpty = sections.isEmpty || sections.allSatisfy { $0.items.isEmpty }
                 self.updateEmptyView(isEmpty: isEmpty)
+                
+                if let targetId = self.deepLinkTargetId,
+                   !sections.isEmpty,
+                   sections.contains(where: { !$0.items.isEmpty }) {
+                    self.scrollToFeedAndExpand(targetId: targetId)
+                    self.deepLinkTargetId = nil
+                }
             }
             .store(in: &cancellables)
         
         viewDidLoadSubject.send(())
+    }
+    
+    private func scrollToFeedAndExpand(targetId: Int64) {
+        
+        for (sectionIndex, section) in renderedSections.enumerated() {
+            for (rowIndex, item) in section.items.enumerated() {
+                if case .finishSchedule(_, _, _, _, _, _, let scheduleDetailId) = item,
+                   scheduleDetailId == targetId {
+                    
+                    let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        self.contentView.tableView.scrollToRow(
+                            at: indexPath,
+                            at: .middle,
+                            animated: true
+                        )
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self.viewModel?.toggleExpansion(at: indexPath)
+                            
+                            UIView.performWithoutAnimation {
+                                self.contentView.tableView.reloadRows(at: [indexPath], with: .none)
+                                self.contentView.tableView.beginUpdates()
+                                self.contentView.tableView.endUpdates()
+                            }
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                self.contentView.tableView.scrollToRow(
+                                    at: indexPath,
+                                    at: .bottom,
+                                    animated: true
+                                )
+                            }
+                        }
+                    }
+                    return
+                }
+            }
+        }
     }
     
     private func updateEmptyView(isEmpty: Bool) {
