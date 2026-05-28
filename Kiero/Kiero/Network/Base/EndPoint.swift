@@ -67,6 +67,9 @@ enum EndPoint {
     case fetchWishes
     case purchaseCoupon(couponId: Int64)
     
+    // WishRoom
+    case fetchCouponHistory
+    
     // Reward
     case fetchCoupons(childId: Int)
     case addCoupon(childId: Int)
@@ -88,7 +91,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .appleLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus, .fetchCouponHistory:
             return .child
         default:
             return .parent
@@ -230,12 +233,14 @@ enum EndPoint {
             return "/api/v1/terms/parent"
         case .deleteParentAccount:
             return "/api/v1/parents/withdraw"
+        case .fetchCouponHistory:
+            return "/api/v1/coupons/history"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .requiredTerms, .requiredTermsAgreementStatus, .fetchParentInfo, .fetchMyPageLinks, .fetchChildTerms, .checkParentWithdrawalStatus:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .requiredTerms, .requiredTermsAgreementStatus, .fetchParentInfo, .fetchMyPageLinks, .fetchChildTerms, .checkParentWithdrawalStatus, .fetchCouponHistory:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds, .updateFCMToken, .updateNotificationSettings:
             return "PATCH"
