@@ -102,6 +102,18 @@ public final class TabBarViewController: UITabBarController {
             startGlobalFeedSSEIfNeeded()
         }
         updateNavigationBar()
+        
+        if DeepLinkManager.shared.hasPendingDeepLink {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                guard let type = DeepLinkManager.shared.pendingType else { return }
+                if self.isParent {
+                    self.handleParentDeepLink(type: type)
+                } else {
+                    self.handleChildDeepLink(type: type)
+                }
+                DeepLinkManager.shared.clear()
+            }
+        }
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -255,6 +267,13 @@ private extension TabBarViewController {
             name: .refreshUnreadBadge,
             object: nil
         )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleDeepLink(_:)),
+            name: .deepLinkReceived,
+            object: nil
+        )
     }
     
     func updateCustomTabBarSelection() {
@@ -363,6 +382,73 @@ private extension TabBarViewController {
     @objc
     private func handleRefreshUnreadBadge(_ notification: Notification) {
         fetchInitialUnreadStatus()
+    }
+    
+    @objc
+    private func handleDeepLink(_ notification: Notification) {
+        guard let type = DeepLinkManager.shared.pendingType else { return }
+        
+        if isParent {
+            handleParentDeepLink(type: type)
+        } else {
+            handleChildDeepLink(type: type)
+        }
+        
+        DeepLinkManager.shared.clear()
+    }
+    
+    private func handleParentDeepLink(type: String) {
+        switch type {
+        case "SCHEDULE_VERIFIED":
+            let notificationVC = factory.makeNotificationFeedViewController()
+            notificationVC.hidesBottomBarWhenPushed = true
+            
+            if let feedVC = notificationVC as? NotificationFeedViewController {
+                feedVC.deepLinkTargetId = DeepLinkManager.shared.pendingTargetId
+            }
+            
+            NotificationBadgeCenter.shared.setUnread(false)
+            
+            guard let nav = selectedViewController as? UINavigationController else { return }
+            nav.pushViewController(notificationVC, animated: true)
+            
+        case "FIRE_LIT", "MISSION_COMPLETE", "COUPON_PURCHASED":
+            let notificationVC = factory.makeNotificationFeedViewController()
+            notificationVC.hidesBottomBarWhenPushed = true
+            
+            NotificationBadgeCenter.shared.setUnread(false)
+            
+            guard let nav = selectedViewController as? UINavigationController else { return }
+            nav.pushViewController(notificationVC, animated: true)
+            
+        case "PARENT_DAILY_START", "SCHEDULE_SKIPPED", "PARENT_SCHEDULE_REMINDER":
+            selectedIndex = 0
+            if let nav = viewControllers?.first as? UINavigationController {
+                nav.popToRootViewController(animated: false)
+            }
+            
+        default:
+            break
+        }
+    }
+    
+    private func handleChildDeepLink(type: String) {
+        switch type {
+        case "CHILD_DAILY_START", "CHILD_NEXT_JOURNEY", "SCHEDULE_CREATED", "SCHEDULE_DELETED", "SCHEDULE_MODIFIED":
+            selectedIndex = 0
+            if let nav = viewControllers?.first as? UINavigationController {
+                nav.popToRootViewController(animated: false)
+            }
+
+        case "CHILD_MISSION_INCOMPLETE":
+            selectedIndex = 1
+            if let nav = viewControllers?[1] as? UINavigationController {
+                nav.popToRootViewController(animated: false)
+            }
+            
+        default:
+            break
+        }
     }
 }
 
