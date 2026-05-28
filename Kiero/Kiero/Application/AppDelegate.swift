@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     func application(_ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
 
-        // 기존 카카오 SDK
+        // 카카오 SDK
         KakaoSDK.initSDK(appKey: Config.kakaoAppKey)
 
         // Firebase 초기화
@@ -38,7 +38,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
             print("❌ GoogleService-Info.plist를 찾을 수 없음")
         }
 
-        // 알림 권한 요청
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(
             options: [.alert, .badge, .sound]
@@ -49,7 +48,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
 
         Messaging.messaging().delegate = self
 
-        // 1. 앱이 완전히 꺼진 상태에서 알림 탭
         if let userInfo = launchOptions?[.remoteNotification] as? [String: Any] {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.handleNotification(userInfo)
@@ -71,6 +69,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     func messaging(_ messaging: Messaging,
         didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else { return }
+        
+        // TODO: - 배포 전 로그 삭제
         print("FCM Token: \(token)")
 
         FCMTokenManager.shared.saveToken(token)
@@ -94,12 +94,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     // MARK: - 공통 알림 처리
 
     private func handleNotification(_ userInfo: [AnyHashable: Any]) {
-        guard let idString = userInfo["notification_id"] as? String,
-              let notificationId = Int(idString) else { return }
+        let type = userInfo["type"] as? String
+        let targetId = userInfo["targetId"] as? String
 
-        // TODO: 딥링크 구현 시 AppCoordinator 연결
-        // AppCoordinator.shared.handleDeepLink(notificationId: notificationId)
-        print("알림 탭 - notification_id: \(notificationId)")
+        DeepLinkManager.shared.handle(type: type, targetId: targetId)
     }
 
     // MARK: - UISceneSession Lifecycle
