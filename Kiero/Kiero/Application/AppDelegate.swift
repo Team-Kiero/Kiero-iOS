@@ -74,10 +74,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         print("FCM Token: \(token)")
 
         FCMTokenManager.shared.saveToken(token)
-
-        if TokenManager.shared.getAccessToken() != nil {
-            Task { await FCMTokenManager.shared.sendTokenToServer(token) }
-        }
     }
 
     // MARK: - 알림 탭 처리
