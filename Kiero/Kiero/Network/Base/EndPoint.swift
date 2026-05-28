@@ -76,6 +76,7 @@ enum EndPoint {
     
     // FCM
     case updateFCMToken
+    case updateNotificationSettings
     
     // CoinMission
     case completeMission(missionId: Int64)
@@ -212,6 +213,8 @@ enum EndPoint {
             return "/api/v1/schedules/\(scheduleDetailId)/image"
         case .updateFCMToken:
             return "/api/v1/common/push/fcm-token"
+        case .updateNotificationSettings:
+            return "/api/v1/common/push/notification-settings"
         case .fetchParentInfo:
             return "/api/v1/parents/me"
         case .fetchMyPageLinks:
@@ -225,7 +228,7 @@ enum EndPoint {
         switch self {
         case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchParentInfo, .fetchMyPageLinks, .fetchChildTerms, .checkParentWithdrawalStatus:
             return "GET"
-        case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds, .updateFCMToken:
+        case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds, .updateFCMToken, .updateNotificationSettings:
             return "PATCH"
         case .deleteChildDummy, .deleteSchedule, .deleteMission, .deleteCoupon:
             return "DELETE"
