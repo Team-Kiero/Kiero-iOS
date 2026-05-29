@@ -21,6 +21,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     private let loadMoreSubject = PassthroughSubject<Void, Never>()
     
     private var renderedSections: [FeedSection] = []
+    private var lastItemCount = 0
     
     var deepLinkTargetId: Int64?
     
@@ -50,6 +51,23 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     
     override func bind(viewModel: NotificationFeedViewModel) {
         super.bind(viewModel: viewModel)
+        
+        NotificationCenter.default.publisher(for: .deepLinkReceived)
+                    .receive(on: RunLoop.main)
+                    .sink { [weak self] _ in
+                        guard let self = self,
+                              let targetId = DeepLinkManager.shared.pendingTargetId else { return }
+                        
+                        if !self.renderedSections.isEmpty,
+                           self.renderedSections.contains(where: { !$0.items.isEmpty }) {
+                            self.scrollToFeedAndExpand(targetId: targetId)
+                            DeepLinkManager.shared.clear()
+                        } else {
+                            self.deepLinkTargetId = targetId
+                        }
+                    }
+                    .store(in: &cancellables)
+        
         
         contentView.onBackTapped = { [weak self] in
             guard let self = self else { return }
@@ -82,11 +100,39 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                 let isEmpty = sections.isEmpty || sections.allSatisfy { $0.items.isEmpty }
                 self.updateEmptyView(isEmpty: isEmpty)
                 
+                DispatchQueue.main.async {
+                    let tableHeight = self.contentView.tableView.frame.height
+                    let bottomInset = max(0, tableHeight - 100)
+                    self.contentView.tableView.contentInset.bottom = bottomInset
+                }
+                
                 if let targetId = self.deepLinkTargetId,
                    !sections.isEmpty,
                    sections.contains(where: { !$0.items.isEmpty }) {
-                    self.scrollToFeedAndExpand(targetId: targetId)
-                    self.deepLinkTargetId = nil
+                    
+                    let currentAllItemsCount = sections.flatMap { $0.items }.count
+                    let isFound = self.scrollToFeedAndExpand(targetId: targetId)
+                    
+                    if isFound {
+                        self.deepLinkTargetId = nil
+                        self.lastItemCount = 0
+                        DeepLinkManager.shared.clear()
+                        print("🎯 [DeepLink] 타겟 알림을 찾아 스크롤했습니다.")
+                    } else {
+                        let viewModelCanLoadMore = self.viewModel?.canLoadMore ?? false
+                        let isDataNotGrowing = (currentAllItemsCount == self.lastItemCount)
+                        
+                        if !viewModelCanLoadMore || isDataNotGrowing {
+                            print("⚠️ [DeepLink] 모든 페이지를 탐색했으나 타겟 알림(ID: \(targetId))을 찾지 못했습니다.")
+                            self.deepLinkTargetId = nil
+                            self.lastItemCount = 0
+                            DeepLinkManager.shared.clear()
+                        } else {
+                            print("➡️ [DeepLink] 다음 페이지를 요청합니다... (현재 탐색한 아이템 수: \(currentAllItemsCount))")
+                            self.lastItemCount = currentAllItemsCount // 현재 개수 저장
+                            self.loadMoreSubject.send(())
+                        }
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -94,7 +140,8 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         viewDidLoadSubject.send(())
     }
     
-    private func scrollToFeedAndExpand(targetId: Int64) {
+    @discardableResult
+    private func scrollToFeedAndExpand(targetId: Int64) -> Bool {
         
         for (sectionIndex, section) in renderedSections.enumerated() {
             for (rowIndex, item) in section.items.enumerated() {
@@ -103,35 +150,28 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                     
                     let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
                     
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self.viewModel?.toggleExpansion(at: indexPath)
+                    
+                    UIView.performWithoutAnimation {
+                        self.contentView.tableView.reloadRows(at: [indexPath], with: .none)
+                        self.contentView.tableView.beginUpdates()
+                        self.contentView.tableView.endUpdates()
+                    }
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        
                         self.contentView.tableView.scrollToRow(
                             at: indexPath,
-                            at: .middle,
+                            at: .top,
                             animated: true
                         )
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            self.viewModel?.toggleExpansion(at: indexPath)
-                            
-                            UIView.performWithoutAnimation {
-                                self.contentView.tableView.reloadRows(at: [indexPath], with: .none)
-                                self.contentView.tableView.beginUpdates()
-                                self.contentView.tableView.endUpdates()
-                            }
-                            
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                self.contentView.tableView.scrollToRow(
-                                    at: indexPath,
-                                    at: .bottom,
-                                    animated: true
-                                )
-                            }
-                        }
                     }
-                    return
+                    return true
                 }
             }
         }
+        
+        return false
     }
     
     private func updateEmptyView(isEmpty: Bool) {

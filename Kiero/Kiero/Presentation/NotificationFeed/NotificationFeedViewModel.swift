@@ -27,7 +27,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private(set) var sections: [FeedSection] = []
     private var nextCursor: String? = nil
-    private var canLoadMore: Bool { nextCursor != nil }
+    var canLoadMore: Bool { nextCursor != nil }
     private var cachedChildName: String = ""
     private var expandedKeys = Set<String>()
     
