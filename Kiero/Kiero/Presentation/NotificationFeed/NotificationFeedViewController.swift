@@ -53,20 +53,15 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         super.bind(viewModel: viewModel)
         
         NotificationCenter.default.publisher(for: .deepLinkReceived)
-                    .receive(on: RunLoop.main)
-                    .sink { [weak self] _ in
-                        guard let self = self,
-                              let targetId = DeepLinkManager.shared.pendingTargetId else { return }
-                        
-                        if !self.renderedSections.isEmpty,
-                           self.renderedSections.contains(where: { !$0.items.isEmpty }) {
-                            self.scrollToFeedAndExpand(targetId: targetId)
-                            DeepLinkManager.shared.clear()
-                        } else {
-                            self.deepLinkTargetId = targetId
-                        }
-                    }
-                    .store(in: &cancellables)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self = self,
+                      let targetId = DeepLinkManager.shared.pendingTargetId else { return }
+                
+                self.deepLinkTargetId = targetId
+                self.processDeepLinkIfNeeded()
+            }
+            .store(in: &cancellables)
         
         
         contentView.onBackTapped = { [weak self] in
@@ -106,34 +101,7 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                     self.contentView.tableView.contentInset.bottom = bottomInset
                 }
                 
-                if let targetId = self.deepLinkTargetId,
-                   !sections.isEmpty,
-                   sections.contains(where: { !$0.items.isEmpty }) {
-                    
-                    let currentAllItemsCount = sections.flatMap { $0.items }.count
-                    let isFound = self.scrollToFeedAndExpand(targetId: targetId)
-                    
-                    if isFound {
-                        self.deepLinkTargetId = nil
-                        self.lastItemCount = 0
-                        DeepLinkManager.shared.clear()
-                        print("🎯 [DeepLink] 타겟 알림을 찾아 스크롤했습니다.")
-                    } else {
-                        let viewModelCanLoadMore = self.viewModel?.canLoadMore ?? false
-                        let isDataNotGrowing = (currentAllItemsCount == self.lastItemCount)
-                        
-                        if !viewModelCanLoadMore || isDataNotGrowing {
-                            print("⚠️ [DeepLink] 모든 페이지를 탐색했으나 타겟 알림(ID: \(targetId))을 찾지 못했습니다.")
-                            self.deepLinkTargetId = nil
-                            self.lastItemCount = 0
-                            DeepLinkManager.shared.clear()
-                        } else {
-                            print("➡️ [DeepLink] 다음 페이지를 요청합니다... (현재 탐색한 아이템 수: \(currentAllItemsCount))")
-                            self.lastItemCount = currentAllItemsCount // 현재 개수 저장
-                            self.loadMoreSubject.send(())
-                        }
-                    }
-                }
+                self.processDeepLinkIfNeeded()
             }
             .store(in: &cancellables)
         
@@ -172,6 +140,36 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         }
         
         return false
+    }
+    
+    private func processDeepLinkIfNeeded() {
+        guard let targetId = self.deepLinkTargetId,
+              !self.renderedSections.isEmpty,
+              self.renderedSections.contains(where: { !$0.items.isEmpty }) else { return }
+        
+        let currentAllItemsCount = self.renderedSections.flatMap { $0.items }.count
+        let isFound = self.scrollToFeedAndExpand(targetId: targetId)
+        
+        if isFound {
+            self.deepLinkTargetId = nil
+            self.lastItemCount = 0
+            DeepLinkManager.shared.clear()
+            print("🎯 [DeepLink] 타겟 알림을 찾아 스크롤했습니다.")
+        } else {
+            let viewModelCanLoadMore = self.viewModel?.canLoadMore ?? false
+            let isDataNotGrowing = (currentAllItemsCount == self.lastItemCount)
+            
+            if !viewModelCanLoadMore || isDataNotGrowing {
+                print("⚠️ [DeepLink] 모든 페이지를 탐색했으나 타겟 알림(ID: \(targetId))을 찾지 못했습니다.")
+                self.deepLinkTargetId = nil
+                self.lastItemCount = 0
+                DeepLinkManager.shared.clear()
+            } else {
+                print("➡️ [DeepLink] 다음 페이지를 요청합니다... (현재 탐색한 아이템 수: \(currentAllItemsCount))")
+                self.lastItemCount = currentAllItemsCount
+                self.loadMoreSubject.send(())
+            }
+        }
     }
     
     private func updateEmptyView(isEmpty: Bool) {
