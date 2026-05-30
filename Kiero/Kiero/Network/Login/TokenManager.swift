@@ -100,6 +100,18 @@ final class TokenManager {
     var isLoggedIn: Bool {
         getAccessToken() != nil && getRefreshToken() != nil
     }
+    
+    func saveRequiredTermsIds(_ ids: [Int]) {
+        userDefaults.set(ids, forKey: "requiredTermsIds")
+    }
+
+    func getRequiredTermsIds() -> [Int] {
+        userDefaults.array(forKey: "requiredTermsIds") as? [Int] ?? []
+    }
+
+    func removeRequiredTermsIds() {
+        userDefaults.removeObject(forKey: "requiredTermsIds")
+    }
 
     // MARK: - Keychain Helpers
 

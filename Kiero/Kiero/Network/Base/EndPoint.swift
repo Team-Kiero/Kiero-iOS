@@ -18,12 +18,15 @@ enum EndPoint {
     case postInviteCode
     case checkConnection(lastName: String, firstName: String)
     case subscribeConnection
+    case agreeRequiredTerms
     
     // Login
     case childSignup(lastName: String, firstName: String, inviteCode: String)
     case kakaoLogin(authCode: String)
     case kakaoAccessToken(token: String)
     case appleLogin(identityToken: String, authorizationCode: String, name: String?)
+    case requiredTermsAgreementStatus
+    case requiredTerms
     
     // Logout & Token
     case logout
@@ -101,6 +104,8 @@ enum EndPoint {
         switch self {
         case .postInviteCode, .checkConnection:
             return "/api/v1/parents/invite"
+        case .agreeRequiredTerms:
+            return "/api/v1/terms/required"
         case .subscribeConnection:
             return "/api/v1/subscribe"
         case .sseToken:
@@ -115,6 +120,10 @@ enum EndPoint {
             return "/api/v1/parents/login/apple"
         case .kakaoAccessToken:
             return "/api/v1/parents/login/kakao/access-token"
+        case .requiredTermsAgreementStatus:
+            return "/api/v1/terms/required/status"
+        case .requiredTerms:
+            return "/api/v1/terms/required"
         case .logout:
             return "/api/v1/tokens/logout"
         case .reissueAccessToken:
@@ -197,7 +206,7 @@ enum EndPoint {
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .requiredTerms, .requiredTermsAgreementStatus:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"

@@ -8,6 +8,11 @@
 import Combine
 import Foundation
 
+enum ParentInviteRoute {
+    case parentTab
+    case toast(String)
+}
+
 final class ParentInviteViewModel: BaseViewModel {
 
     let childLastName: String
@@ -35,6 +40,12 @@ final class ParentInviteViewModel: BaseViewModel {
 
     private let isReissuingSubject = CurrentValueSubject<Bool, Never>(false)
     var isReissuing: AnyPublisher<Bool, Never> { isReissuingSubject.eraseToAnyPublisher() }
+    
+    private let routeSubject = PassthroughSubject<ParentInviteRoute, Never>()
+    var route: AnyPublisher<ParentInviteRoute, Never> { routeSubject.eraseToAnyPublisher() }
+    
+    private let isStartingSubject = CurrentValueSubject<Bool, Never>(false)
+    var isStarting: AnyPublisher<Bool, Never> { isStartingSubject.eraseToAnyPublisher() }
 
     init(
         childLastName: String,
@@ -135,6 +146,38 @@ final class ParentInviteViewModel: BaseViewModel {
         return String(format: "%02d:%02d", m, s)
     }
 
+    func start() {
+        guard isStartingSubject.value == false else { return }
+        
+        isStartingSubject.send(true)
+        
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let termsIds = TokenManager.shared.getRequiredTermsIds()
+                if termsIds.isEmpty == false {
+                    let request = AgreeRequiredTermsRequestDTO(
+                        termsIds: termsIds
+                    )
+                    let _: EmptyResponse = try await BaseService.shared.request(
+                        endPoint: .agreeRequiredTerms,
+                        body: request
+                    )
+                    TokenManager.shared.removeRequiredTermsIds()
+                }
+                await MainActor.run {
+                    self.isStartingSubject.send(false)
+                    self.routeSubject.send(.parentTab)
+                }
+            } catch {
+                await MainActor.run {
+                    self.isStartingSubject.send(false)
+                    self.routeSubject.send(.toast("약관 동의 처리에 실패했습니다."))
+                }
+            }
+        }
+    }
+    
     deinit {
         timerCancellable?.cancel()
     }
