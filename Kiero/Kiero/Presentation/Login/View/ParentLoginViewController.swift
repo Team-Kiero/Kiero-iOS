@@ -6,6 +6,7 @@
 //
 
 import Combine
+import SwiftUI
 import UIKit
 
 import SnapKit
@@ -134,6 +135,55 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         }
     }
     
+    private func presentRequiredTermsBottomSheet(_ terms: [RequiredTerm]) {
+        let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
+        let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
+        
+        var hostingController: UIHostingController<AnyView>?
+        
+        let bottomSafeArea = view.safeAreaInsets.bottom
+        
+        let rootView = AnyView(
+            ZStack(alignment: .bottom) {
+                Color.black.opacity(0.6)
+                    .ignoresSafeArea()
+                
+                RequiredTermsBottomSheetView(
+                    onTermsTap: {
+                        guard let serviceTermsURL,
+                              let url = URL(string: serviceTermsURL)
+                        else { return }
+                        
+                        UIApplication.shared.open(url)
+                    },
+                    onPrivacyTap: {
+                        guard let privacyPolicyURL,
+                              let url = URL(string: privacyPolicyURL)
+                        else { return }
+                        
+                        UIApplication.shared.open(url)
+                    },
+                    onConfirm: { [weak self] in
+                        hostingController?.dismiss(animated: true) {
+                            self?.navigateToParentOnboarding()
+                        }
+                    }
+                )
+                Color.kBlack
+                    .frame(height: bottomSafeArea)
+            }
+                .ignoresSafeArea(edges: .bottom)
+        )
+        
+        hostingController = UIHostingController(rootView: rootView)
+        hostingController?.modalPresentationStyle = .overFullScreen
+        hostingController?.view.backgroundColor = .clear
+        
+        if let hostingController {
+            present(hostingController, animated: true)
+        }
+    }
+    
     private func handle(by route: LoginRoute) {
         switch route {
         case .parentOnboarding:
@@ -144,6 +194,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         case .parentTab:
             let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
             changeRoot(tab)
+        case .requiredTerms(let terms):
+            TokenManager.shared.saveRequiredTermsIds(terms.map { $0.termsId })
+            presentRequiredTermsBottomSheet(terms)
         case let .toast(message):
             Toast.show(message: message, bottomInset: 83)
         }

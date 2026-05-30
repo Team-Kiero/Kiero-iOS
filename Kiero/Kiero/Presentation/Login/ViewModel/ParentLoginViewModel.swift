@@ -58,21 +58,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     private func requestKakaoLogin() {
         guard !isLoggingIn else { return }
         isLoggingIn = true
-        
         stateSubject.send(.loading)
-        
         Task { [weak self] in
             guard let self else { return }
-            
             defer { self.isLoggingIn = false }
-            
             do {
                 let kakaoToken = try await kakaoService.loginWithKakao()
-                
                 let loginData: LoginData = try await BaseService.shared.request(
                     endPoint: .kakaoAccessToken(token: kakaoToken)
                 )
-                
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 TokenManager.shared.saveRefreshToken(loginData.refreshToken)
                 if let image = loginData.image {
@@ -80,14 +74,18 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                
+                if let requiredTerms = try await checkRequiredTerms() {
+                    await MainActor.run {
+                        self.stateSubject.send(.idle)
+                        self.routeSubject.send(.requiredTerms(requiredTerms))
+                    }
+                    return
+                }
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
-                
                 await MainActor.run {
                     self.stateSubject.send(.idle)
-                    
                     if children.isEmpty {
                         self.routeSubject.send(.parentOnboarding)
                     } else {
@@ -104,7 +102,6 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                         self.routeSubject.send(.toast("로그인이 취소되었습니다."))
                     }
                 }
-                
             } catch let error as NetworkError {
                 await MainActor.run {
                     self.stateSubject.send(.failure(error.errorDescription))
@@ -121,14 +118,11 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         guard !isLoggingIn else { return }
         isLoggingIn = true
         stateSubject.send(.loading)
-        
         Task { [weak self] in
             guard let self else { return }
             defer { self.isLoggingIn = false }
-            
             do {
                 let credential = try await appleService.loginWithApple()
-                
                 let loginData: LoginData = try await BaseService.shared.request(
                     endPoint: .appleLogin(
                         identityToken: credential.identityToken,
@@ -141,7 +135,6 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                         name: credential.name
                     )
                 )
-                
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
                 TokenManager.shared.saveRefreshToken(loginData.refreshToken)
                 if let image = loginData.image {
@@ -149,11 +142,16 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                
+                if let requiredTerms = try await checkRequiredTerms() {
+                    await MainActor.run {
+                        self.stateSubject.send(.idle)
+                        self.routeSubject.send(.requiredTerms(requiredTerms))
+                    }
+                    return
+                }
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
-                
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -182,5 +180,21 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
             }
         }
+    }
+    
+    private func checkRequiredTerms() async throws -> [RequiredTerm]? {
+        let agreement: RequiredTermsAgreementStatusData = try await BaseService.shared.request(
+            endPoint: .requiredTermsAgreementStatus
+        )
+
+        guard agreement.isRequiredTermsAllAgreed == false else {
+            return nil
+        }
+
+        let terms: [RequiredTerm] = try await BaseService.shared.request(
+            endPoint: .requiredTerms
+        )
+
+        return terms
     }
 }
