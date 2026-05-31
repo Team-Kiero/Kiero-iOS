@@ -393,28 +393,17 @@ private extension TabBarViewController {
         } else {
             handleChildDeepLink(type: type)
         }
-        
-        DeepLinkManager.shared.clear()
     }
     
     private func handleParentDeepLink(type: String) {
         switch type {
-        case "SCHEDULE_VERIFIED":
+        case "SCHEDULE_VERIFIED", "FIRE_LIT", "MISSION_COMPLETE", "COUPON_PURCHASED":
             let notificationVC = factory.makeNotificationFeedViewController()
             notificationVC.hidesBottomBarWhenPushed = true
             
             if let feedVC = notificationVC as? NotificationFeedViewController {
                 feedVC.deepLinkTargetId = DeepLinkManager.shared.pendingTargetId
             }
-            
-            NotificationBadgeCenter.shared.setUnread(false)
-            
-            guard let nav = selectedViewController as? UINavigationController else { return }
-            nav.pushViewController(notificationVC, animated: true)
-            
-        case "FIRE_LIT", "MISSION_COMPLETE", "COUPON_PURCHASED":
-            let notificationVC = factory.makeNotificationFeedViewController()
-            notificationVC.hidesBottomBarWhenPushed = true
             
             NotificationBadgeCenter.shared.setUnread(false)
             
