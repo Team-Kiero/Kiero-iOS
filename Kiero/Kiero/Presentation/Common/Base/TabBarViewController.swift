@@ -511,6 +511,11 @@ private extension TabBarViewController {
                 guard let self else { return }
                 print("📡 TabBar received SSE:", payload.eventType)
                 
+                NotificationCenter.default.post(
+                    name: .didReceiveSseEvent,
+                    object: payload
+                )
+                
                 guard payload.eventType == "FEED_ITEM_CREATED" else { return }
                 
                 NotificationCenter.default.post(
