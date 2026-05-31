@@ -17,26 +17,28 @@ final class NotificationFeed: UIView {
     
     enum State {
         case finishSchedule(
-            key: String,
+            feedId: Int64?,
             time: String,
             childName: String,
             schedule: String,
             proofImageUrl: String?,
-            isExpanded: Bool,
-            scheduleDetailId: Int64?
+            isExpanded: Bool
         )
         case finishAllSchedule(
+            feedId: Int64?,
             time: String,
             childName: String,
             coinEarned: Int
         )
         case useCoupon(
+            feedId: Int64?,
             time: String,
             childName: String,
             coupon: String,
             coinUsed: Int
         )
         case finishMission(
+            feedId: Int64?,
             time: String,
             childName: String,
             mission: String,
@@ -166,13 +168,13 @@ final class NotificationFeed: UIView {
         let style: UIFont.NotoSans = .title3_16_SB
         
         switch state {
-        case let .finishSchedule(_, time, childName, schedule, proofImageUrl, isExpanded, _):
+        case let .finishSchedule(_, time, childName, schedule, proofImageUrl, isExpanded):
             timeLabel.setTypo(.body4_12_R, text: time)
             downButton.isHidden = false
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(schedule)에 도착했어요."
             messageLabel.attributedText = makeMessage(message: base, highlight: schedule, style: style)
-
+            
             applyExpanded(isExpanded, animated: false)
             updateBottomAnchorForSchedule(isExpanded: isExpanded)
             
@@ -188,7 +190,7 @@ final class NotificationFeed: UIView {
                 proofImageView.image = nil
             }
             
-        case let .finishAllSchedule(time, childName, coinEarned):
+        case let .finishAllSchedule(_, time, childName, coinEarned):
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) 하루의 일정을 모두 완료했어요."
@@ -196,7 +198,7 @@ final class NotificationFeed: UIView {
             showCoinChip(style: .usedCoinChip, text: "\(coinEarned)개 획득")
             updateBottomAnchorForNormal(hasChip: true)
             
-        case let .useCoupon(time, childName, coupon, coinUsed):
+        case let .useCoupon(_, time, childName, coupon, coinUsed):
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(coupon) 쿠폰을 사용했어요."
@@ -204,7 +206,7 @@ final class NotificationFeed: UIView {
             showCoinChip(style: .usedCoinChip, text: "\(coinUsed)개 사용")
             updateBottomAnchorForNormal(hasChip: true)
             
-        case let .finishMission(time, childName, mission, coinEarned):
+        case let .finishMission(_, time, childName, mission, coinEarned):
             timeLabel.setTypo(.body4_12_R, text: time)
             let subject = "\(childName)\(childName.subjectMarker)"
             let base = "\(subject) \(mission) 미션을 완료했어요."
@@ -292,47 +294,55 @@ final class NotificationFeed: UIView {
 
 extension NotificationFeed {
     func resetForReuse() {
-
+        
         downButton.setImage(UIImage(resource: .icDown), for: .normal)
         proofImageView.isHidden = true
         proofImageView.snp.updateConstraints { $0.height.equalTo(0) }
-
-
+        
+        
         proofImageView.kf.cancelDownloadTask()
         proofImageView.image = nil
-
+        
         coinChip.isHidden = true
-
+        
         setNeedsLayout()
         layoutIfNeeded()
     }
 }
 
 extension NotificationFeed.State {
-
+    
     mutating func toggleExpanded() {
         switch self {
-        case let .finishSchedule(key, time, childName, schedule, url, isExpanded, scheduleDetailId):
+        case let .finishSchedule(feedId, time, childName, schedule, url, isExpanded):
             self = .finishSchedule(
-                key: key,
+                feedId: feedId,
                 time: time,
                 childName: childName,
                 schedule: schedule,
                 proofImageUrl: url,
                 isExpanded: !isExpanded,
-                scheduleDetailId: scheduleDetailId
             )
         default:
             break
         }
     }
-
+    
+    var feedId: Int64? {
+        switch self {
+        case let .finishSchedule(feedId, _, _, _, _, _): return feedId
+        case let .finishAllSchedule(feedId, _, _, _): return feedId
+        case let .useCoupon(feedId, _, _, _, _): return feedId
+        case let .finishMission(feedId, _, _, _, _): return feedId
+        }
+    }
+    
     var dateKey: String {
         switch self {
-        case let .finishSchedule(_, time, _, _, _, _, _),
-             let .finishMission(time, _, _, _),
-             let .useCoupon(time, _, _, _),
-             let .finishAllSchedule(time, _, _):
+        case let .finishSchedule(_, time, _, _, _, _),
+            let .finishMission(_, time, _, _, _),
+            let .useCoupon(_, time, _, _, _),
+            let .finishAllSchedule(_, time, _, _):
             return time.components(separatedBy: " ").first ?? ""
         }
     }

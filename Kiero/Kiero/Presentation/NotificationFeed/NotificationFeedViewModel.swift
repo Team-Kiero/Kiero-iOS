@@ -231,6 +231,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
         switch item.eventType {
         case .mission:
             return .finishMission(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 mission: item.metadata.content ?? "",
@@ -243,16 +244,16 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 metadata: item.metadata
             )
             return .finishSchedule(
-                key: key,
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 schedule: item.metadata.content ?? "",
                 proofImageUrl: item.metadata.imageUrl,
                 isExpanded: expandedKeys.contains(key),
-                scheduleDetailId: item.metadata.scheduleDetailId
             )
         case .coupon:
             return .useCoupon(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 coupon: item.metadata.content ?? "",
@@ -260,6 +261,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             )
         case .complete:
             return .finishAllSchedule(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 coinEarned: item.metadata.amount ?? 0
@@ -288,11 +290,14 @@ extension NotificationFeedViewModel {
               sections[indexPath.section].items.indices.contains(indexPath.row) else { return }
         
         let before = sections[indexPath.section].items[indexPath.row]
-        if case let .finishSchedule(key, _, _, _, _, isExpanded, _) = before {
-            if isExpanded {
-                expandedKeys.remove(key)
-            } else {
-                expandedKeys.insert(key)
+        if case let .finishSchedule(_, _, _, _, _, isExpanded) = before {
+            if let feedId = before.feedId {
+                let key = String(feedId)
+                if isExpanded {
+                    expandedKeys.remove(key)
+                } else {
+                    expandedKeys.insert(key)
+                }
             }
         }
         

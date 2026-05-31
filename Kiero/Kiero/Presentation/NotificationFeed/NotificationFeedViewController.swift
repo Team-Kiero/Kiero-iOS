@@ -110,35 +110,32 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
     
     @discardableResult
     private func scrollToFeedAndExpand(targetId: Int64) -> Bool {
-        
         for (sectionIndex, section) in renderedSections.enumerated() {
             for (rowIndex, item) in section.items.enumerated() {
-                if case .finishSchedule(_, _, _, _, _, _, let scheduleDetailId) = item,
-                   scheduleDetailId == targetId {
-                    
-                    let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
-                    
+                guard item.feedId == targetId else { continue }
+
+                let indexPath = IndexPath(row: rowIndex, section: sectionIndex)
+
+                if case .finishSchedule = item {
                     self.viewModel?.toggleExpansion(at: indexPath)
-                    
-                    UIView.performWithoutAnimation {
-                        self.contentView.tableView.reloadRows(at: [indexPath], with: .none)
-                        self.contentView.tableView.beginUpdates()
-                        self.contentView.tableView.endUpdates()
-                    }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        
-                        self.contentView.tableView.scrollToRow(
-                            at: indexPath,
-                            at: .top,
-                            animated: true
-                        )
-                    }
-                    return true
                 }
+
+                UIView.performWithoutAnimation {
+                    self.contentView.tableView.reloadRows(at: [indexPath], with: .none)
+                    self.contentView.tableView.beginUpdates()
+                    self.contentView.tableView.endUpdates()
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.contentView.tableView.scrollToRow(
+                        at: indexPath,
+                        at: .top,
+                        animated: true
+                    )
+                }
+                return true
             }
         }
-        
         return false
     }
     
@@ -165,7 +162,6 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
                 self.lastItemCount = 0
                 DeepLinkManager.shared.clear()
             } else {
-                print("➡️ [DeepLink] 다음 페이지를 요청합니다... (현재 탐색한 아이템 수: \(currentAllItemsCount))")
                 self.lastItemCount = currentAllItemsCount
                 self.loadMoreSubject.send(())
             }

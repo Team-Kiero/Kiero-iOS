@@ -14,7 +14,7 @@ struct FeedResponseDTO: Decodable {
 }
 
 struct FeedItemDTO: Decodable {
-    let feedId: Int64?  
+    let id: Int64?
     let eventType: FeedEventTypeDTO
     let occurredAt: String
     let metadata: FeedMetadataDTO
@@ -52,7 +52,7 @@ extension FeedResponseDTO {
 extension FeedItemDTO {
     func toEntity() -> FeedItem {
         .init(
-            feedId: feedId,  
+            feedId: id,
             eventType: eventType.toEntity(),
             occurredAt: occurredAt,
             metadata: metadata.toEntity()
