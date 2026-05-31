@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 final class DeepLinkManager {
     static let shared = DeepLinkManager()
     private init() {}
