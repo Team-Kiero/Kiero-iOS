@@ -10,6 +10,7 @@ import SwiftUI
 struct DeleteAccountView: View {
     @Environment(\.dismiss) private var dismiss
     
+    @StateObject private var viewModel = DeleteAccountViewModel()
     @State private var isChecked = false
     
     var body: some View {
@@ -32,13 +33,22 @@ struct DeleteAccountView: View {
                     .padding(.bottom, 24)
                 
                 CTAButtonWrapper(title: "계정 삭제하고 탈퇴하기", style: .main, size: .h49, enabledStyle: .main, disabledStyle: .gray900, isEnabled: isChecked) {
-                    print("탈퇴")
+                    viewModel.deleteAccount()
                 }
                 .padding(.bottom, 17)
             }
             .padding(.horizontal, 16)
         }
         .navigationBarHidden(true)
+        .onReceive(viewModel.route) { route in
+            switch route {
+            case .pickRole:
+                LogoutHelper.logoutToPickRole()
+                
+            case .toast(let message):
+                Toast.show(message: message, bottomInset: 83)
+            }
+        }
     }
 }
 
