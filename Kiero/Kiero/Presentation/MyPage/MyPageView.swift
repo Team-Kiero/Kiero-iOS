@@ -62,7 +62,9 @@ struct MyPageView: View {
                             
                             Spacer()
                             
-                            ConnectionChip(count: viewModel.connectedChild)
+                            ConnectionChip(
+                                state: viewModel.childConnectionState
+                            )
                             
                             Image(.icRight)
                         }
@@ -92,13 +94,11 @@ struct MyPageView: View {
                     .padding(.horizontal, 8)
                     
                     MenuListItem(title: "고객지원") {
-                        viewModel.openURL(
-                            "https://docs.google.com/forms/d/e/1FAIpQLSc2NRxLO6z5DvcdADtapt2Tsaa76MNxhgEMkYORYGiUihgZpw/viewform"
-                        )
+                        viewModel.openCustomerSupport()
                     }
                     .frame(height: 48)
                     
-                    TermsAndConditionsView()
+                    TermsAndConditionsView(viewModel: viewModel)
                         .padding(.top, 24)
                     
                     Text("앱 버전 v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0")")
@@ -186,20 +186,49 @@ struct MyPageView: View {
         ) { _ in
             viewModel.refreshNotificationStatus()
         }
+        .onReceive(
+            NotificationCenter.default.publisher(for: .didReceiveSseEvent)
+        ) { notification in
+            guard let payload = notification.object as? SseEventPayload else { return }
+            guard payload.eventType == "CHILD_JOINED" else { return }
+
+            viewModel.childConnectionState = .connected
+            viewModel.fetchChildCount()
+        }
     }
 }
 
 struct ConnectionChip: View {
-    let count: Int
-    
-    // TODO: - API 연결 시 수정
+    let state: ChildConnectionState
+
     var body: some View {
-        Text(count == 0 ? "연결 필요" : "\(count)명 연결됨")
+        Text(title)
             .font(Font(UIFont.body6_10_R))
-            .foregroundStyle(count == 0 ? .main : .gray500)
+            .foregroundStyle(strokeColor)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(.gray900, in: Capsule())
-            .overlay(Capsule().stroke(count == 0 ? .main : .gray500, lineWidth: 1))
+            .overlay(
+                Capsule()
+                    .stroke(strokeColor, lineWidth: 1)
+            )
+    }
+
+    private var title: String {
+        switch state {
+        case .connected:
+            return "연결 코드 재발급"
+        case .waiting:
+            return "연결 대기"
+        }
+    }
+
+    private var strokeColor: Color {
+        switch state {
+        case .connected:
+            return .gray500
+        case .waiting:
+            return .point
+        }
     }
 }
