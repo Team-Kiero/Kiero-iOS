@@ -162,7 +162,14 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         dialogBox.configure(state: .notificationRequest)
         dialogBox.onTapConfirm = {
             dialogBox.dismiss()
-            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+            UNUserNotificationCenter.current().requestAuthorization(
+                options: [.alert, .badge, .sound]
+            ) { granted, _ in
+                guard granted else { return }
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
         }
         dialogBox.show(in: self)
     }

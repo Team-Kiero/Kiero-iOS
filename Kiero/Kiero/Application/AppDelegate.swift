@@ -39,11 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         }
         
         UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .badge, .sound]
-        ) { granted, error in
-            print("알림 권한 허용 여부: \(granted)")
-        }
+        
         application.registerForRemoteNotifications()
         
         Messaging.messaging().delegate = self

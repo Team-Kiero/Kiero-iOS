@@ -112,11 +112,27 @@ private extension TodayStatusHostingController {
     func showNotificationRequestDialog() {
         let dialogBox = DialogBox()
         dialogBox.configure(state: .parentRequestNotification)
+        
         dialogBox.onTapConfirm = {
             dialogBox.dismiss()
-            UNUserNotificationCenter.current()
-                .requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
+            UNUserNotificationCenter.current().requestAuthorization(
+                options: [.alert, .badge, .sound]
+            ) { granted, _ in
+                guard granted else { return }
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
         }
+        
+        dialogBox.onTapCancel = {
+            dialogBox.dismiss()
+        }
+        
+        dialogBox.onTapClose = {
+            dialogBox.dismiss()
+        }
+        
         dialogBox.show(in: self)
     }
 }
