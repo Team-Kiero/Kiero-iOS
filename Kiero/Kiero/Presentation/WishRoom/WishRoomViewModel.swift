@@ -13,6 +13,9 @@ final class WishRoomViewModel: ObservableObject {
     @Published var previousWishes: [WishItem] = []
     @Published var isLoading: Bool = false
     
+    private var nextCursor: String? = nil
+    private var hasMore: Bool = true
+    
     var onNavigateToWishWell: (() -> Void)?
     
     var totalWishCount: Int {
@@ -30,31 +33,33 @@ final class WishRoomViewModel: ObservableObject {
     }
     
     func fetchCouponHistory() {
+        guard !isLoading, hasMore else { return }
         isLoading = true
         
         Task {
             do {
                 let items: [CouponHistoryItem] = try await BaseService.shared.request(
-                    endPoint: .fetchCouponHistory
+                    endPoint: .fetchCouponHistory()
                 )
                 
                 let today = todayString()
                 
-                let todayItems = items.filter { $0.purchasedAt == today }
-                let previousItems = items.filter { $0.purchasedAt != today }
-                
                 await MainActor.run {
-                    self.todayWishes = todayItems.map { $0.toWishItem() }
-                    self.previousWishes = previousItems.map { $0.toWishItem() }
+                    self.todayWishes = items.filter { $0.purchasedAt == today }.map { $0.toWishItem() }
+                    self.previousWishes = items.filter { $0.purchasedAt != today }.map { $0.toWishItem() }
+                    self.hasMore = false
                     self.isLoading = false
                 }
             } catch {
                 print("❌ 소원 이용내역 조회 실패: \(error)")
-                await MainActor.run {
-                    self.isLoading = false
-                }
+                await MainActor.run { self.isLoading = false }
             }
         }
+    }
+    
+    func loadMoreIfNeeded() {
+        guard hasMore else { return }
+        fetchCouponHistory()
     }
     
     // MARK: - Actions
