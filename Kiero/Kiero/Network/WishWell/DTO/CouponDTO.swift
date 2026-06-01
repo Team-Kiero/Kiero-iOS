@@ -46,6 +46,11 @@ struct WishItem: Identifiable {
     let cost: Int
 }
 
+struct CouponHistoryResponse: Decodable {
+    let data: [CouponHistoryItem]
+    let nextCursor: String?
+}
+
 extension CouponHistoryItem {
     func toWishItem() -> WishItem {
         let displayDate = formatDate(purchasedAt)

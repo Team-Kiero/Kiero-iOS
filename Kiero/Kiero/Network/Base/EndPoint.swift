@@ -68,7 +68,7 @@ enum EndPoint {
     case purchaseCoupon(couponId: Int64)
     
     // WishRoom
-    case fetchCouponHistory
+    case fetchCouponHistory(size: Int? = nil, cursor: String? = nil)
     
     // Reward
     case fetchCoupons(childId: Int)
@@ -235,6 +235,12 @@ enum EndPoint {
             return "/api/v1/parents/withdraw"
         case .fetchCouponHistory:
             return "/api/v1/coupons/history"
+        case .fetchCouponHistory(let size, let cursor):
+            var query: [String] = []
+            if let size { query.append("size=\(size)") }
+            if let cursor, !cursor.isEmpty { query.append("cursor=\(cursor)") }
+            let queryString = query.isEmpty ? "" : "?\(query.joined(separator: "&"))"
+            return "/api/v1/coupons/history\(queryString)"
         }
     }
     
