@@ -174,9 +174,11 @@ private extension MySpaceView {
                 let osEnabled = settings.authorizationStatus == .authorized
                     || settings.authorizationStatus == .provisional
 
-                if isAlarmOn != osEnabled {
-                    isAlarmOn = osEnabled
-                    updateNotificationSettings(enabled: osEnabled)
+                let shouldEnable = isAlarmOn && osEnabled
+
+                if isAlarmOn != shouldEnable {
+                    isAlarmOn = shouldEnable
+                    updateNotificationSettings(enabled: false)
                 }
             }
         }
