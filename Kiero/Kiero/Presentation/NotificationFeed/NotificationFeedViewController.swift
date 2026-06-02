@@ -108,7 +108,6 @@ final class NotificationFeedViewController: BaseViewController<NotificationFeedV
         viewDidLoadSubject.send(())
     }
     
-    @discardableResult
     private func scrollToFeedAndExpand(targetId: Int64) -> Bool {
         for (sectionIndex, section) in renderedSections.enumerated() {
             for (rowIndex, item) in section.items.enumerated() {
