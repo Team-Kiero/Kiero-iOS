@@ -156,11 +156,37 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
         inviteView.refreshDidTap = { [weak viewModel] in
             viewModel?.reissueInviteCode()
         }
+        
+        viewModel.route
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] route in
+                guard let self else { return }
+                
+                switch route {
+                case .parentTab:
+                    self.navigateToParentTap()
+                    
+                case .toast(let message):
+                    Toast.show(message: message, bottomInset: 83)
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.isStarting
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isStarting in
+                guard let self else { return }
+
+                if isStarting {
+                    self.startButton.isEnabled = false
+                }
+            }
+            .store(in: &cancellables)
     }
     
     @objc
     private func startButtonDidTap() {
-        navigateToParentTap()
+        viewModel?.start()
     }
     
     private func checkConnectionOnce() {

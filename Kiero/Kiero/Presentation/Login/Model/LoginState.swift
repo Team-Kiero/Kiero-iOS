@@ -15,4 +15,5 @@ enum LoginRoute {
     case parentOnboarding
     case parentTab
     case toast(String)
+    case requiredTerms([RequiredTerm])
 }

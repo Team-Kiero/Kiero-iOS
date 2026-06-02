@@ -49,7 +49,7 @@ final class LoginButton: UIButton {
         case .kakao:
             backgroundColor = .kakaoYellow
             iconImageView.image = UIImage(resource: .kakaoLogo)
-            loginTitleLabel.setTypo(.title3_16_SB, text: "카카오톡 로그인")
+            loginTitleLabel.setTypo(.title3_16_SB, text: "카카오 계정으로 로그인")
             loginTitleLabel.textColor = .kBlack
         case .apple:
             backgroundColor = .white

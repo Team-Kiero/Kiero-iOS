@@ -134,6 +134,21 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         }
     }
     
+    private func presentRequiredTermsBottomSheet(_ terms: [RequiredTerm]) {
+        let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
+        let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
+        
+        let termsBottomSheetVC = RequiredTermsBottomSheetHostingViewController(
+            serviceTermsURL: serviceTermsURL,
+            privacyPolicyURL: privacyPolicyURL,
+            onConfirm: { [weak self] in
+                self?.navigateToParentOnboarding()
+            }
+        )
+        
+        present(termsBottomSheetVC, animated: true)
+    }
+    
     private func handle(by route: LoginRoute) {
         switch route {
         case .parentOnboarding:
@@ -144,6 +159,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         case .parentTab:
             let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
             changeRoot(tab)
+        case .requiredTerms(let terms):
+            TokenManager.shared.saveRequiredTermsIds(terms.map { $0.termsId })
+            presentRequiredTermsBottomSheet(terms)
         case let .toast(message):
             Toast.show(message: message, bottomInset: 83)
         }
