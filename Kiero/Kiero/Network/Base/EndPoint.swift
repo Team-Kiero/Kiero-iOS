@@ -31,6 +31,7 @@ enum EndPoint {
     case reissueAllTokens
     case sseToken
     case deleteChildDummy
+    case deleteParentAccount
     
     // Child
     case fetchChildren
@@ -53,6 +54,10 @@ enum EndPoint {
     case postMission(childId: Int, request: WriteMissionRequestDTO)
     case postMissionSuggestions(request: MissionSuggestionRequestDTO)
     case postBulkMissions(childId: Int, request: MissionBulkCreateRequestDTO)
+    
+    // MyPage
+    case fetchParentInfo
+    case fetchMyPageLinks
     
     // WishWell
     case fetchChildrenInfo
@@ -202,12 +207,18 @@ enum EndPoint {
             return "/api/v1/parents/progress/\(childId)"
         case .postImageRead(let scheduleDetailId):
             return "/api/v1/schedules/\(scheduleDetailId)/image"
+        case .fetchParentInfo:
+            return "/api/v1/parents/me"
+        case .fetchMyPageLinks:
+            return "/api/v1/terms/parent"
+        case .deleteParentAccount:
+            return "/api/v1/parents/withdraw"
         }
     }
     
     var method: String {
         switch self {
-        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchChildTerms, .checkParentWithdrawalStatus:
+        case .checkConnection, .subscribeConnection, .fetchChildren, .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .fetchMissions, .fetchDefaultColor, .fetchJourneyList, .fetchCoupons, .fetchTodayStatus, .fetchUnreadFeed, .fetchParentInfo, .fetchMyPageLinks, .fetchChildTerms, .checkParentWithdrawalStatus:
             return "GET"
         case .updateDailyJourney, .skipJourney, .completeSchedule, .fireLit, .completeMission, .editSchedule, .updateMission, .updateCoupon, .postImageRead, .fetchFeeds:
             return "PATCH"

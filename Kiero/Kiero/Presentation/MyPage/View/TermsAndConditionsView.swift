@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct TermsAndConditionsView: View {
+    
+    @StateObject var viewModel: MyPageViewModel
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             
@@ -19,17 +22,12 @@ struct TermsAndConditionsView: View {
             
             VStack(spacing: 0) {
                 MenuListItem(title: "서비스 이용약관") {
-                    // TODO: - API 연결
+                    viewModel.openServiceTerms()
                 }
                 MenuListItem(title: "개인정보 처리방침") {
-                    // TODO: - API 연결
+                    viewModel.openPrivacyPolicy()
                 }
             }
         }
-    }
-    
-    func openURL(_ urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        UIApplication.shared.open(url)
     }
 }
