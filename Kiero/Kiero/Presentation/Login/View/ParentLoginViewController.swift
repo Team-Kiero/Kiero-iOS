@@ -6,7 +6,6 @@
 //
 
 import Combine
-import SwiftUI
 import UIKit
 
 import SnapKit
@@ -139,49 +138,18 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
         let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
         
-        var hostingController: UIHostingController<AnyView>?
-        
-        let bottomSafeArea = view.safeAreaInsets.bottom
-        
-        let rootView = AnyView(
-            ZStack(alignment: .bottom) {
-                Color.black.opacity(0.6)
-                    .ignoresSafeArea()
-                
-                RequiredTermsBottomSheetView(
-                    onTermsTap: {
-                        guard let serviceTermsURL,
-                              let url = URL(string: serviceTermsURL)
-                        else { return }
-                        
-                        UIApplication.shared.open(url)
-                    },
-                    onPrivacyTap: {
-                        guard let privacyPolicyURL,
-                              let url = URL(string: privacyPolicyURL)
-                        else { return }
-                        
-                        UIApplication.shared.open(url)
-                    },
-                    onConfirm: { [weak self] in
-                        hostingController?.dismiss(animated: true) {
-                            self?.navigateToParentOnboarding()
-                        }
-                    }
-                )
-                Color.kBlack
-                    .frame(height: bottomSafeArea)
+        let termsBottomSheetVC = RequiredTermsBottomSheetWrapperViewController(
+            serviceTermsURL: serviceTermsURL,
+            privacyPolicyURL: privacyPolicyURL,
+            onConfirm: { [weak self] in
+                self?.navigateToParentOnboarding()
             }
-                .ignoresSafeArea(edges: .bottom)
         )
         
-        hostingController = UIHostingController(rootView: rootView)
-        hostingController?.modalPresentationStyle = .overFullScreen
-        hostingController?.view.backgroundColor = .clear
+        termsBottomSheetVC.modalPresentationStyle = .overFullScreen
+        termsBottomSheetVC.view.backgroundColor = .clear
         
-        if let hostingController {
-            present(hostingController, animated: true)
-        }
+        present(termsBottomSheetVC, animated: true)
     }
     
     private func handle(by route: LoginRoute) {
