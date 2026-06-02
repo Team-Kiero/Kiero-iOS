@@ -14,6 +14,7 @@ struct MySpaceView: View {
     @State private var showNotificationDialog = false
     @State private var showLogoutDialog = false
     @State private var showTerms = false
+    var onNavigateToWishRoom: (() -> Void)?
     
     private let userName = TokenManager.shared.getFirstName() ?? "꾸비"
     var isPreview = false
@@ -39,10 +40,9 @@ struct MySpaceView: View {
                             .foregroundStyle(.white)
                     }
                     .padding(.horizontal, 16)
-                    .padding(.top, 15)
                     
                     WishSpaceCardView {
-                        // TODO: 소원의 공간으로 이동
+                        onNavigateToWishRoom?()
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 20)
@@ -87,6 +87,8 @@ struct MySpaceView: View {
                     
                     Spacer()
                 }
+                .padding(.top, 59)
+                .ignoresSafeArea(edges: .top)
                 
                 if showNotificationDialog {
                     Color.kBlack.opacity(0.75)
@@ -126,9 +128,9 @@ struct MySpaceView: View {
                 TermsView()
             }
             .navigationBarHidden(true)
-            .onAppear { refreshNotificationStatus() }
+            .onAppear { fetchProfile() }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
-                refreshNotificationStatus()
+                fetchProfile()
             }
         }
     }
@@ -159,13 +161,13 @@ private extension MySpaceView {
         }
     }
     
-    func refreshNotificationStatus() {
-        UNUserNotificationCenter.current().getNotificationSettings { settings in
-            DispatchQueue.main.async {
-                isAlarmOn = settings.authorizationStatus == .authorized
-                || settings.authorizationStatus == .provisional
+    func fetchProfile() {
+        WishWellService().fetchMyInfo()
+            .receive(on: DispatchQueue.main)
+            .sink { _ in } receiveValue: { info in
+                isAlarmOn = info.pushNotificationEnabled
             }
-        }
+            .store(in: &StaticCancellables.bag)
     }
     
     func openAppSettings() {

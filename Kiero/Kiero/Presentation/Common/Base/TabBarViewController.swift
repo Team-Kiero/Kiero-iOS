@@ -511,6 +511,16 @@ private extension TabBarViewController {
                 guard let self else { return }
                 print("📡 TabBar received SSE:", payload.eventType)
                 
+                NotificationCenter.default.post(
+                    name: .didReceiveSseEvent,
+                    object: payload
+                )
+                
+                if !self.isParent && payload.eventType == "PARENT_WITHDRAWN" {
+                    LogoutHelper.logoutToPickRole()
+                    return
+                }
+
                 guard payload.eventType == "FEED_ITEM_CREATED" else { return }
                 
                 NotificationCenter.default.post(

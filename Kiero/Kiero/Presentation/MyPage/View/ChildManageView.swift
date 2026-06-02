@@ -14,12 +14,7 @@ enum ChildConnectionState {
 
 struct ChildManageView: View {
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var connectionState: ChildConnectionState = .connected
-    
-    // TODO: - API 연결시 삭제
-    private let childName = "최근영"
-    private let inviteCode = "별빛기사단918"
+    @StateObject var viewModel = ChildManageViewModel()
     
     var body: some View {
         ZStack {
@@ -44,17 +39,21 @@ struct ChildManageView: View {
                     connectionStatusView
                         .padding(.top, 6)
                     
-                    if connectionState == .waiting {
-                        InviteCodeViewWrapper(code: inviteCode, remainingTime: "15:00", isExpired: false)
-                            .frame(height: 266)
-                            .padding(.top, 11)
+                    if viewModel.connectionState == .waiting {
+                        InviteCodeViewWrapper(
+                            code: viewModel.inviteCode,
+                            remainingTime: viewModel.remainingText,
+                            isExpired: viewModel.isExpired
+                        )
+                        .frame(height: 266)
+                        .padding(.top, 11)
                     }
                 }
                 .padding(.horizontal, 16)
                 
                 Spacer()
                 
-                if connectionState == .connected {
+                if viewModel.connectionState == .connected {
                     reconnectArea
                         .padding(.horizontal, 16)
                         .padding(.bottom, 34)
@@ -68,7 +67,7 @@ struct ChildManageView: View {
 private extension ChildManageView {
     var childNameCard: some View {
         HStack {
-            Text(childName)
+            Text(viewModel.childName)
                 .font(Font(UIFont.body4_12_R))
                 .foregroundStyle(.white)
             
@@ -85,11 +84,11 @@ private extension ChildManageView {
             Image(.icInfo)
                 .resizable()
                 .frame(width: 11, height: 11)
-                .foregroundStyle(connectionState == .connected ? .gray300 : .main)
+                .foregroundStyle(viewModel.connectionState == .connected ? .gray300 : .main)
             
-            Text(connectionState == .connected ? "연결 완료" : "연결 대기")
+            Text(viewModel.connectionState == .connected ? "연결 완료" : "연결 대기")
                 .font(Font(UIFont.body5_11_R))
-                .foregroundStyle(connectionState == .connected ? .gray300 : .main)
+                .foregroundStyle(viewModel.connectionState == .connected ? .gray300 : .main)
         }
         .frame(maxWidth: .infinity, alignment: .trailing)
     }
@@ -107,7 +106,7 @@ private extension ChildManageView {
                 style: .main,
                 size: .h49
             ) {
-                connectionState = .waiting
+                viewModel.reissueInviteCode()
             }
         }
     }

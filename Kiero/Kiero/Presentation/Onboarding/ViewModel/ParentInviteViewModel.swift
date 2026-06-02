@@ -108,17 +108,17 @@ final class ParentInviteViewModel: BaseViewModel {
     }
 
     private func startCountdown() {
-        tick()
+        updateRemainingTime()
 
         timerCancellable = Timer
             .publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                self?.tick()
+                self?.updateRemainingTime()
             }
     }
 
-    private func tick() {
+    private func updateRemainingTime() {
         let remaining = Int(expiresAt.timeIntervalSinceNow.rounded(.down))
 
         if remaining <= 0 {
