@@ -91,13 +91,10 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 let osEnabled = settings.authorizationStatus == .authorized
                     || settings.authorizationStatus == .provisional
                     || settings.authorizationStatus == .ephemeral
-                
-                if osEnabled && !self.isAlarmOn {
-                    self.isAlarmOn = true
-                    self.updateNotificationSettings(enabled: true)
-                } else if !osEnabled && self.isAlarmOn {
-                    self.isAlarmOn = false
-                    self.updateNotificationSettings(enabled: false)
+
+                if self.isAlarmOn != osEnabled {
+                    self.isAlarmOn = osEnabled
+                    self.updateNotificationSettings(enabled: osEnabled)
                 }
             }
         }
