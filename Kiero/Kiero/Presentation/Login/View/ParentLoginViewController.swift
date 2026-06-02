@@ -138,7 +138,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
         let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
         
-        let termsBottomSheetVC = RequiredTermsBottomSheetWrapperViewController(
+        let termsBottomSheetVC = RequiredTermsBottomSheetHostingViewController(
             serviceTermsURL: serviceTermsURL,
             privacyPolicyURL: privacyPolicyURL,
             onConfirm: { [weak self] in

@@ -1,5 +1,5 @@
 //
-//  RequiredTermsBottomSheetWrapperViewController.swift
+//  RequiredTermsBottomSheetHostingViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 6/2/26.
@@ -8,7 +8,7 @@
 import SwiftUI
 import UIKit
 
-final class RequiredTermsBottomSheetWrapperViewController: UIViewController {
+final class RequiredTermsBottomSheetHostingViewController: UIViewController {
     
     private let serviceTermsURL: String?
     private let privacyPolicyURL: String?
