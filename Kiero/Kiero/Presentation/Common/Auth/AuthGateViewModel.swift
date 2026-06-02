@@ -36,13 +36,34 @@ final class AuthGateViewModel {
         }
         
         if role.contains("child") {
-            routeSubject.send(.childTab)
+            decideChildRoute()
             return
         }
         
         routeSubject.send(.pickRole)
     }
     
+    private func decideChildRoute() {
+        Task {
+            do {
+                let status: ParentWithdrawalStatusDTO = try await BaseService.shared.request(
+                    endPoint: .checkParentWithdrawalStatus
+                )
+                await MainActor.run {
+                    if status.isParentWithdrawn {
+                        LogoutHelper.logoutToPickRole()
+                    } else {
+                        self.routeSubject.send(.childTab)
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.routeSubject.send(.childTab)
+                }
+            }
+        }
+    }
+
     private func decideParentRoute() {
         Task {
             do {

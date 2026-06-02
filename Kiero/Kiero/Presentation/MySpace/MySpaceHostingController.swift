@@ -11,6 +11,12 @@ final class MySpaceHostingController: UIHostingController<MySpaceView> {
     
     init() {
         super.init(rootView: MySpaceView())
+        
+        rootView.onNavigateToWishRoom = { [weak self] in
+            let vc = WishRoomHostingController()
+            vc.hidesBottomBarWhenPushed = true
+            self?.navigationController?.pushViewController(vc, animated: true)
+        }
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {

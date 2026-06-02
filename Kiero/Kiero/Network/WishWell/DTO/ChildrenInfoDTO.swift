@@ -12,12 +12,14 @@ struct ChildrenInfoResponseDTO: Decodable {
     let lastName: String
     let coinAmount: Int
     let today: String
+    let pushNotificationEnabled: Bool?
 }
 
 struct ChildrenInfo {
     let firstName: String
     let coinAmount: Int
     let today: String
+    let pushNotificationEnabled: Bool
 }
 
 extension ChildrenInfoResponseDTO {
@@ -25,7 +27,8 @@ extension ChildrenInfoResponseDTO {
         .init(
             firstName: firstName,
             coinAmount: coinAmount,
-            today: today
+            today: today,
+            pushNotificationEnabled: pushNotificationEnabled ?? false
         )
     }
 }
