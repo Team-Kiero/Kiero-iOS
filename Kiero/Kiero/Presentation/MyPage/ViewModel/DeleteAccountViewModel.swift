@@ -15,7 +15,7 @@ enum DeleteAccountRoute {
 
 final class DeleteAccountViewModel: BaseViewModel, ObservableObject {
     
-    @Published var isLoading = false
+    private var isLoading = false
     
     private let routeSubject = PassthroughSubject<DeleteAccountRoute, Never>()
     var route: AnyPublisher<DeleteAccountRoute, Never> {
