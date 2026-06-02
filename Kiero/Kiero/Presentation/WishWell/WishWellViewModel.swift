@@ -111,7 +111,7 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
         let me = self.service.fetchMyInfo()
             .catch { [weak self] err -> Just<ChildrenInfo> in
                 self?.errorMessageSubject.send(err.errorDescription)
-                return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: ""))
+                return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false))
             }
         
         let coupons = self.service.fetchCoupons()
