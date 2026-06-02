@@ -62,6 +62,7 @@ struct MySpaceView: View {
                                 checkNotificationPermission()
                             } else {
                                 isAlarmOn = false
+                                updateNotificationSettings(enabled: false)
                             }
                         }
                     ))
@@ -145,17 +146,39 @@ private extension MySpaceView {
                 switch settings.authorizationStatus {
                 case .authorized, .provisional, .ephemeral:
                     isAlarmOn = true
+                    updateNotificationSettings(enabled: true)
                 case .denied:
+                    isAlarmOn = false
                     showNotificationDialog = true
                 case .notDetermined:
                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
                         DispatchQueue.main.async {
                             isAlarmOn = granted
-                            if !granted { showNotificationDialog = true }
+                            if granted {
+                                updateNotificationSettings(enabled: true)
+                            } else {
+                                showNotificationDialog = true
+                            }
                         }
                     }
                 @unknown default:
                     showNotificationDialog = true
+                }
+            }
+        }
+    }
+    
+    func refreshNotificationStatus() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                let osEnabled = settings.authorizationStatus == .authorized
+                    || settings.authorizationStatus == .provisional
+
+                let shouldEnable = isAlarmOn && osEnabled
+
+                if isAlarmOn != shouldEnable {
+                    isAlarmOn = shouldEnable
+                    updateNotificationSettings(enabled: false)
                 }
             }
         }
@@ -166,8 +189,27 @@ private extension MySpaceView {
             .receive(on: DispatchQueue.main)
             .sink { _ in } receiveValue: { info in
                 isAlarmOn = info.pushNotificationEnabled
+                refreshNotificationStatus()
             }
             .store(in: &StaticCancellables.bag)
+    }
+    
+    func updateNotificationSettings(enabled: Bool) {
+        Task {
+            do {
+                let body = NotificationSettingsRequest(pushNotificationEnabled: enabled)
+                let _: EmptyResponse = try await BaseService.shared.request(
+                    endPoint: .updateNotificationSettings,
+                    body: body
+                )
+                print("✅ [자녀] 알림 설정 변경 성공: \(enabled)")
+            } catch {
+                print("❌ [자녀] 알림 설정 변경 실패: \(error)")
+                await MainActor.run {
+                    isAlarmOn = !enabled
+                }
+            }
+        }
     }
     
     func openAppSettings() {

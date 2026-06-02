@@ -27,7 +27,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private(set) var sections: [FeedSection] = []
     private var nextCursor: String? = nil
-    private var canLoadMore: Bool { nextCursor != nil }
+    var canLoadMore: Bool { nextCursor != nil }
     private var cachedChildName: String = ""
     private var expandedKeys = Set<String>()
     
@@ -227,10 +227,11 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
     
     private func makeState(from item: FeedItem, childName: String) -> NotificationFeed.State {
         let (_, time) = splitOccurredAt(item.occurredAt)
-        
+
         switch item.eventType {
         case .mission:
             return .finishMission(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 mission: item.metadata.content ?? "",
@@ -242,17 +243,17 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 occurredAt: item.occurredAt,
                 metadata: item.metadata
             )
-            
             return .finishSchedule(
-                key: key,
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 schedule: item.metadata.content ?? "",
                 proofImageUrl: item.metadata.imageUrl,
-                isExpanded: expandedKeys.contains(key)
+                isExpanded: expandedKeys.contains(key),
             )
         case .coupon:
             return .useCoupon(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 coupon: item.metadata.content ?? "",
@@ -260,6 +261,7 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
             )
         case .complete:
             return .finishAllSchedule(
+                feedId: item.feedId,
                 time: time,
                 childName: childName,
                 coinEarned: item.metadata.amount ?? 0
@@ -288,11 +290,14 @@ extension NotificationFeedViewModel {
               sections[indexPath.section].items.indices.contains(indexPath.row) else { return }
         
         let before = sections[indexPath.section].items[indexPath.row]
-        if case let .finishSchedule(key, _, _, _, _, isExpanded) = before{
-            if isExpanded {
-                expandedKeys.remove(key)
-            } else {
-                expandedKeys.insert(key)
+        if case let .finishSchedule(_, _, _, _, _, isExpanded) = before {
+            if let feedId = before.feedId {
+                let key = String(feedId)
+                if isExpanded {
+                    expandedKeys.remove(key)
+                } else {
+                    expandedKeys.insert(key)
+                }
             }
         }
         

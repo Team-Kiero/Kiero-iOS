@@ -85,7 +85,7 @@ struct MyPageView: View {
                                 if newValue {
                                     viewModel.checkNotificationPermission()
                                 } else {
-                                    viewModel.isAlarmOn = false
+                                    viewModel.turnOffAlarm()
                                 }
                             }
                         ))

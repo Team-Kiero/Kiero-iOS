@@ -31,20 +31,71 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
         bindSSE()
     }
     
-    func requestLogout() {
-        LogoutService.shared.logout()
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                switch completion {
-                case .finished:
-                    print("로그아웃 완료")
-                    LogoutHelper.logoutToPickRole()
-                case .failure(let error):
-                    print("로그아웃 실패: \(error)")
+    // MARK: - Notification Settings
+    
+    private func updateNotificationSettings(enabled: Bool) {
+        Task {
+            do {
+                let body = NotificationSettingsRequest(pushNotificationEnabled: enabled)
+                let _: EmptyResponse = try await BaseService.shared.request(
+                    endPoint: .updateNotificationSettings,
+                    body: body
+                )
+                print("✅ 알림 설정 변경 성공: \(enabled)")
+            } catch {
+                print("❌ 알림 설정 변경 실패: \(error)")
+                await MainActor.run {
+                    self.isAlarmOn = !enabled
                 }
-            } receiveValue: { _ in }
-            .store(in: &cancellables)
+            }
+        }
     }
+    
+    func checkNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                
+                switch settings.authorizationStatus {
+                case .authorized, .provisional, .ephemeral:
+                    self.isAlarmOn = true
+                    self.updateNotificationSettings(enabled: true)
+                    
+                case .denied:
+                    self.isAlarmOn = false
+                    self.showNotificationDialog = true
+                    
+                case .notDetermined:
+                    UNUserNotificationCenter.current()
+                        .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                            DispatchQueue.main.async {
+                                self.isAlarmOn = granted
+                                if granted {
+                                    self.updateNotificationSettings(enabled: true)
+                                } else {
+                                    self.showNotificationDialog = true
+                                }
+                            }
+                        }
+                    
+                @unknown default:
+                    self.isAlarmOn = false
+                    self.showNotificationDialog = true
+                }
+            }
+        }
+    }
+    
+    func turnOffAlarm() {
+        isAlarmOn = false
+        updateNotificationSettings(enabled: false)
+    }
+    
+    func refreshNotificationStatus() {
+        fetchUserInfo()
+    }
+    
+    // MARK: - Profile & Data
     
     func fetchUserInfo() {
         Task { [weak self] in
@@ -62,12 +113,21 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 settings.authorizationStatus == .provisional ||
                 settings.authorizationStatus == .ephemeral
                 
+                let shouldEnable = profile.pushNotificationEnabled && isAuthorized
+                
                 await MainActor.run {
                     self.userName = profile.name
                     self.userImage = profile.image
-                    self.isAlarmOn = profile.pushNotificationEnabled && isAuthorized
                     self.childConnectionState =
                     profile.hasPendingChildSession ? .waiting : .connected
+                    
+                    if self.isAlarmOn != shouldEnable {
+                        self.isAlarmOn = shouldEnable
+                        
+                        if profile.pushNotificationEnabled && !isAuthorized {
+                            self.updateNotificationSettings(enabled: false)
+                        }
+                    }
                 }
                 
             } catch {
@@ -99,6 +159,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
         }
     }
     
+    // MARK: - SSE
+    
     private func bindSSE() {
         NotificationCenter.default.publisher(for: .didReceiveSseEvent)
             .compactMap { $0.object as? SseEventPayload }
@@ -115,42 +177,24 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
             .store(in: &cancellables)
     }
     
-    func checkNotificationPermission() {
-        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                
-                switch settings.authorizationStatus {
-                case .authorized, .provisional, .ephemeral:
-                    self.isAlarmOn = true
-                    
-                case .denied:
-                    self.isAlarmOn = false
-                    self.showNotificationDialog = true
-                    
-                case .notDetermined:
-                    UNUserNotificationCenter.current()
-                        .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                            DispatchQueue.main.async {
-                                self.isAlarmOn = granted
-                                
-                                if !granted {
-                                    self.showNotificationDialog = true
-                                }
-                            }
-                        }
-                    
-                @unknown default:
-                    self.isAlarmOn = false
-                    self.showNotificationDialog = true
+    // MARK: - Logout
+    
+    func requestLogout() {
+        LogoutService.shared.logout()
+            .receive(on: DispatchQueue.main)
+            .sink { completion in
+                switch completion {
+                case .finished:
+                    print("로그아웃 완료")
+                    LogoutHelper.logoutToPickRole()
+                case .failure(let error):
+                    print("로그아웃 실패: \(error)")
                 }
-            }
-        }
+            } receiveValue: { _ in }
+            .store(in: &cancellables)
     }
     
-    func refreshNotificationStatus() {
-        fetchUserInfo()
-    }
+    // MARK: - External Links & URL
     
     func openAppSettings() {
         guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
