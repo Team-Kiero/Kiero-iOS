@@ -70,18 +70,28 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                     endPoint: .fetchParentInfo
                 )
                 
+                let settings = await UNUserNotificationCenter.current().notificationSettings()
+                
+                let isAuthorized =
+                settings.authorizationStatus == .authorized ||
+                settings.authorizationStatus == .provisional ||
+                settings.authorizationStatus == .ephemeral
+                
                 await MainActor.run {
                     self.userName = profile.name
                     self.userImage = profile.image
-                    self.isAlarmOn = profile.pushNotificationEnabled
-                    self.childConnectionState = profile.hasPendingChildSession ? .waiting : .connected
+                    self.isAlarmOn = profile.pushNotificationEnabled && isAuthorized
+                    self.childConnectionState =
+                    profile.hasPendingChildSession ? .waiting : .connected
                 }
+                
             } catch {
                 await MainActor.run {
                     self.userName = TokenManager.shared.getUserName() ?? ""
                     self.userImage = TokenManager.shared.getProfile()
-                    print("프로필 정보 조회 실패:", error)
                 }
+                
+                print("프로필 정보 조회 실패:", error)
             }
         }
     }
