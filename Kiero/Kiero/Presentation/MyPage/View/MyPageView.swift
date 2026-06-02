@@ -186,15 +186,6 @@ struct MyPageView: View {
         ) { _ in
             viewModel.refreshNotificationStatus()
         }
-        .onReceive(
-            NotificationCenter.default.publisher(for: .didReceiveSseEvent)
-        ) { notification in
-            guard let payload = notification.object as? SseEventPayload else { return }
-            guard payload.eventType == "CHILD_JOINED" else { return }
-
-            viewModel.childConnectionState = .connected
-            viewModel.fetchChildCount()
-        }
     }
 }
 

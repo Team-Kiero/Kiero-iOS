@@ -13,7 +13,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     
     @Published var userName: String = ""
     @Published var userImage: String? = nil
-    @Published var connectedChild: Int = 0
     @Published var childConnectionState: ChildConnectionState = .connected
     
     @Published var isAlarmOn: Bool = false
@@ -28,7 +27,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
         
         print("✅ MyPageViewModel init")
         fetchUserInfo()
-        fetchChildCount()
         fetchExternalLinks()
         bindSSE()
     }
@@ -45,19 +43,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                     print("로그아웃 실패: \(error)")
                 }
             } receiveValue: { _ in }
-            .store(in: &cancellables)
-    }
-    
-    func fetchChildCount() {
-        ScheduleService.shared.fetchChildren()
-            .receive(on: DispatchQueue.main)
-            .sink { completion in
-                if case .failure(let error) = completion {
-                    print("자녀 수 조회 실패: \(error)")
-                }
-            } receiveValue: { [weak self] children in
-                self?.connectedChild = children.count
-            }
             .store(in: &cancellables)
     }
     
@@ -125,8 +110,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 print("📩 [MyPageVM] CHILD_JOINED:", payload.childId ?? 0)
 
                 self.childConnectionState = .connected
-
-                self.fetchChildCount()
                 self.fetchUserInfo()
             }
             .store(in: &cancellables)
