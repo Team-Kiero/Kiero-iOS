@@ -44,6 +44,9 @@ final class RequiredTermsBottomSheetWrapperViewController: UIViewController {
             rootView: ZStack(alignment: .bottom) {
                 Color.black.opacity(0.6)
                     .ignoresSafeArea()
+                    .onTapGesture { [weak self] in
+                        self?.dismiss(animated: false)
+                    }
                 
                 RequiredTermsBottomSheetView(
                     onTermsTap: { [weak self] in
