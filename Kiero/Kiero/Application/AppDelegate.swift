@@ -53,14 +53,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         return true
     }
     
-    // MARK: - APNs 토큰 → FCM에 전달
-    
     func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Messaging.messaging().apnsToken = deviceToken
     }
-    
-    // MARK: - FCM 토큰 수신
     
     func messaging(_ messaging: Messaging,
                    didReceiveRegistrationToken fcmToken: String?) {
@@ -72,8 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         FCMTokenManager.shared.saveToken(token)
     }
     
-    // MARK: - 알림 탭 처리
-    
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
@@ -82,8 +76,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         handleNotification(userInfo)
         completionHandler()
     }
-    
-    // MARK: - 공통 알림 처리
     
     private func handleNotification(_ userInfo: [AnyHashable: Any]) {
         let type = userInfo["type"] as? String

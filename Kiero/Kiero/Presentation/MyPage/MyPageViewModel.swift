@@ -44,8 +44,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
         }
     }
     
-    // MARK: - 토글 ON
-    
     func checkNotificationPermission() {
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
             DispatchQueue.main.async {
@@ -80,15 +78,11 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
             }
         }
     }
-
-    // MARK: - 토글 OFF
     
     func turnOffAlarm() {
         isAlarmOn = false
         updateNotificationSettings(enabled: false)
     }
-
-    // MARK: - 앱 포그라운드 복귀 시 동기화
     
     func refreshNotificationStatus() {
         UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
