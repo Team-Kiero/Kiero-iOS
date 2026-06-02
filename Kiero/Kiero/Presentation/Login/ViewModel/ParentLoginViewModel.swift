@@ -74,13 +74,11 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                if let requiredTerms = try await checkRequiredTerms() {
-                    await MainActor.run {
-                        self.stateSubject.send(.idle)
-                        self.routeSubject.send(.requiredTerms(requiredTerms))
-                    }
+                
+                if try await routeRequiredTermsIfNeeded() {
                     return
                 }
+                
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
@@ -142,13 +140,11 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
-                if let requiredTerms = try await checkRequiredTerms() {
-                    await MainActor.run {
-                        self.stateSubject.send(.idle)
-                        self.routeSubject.send(.requiredTerms(requiredTerms))
-                    }
+                
+                if try await routeRequiredTermsIfNeeded() {
                     return
                 }
+                
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
@@ -196,5 +192,17 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         )
 
         return terms
+    }
+    
+    private func routeRequiredTermsIfNeeded() async throws -> Bool {
+        if let requiredTerms = try await checkRequiredTerms() {
+            await MainActor.run {
+                self.stateSubject.send(.idle)
+                self.routeSubject.send(.requiredTerms(requiredTerms))
+            }
+            return true
+        }
+
+        return false
     }
 }
