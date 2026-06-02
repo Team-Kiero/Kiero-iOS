@@ -104,22 +104,3 @@ private struct TermsAgreementRow: View {
         .frame(height: 44)
     }
 }
-
-#Preview {
-    ZStack(alignment: .bottom) {
-        Color.black
-            .ignoresSafeArea()
-
-        RequiredTermsBottomSheetView(
-            onTermsTap: {
-                print("이용약관")
-            },
-            onPrivacyTap: {
-                print("개인정보")
-            },
-            onConfirm: {
-                print("확인")
-            }
-        )
-    }
-}
