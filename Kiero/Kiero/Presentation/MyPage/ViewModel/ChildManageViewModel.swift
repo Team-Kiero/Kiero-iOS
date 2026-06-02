@@ -103,17 +103,17 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
     }
     
     private func startCountdown() {
-        tick()
+        updateRemainingTime()
         
         timerCancellable = Timer
             .publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink { [weak self] _ in
-                self?.tick()
+                self?.updateRemainingTime()
             }
     }
     
-    private func tick() {
+    private func updateRemainingTime() {
         guard let expiresAt else { return }
         
         let remaining = Int(expiresAt.timeIntervalSinceNow.rounded(.down))
