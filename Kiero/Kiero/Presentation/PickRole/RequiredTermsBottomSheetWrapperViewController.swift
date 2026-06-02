@@ -23,6 +23,9 @@ final class RequiredTermsBottomSheetWrapperViewController: UIViewController {
         self.privacyPolicyURL = privacyPolicyURL
         self.onConfirm = onConfirm
         super.init(nibName: nil, bundle: nil)
+        
+        view.backgroundColor = .clear
+        modalPresentationStyle = .overFullScreen
     }
     
     required init?(coder: NSCoder) {
@@ -50,7 +53,7 @@ final class RequiredTermsBottomSheetWrapperViewController: UIViewController {
                         self?.openURL(self?.privacyPolicyURL)
                     },
                     onConfirm: { [weak self] in
-                        self?.dismiss(animated: true) {
+                        self?.dismiss(animated: false) {
                             self?.onConfirm()
                         }
                     }

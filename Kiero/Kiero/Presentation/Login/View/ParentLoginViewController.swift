@@ -146,9 +146,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             }
         )
         
-        termsBottomSheetVC.modalPresentationStyle = .overFullScreen
-        termsBottomSheetVC.view.backgroundColor = .clear
-        
         present(termsBottomSheetVC, animated: true)
     }
     
