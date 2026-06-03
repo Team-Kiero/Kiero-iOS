@@ -18,7 +18,7 @@ final class MyPageHostingController: UIHostingController<MyPageView> {
         self.rootView = MyPageView(
             viewModel: viewModel,
             onChildManageTap: { [weak self] in
-                let vc = UIHostingController(rootView: ChildManageView())
+                let vc = UIHostingController(rootView: ChildManageView(initialConnectionState: viewModel.childConnectionState))
                 vc.hidesBottomBarWhenPushed = true
                 self?.navigationController?.pushViewController(vc, animated: true)
             },

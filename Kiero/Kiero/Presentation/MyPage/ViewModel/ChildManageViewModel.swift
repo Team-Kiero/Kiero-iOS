@@ -8,6 +8,15 @@
 import Combine
 import Foundation
 
+enum ChildManageRoute {
+    case toast(String)
+}
+
+private enum InviteSessionKey {
+    static let code = "pendingInviteCode"
+    static let expiresAt = "pendingInviteExpiresAt"
+}
+
 final class ChildManageViewModel: BaseViewModel, ObservableObject {
     
     @Published var connectionState: ChildConnectionState = .connected
@@ -15,6 +24,11 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
     @Published var inviteCode: String = ""
     @Published var remainingText: String = "00:00"
     @Published var isExpired: Bool = false
+    
+    private let routeSubject = PassthroughSubject<ChildManageRoute, Never>()
+    var route: AnyPublisher<ChildManageRoute, Never> {
+        routeSubject.eraseToAnyPublisher()
+    }
     
     private var childLastName: String = ""
     private var childFirstName: String = ""
@@ -24,11 +38,16 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
     
     private var timerCancellable: AnyCancellable?
     
-    init(expiresIn: TimeInterval = 10 * 60) {
+    init(
+        initialConnectionState: ChildConnectionState,
+        expiresIn: TimeInterval = 10 * 60
+    ) {
+        self.connectionState = initialConnectionState
         self.expiresIn = expiresIn
         super.init()
-
+        
         fetchChild()
+        restoreInviteSessionIfNeeded()
         bindSSE()
     }
     
@@ -47,7 +66,6 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                     self.childLastName = child.childLastName
                     self.childFirstName = child.childFirstName
                     self.childName = "\(child.childLastName)\(child.childFirstName)"
-                    self.connectionState = .connected
                 }
             } catch {
                 print("자녀 조회 실패:", error)
@@ -75,9 +93,15 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                 )
                 
                 await MainActor.run {
+                    let expiresAt = Date().addingTimeInterval(self.expiresIn)
+
                     self.inviteCode = data.code
                     self.connectionState = .waiting
-                    self.expiresAt = Date().addingTimeInterval(self.expiresIn)
+                    self.expiresAt = expiresAt
+
+                    UserDefaults.standard.set(data.code, forKey: InviteSessionKey.code)
+                    UserDefaults.standard.set(expiresAt.timeIntervalSince1970, forKey: InviteSessionKey.expiresAt)
+
                     self.restartCountdown()
                 }
             } catch {
@@ -121,6 +145,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
         if remaining <= 0 {
             remainingText = "00:00"
             isExpired = true
+            clearInviteSession()
             timerCancellable?.cancel()
             timerCancellable = nil
             return
@@ -128,6 +153,33 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
         
         remainingText = Self.format(seconds: remaining)
         isExpired = false
+    }
+    
+    private func restoreInviteSessionIfNeeded() {
+        guard connectionState == .waiting else { return }
+        
+        guard let code = UserDefaults.standard.string(forKey: InviteSessionKey.code) else { return }
+        
+        let timestamp = UserDefaults.standard.double(forKey: InviteSessionKey.expiresAt)
+        guard timestamp > 0 else { return }
+        
+        let restoredExpiresAt = Date(timeIntervalSince1970: timestamp)
+        
+        guard restoredExpiresAt > Date() else {
+            clearInviteSession()
+            isExpired = true
+            remainingText = "00:00"
+            return
+        }
+        
+        inviteCode = code
+        expiresAt = restoredExpiresAt
+        startCountdown()
+    }
+    
+    private func clearInviteSession() {
+        UserDefaults.standard.removeObject(forKey: InviteSessionKey.code)
+        UserDefaults.standard.removeObject(forKey: InviteSessionKey.expiresAt)
     }
     
     private func bindSSE() {
@@ -141,7 +193,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                 print("📩 [ChildManageVM] CHILD_JOINED:", payload.childId ?? 0)
 
                 self.connectionState = .connected
-
+                self.clearInviteSession()
                 self.timerCancellable?.cancel()
                 self.timerCancellable = nil
 
@@ -149,6 +201,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                 self.remainingText = "00:00"
                 self.isExpired = false
                 self.expiresAt = nil
+                self.routeSubject.send(.toast("자녀 연결이 완료되었습니다."))
             }
             .store(in: &cancellables)
     }
