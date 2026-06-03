@@ -189,7 +189,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         let timeText = formatTimeRange(start: schedule.startTime, end: schedule.endTime)
         let isTimeViewActive = (timeText != "-")
         
-        let isLastJourney = (schedule.scheduleOrder > 0 && totalSchedule == 1)
+        let isLastJourney = (schedule.scheduleOrder > 0 && schedule.scheduleOrder == totalSchedule)
+
         self.isCurrentlyLastJourney = isLastJourney
 
         let isCurrentTimeMatched = isCurrentTimeInSchedule(start: schedule.startTime, end: schedule.endTime)
