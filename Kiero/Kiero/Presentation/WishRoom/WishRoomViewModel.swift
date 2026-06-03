@@ -11,6 +11,10 @@ final class WishRoomViewModel: ObservableObject {
     
     @Published var todayWishes: [WishItem] = []
     @Published var previousWishes: [WishItem] = []
+    @Published var isLoading: Bool = false
+    
+    private var nextCursor: String? = nil
+    private var hasMore: Bool = true
     
     var onNavigateToWishWell: (() -> Void)?
     
@@ -25,30 +29,51 @@ final class WishRoomViewModel: ObservableObject {
     // MARK: - Init
     
     init() {
-        loadMockData()
+        fetchCouponHistory()
     }
     
-    // MARK: - Mock Data
-    
-    // TODO: - Api 연결 후 삭제
-    
-    private func loadMockData() {
-        todayWishes = [
-            WishItem(id: 1, title: "상헌 아트디렉터되기", acquiredDate: "5월 10일", cost: 100),
-            WishItem(id: 2, title: "윤주 데이트하기", acquiredDate: "5월 10일", cost: 100)
-        ]
+    func fetchCouponHistory() {
+        guard !isLoading, hasMore else { return }
+        isLoading = true
         
-        previousWishes = [
-            WishItem(id: 3, title: "키어로 여름엠티", acquiredDate: "5월 2일", cost: 100),
-            WishItem(id: 4, title: "포이 숭실대오기", acquiredDate: "5월 2일", cost: 100),
-            WishItem(id: 5, title: "그냥이 건물공동소유", acquiredDate: "5월 2일", cost: 100),
-            WishItem(id: 6, title: "윤주 영화보기", acquiredDate: "5월 2일", cost: 100)
-        ]
+        Task {
+            do {
+                let items: [CouponHistoryItem] = try await BaseService.shared.request(
+                    endPoint: .fetchCouponHistory()
+                )
+                
+                let today = todayString()
+                
+                await MainActor.run {
+                    self.todayWishes = items.filter { $0.purchasedAt == today }.map { $0.toWishItem() }
+                    self.previousWishes = items.filter { $0.purchasedAt != today }.map { $0.toWishItem() }
+                    self.hasMore = false
+                    self.isLoading = false
+                }
+            } catch {
+                print("❌ 소원 이용내역 조회 실패: \(error)")
+                await MainActor.run { self.isLoading = false }
+            }
+        }
+    }
+    
+    func loadMoreIfNeeded() {
+        guard hasMore else { return }
+        fetchCouponHistory()
     }
     
     // MARK: - Actions
     
     func navigateToMakeWish() {
         onNavigateToWishWell?()
+    }
+    
+    // MARK: - Helper
+    
+    private func todayString() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: Date())
     }
 }

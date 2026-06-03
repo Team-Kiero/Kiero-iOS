@@ -85,6 +85,11 @@ struct WishRoomView: View {
             if viewModel.hasTodayWishes {
                 ForEach(viewModel.todayWishes) { wish in
                     WishRoomBox(type: .wish(wish), isToday: true)
+                        .onAppear {
+                            if wish.id == viewModel.todayWishes.last?.id {
+                                viewModel.loadMoreIfNeeded()
+                            }
+                        }
                 }
             } else {
                 WishRoomBox(
@@ -104,6 +109,11 @@ struct WishRoomView: View {
             
             ForEach(viewModel.previousWishes) { wish in
                 WishRoomBox(type: .wish(wish), isToday: false)
+                    .onAppear {
+                        if wish.id == viewModel.previousWishes.last?.id {
+                            viewModel.loadMoreIfNeeded()
+                        }
+                    }
             }
         }
     }

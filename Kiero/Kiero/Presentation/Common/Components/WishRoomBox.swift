@@ -7,13 +7,6 @@
 
 import SwiftUI
 
-struct WishItem: Identifiable {
-    let id: Int
-    let title: String
-    let acquiredDate: String
-    let cost: Int
-}
-
 enum WishRoomBoxType {
     case wish(WishItem)
     case empty

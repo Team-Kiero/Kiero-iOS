@@ -30,3 +30,49 @@ extension CouponResponseDTO {
         .init(id: couponId, name: name, price: price)
     }
 }
+
+// MARK: - 소원 이용내역
+
+struct CouponHistoryItem: Decodable {
+    let name: String
+    let price: Int
+    let purchasedAt: String
+}
+
+struct WishItem: Identifiable {
+    let id: String
+    let title: String
+    let acquiredDate: String
+    let cost: Int
+}
+
+struct CouponHistoryResponse: Decodable {
+    let data: [CouponHistoryItem]
+    let nextCursor: String?
+}
+
+extension CouponHistoryItem {
+    func toWishItem() -> WishItem {
+        let displayDate = formatDate(purchasedAt)
+        return WishItem(
+            id: name + purchasedAt + String(price),
+            title: name,
+            acquiredDate: displayDate,
+            cost: price
+        )
+    }
+    
+    private func formatDate(_ dateString: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+        inputFormatter.locale = Locale(identifier: "ko_KR")
+        
+        guard let date = inputFormatter.date(from: dateString) else { return dateString }
+        
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "M월 d일"
+        outputFormatter.locale = Locale(identifier: "ko_KR")
+        
+        return outputFormatter.string(from: date)
+    }
+}
