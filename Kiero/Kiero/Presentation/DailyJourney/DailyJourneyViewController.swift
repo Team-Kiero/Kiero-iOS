@@ -169,6 +169,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
+                Task {
+                    let body = NotificationSettingsRequest(pushNotificationEnabled: true)
+                    let _: EmptyResponse? = try? await BaseService.shared.request(
+                        endPoint: .updateNotificationSettings,
+                        body: body
+                    )
+                }
             }
         }
         dialogBox.show(in: self)
