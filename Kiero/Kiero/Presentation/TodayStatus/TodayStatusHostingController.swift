@@ -117,10 +117,12 @@ private extension TodayStatusHostingController {
             dialogBox.dismiss()
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
-            ) { granted, _ in
+            ) { [weak self] granted, _ in
                 guard granted else { return }
+                
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
+                    self?.viewModel.updateNotificationSettings(enabled: true)
                 }
             }
         }
