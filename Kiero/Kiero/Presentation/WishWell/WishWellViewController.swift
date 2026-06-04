@@ -89,6 +89,7 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     
     @objc private func didTapGoToWishRoom() {
         let wishRoomVC = diContainer.makeWishRoomViewController()
+        wishRoomVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(wishRoomVC, animated: true)
     }
 }
