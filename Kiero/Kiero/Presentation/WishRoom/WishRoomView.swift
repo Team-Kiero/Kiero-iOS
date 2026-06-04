@@ -95,7 +95,12 @@ struct WishRoomView: View {
                 WishRoomBox(
                     type: .empty,
                     isToday: true,
-                    onEmptyTapped: { viewModel.navigateToMakeWish() }
+                    onEmptyTapped: {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            NotificationCenter.default.post(name: .navigateToWishWell, object: nil)
+                        }
+                    }
                 )
             }
         }
