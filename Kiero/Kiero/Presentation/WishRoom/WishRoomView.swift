@@ -40,24 +40,27 @@ struct WishRoomView: View {
                 }
             }
             
-            LinearGradient(
-                colors: [.kBlack.opacity(0), .kBlack],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 156)
+            VStack(spacing: 0) {
+                LinearGradient(
+                    colors: [.kBlack.opacity(0), .kBlack],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 80)
+                .allowsHitTesting(false)
+                
+                CTAButtonWrapper(
+                    title: "확인",
+                    style: .main,
+                    size: .h49,
+                    onTap: { dismiss() }
+                )
+                .padding(.horizontal, 20)
+                .padding(.bottom, 32)
+                .frame(maxWidth: .infinity)
+                .background(.kBlack)
+            }
             .ignoresSafeArea(edges: .bottom)
-            .allowsHitTesting(false)
-            
-            CTAButtonWrapper(
-                title: "확인",
-                style: .main,
-                size: .h49,
-                onTap: { dismiss() }
-            )
-            .padding(.horizontal, 20)
-            .padding(.bottom, 19)
-            .background(.kBlack)
         }
         .navigationBarHidden(true)
     }
