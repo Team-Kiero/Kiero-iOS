@@ -178,6 +178,21 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
         }
     }
     
+    func updateNotificationSettings(enabled: Bool) {
+        Task {
+            do {
+                let body = NotificationSettingsRequest(pushNotificationEnabled: enabled)
+                let _: EmptyResponse = try await BaseService.shared.request(
+                    endPoint: .updateNotificationSettings,
+                    body: body
+                )
+                print("✅ 알림 설정 변경 성공: \(enabled)")
+            } catch {
+                print("❌ 알림 설정 변경 실패: \(error)")
+            }
+        }
+    }
+    
     private func scheduleRefresh() {
         refreshWorkItem?.cancel()
         

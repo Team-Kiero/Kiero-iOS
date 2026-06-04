@@ -18,6 +18,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     @Published var isAlarmOn: Bool = false
     @Published var showNotificationDialog: Bool = false
     
+    private var pendingEnableAfterSettings: Bool = false
+    
     private var externalLinks: [ExternalLinkDTO] = []
     
     let scrollToTop = PassthroughSubject<Void, Never>()
@@ -32,6 +34,10 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     }
     
     // MARK: - Notification Settings
+    
+    private func isOSAuthorized(_ status: UNAuthorizationStatus) -> Bool {
+        status == .authorized || status == .provisional || status == .ephemeral
+    }
     
     private func updateNotificationSettings(enabled: Bool) {
         Task {
@@ -72,15 +78,12 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                                 self.isAlarmOn = granted
                                 if granted {
                                     self.updateNotificationSettings(enabled: true)
-                                } else {
-                                    self.showNotificationDialog = true
                                 }
                             }
                         }
                     
                 @unknown default:
                     self.isAlarmOn = false
-                    self.showNotificationDialog = true
                 }
             }
         }
@@ -91,8 +94,51 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
         updateNotificationSettings(enabled: false)
     }
     
+    func goToNotificationSettings() {
+        pendingEnableAfterSettings = true
+        openAppSettings()
+    }
+
+    func handleForeground() {
+        if pendingEnableAfterSettings {
+            resolveReturnFromSettings()
+        } else {
+            refreshNotificationStatus()
+        }
+    }
+
+    private func resolveReturnFromSettings() {
+        pendingEnableAfterSettings = false
+        showNotificationDialog = false
+        
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if self.isOSAuthorized(settings.authorizationStatus) {
+                    self.isAlarmOn = true
+                    self.updateNotificationSettings(enabled: true)
+                } else {
+                    self.isAlarmOn = false
+                }
+            }
+        }
+    }
+    
     func refreshNotificationStatus() {
+        reconcileWithOSImmediately()
         fetchUserInfo()
+    }
+
+    private func reconcileWithOSImmediately() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                let osEnabled = self.isOSAuthorized(settings.authorizationStatus)
+                if self.isAlarmOn && !osEnabled {
+                    self.isAlarmOn = false
+                }
+            }
+        }
     }
     
     // MARK: - Profile & Data
@@ -107,12 +153,7 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 )
                 
                 let settings = await UNUserNotificationCenter.current().notificationSettings()
-                
-                let isAuthorized =
-                settings.authorizationStatus == .authorized ||
-                settings.authorizationStatus == .provisional ||
-                settings.authorizationStatus == .ephemeral
-                
+                let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
                 let shouldEnable = profile.pushNotificationEnabled && isAuthorized
                 
                 await MainActor.run {
@@ -121,19 +162,19 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                     self.childConnectionState =
                     profile.hasPendingChildSession ? .waiting : .connected
                     
-                    if self.isAlarmOn != shouldEnable {
-                        self.isAlarmOn = shouldEnable
-                        
-                        if profile.pushNotificationEnabled && !isAuthorized {
-                            self.updateNotificationSettings(enabled: false)
-                        }
-                    }
+                    self.isAlarmOn = shouldEnable
                 }
                 
             } catch {
+                let settings = await UNUserNotificationCenter.current().notificationSettings()
+                let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
+                
                 await MainActor.run {
                     self.userName = TokenManager.shared.getUserName() ?? ""
                     self.userImage = TokenManager.shared.getProfile()
+                    if self.isAlarmOn && !isAuthorized {
+                        self.isAlarmOn = false
+                    }
                 }
                 
                 print("프로필 정보 조회 실패:", error)

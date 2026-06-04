@@ -148,7 +148,7 @@ struct MyPageView: View {
                     state: .parentNotification,
                     isPresented: $viewModel.showNotificationDialog,
                     onConfirm: {
-                        viewModel.openAppSettings()
+                        viewModel.goToNotificationSettings()
                     }
                 )
                 .frame(width: 327, height: 216)
@@ -184,7 +184,7 @@ struct MyPageView: View {
                 for: UIApplication.willEnterForegroundNotification
             )
         ) { _ in
-            viewModel.refreshNotificationStatus()
+            viewModel.handleForeground()
         }
     }
 }

@@ -14,7 +14,15 @@ enum ChildConnectionState {
 
 struct ChildManageView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject var viewModel = ChildManageViewModel()
+    @StateObject var viewModel: ChildManageViewModel
+    
+    init(initialConnectionState: ChildConnectionState) {
+        _viewModel = StateObject(
+            wrappedValue: ChildManageViewModel(
+                initialConnectionState: initialConnectionState
+            )
+        )
+    }
     
     var body: some View {
         ZStack {
@@ -61,6 +69,12 @@ struct ChildManageView: View {
             }
         }
         .navigationBarHidden(true)
+        .onReceive(viewModel.route) { route in
+            switch route {
+            case .toast(let message):
+                Toast.show(message: message, bottomInset: 125)
+            }
+        }
     }
 }
 
