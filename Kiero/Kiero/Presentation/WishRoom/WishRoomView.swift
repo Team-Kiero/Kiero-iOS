@@ -22,11 +22,12 @@ struct WishRoomView: View {
                 )
                 .frame(height: 37)
                 
+                totalCountBanner
+                    .padding(.top, 25)
+                    .padding(.horizontal, 16)
+                
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 0) {
-                        totalCountBanner
-                            .padding(.top, 25)
-                        
                         todaySection
                             .padding(.top, 24)
                         
