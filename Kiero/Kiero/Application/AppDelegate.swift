@@ -34,8 +34,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         if let filePath = Bundle.main.path(forResource: googleServiceFileName, ofType: "plist"),
            let options = FirebaseOptions(contentsOfFile: filePath) {
             FirebaseApp.configure(options: options)
+            NSLog("✅ Firebase 초기화 성공: %@", googleServiceFileName)
         } else {
-            print("❌ GoogleService-Info.plist를 찾을 수 없음")
+            NSLog("❌ GoogleService-Info.plist를 찾을 수 없음")
         }
         
         UNUserNotificationCenter.current().delegate = self
@@ -55,15 +56,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     
     func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        let tokenString = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        NSLog("✅ APNs 토큰 수신: %@", tokenString)
         Messaging.messaging().apnsToken = deviceToken
+    }
+    
+    func application(_ application: UIApplication,
+                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NSLog("❌ APNs 등록 실패: %@", error.localizedDescription)
     }
     
     func messaging(_ messaging: Messaging,
                    didReceiveRegistrationToken fcmToken: String?) {
         guard let token = fcmToken else { return }
         
-        // TODO: - 배포 전 로그 삭제
-        print("FCM Token: \(token)")
+        NSLog("🔥 FCM Token: %@", token)
         
         FCMTokenManager.shared.saveToken(token)
     }
