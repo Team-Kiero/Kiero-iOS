@@ -773,4 +773,17 @@ extension AddScheduleViewController: UITextFieldDelegate {
         textField.resignFirstResponder()
         return true
     }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if string.isEmpty { return true }
+        
+        if textField.markedTextRange == nil {
+            let currentText = textField.text ?? ""
+            guard let swiftRange = Range(range, in: currentText) else { return true }
+            let newText = currentText.replacingCharacters(in: swiftRange, with: string)
+            return newText.count <= 8
+        }
+        
+        return true
+    }
 }
