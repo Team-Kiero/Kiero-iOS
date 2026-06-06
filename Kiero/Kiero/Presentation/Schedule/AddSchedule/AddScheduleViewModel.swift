@@ -55,6 +55,7 @@ final class AddScheduleViewModel: BaseViewModel {
     
     func fetchDefaultColor() {
         service.fetchDefaultColor(childId: childId)
+            .receive(on: DispatchQueue.main)
             .sink { _ in } receiveValue: { [weak self] response in
                 let colorMapping: [String: UIColor] = [
                     "SCHEDULE1": .schedule1, "SCHEDULE2": .schedule2,

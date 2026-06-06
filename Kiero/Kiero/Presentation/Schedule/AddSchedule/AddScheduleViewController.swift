@@ -108,7 +108,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             viewModel?.fetchDefaultColor()
         }
         
-        addTarget()
         updatePagingTitle()
     }
     
@@ -355,6 +354,15 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
         repeatSwitch.addTarget(self, action: #selector(repeatSwitchChanged), for: .valueChanged)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc
+    private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     func configure(with schedule: Schedule) {
@@ -368,10 +376,6 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             return components[0] * 60 + components[1]
         }
         return 0
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.view.endEditing(true)
     }
     
     override func bindViewModel() {
@@ -767,6 +771,19 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
 extension AddScheduleViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
+        return true
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        if string.isEmpty { return true }
+        
+        if textField.markedTextRange == nil {
+            let currentText = textField.text ?? ""
+            guard let swiftRange = Range(range, in: currentText) else { return true }
+            let newText = currentText.replacingCharacters(in: swiftRange, with: string)
+            return newText.count <= 8
+        }
+        
         return true
     }
 }
