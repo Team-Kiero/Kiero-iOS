@@ -12,4 +12,5 @@ extension Notification.Name {
     static let hideTabBar = Notification.Name("hideTabBar")
     static let dimNavigationBar = Notification.Name("dimNavigationBar")
     static let hideNavigationBar = Notification.Name("hideNavigationBar")
+    static let navigateToWishWell = Notification.Name("navigateToWishWell")
 }

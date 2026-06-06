@@ -75,6 +75,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
                 
+                await FCMTokenManager.shared.sendCurrentTokenToServer()
+                
                 if try await routeRequiredTermsIfNeeded() {
                     return
                 }
@@ -140,6 +142,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                
+                await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
                 if try await routeRequiredTermsIfNeeded() {
                     return

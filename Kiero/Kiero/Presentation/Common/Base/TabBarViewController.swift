@@ -274,6 +274,13 @@ private extension TabBarViewController {
             name: .deepLinkReceived,
             object: nil
         )
+        
+        NotificationCenter.default.addObserver(
+            self,
+                selector: #selector(handleNavigateToWishWell),
+                name: .navigateToWishWell,
+                object: nil
+            )
     }
     
     func updateCustomTabBarSelection() {
@@ -393,6 +400,14 @@ private extension TabBarViewController {
         } else {
             handleChildDeepLink(type: type)
         }
+    }
+    
+    @objc
+    func handleNavigateToWishWell() {
+        if let nav = viewControllers?[3] as? UINavigationController {
+            nav.popToRootViewController(animated: false)
+        }
+        selectedIndex = 2
     }
     
     private func handleParentDeepLink(type: String) {

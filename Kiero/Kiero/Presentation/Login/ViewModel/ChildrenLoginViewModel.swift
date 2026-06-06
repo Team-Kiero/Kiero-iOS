@@ -68,6 +68,8 @@ final class ChildrenLoginViewModel: BaseViewModel {
                 TokenManager.shared.saveUserRole(data.role)
                 TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
                 TokenManager.shared.saveFirstName(data.firstName)
+                
+                await FCMTokenManager.shared.sendCurrentTokenToServer()
 
                 await MainActor.run {
                     self.stateSubject.send(.idle)

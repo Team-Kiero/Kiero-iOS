@@ -109,8 +109,7 @@ final class ConfirmBox: UIView {
     
     private func setLayout() {
         container.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(16)
-            $0.height.equalTo(248)
+            $0.edges.equalToSuperview()
         }
         
         characterImage.snp.makeConstraints {
