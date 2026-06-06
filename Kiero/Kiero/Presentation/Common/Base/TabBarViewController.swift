@@ -281,6 +281,13 @@ private extension TabBarViewController {
                 name: .navigateToWishWell,
                 object: nil
             )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillEnterForeground),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
     }
     
     func updateCustomTabBarSelection() {
@@ -408,6 +415,17 @@ private extension TabBarViewController {
             nav.popToRootViewController(animated: false)
         }
         selectedIndex = 2
+    }
+    
+    @objc
+    private func handleAppWillEnterForeground() {
+        guard isParent else { return }
+        
+        print("🔄 포그라운드 복귀 - 동기화 시작")
+        fetchInitialUnreadStatus()
+        
+        globalSseStarted = false
+        startGlobalFeedSSEIfNeeded()
     }
     
     private func handleParentDeepLink(type: String) {
