@@ -79,14 +79,13 @@ struct RewardView: View {
                     .ignoresSafeArea()
                     .onTapGesture { viewModel.showDeleteDialog = false }
                 
-                DialogBoxWrapper(
+                DialogBoxView(
                     state: .deleteReward(title: reward.title, coin: "\(reward.cost)"),
                     isPresented: $viewModel.showDeleteDialog,
                     onConfirm: {
                         viewModel.deleteReward(reward: reward)
                     }
                 )
-                .frame(width: 327, height: 216)
                 .transition(.scale.combined(with: .opacity))
             }
         }

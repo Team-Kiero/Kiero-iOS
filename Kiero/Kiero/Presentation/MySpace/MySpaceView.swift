@@ -96,14 +96,13 @@ struct MySpaceView: View {
                         .ignoresSafeArea()
                         .onTapGesture { showNotificationDialog = false }
                     
-                    DialogBoxWrapper(
+                    DialogBoxView(
                         state: .childNotification,
                         isPresented: $showNotificationDialog,
                         onConfirm: {
                             openAppSettings()
                         }
                     )
-                    .frame(width: 327, height: 216)
                     .padding(.horizontal, 16)
                     .zIndex(1)
                 }
@@ -113,14 +112,13 @@ struct MySpaceView: View {
                         .ignoresSafeArea()
                         .onTapGesture { showLogoutDialog = false }
                     
-                    DialogBoxWrapper(
+                    DialogBoxView(
                         state: .childLogout,
                         isPresented: $showLogoutDialog,
                         onConfirm: {
                             performLogout()
                         }
                     )
-                    .frame(width: 327, height: 216)
                     .padding(.horizontal, 16)
                     .zIndex(1)
                 }

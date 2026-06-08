@@ -215,7 +215,7 @@ final class DialogBox: UIView {
     }
     
     private let messageLabel = UILabel().then {
-        $0.textColor = .white
+        $0.textColor = .gray100
         $0.numberOfLines = 2
     }
     
