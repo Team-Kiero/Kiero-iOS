@@ -10,7 +10,7 @@ import SwiftUI
 import UserNotifications
 
 struct MySpaceView: View {
-    @State private var isAlarmOn = false
+    @State private var isAlarmOn = UserDefaults.standard.bool(forKey: "child_pushNotificationEnabled")
     @State private var showNotificationDialog = false
     @State private var showLogoutDialog = false
     @State private var showTerms = false
@@ -133,6 +133,9 @@ struct MySpaceView: View {
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 fetchProfile()
             }
+            .onChange(of: isAlarmOn) { _, newValue in
+                UserDefaults.standard.set(newValue, forKey: "child_pushNotificationEnabled")
+            }
         }
     }
 }
@@ -172,10 +175,10 @@ private extension MySpaceView {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
                 let osEnabled = settings.authorizationStatus == .authorized
-                    || settings.authorizationStatus == .provisional
-
+                || settings.authorizationStatus == .provisional
+                
                 if isAlarmOn != osEnabled {
-                    isAlarmOn = osEnabled
+                    setAlarmSilently(osEnabled)
                     updateNotificationSettings(enabled: osEnabled)
                 }
             }
@@ -186,10 +189,18 @@ private extension MySpaceView {
         WishWellService().fetchMyInfo()
             .receive(on: DispatchQueue.main)
             .sink { _ in } receiveValue: { info in
-                isAlarmOn = info.pushNotificationEnabled
+                setAlarmSilently(info.pushNotificationEnabled)
                 refreshNotificationStatus()
             }
             .store(in: &StaticCancellables.bag)
+    }
+    
+    func setAlarmSilently(_ value: Bool) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            isAlarmOn = value
+        }
     }
     
     func updateNotificationSettings(enabled: Bool) {
