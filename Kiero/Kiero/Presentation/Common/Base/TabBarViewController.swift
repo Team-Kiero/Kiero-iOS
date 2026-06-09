@@ -277,10 +277,10 @@ private extension TabBarViewController {
         
         NotificationCenter.default.addObserver(
             self,
-                selector: #selector(handleNavigateToWishWell),
-                name: .navigateToWishWell,
-                object: nil
-            )
+            selector: #selector(handleNavigateToWishWell),
+            name: .navigateToWishWell,
+            object: nil
+        )
         
         NotificationCenter.default.addObserver(
             self,
@@ -424,8 +424,8 @@ private extension TabBarViewController {
         print("🔄 포그라운드 복귀 - 동기화 시작")
         fetchInitialUnreadStatus()
         
-        globalSseStarted = false
-        startGlobalFeedSSEIfNeeded()
+        SseStreamManager.shared.pause()
+        SseStreamManager.shared.resume()
     }
     
     private func handleParentDeepLink(type: String) {
@@ -461,7 +461,7 @@ private extension TabBarViewController {
             if let nav = viewControllers?.first as? UINavigationController {
                 nav.popToRootViewController(animated: false)
             }
-
+            
         case "CHILD_MISSION_INCOMPLETE":
             selectedIndex = 1
             if let nav = viewControllers?[1] as? UINavigationController {
@@ -628,7 +628,7 @@ private extension TabBarViewController {
                     LogoutHelper.logoutToPickRole()
                     return
                 }
-
+                
                 guard payload.eventType == "FEED_ITEM_CREATED" else { return }
                 
                 NotificationCenter.default.post(
