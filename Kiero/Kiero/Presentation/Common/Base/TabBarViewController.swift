@@ -277,10 +277,17 @@ private extension TabBarViewController {
         
         NotificationCenter.default.addObserver(
             self,
-                selector: #selector(handleNavigateToWishWell),
-                name: .navigateToWishWell,
-                object: nil
-            )
+            selector: #selector(handleNavigateToWishWell),
+            name: .navigateToWishWell,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppWillEnterForeground),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
     }
     
     func updateCustomTabBarSelection() {
@@ -410,6 +417,17 @@ private extension TabBarViewController {
         selectedIndex = 2
     }
     
+    @objc
+    private func handleAppWillEnterForeground() {
+        guard isParent else { return }
+        
+        print("🔄 포그라운드 복귀 - 동기화 시작")
+        fetchInitialUnreadStatus()
+        
+        SseStreamManager.shared.pause()
+        SseStreamManager.shared.resume()
+    }
+    
     private func handleParentDeepLink(type: String) {
         switch type {
         case "SCHEDULE_VERIFIED", "FIRE_LIT", "MISSION_COMPLETE", "COUPON_PURCHASED":
@@ -443,7 +461,7 @@ private extension TabBarViewController {
             if let nav = viewControllers?.first as? UINavigationController {
                 nav.popToRootViewController(animated: false)
             }
-
+            
         case "CHILD_MISSION_INCOMPLETE":
             selectedIndex = 1
             if let nav = viewControllers?[1] as? UINavigationController {
@@ -610,7 +628,7 @@ private extension TabBarViewController {
                     LogoutHelper.logoutToPickRole()
                     return
                 }
-
+                
                 guard payload.eventType == "FEED_ITEM_CREATED" else { return }
                 
                 NotificationCenter.default.post(
