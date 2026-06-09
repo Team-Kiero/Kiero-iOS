@@ -10,6 +10,7 @@ import Foundation
 
 enum AuthGateRoute {
     case pickRole
+    case parentRequiredTerms([RequiredTerm])
     case parentOnboarding
     case parentTab
     case childTab
@@ -21,12 +22,10 @@ final class AuthGateViewModel {
     var route: AnyPublisher<AuthGateRoute, Never> { routeSubject.eraseToAnyPublisher() }
     
     func decideRoute() {
-        
         guard TokenManager.shared.getAccessToken() != nil else {
             routeSubject.send(.pickRole)
             return
         }
-        
         
         let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
         
@@ -49,6 +48,7 @@ final class AuthGateViewModel {
                 let status: ParentWithdrawalStatusDTO = try await BaseService.shared.request(
                     endPoint: .checkParentWithdrawalStatus
                 )
+                
                 await MainActor.run {
                     if status.isParentWithdrawn {
                         LogoutHelper.logoutToPickRole()
@@ -63,10 +63,18 @@ final class AuthGateViewModel {
             }
         }
     }
-
+    
     private func decideParentRoute() {
         Task {
             do {
+                if let requiredTerms = try await checkRequiredTerms() {
+                    await MainActor.run {
+                        TokenManager.shared.saveRequiredTermsIds(requiredTerms.map { $0.termsId })
+                        self.routeSubject.send(.parentRequiredTerms(requiredTerms))
+                    }
+                    return
+                }
+                
                 let children: [ChildrenData] = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
@@ -84,5 +92,21 @@ final class AuthGateViewModel {
                 }
             }
         }
+    }
+    
+    private func checkRequiredTerms() async throws -> [RequiredTerm]? {
+        let agreement: RequiredTermsAgreementStatusData = try await BaseService.shared.request(
+            endPoint: .requiredTermsAgreementStatus
+        )
+        
+        guard agreement.isRequiredTermsAllAgreed == false else {
+            return nil
+        }
+        
+        let terms: [RequiredTerm] = try await BaseService.shared.request(
+            endPoint: .requiredTerms
+        )
+        
+        return terms
     }
 }
