@@ -144,14 +144,13 @@ struct MyPageView: View {
                         viewModel.showNotificationDialog = false
                     }
                 
-                DialogBoxWrapper(
+                DialogBoxView(
                     state: .parentNotification,
                     isPresented: $viewModel.showNotificationDialog,
                     onConfirm: {
                         viewModel.goToNotificationSettings()
                     }
                 )
-                .frame(width: 327, height: 216)
                 .padding(.horizontal, 16)
                 .zIndex(1)
             }
@@ -163,14 +162,13 @@ struct MyPageView: View {
                         showDialog.toggle()
                     }
                 
-                DialogBoxWrapper(
+                DialogBoxView(
                     state: .logout,
                     isPresented: $showDialog,
                     onConfirm: {
                         viewModel.requestLogout()
                     }
                 )
-                .frame(width: 327, height: 216)
                 .padding(.horizontal, 16)
                 .zIndex(1)
             }
