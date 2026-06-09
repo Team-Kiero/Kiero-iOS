@@ -38,49 +38,69 @@ final class RequiredTermsBottomSheetHostingViewController: UIViewController {
     }
     
     private func setUI() {
-        let bottomSafeArea = view.safeAreaInsets.bottom
+        let dimView = UIView()
+        dimView.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        view.addSubview(dimView)
+        
+        dimView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            dimView.topAnchor.constraint(equalTo: view.topAnchor),
+            dimView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            dimView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            dimView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dimViewTapped))
+        dimView.addGestureRecognizer(tapGesture)
         
         let hostingController = UIHostingController(
-            rootView: ZStack(alignment: .bottom) {
-                Color.black.opacity(0.6)
-                    .ignoresSafeArea()
-                    .onTapGesture { [weak self] in
-                        self?.dismiss(animated: false)
+            rootView: RequiredTermsBottomSheetView(
+                onTermsTap: { [weak self] in
+                    self?.openURL(self?.serviceTermsURL)
+                },
+                onPrivacyTap: { [weak self] in
+                    self?.openURL(self?.privacyPolicyURL)
+                },
+                onConfirm: { [weak self] in
+                    self?.dismiss(animated: false) {
+                        self?.onConfirm()
                     }
-                
-                RequiredTermsBottomSheetView(
-                    onTermsTap: { [weak self] in
-                        self?.openURL(self?.serviceTermsURL)
-                    },
-                    onPrivacyTap: { [weak self] in
-                        self?.openURL(self?.privacyPolicyURL)
-                    },
-                    onConfirm: { [weak self] in
-                        self?.dismiss(animated: false) {
-                            self?.onConfirm()
-                        }
-                    }
-                )
-                
-                Color.kBlack
-                    .frame(height: bottomSafeArea)
-            }
-            .ignoresSafeArea(edges: .bottom)
+                }
+            )
         )
         
         addChild(hostingController)
         view.addSubview(hostingController.view)
         
+        hostingController.view.backgroundColor = UIColor(resource: .kBlack)
+        
+        hostingController.view.layer.cornerRadius = 15
+        hostingController.view.layer.maskedCorners = [
+            .layerMinXMinYCorner,
+            .layerMaxXMinYCorner
+        ]
+        
+        hostingController.view.layer.shadowColor = UIColor(resource: .gray800).cgColor
+        hostingController.view.layer.shadowOffset = CGSize(width: 0, height: -1)
+        hostingController.view.layer.shadowRadius = 4
+        hostingController.view.layer.shadowOpacity = 0.5
+        
+        hostingController.view.layer.masksToBounds = false
+        hostingController.view.clipsToBounds = false
+        
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
             hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        hostingController.view.backgroundColor = .clear
         hostingController.didMove(toParent: self)
+    }
+    
+    @objc
+    private func dimViewTapped() {
+        dismiss(animated: false)
     }
     
     private func openURL(_ urlString: String?) {
