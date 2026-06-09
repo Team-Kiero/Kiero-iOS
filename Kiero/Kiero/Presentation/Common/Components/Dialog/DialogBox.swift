@@ -75,7 +75,7 @@ final class DialogBox: UIView {
             case .deleteSchedule, .deleteReward, .deleteMission:
                 return "삭제하시겠습니까?"
             case .childNotification:
-                return "알림을 받으려면 설정에서 키어로 알림을 허용해줘!"
+                return "알림을 받으려면\n설정에서 키어로 알림을 허용해줘!"
             case .notificationRequest:
                 return "여정의 중요한 알림을 받아볼 수 있어."
             case .childLogout:
