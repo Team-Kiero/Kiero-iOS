@@ -20,6 +20,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     private var loadingVC: UIViewController?
     
+    var pendingRequiredTerms: [RequiredTerm]?
+    private var didShowPendingRequiredTerms = false
+    
     // MARK: - UI Components
     
     private let parentNaviBar = NavigationBar(type: .back(title: "부모님으로 시작하기"))
@@ -34,6 +37,17 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     private let kakaoLoginButton = LoginButton(type: .kakao)
     private let appleLoginButton = LoginButton(type: .apple)
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        guard !didShowPendingRequiredTerms,
+              let pendingRequiredTerms
+        else { return }
+        
+        didShowPendingRequiredTerms = true
+        presentRequiredTermsBottomSheet(pendingRequiredTerms)
+    }
     
     override func setStyle() {
         parentImageView.transform = CGAffineTransform(rotationAngle: -(.pi / 180 * 35))

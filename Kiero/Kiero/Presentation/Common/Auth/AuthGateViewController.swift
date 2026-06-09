@@ -13,15 +13,12 @@ import Then
 
 final class AuthGateViewController: UIViewController {
 
-    // MARK: - Properties
-
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
     private var pendingWork: DispatchWorkItem?
     
     private var dimPanelBottomConstraint: Constraint?
     private var pickRoleBottomConstraint: Constraint?
-
 
     private var overlayPrepared = false
 
@@ -35,8 +32,6 @@ final class AuthGateViewController: UIViewController {
         static let pickRoleHiddenOffset: CGFloat = 1000
     }
 
-    // MARK: - UI Components
-
     private let splashView = SplashView()
 
     private let dimPanelView = GradientDimView().then {
@@ -45,16 +40,14 @@ final class AuthGateViewController: UIViewController {
 
     private let pickRoleView = PickRoleView()
 
-    // MARK: - Init
-
     init(viewModel: AuthGateViewModel = AuthGateViewModel()) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
 
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-
-    // MARK: - Life Cycle
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -64,15 +57,11 @@ final class AuthGateViewController: UIViewController {
         viewModel.decideRoute()
     }
 
-    // MARK: - Setup Methods
-
     private func setUI() {
         view.addSubview(splashView)
         splashView.snp.makeConstraints { $0.edges.equalToSuperview() }
         splashView.start()
     }
-
-    // MARK: - Bind
 
     private func bind() {
         viewModel.route
@@ -80,9 +69,11 @@ final class AuthGateViewController: UIViewController {
             .sink { [weak self] route in
                 guard let self else { return }
 
-                if route == .parentOnboarding {
+                switch route {
+                case .parentOnboarding:
                     self.transition(after: 2.0, to: route)
-                } else {
+
+                default:
                     self.transition(after: 0.0, to: route)
                 }
             }
@@ -95,6 +86,7 @@ final class AuthGateViewController: UIViewController {
         let work = DispatchWorkItem { [weak self] in
             self?.handle(by: route)
         }
+
         pendingWork = work
         DispatchQueue.main.asyncAfter(deadline: .now() + seconds, execute: work)
     }
@@ -107,6 +99,20 @@ final class AuthGateViewController: UIViewController {
             DispatchQueue.main.asyncAfter(deadline: .now() + IntroTiming.splashHold) { [weak self] in
                 self?.showPickRoleOverlaySequence()
             }
+
+        case .parentRequiredTerms(let terms):
+            let vm = ParentLoginViewModel()
+
+            let vc = ParentLoginViewController(
+                viewModel: vm,
+                diContainer: AppDIContainer.shared
+            )
+
+            vc.pendingRequiredTerms = terms
+
+            changeRoot(
+                UINavigationController(rootViewController: vc)
+            )
 
         case .parentOnboarding:
             let vc = AppDIContainer.shared.makeParentOnboardingViewController()
@@ -151,34 +157,41 @@ final class AuthGateViewController: UIViewController {
     private func showPickRoleOverlaySequence() {
         view.layoutIfNeeded()
 
-        UIView.animate(withDuration: IntroTiming.dimDuration,
-                       delay: 0,
-                       options: [.curveEaseOut]) {
+        UIView.animate(
+            withDuration: IntroTiming.dimDuration,
+            delay: 0,
+            options: [.curveEaseOut]
+        ) {
             self.dimPanelView.alpha = 1
             self.dimPanelBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
         }
 
-        UIView.animate(withDuration: IntroTiming.pickRoleDuration,
-                       delay: IntroTiming.pickRoleDelayAfterDimStart,
-                       options: [.curveEaseOut]) {
+        UIView.animate(
+            withDuration: IntroTiming.pickRoleDuration,
+            delay: IntroTiming.pickRoleDelayAfterDimStart,
+            options: [.curveEaseOut]
+        ) {
             self.pickRoleBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
         }
     }
 
-    // MARK: - Navigation
-
     private func goLoginFlow(for role: LoginUser) {
         let vc: UIViewController
+
         switch role {
         case .parent:
             let vm = ParentLoginViewModel()
             vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
             
         case .child:
-            vc = ChildrenLoginViewController(viewModel: ChildrenLoginViewModel(), diContainer: AppDIContainer.shared)
+            vc = ChildrenLoginViewController(
+                viewModel: ChildrenLoginViewModel(),
+                diContainer: AppDIContainer.shared
+            )
         }
+
         navigationController?.setNavigationBarHidden(false, animated: true)
         navigationController?.pushViewController(vc, animated: true)
     }
