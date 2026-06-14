@@ -139,15 +139,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             .store(in: &cancellables)
     }
     
-    private func navigateToParentOnboarding() {
-        let vm = ParentOnboardingViewModel()
-        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(onboardingVC)
-        }
-    }
-    
     private func presentRequiredTermsBottomSheet(_ terms: [RequiredTerm]) {
         let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
         let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
@@ -156,7 +147,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             serviceTermsURL: serviceTermsURL,
             privacyPolicyURL: privacyPolicyURL,
             onConfirm: { [weak self] in
-                self?.navigateToParentOnboarding()
+                self?.viewModel?.confirmRequiredTerms()
             }
         )
         
