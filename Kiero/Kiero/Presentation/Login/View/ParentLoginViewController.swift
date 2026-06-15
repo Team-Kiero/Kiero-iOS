@@ -17,6 +17,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private let appleTap = PassthroughSubject<Void, Never>()
+    private let requiredTermsConfirmTap = PassthroughSubject<Void, Never>()
     
     private var loadingVC: UIViewController?
     
@@ -107,7 +108,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         let output = viewModel.transform(
             input: .init(
                 kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
-                appleButtonTapped: appleTap.eraseToAnyPublisher()
+                appleButtonTapped: appleTap.eraseToAnyPublisher(),
+                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher()
             )
         )
         
@@ -147,7 +149,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             serviceTermsURL: serviceTermsURL,
             privacyPolicyURL: privacyPolicyURL,
             onConfirm: { [weak self] in
-                self?.viewModel?.confirmRequiredTerms()
+                self?.requiredTermsConfirmTap.send(())
             }
         )
         

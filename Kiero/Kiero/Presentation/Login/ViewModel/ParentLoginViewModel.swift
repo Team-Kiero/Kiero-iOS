@@ -13,6 +13,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
         let appleButtonTapped: AnyPublisher<Void, Never>
+        let requiredTermsConfirmTapped: AnyPublisher<Void, Never>
     }
     
     struct Output {
@@ -46,6 +47,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         input.appleButtonTapped
             .sink { [weak self] in
                 self?.requestAppleLogin()
+            }
+            .store(in: &cancellables)
+        
+        input.requiredTermsConfirmTapped
+            .sink { [weak self] in
+                self?.confirmRequiredTerms()
             }
             .store(in: &cancellables)
         
