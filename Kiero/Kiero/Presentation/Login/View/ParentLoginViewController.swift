@@ -17,6 +17,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private let appleTap = PassthroughSubject<Void, Never>()
+    private let requiredTermsConfirmTap = PassthroughSubject<Void, Never>()
     
     private var loadingVC: UIViewController?
     
@@ -107,7 +108,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         let output = viewModel.transform(
             input: .init(
                 kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
-                appleButtonTapped: appleTap.eraseToAnyPublisher()
+                appleButtonTapped: appleTap.eraseToAnyPublisher(),
+                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher()
             )
         )
         
@@ -139,15 +141,6 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             .store(in: &cancellables)
     }
     
-    private func navigateToParentOnboarding() {
-        let vm = ParentOnboardingViewModel()
-        let onboardingVC = UINavigationController(rootViewController: ParentOnboardingViewController(viewModel: vm, diContainer: AppDIContainer.shared))
-        
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(onboardingVC)
-        }
-    }
-    
     private func presentRequiredTermsBottomSheet(_ terms: [RequiredTerm]) {
         let serviceTermsURL = terms.first { $0.termsType == .serviceTerms }?.url
         let privacyPolicyURL = terms.first { $0.termsType == .privacyPolicy }?.url
@@ -156,7 +149,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             serviceTermsURL: serviceTermsURL,
             privacyPolicyURL: privacyPolicyURL,
             onConfirm: { [weak self] in
-                self?.navigateToParentOnboarding()
+                self?.requiredTermsConfirmTap.send(())
             }
         )
         

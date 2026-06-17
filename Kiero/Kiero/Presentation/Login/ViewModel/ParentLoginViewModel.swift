@@ -13,6 +13,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
     struct Input {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
         let appleButtonTapped: AnyPublisher<Void, Never>
+        let requiredTermsConfirmTapped: AnyPublisher<Void, Never>
     }
     
     struct Output {
@@ -46,6 +47,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         input.appleButtonTapped
             .sink { [weak self] in
                 self?.requestAppleLogin()
+            }
+            .store(in: &cancellables)
+        
+        input.requiredTermsConfirmTapped
+            .sink { [weak self] in
+                self?.confirmRequiredTerms()
             }
             .store(in: &cancellables)
         
@@ -208,5 +215,52 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         }
 
         return false
+    }
+    
+    func confirmRequiredTerms() {
+        stateSubject.send(.loading)
+        
+        Task { [weak self] in
+            guard let self else { return }
+            
+            do {
+                let children: ChildListResponse = try await BaseService.shared.request(
+                    endPoint: .fetchChildren
+                )
+                
+                if children.isEmpty {
+                    await MainActor.run {
+                        self.stateSubject.send(.idle)
+                        self.routeSubject.send(.parentOnboarding)
+                    }
+                    return
+                }
+                
+                let termsIds = TokenManager.shared.getRequiredTermsIds()
+                
+                if termsIds.isEmpty == false {
+                    let request = AgreeRequiredTermsRequestDTO(
+                        termsIds: termsIds
+                    )
+                    
+                    let _: EmptyResponse = try await BaseService.shared.request(
+                        endPoint: .agreeRequiredTerms,
+                        body: request
+                    )
+                    
+                    TokenManager.shared.removeRequiredTermsIds()
+                }
+                
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    self.routeSubject.send(.parentTab)
+                }
+            } catch {
+                await MainActor.run {
+                    self.stateSubject.send(.idle)
+                    self.routeSubject.send(.toast("약관 동의 처리에 실패했습니다."))
+                }
+            }
+        }
     }
 }
