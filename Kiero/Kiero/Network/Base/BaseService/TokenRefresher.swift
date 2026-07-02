@@ -49,7 +49,9 @@ final class TokenRefresher {
         NetworkLogger.shared.responseLog(http, data: data)
         
         guard (200...299).contains(http.statusCode) else {
-            TokenManager.shared.clearAll()
+            if [401, 403].contains(http.statusCode) {
+                TokenManager.shared.clearAll()
+            }
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
         
@@ -94,7 +96,9 @@ final class TokenRefresher {
         NetworkLogger.shared.responseLog(http, data: data)
         
         guard (200...299).contains(http.statusCode) else {
-            TokenManager.shared.clearAll()
+            if [401, 403].contains(http.statusCode) {
+                TokenManager.shared.clearAll()
+            }
             throw NetworkError.clientError(statusCode: http.statusCode)
         }
         
@@ -104,7 +108,6 @@ final class TokenRefresher {
         TokenManager.shared.saveAccessToken(tokenData.accessToken)
         
         guard let newRefresh = extractCookieValue(from: http, cookieName: "refreshToken") else {
-            TokenManager.shared.clearAll()
             throw NetworkError.responseDecodingError
         }
         
