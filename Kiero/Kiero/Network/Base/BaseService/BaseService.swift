@@ -45,7 +45,7 @@ final class BaseService {
                 throw error
                 
             case .child:
-                try await TokenRefresher.shared.refreshAllTokens()
+                try await TokenRefresher.shared.refreshAccessToken()
                 
             case .parent:
                 do {

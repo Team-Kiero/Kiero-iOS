@@ -88,6 +88,7 @@ final class TokenManager {
     func clearUserInfo() {
         userDefaults.removeObject(forKey: Key.role)
         userDefaults.removeObject(forKey: Key.name)
+        userDefaults.removeObject(forKey: Key.nameKey)
         userDefaults.removeObject(forKey: Key.profile)
     }
 
