@@ -43,16 +43,6 @@ extension AppDIContainer {
         return ParentOnboardingViewController(viewModel: vm)
     }
     
-    func makeChildOnboardingViewController() -> UIViewController {
-        let userName = TokenManager.shared.getFirstName() ?? "사용자"
-        let items = ChildOnboardingScript.items
-        let viewModel = ChildrenOnboardingViewModel(
-            items: items,
-            userName: userName
-        )
-        return ChildrenOnboardingViewController(viewModel: viewModel, diContainer: self)
-    }
-    
     func makeParentInviteViewController(
         childLastName: String,
         childFirstName: String,
@@ -67,14 +57,28 @@ extension AppDIContainer {
         )
         return ParentInviteViewController(viewModel: vm)
     }
-}
-
-// MARK: - Onboarding
-
-extension AppDIContainer {
+    
+    func makeChildrenLoginViewController() -> UIViewController {
+        let vm = ChildrenLoginViewModel()
+        return ChildrenLoginViewController(viewModel: vm)
+    }
+    
+    func makeChildOnboardingViewController() -> UIViewController {
+        let userName = TokenManager.shared.getFirstName() ?? "사용자"
+        let items = ChildOnboardingScript.items
+        let viewModel = ChildrenOnboardingViewModel(
+            items: items,
+            userName: userName
+        )
+        let vc = ChildrenOnboardingViewController(viewModel: viewModel)
+        vc.makeLoadingVC = { self.makeChildLoadingViewController() }
+        
+        return vc
+    }
+    
     func makeChildLoadingViewController() -> UIViewController {
         let viewModel = BaseViewModel()
-        return ChildrenLoadingViewController(viewModel: viewModel, diContainer: self)
+        return ChildrenLoadingViewController(viewModel: viewModel)
     }
 }
 
@@ -206,7 +210,18 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeDailyJourneyViewController() -> UIViewController {
         let viewModel = DailyJourneyViewModel()
-        return DailyJourneyViewController(viewModel: viewModel, diContainer: self)
+        let vc = DailyJourneyViewController(viewModel: viewModel)
+        
+        vc.makeDailyJourneyMapVC = {
+            let vm = DailyJourneyMapViewModel()
+            return DailyJourneyMapViewController(viewModel: vm)
+        }
+        vc.makeGiveFireStoneVC = { stoneCount in
+            let vm = GiveFireStoneViewModel(count: stoneCount)
+            return GiveFireStoneViewController(viewModel: vm)
+        }
+        
+        return vc
     }
 }
 
@@ -232,7 +247,9 @@ extension AppDIContainer {
     
     func makeWishWellViewController() -> UIViewController {
         let viewModel = makeWishWellViewModel()
-        return WishWellViewController(viewModel: viewModel, diContainer: self)
+        let vc = WishWellViewController(viewModel: viewModel)
+        vc.makeWishRoomVC = { self.makeWishRoomViewController() }
+        return vc
     }
 }
 
@@ -241,7 +258,9 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeWishRoomViewController() -> UIViewController {
         let viewModel = WishRoomViewModel()
-        return WishRoomHostingController(viewModel: viewModel)
+        let vc = WishRoomHostingController(viewModel: viewModel)
+        vc.makeWishWellVC = { self.makeWishWellViewController() }
+        return vc
     }
 }
 
@@ -249,7 +268,9 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     func makeMySpaceViewController() -> UIViewController {
-        return MySpaceHostingController()
+        let vc = MySpaceHostingController()
+        vc.makeWishRoomVC = { self.makeWishRoomViewController() }
+        return vc
     }
 }
 

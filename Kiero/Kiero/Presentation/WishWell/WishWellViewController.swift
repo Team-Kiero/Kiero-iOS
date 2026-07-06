@@ -15,6 +15,8 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     
     // MARK: - Properties
     
+    var makeWishRoomVC: (() -> UIViewController)?
+    
     private let rootView = WishWellView()
     
     private let viewDidLoadSubject = PassthroughSubject<Void, Never>()
@@ -88,7 +90,7 @@ final class WishWellViewController: BaseViewController<WishWellViewModel>{
     }
     
     @objc private func didTapGoToWishRoom() {
-        guard let wishRoomVC = diContainer?.makeWishRoomViewController() else { return }
+        guard let wishRoomVC = makeWishRoomVC?() else { return }
         wishRoomVC.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(wishRoomVC, animated: true)
     }

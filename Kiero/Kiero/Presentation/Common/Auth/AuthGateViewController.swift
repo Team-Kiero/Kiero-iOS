@@ -16,6 +16,10 @@ final class AuthGateViewController: UIViewController {
 #if KIERO_PARENT
     private var parentCoordinator: ParentCoordinator?
 #endif
+    
+#if KIERO_CHILD
+    private var childCoordinator: ChildCoordinator?
+#endif
 
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -201,12 +205,17 @@ final class AuthGateViewController: UIViewController {
 #endif
             
         case .child:
-            let vc = ChildrenLoginViewController(
-                viewModel: ChildrenLoginViewModel(),
-                diContainer: AppDIContainer.shared
-            )
+#if KIERO_CHILD
+            guard let nav = navigationController else { return }
             navigationController?.setNavigationBarHidden(false, animated: true)
-            navigationController?.pushViewController(vc, animated: true)
+            
+            let coordinator = ChildCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak self] vc in
+                self?.changeRoot(vc)
+            }
+            self.childCoordinator = coordinator
+            coordinator.start()
+#endif
         }
     }
 

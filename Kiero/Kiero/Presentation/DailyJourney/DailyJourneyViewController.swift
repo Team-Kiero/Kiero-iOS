@@ -13,6 +13,9 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     
     // MARK: - Properties
     
+    var makeDailyJourneyMapVC: (() -> DailyJourneyMapViewController)?
+    var makeGiveFireStoneVC: ((Int) -> GiveFireStoneViewController)?
+    
     private let mainView = DailyJourneyView()
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
     private let viewWillDisappearSubject = PassthroughSubject<Void, Never>()
@@ -51,8 +54,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         mainView.verifyPhotoButton.addTarget(self, action: #selector(didTapVerifyButton), for: .touchUpInside)
         
         mainView.onMapButtonTap = { [weak self] in
-            let viewModel = DailyJourneyMapViewModel()
-            let mapVC = DailyJourneyMapViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
+            guard let mapVC = self?.makeDailyJourneyMapVC?() else { return }
             mapVC.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(mapVC, animated: true)
         }
@@ -115,11 +117,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             openCamera()
             
         case .tryLightFire:
-            print("🔥 마음의 불꽃 피우기 화면(GiveFireStoneView)으로 이동")
-            
             let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
-            let viewModel = GiveFireStoneViewModel(count: stoneCount)
-            let vc = GiveFireStoneViewController(viewModel: viewModel, diContainer: AppDIContainer.shared)
+            guard let vc = self.makeGiveFireStoneVC?(stoneCount) else { return }
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         }

@@ -15,6 +15,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     
     // MARK: - Properties
     
+    var onFinishSignup: (() -> Void)?
     private var isLastValid = false
     private var isFirstValid = false
     private var isCodeValid = false
@@ -132,7 +133,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
                 guard let self else { return }
                 switch route {
                 case .childOnboarding:
-                    self.navigateToChildOnboarding()
+                    self.onFinishSignup?()
                 }
             }
             .store(in: &cancellables)

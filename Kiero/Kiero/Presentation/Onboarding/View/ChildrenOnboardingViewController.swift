@@ -15,10 +15,12 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
     
     // MARK: - Properties
     
+    var makeLoadingVC: (() -> UIViewController)?
+    var onFinish: (() -> Void)?
+    
     private let nextTap = PassthroughSubject<Void, Never>()
     
     private var currentSpeech: SpeechField?
-    
     private var latestItem: SpeechItem?
     
     private var currentFieldType: SpeechField.fieldType = .main
@@ -160,21 +162,14 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
         nextTap.send(())
     }
     
-    private func navigateToChildrenTap() {
-        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: false)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(tab)
-        }
-    }
-    
     @objc
     private func startButtonDidTap() {
-        let loadingVC = AppDIContainer.shared.makeChildLoadingViewController()
+        guard let loadingVC = makeLoadingVC?() else { return }
         loadingVC.modalPresentationStyle = .fullScreen
         present(loadingVC, animated: false)
         
-        DispatchQueue.main.asyncAfter (deadline: .now() + 4) { [weak self] in
-            self?.navigateToChildrenTap()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
+            self?.onFinish?()
         }
     }
 }
