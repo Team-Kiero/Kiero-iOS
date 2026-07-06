@@ -44,6 +44,7 @@ extension UIViewController {
         let roleSelectionVC = AppDIContainer.shared.makePickRoleViewController() as! PickRoleViewController
         
         roleSelectionVC.onSelectParent = {
+#if KIERO_PARENT
             guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
             
             let nav = UINavigationController()
@@ -55,6 +56,7 @@ extension UIViewController {
             }
             sceneDelegate.parentCoordinator = coordinator
             coordinator.showParentLogin()
+#endif
         }
         
         roleSelectionVC.onSelectChild = {

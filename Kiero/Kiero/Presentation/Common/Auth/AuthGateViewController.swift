@@ -13,7 +13,9 @@ import Then
 
 final class AuthGateViewController: UIViewController {
     
+#if KIERO_PARENT
     private var parentCoordinator: ParentCoordinator?
+#endif
 
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -103,6 +105,7 @@ final class AuthGateViewController: UIViewController {
             }
             
         case .parentRequiredTerms(let terms):
+#if KIERO_PARENT
             guard let nav = navigationController else { return }
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
             coordinator.onRequestRootChange = { [weak self] vc in
@@ -110,8 +113,10 @@ final class AuthGateViewController: UIViewController {
             }
             self.parentCoordinator = coordinator
             coordinator.showParentLogin(pendingRequiredTerms: terms)
-
+#endif
+            
         case .parentOnboarding:
+#if KIERO_PARENT
             guard let nav = navigationController else { return }
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
             coordinator.onRequestRootChange = { [weak self] vc in
@@ -119,6 +124,7 @@ final class AuthGateViewController: UIViewController {
             }
             self.parentCoordinator = coordinator
             coordinator.showParentOnboardingDirectly()
+#endif
             
         case .parentTab:
             changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: true))
@@ -182,6 +188,7 @@ final class AuthGateViewController: UIViewController {
     private func goLoginFlow(for role: LoginUser) {
         switch role {
         case .parent:
+#if KIERO_PARENT
             guard let nav = navigationController else { return }
             navigationController?.setNavigationBarHidden(false, animated: true)
             
@@ -191,6 +198,7 @@ final class AuthGateViewController: UIViewController {
             }
             self.parentCoordinator = coordinator
             coordinator.start()
+#endif
             
         case .child:
             let vc = ChildrenLoginViewController(

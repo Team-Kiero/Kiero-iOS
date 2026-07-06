@@ -12,7 +12,10 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+#if KIERO_PARENT
     var parentCoordinator: ParentCoordinator?
+#endif
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
