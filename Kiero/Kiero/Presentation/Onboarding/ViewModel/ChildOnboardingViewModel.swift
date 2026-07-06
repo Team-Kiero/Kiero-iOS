@@ -1,5 +1,5 @@
 //
-//  ChildrenOnboardingViewModel.swift
+//  ChildOnboardingViewModel.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/17/26.
@@ -8,7 +8,7 @@
 import Combine
 import UIKit
 
-final class ChildrenOnboardingViewModel: BaseViewModel, ViewModelType {
+final class ChildOnboardingViewModel: BaseViewModel, ViewModelType {
     
     // MARK: - Input / Output
     

@@ -24,11 +24,11 @@ final class ChildCoordinator: Coordinator {
 
 extension ChildCoordinator {
     func showChildLogin() {
-        let vc = diContainer.makeChildrenLoginViewController() as! ChildrenLoginViewController
+        let vc = diContainer.makeChildLoginViewController() as! ChildLoginViewController
         
         vc.onFinishSignup = { [weak self] in
             guard let self else { return }
-            let onboardingVC = self.diContainer.makeChildOnboardingViewController() as! ChildrenOnboardingViewController
+            let onboardingVC = self.diContainer.makeChildOnboardingViewController() as! ChildOnboardingViewController
             
             onboardingVC.onFinish = { [weak self] in
                 guard let self else { return }

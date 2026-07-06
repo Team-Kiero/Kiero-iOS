@@ -58,19 +58,19 @@ extension AppDIContainer {
         return ParentInviteViewController(viewModel: vm)
     }
     
-    func makeChildrenLoginViewController() -> UIViewController {
-        let vm = ChildrenLoginViewModel()
-        return ChildrenLoginViewController(viewModel: vm)
+    func makeChildLoginViewController() -> UIViewController {
+        let vm = ChildLoginViewModel()
+        return ChildLoginViewController(viewModel: vm)
     }
     
     func makeChildOnboardingViewController() -> UIViewController {
         let userName = TokenManager.shared.getFirstName() ?? "사용자"
         let items = ChildOnboardingScript.items
-        let viewModel = ChildrenOnboardingViewModel(
+        let viewModel = ChildOnboardingViewModel(
             items: items,
             userName: userName
         )
-        let vc = ChildrenOnboardingViewController(viewModel: viewModel)
+        let vc = ChildOnboardingViewController(viewModel: viewModel)
         vc.makeLoadingVC = { self.makeChildLoadingViewController() }
         
         return vc
@@ -78,7 +78,7 @@ extension AppDIContainer {
     
     func makeChildLoadingViewController() -> UIViewController {
         let viewModel = BaseViewModel()
-        return ChildrenLoadingViewController(viewModel: viewModel)
+        return ChildLoadingViewController(viewModel: viewModel)
     }
 }
 

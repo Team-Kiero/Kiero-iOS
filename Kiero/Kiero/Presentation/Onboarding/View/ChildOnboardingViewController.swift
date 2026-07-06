@@ -1,5 +1,5 @@
 //
-//  ChildrenOnboardingViewController.swift
+//  ChildOnboardingViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -11,7 +11,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboardingViewModel> {
+final class ChildOnboardingViewController: BaseViewController<ChildOnboardingViewModel> {
     
     // MARK: - Properties
     
@@ -78,7 +78,7 @@ final class ChildrenOnboardingViewController: BaseViewController<ChildrenOnboard
         startButton.addTarget(self, action: #selector(startButtonDidTap), for: .touchUpInside)
     }
     
-    override func bind(viewModel: ChildrenOnboardingViewModel) {
+    override func bind(viewModel: ChildOnboardingViewModel) {
         super.bind(viewModel: viewModel)
         
         let output = viewModel.transform(

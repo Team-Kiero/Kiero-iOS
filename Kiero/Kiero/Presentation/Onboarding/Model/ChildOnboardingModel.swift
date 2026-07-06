@@ -1,5 +1,5 @@
 //
-//  ChildrenOnboardingModel.swift
+//  ChildOnboardingModel.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/17/26.

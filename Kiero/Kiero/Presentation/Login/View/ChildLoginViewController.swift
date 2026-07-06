@@ -1,5 +1,5 @@
 //
-//  ChildrenLoginViewController.swift
+//  ChildLoginViewController.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/16/26.
@@ -11,7 +11,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewModel> {
+final class ChildLoginViewController: BaseViewController<ChildLoginViewModel> {
     
     // MARK: - Properties
     
@@ -109,7 +109,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
         codeTextField.externalDelegate = self
     }
     
-    override func bind(viewModel: ChildrenLoginViewModel) {
+    override func bind(viewModel: ChildLoginViewModel) {
         super.bind(viewModel: viewModel)
         
         lastNameTextField.onValidationChanged = { [weak self] isValid in
@@ -183,7 +183,7 @@ final class ChildrenLoginViewController: BaseViewController<ChildrenLoginViewMod
     }
 }
 
-extension ChildrenLoginViewController: UITextFieldDelegate {
+extension ChildLoginViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField === lastNameTextField.innerTextField {
             firstNameTextField.innerTextField.becomeFirstResponder()

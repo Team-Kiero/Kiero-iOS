@@ -28,7 +28,7 @@ public protocol ViewControllerFactory {
     func makeAIMissionViewController() -> UIViewController
     
     // 아이 탭
-    func makeChildrenLoginViewController() -> UIViewController
+    func makeChildLoginViewController() -> UIViewController
     func makeChildOnboardingViewController() -> UIViewController
     func makeDailyJourneyViewController() -> UIViewController
     func makeCoinMissionViewController() -> UIViewController
