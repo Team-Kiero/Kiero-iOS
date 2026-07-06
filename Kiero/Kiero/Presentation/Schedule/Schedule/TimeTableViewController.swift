@@ -27,6 +27,8 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
     
     let scheduleView = ScheduleView()
     
+    var makeEditScheduleVC: ((Schedule) -> AddScheduleViewController)?
+    
     // MARK: - Life Cycle
     
     override func loadView() {
@@ -37,8 +39,8 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         super.viewDidLoad()
     }
     
-    override init(viewModel: ScheduleViewModel, diContainer: any ViewControllerFactory) {
-        super.init(viewModel: viewModel, diContainer: diContainer)
+    override init(viewModel: ScheduleViewModel) {
+        super.init(viewModel: viewModel)
     }
 
     required init?(coder: NSCoder) {
@@ -185,7 +187,7 @@ final class TimeTableViewController: BaseViewController<ScheduleViewModel> {
         bottomSheet.onEditTap = { [weak self] in
             guard let self = self else { return }
             bottomSheet.dismiss(animated: false) {
-                let editVC = AppDIContainer.shared.makeEditScheduleViewController(schedule: schedule)
+                guard let editVC = self.makeEditScheduleVC?(schedule) else { return }
                 editVC.modalPresentationStyle = .overFullScreen
                 
                 editVC.onEditConfirmed = { [weak self] request, selectedDate, _, completion in

@@ -12,6 +12,8 @@ import SnapKit
 import Then
 
 final class AuthGateViewController: UIViewController {
+    
+    private var parentCoordinator: ParentCoordinator?
 
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -95,29 +97,29 @@ final class AuthGateViewController: UIViewController {
         switch route {
         case .pickRole:
             prepareOverlaysIfNeeded()
-
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + IntroTiming.splashHold) { [weak self] in
                 self?.showPickRoleOverlaySequence()
             }
-
+            
         case .parentRequiredTerms(let terms):
-            let vm = ParentLoginViewModel()
-
-            let vc = ParentLoginViewController(
-                viewModel: vm,
-                diContainer: AppDIContainer.shared
-            )
-
-            vc.pendingRequiredTerms = terms
-
-            changeRoot(
-                UINavigationController(rootViewController: vc)
-            )
+            guard let nav = navigationController else { return }
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak self] vc in
+                self?.changeRoot(vc)
+            }
+            self.parentCoordinator = coordinator
+            coordinator.showParentLogin(pendingRequiredTerms: terms)
 
         case .parentOnboarding:
-            let vc = AppDIContainer.shared.makeParentOnboardingViewController()
-            changeRoot(UINavigationController(rootViewController: vc))
-
+            guard let nav = navigationController else { return }
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak self] vc in
+                self?.changeRoot(vc)
+            }
+            self.parentCoordinator = coordinator
+            coordinator.showParentOnboardingDirectly()
+            
         case .parentTab:
             changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: true))
 
@@ -178,22 +180,26 @@ final class AuthGateViewController: UIViewController {
     }
 
     private func goLoginFlow(for role: LoginUser) {
-        let vc: UIViewController
-
         switch role {
         case .parent:
-            let vm = ParentLoginViewModel()
-            vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
+            guard let nav = navigationController else { return }
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak self] vc in
+                self?.changeRoot(vc)
+            }
+            self.parentCoordinator = coordinator
+            coordinator.start()
             
         case .child:
-            vc = ChildrenLoginViewController(
+            let vc = ChildrenLoginViewController(
                 viewModel: ChildrenLoginViewModel(),
                 diContainer: AppDIContainer.shared
             )
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            navigationController?.pushViewController(vc, animated: true)
         }
-
-        navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.pushViewController(vc, animated: true)
     }
 
     private func changeRoot(_ vc: UIViewController) {

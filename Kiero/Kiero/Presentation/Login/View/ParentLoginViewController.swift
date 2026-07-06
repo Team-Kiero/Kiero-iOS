@@ -15,6 +15,9 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     
     // MARK: - Properties
     
+    var onFinishOnboarding: (() -> Void)?
+    var onFinishLogin: (() -> Void)?
+    
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private let appleTap = PassthroughSubject<Void, Never>()
     private let requiredTermsConfirmTap = PassthroughSubject<Void, Never>()
@@ -159,24 +162,14 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private func handle(by route: LoginRoute) {
         switch route {
         case .parentOnboarding:
-            let onboardingVC = AppDIContainer.shared.makeParentOnboardingViewController()
-            if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                sceneDelegate.changeRootViewController(onboardingVC)
-            }
+            onFinishOnboarding?()
         case .parentTab:
-            let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-            changeRoot(tab)
+            onFinishLogin?()
         case .requiredTerms(let terms):
             TokenManager.shared.saveRequiredTermsIds(terms.map { $0.termsId })
             presentRequiredTermsBottomSheet(terms)
         case let .toast(message):
             Toast.show(message: message, bottomInset: 83)
-        }
-    }
-    
-    private func changeRoot(_ vc: UIViewController) {
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(vc)
         }
     }
     

@@ -13,8 +13,10 @@ import Then
 
 final class ParentInviteViewController: BaseViewController<ParentInviteViewModel> {
     
+    var onFinish: (() -> Void)?
+    var onLogout: (() -> Void)?
+    
     private var isChildJoined = false
-    private var isChecking = false
 
     private let profileBox = ProfileBox(name: "사용자", profileURL: "")
     private let titleLabel = UILabel().then {
@@ -80,7 +82,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
         
         profileBox.onTap = { [weak self] in
             self?.showLogoutDialog {
-                LogoutHelper.logoutToPickRole()
+                self?.onLogout?()
             }
         }
     }
@@ -164,7 +166,7 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
                 
                 switch route {
                 case .parentTab:
-                    self.navigateToParentTap()
+                    self.onFinish?()
                     
                 case .toast(let message):
                     Toast.show(message: message, bottomInset: 83)
@@ -187,41 +189,5 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
     @objc
     private func startButtonDidTap() {
         viewModel?.start()
-    }
-    
-    private func checkConnectionOnce() {
-        guard !isChecking else { return }
-        guard let viewModel else { return }
-        guard viewModel.isExpiredValue == false else { return }
-        guard isChildJoined == false else { return }
-        
-        isChecking = true
-        Task { [weak self] in
-            defer { self?.isChecking = false }
-            do {
-                let data: ChildRegistrationStatusDTO = try await BaseService.shared.request(
-                    endPoint: .checkConnection(
-                        lastName: viewModel.childLastName,
-                        firstName: viewModel.childFirstName
-                    )
-                )
-                if data.isRegistered {
-                    await MainActor.run {
-                        self?.isChildJoined = true
-                        self?.startButton.isEnabled = true
-                        self?.startButton.alpha = 1.0
-                    }
-                }
-            } catch {
-                // 조용히 무시(폴백이니까)
-            }
-        }
-    }
-    
-    private func navigateToParentTap() {
-        let tab = TabBarViewController(factory: AppDIContainer.shared, isParent: true)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(tab)
-        }
     }
 }

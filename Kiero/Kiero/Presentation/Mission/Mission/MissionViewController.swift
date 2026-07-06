@@ -13,6 +13,13 @@ import Then
 
 final class MissionViewController: BaseViewController<MissionViewModel> {
     
+    // MARK: - Properties
+    
+    var makeWriteMissionVC: (() -> WriteMissionViewController)?
+    var makeAIMissionVC: (() -> UIViewController)?
+    var makeNotificationFeedVC: (() -> UIViewController)?
+    var makeEditMissionVC: (() -> WriteMissionViewController)?
+    
     // MARK: - UI Components
     
     private let emptyView = EmptyView(text: "등록된 미션이 없어요.\n우측 하단 버튼을 눌러 미션을 추가해보세요!")
@@ -21,8 +28,8 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     
     // MARK: - Life Cycle
     
-    public override init(viewModel: MissionViewModel, diContainer: any ViewControllerFactory) {
-        super.init(viewModel: viewModel, diContainer: diContainer)
+    public override init(viewModel: MissionViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -98,9 +105,7 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
         
         bottomSheet.onEditTap = { [weak self] in
             guard let self = self else { return }
-            guard let editVC = self.diContainer.makeWriteMissionViewController() as? WriteMissionViewController else {
-                return
-            }
+            guard let editVC = self.makeEditMissionVC?() else { return }
             editVC.configureEditMode(with: mission, dueAt: dueAt)
             
             NotificationCenter.default.post(name: .hideTabBar, object: true)
@@ -159,12 +164,12 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     }
     
     private func presentNotificationFeed() {
-        let notificationVC = diContainer.makeNotificationFeedViewController()
+        guard let notificationVC = makeNotificationFeedVC?() else { return }
         self.navigationController?.pushViewController(notificationVC, animated: true)
     }
     
     private func presentAddMissionDirectly() {
-        let vc = diContainer.makeWriteMissionViewController()
+        guard let vc = makeWriteMissionVC?() else { return }
         NotificationCenter.default.post(name: .hideTabBar, object: true)
         NotificationCenter.default.post(name: .hideNavigationBar, object: true)
         vc.modalPresentationStyle = .fullScreen
@@ -172,7 +177,7 @@ final class MissionViewController: BaseViewController<MissionViewModel> {
     }
     
     private func presentAddMissionByAI() {
-        let vc = diContainer.makeAIMissionViewController()
+        guard let vc = makeAIMissionVC?() else { return }
         NotificationCenter.default.post(name: .hideTabBar, object: true)
         NotificationCenter.default.post(name: .hideNavigationBar, object: true)
         vc.modalPresentationStyle = .fullScreen

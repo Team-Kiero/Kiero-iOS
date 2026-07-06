@@ -12,6 +12,7 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    var parentCoordinator: ParentCoordinator?
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,

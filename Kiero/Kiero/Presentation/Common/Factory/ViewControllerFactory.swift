@@ -10,7 +10,10 @@ import UIKit
 public protocol ViewControllerFactory {
     // 부모 탭
     //func makeLoginViewController() -> UIViewController
-    //func makeParentOnboardingViewController() -> UIViewController
+    func makePickRoleViewController() -> UIViewController
+    func makeParentLoginViewController() -> UIViewController
+    func makeParentOnboardingViewController() -> UIViewController
+    func makeParentInviteViewController(childLastName: String, childFirstName: String, inviteCode: String, issuedAt: Date) -> UIViewController
     
     func makeTodayStatusViewController() -> UIViewController
     func makeScheduleViewController() -> UIViewController

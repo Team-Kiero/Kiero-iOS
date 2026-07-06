@@ -45,6 +45,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Config.xcconfig,
+				Coordinator/ParentCoordinator.swift,
 				"GoogleService-Info-Parent.plist",
 				ParentInfo.plist,
 			);

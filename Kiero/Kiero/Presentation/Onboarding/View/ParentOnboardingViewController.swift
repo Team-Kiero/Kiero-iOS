@@ -20,6 +20,9 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private let userName = TokenManager.shared.getUserName() ?? ""
     private let profileURL = TokenManager.shared.getProfile() ?? ""
     
+    var onInvite: ((_ lastName: String, _ firstName: String, _ inviteCode: String, _ issuedAt: Date) -> Void)?
+    var onLogout: (() -> Void)?
+    
     // MARK: - UI Components
     
     private let profileBox = ProfileBox(name: "사용자", profileURL: "")
@@ -127,16 +130,11 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
             .receive(on: DispatchQueue.main)
             .sink { [weak self] route in
                 guard let self else { return }
-                print("✅ [VC] route received:", route)
-                print("nav:", self.navigationController as Any)
                 switch route {
                 case .invite(let last, let first, let inviteCode, let issuedAt):
-                    self.navigateToInviteView(childLastName: last,
-                                              childFirstName: first,
-                                              inviteCode: inviteCode,
-                                              issuedAt: issuedAt)
+                    self.onInvite?(last, first, inviteCode, issuedAt)
                 case .logout:
-                    LogoutHelper.logoutToPickRole()
+                    self.onLogout?()
                 }
             }
             .store(in: &cancellables)
@@ -167,26 +165,6 @@ final class ParentOnboardingViewController: BaseViewController<ParentOnboardingV
     private func updateGenerateButton() {
         let enabled = isLastValid && isFirstValid
         generateButton.isEnabled = enabled
-    }
-    
-    private func navigateToInviteView(
-        childLastName: String,
-        childFirstName: String,
-        inviteCode: String,
-        issuedAt: Date
-    ) {
-        let vm = ParentInviteViewModel(
-            childLastName: childLastName,
-            childFirstName: childFirstName,
-            inviteCode: inviteCode,
-            issuedAt: issuedAt
-        )
-        
-        let vc = ParentInviteViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-        let nav = UINavigationController(rootViewController: vc)
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-            sceneDelegate.changeRootViewController(nav)
-        }
     }
 }
 

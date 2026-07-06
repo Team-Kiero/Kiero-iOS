@@ -30,17 +30,17 @@ extension AppDIContainer {
     
     func makePickRoleViewController() -> UIViewController {
         let viewModel = PickRoleViewModel()
-        return PickRoleViewController(viewModel: viewModel, diContainer: self)
+        return PickRoleViewController(viewModel: viewModel)
     }
     
     func makeParentLoginViewController() -> UIViewController {
         let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService())
-        return ParentLoginViewController(viewModel: vm, diContainer: self)
+        return ParentLoginViewController(viewModel: vm)
     }
     
     func makeParentOnboardingViewController() -> UIViewController {
         let vm = ParentOnboardingViewModel()
-        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
+        return ParentOnboardingViewController(viewModel: vm)
     }
     
     func makeChildOnboardingViewController() -> UIViewController {
@@ -51,6 +51,21 @@ extension AppDIContainer {
             userName: userName
         )
         return ChildrenOnboardingViewController(viewModel: viewModel, diContainer: self)
+    }
+    
+    func makeParentInviteViewController(
+        childLastName: String,
+        childFirstName: String,
+        inviteCode: String,
+        issuedAt: Date
+    ) -> UIViewController {
+        let vm = ParentInviteViewModel(
+            childLastName: childLastName,
+            childFirstName: childFirstName,
+            inviteCode: inviteCode,
+            issuedAt: issuedAt
+        )
+        return ParentInviteViewController(viewModel: vm)
     }
 }
 
@@ -73,13 +88,29 @@ extension AppDIContainer {
     func makeScheduleViewController() -> UIViewController {
         let service = makeScheduleService()
         let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
-        
         let viewModel = ScheduleViewModel(service: service, childId: selectedChildId)
-        return ScheduleViewController(viewModel: viewModel, diContainer: self)
+        
+        let vc = ScheduleViewController(viewModel: viewModel)
+        
+        vc.makeTimeTableVC = { vm in
+            self.makeTimeTableViewController(viewModel: vm)
+        }
+        vc.makeAddScheduleVC = { isFireLit, scheduleList in
+            self.makeAddScheduleViewController(isFireLit: isFireLit, scheduleList: scheduleList)
+        }
+        vc.makeNotificationFeedVC = {
+            self.makeNotificationFeedViewController()
+        }
+        
+        return vc
     }
     
     func makeTimeTableViewController(viewModel: ScheduleViewModel) -> TimeTableViewController {
-        return TimeTableViewController(viewModel: viewModel, diContainer: self)
+        let vc = TimeTableViewController(viewModel: viewModel)
+        vc.makeEditScheduleVC = { schedule in
+            self.makeEditScheduleViewController(schedule: schedule)
+        }
+        return vc
     }
     
     func makeAddScheduleViewController() -> UIViewController {
@@ -139,26 +170,34 @@ extension AppDIContainer {
     func makeMissionViewController() -> UIViewController {
         let service = makeMissionService()
         let viewModel = MissionViewModel(service: service)
-        return MissionViewController(viewModel: viewModel, diContainer: self)
+        let vc = MissionViewController(viewModel: viewModel)
+        
+        vc.makeWriteMissionVC = { self.makeWriteMissionViewController() as! WriteMissionViewController }
+        vc.makeEditMissionVC = { self.makeWriteMissionViewController() as! WriteMissionViewController }
+        vc.makeAIMissionVC = { self.makeAIMissionViewController() }
+        vc.makeNotificationFeedVC = { self.makeNotificationFeedViewController() }
+        
+        return vc
     }
     
     func makeWriteMissionViewController() -> UIViewController {
         let service = WriteMissionService()
         let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
-        
         let viewModel = WriteMissionViewModel(service: service, childId: selectedChildId)
-        return WriteMissionViewController(viewModel: viewModel, diContainer: self)
+        return WriteMissionViewController(viewModel: viewModel)
     }
-    
+
     func makeLoadingViewController() -> UIViewController {
         let viewModel = LoadingViewModel()
-        return LoadingViewController(viewModel: viewModel, diContainer: self)
+        return LoadingViewController(viewModel: viewModel)
     }
-    
+
     func makeAIMissionViewController() -> UIViewController {
         let service = makeAIMissionService()
         let viewModel = AIMissionViewModel(service: service)
-        return AIMissionViewController(viewModel: viewModel, diContainer: self)
+        let vc = AIMissionViewController(viewModel: viewModel)
+        vc.makeLoadingVC = { self.makeLoadingViewController() as! LoadingViewController }
+        return vc
     }
 }
 

@@ -41,7 +41,26 @@ extension UIViewController {
     }
     
     func navigateToPickRole() {
-        let roleSelectionVC = PickRoleViewController(viewModel: PickRoleViewModel(), diContainer: AppDIContainer.shared)
+        let roleSelectionVC = AppDIContainer.shared.makePickRoleViewController() as! PickRoleViewController
+        
+        roleSelectionVC.onSelectParent = {
+            guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            let nav = UINavigationController()
+            sceneDelegate.changeRootViewController(nav, animated: true)
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.parentCoordinator = coordinator
+            coordinator.showParentLogin()
+        }
+        
+        roleSelectionVC.onSelectChild = {
+            // TODO: 아이 로그인 작업 시 수정
+        }
+        
         let nav = UINavigationController(rootViewController: roleSelectionVC)
         
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
