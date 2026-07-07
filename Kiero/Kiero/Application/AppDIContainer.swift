@@ -129,7 +129,7 @@ extension AppDIContainer {
         viewModel.isFireLit = isFireLit
         viewModel.scheduleList = scheduleList
         
-        return AddScheduleViewController(viewModel: viewModel, diContainer: self)
+        return AddScheduleViewController(viewModel: viewModel)
     }
     
     func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController {
@@ -156,7 +156,7 @@ extension AppDIContainer {
     
     func makeNotificationFeedViewController() -> UIViewController {
         let viewModel = makeNotificationFeedViewModel()
-        return NotificationFeedViewController(viewModel: viewModel, diContainer: self)
+        return NotificationFeedViewController(viewModel: viewModel)
     }
 }
 
@@ -230,7 +230,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeCoinMissionViewController() -> UIViewController {
         let viewModel = CoinMissionViewModel()
-        return CoinMissionViewController(viewModel: viewModel, diContainer: self)
+        return CoinMissionViewController(viewModel: viewModel)
     }
 }
 

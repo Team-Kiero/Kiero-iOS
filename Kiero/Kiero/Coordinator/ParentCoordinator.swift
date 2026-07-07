@@ -22,17 +22,6 @@ final class ParentCoordinator: Coordinator {
     }
 }
 
-// MARK: - PickRole
-
-extension ParentCoordinator {
-    func showPickRole() {
-        let vc = diContainer.makePickRoleViewController() as! PickRoleViewController
-        vc.onSelectParent = { [weak self] in self?.showParentLogin() }
-        vc.onSelectChild = { [weak self] in /* 별도 스텝 */ }
-        navigationController.pushViewController(vc, animated: true)
-    }
-}
-
 // MARK: - ParentLogin
 
 extension ParentCoordinator {

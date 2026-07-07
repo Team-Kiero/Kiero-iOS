@@ -30,7 +30,7 @@ final class MissionCompleteViewController: BaseViewController<MissionCompleteVie
     // MARK: - Init
     
     override init(viewModel: MissionCompleteViewModel) {
-        super.init(viewModel: viewModel, diContainer: AppDIContainer.shared)
+        super.init(viewModel: viewModel)
         self.hidesBottomBarWhenPushed = true
     }
     
