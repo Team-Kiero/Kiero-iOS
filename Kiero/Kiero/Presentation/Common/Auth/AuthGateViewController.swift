@@ -12,14 +12,6 @@ import SnapKit
 import Then
 
 final class AuthGateViewController: UIViewController {
-    
-#if KIERO_PARENT
-    private var parentCoordinator: ParentCoordinator?
-#endif
-    
-#if KIERO_CHILD
-    private var childCoordinator: ChildCoordinator?
-#endif
 
     private let viewModel: AuthGateViewModel
     private var cancellables = Set<AnyCancellable>()
@@ -110,23 +102,27 @@ final class AuthGateViewController: UIViewController {
             
         case .parentRequiredTerms(let terms):
 #if KIERO_PARENT
-            guard let nav = navigationController else { return }
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
-            coordinator.onRequestRootChange = { [weak self] vc in
-                self?.changeRoot(vc)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
             }
-            self.parentCoordinator = coordinator
+            sceneDelegate.parentCoordinator = coordinator
             coordinator.showParentLogin(pendingRequiredTerms: terms)
 #endif
             
         case .parentOnboarding:
 #if KIERO_PARENT
-            guard let nav = navigationController else { return }
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
-            coordinator.onRequestRootChange = { [weak self] vc in
-                self?.changeRoot(vc)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
             }
-            self.parentCoordinator = coordinator
+            sceneDelegate.parentCoordinator = coordinator
             coordinator.showParentOnboardingDirectly()
 #endif
             
@@ -193,27 +189,31 @@ final class AuthGateViewController: UIViewController {
         switch role {
         case .parent:
 #if KIERO_PARENT
-            guard let nav = navigationController else { return }
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
             navigationController?.setNavigationBarHidden(false, animated: true)
             
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
-            coordinator.onRequestRootChange = { [weak self] vc in
-                self?.changeRoot(vc)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
             }
-            self.parentCoordinator = coordinator
+            sceneDelegate.parentCoordinator = coordinator
             coordinator.start()
 #endif
             
         case .child:
 #if KIERO_CHILD
-            guard let nav = navigationController else { return }
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
             navigationController?.setNavigationBarHidden(false, animated: true)
             
             let coordinator = ChildCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
-            coordinator.onRequestRootChange = { [weak self] vc in
-                self?.changeRoot(vc)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
             }
-            self.childCoordinator = coordinator
+            sceneDelegate.childCoordinator = coordinator
             coordinator.start()
 #endif
         }

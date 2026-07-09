@@ -71,7 +71,7 @@ extension ParentCoordinator {
             self.onRequestRootChange?(nav)
         }
         
-        vc.onLogout = { [weak self] in
+        vc.onLogout = {
             LogoutHelper.logoutToPickRole()
         }
     }
@@ -87,7 +87,7 @@ extension ParentCoordinator {
             self.onRequestRootChange?(tab)
         }
         
-        vc.onLogout = { [weak self] in
+        vc.onLogout = {
             LogoutHelper.logoutToPickRole()
         }
     }
