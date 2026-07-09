@@ -12,6 +12,9 @@ import Then
 
 final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
+    var onSelectParent: (() -> Void)?
+    var onSelectChild: (() -> Void)?
+    
     private let logoImageView = UIImageView().then {
         $0.image = .imgLogo
         $0.tintColor = .white
@@ -65,23 +68,12 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     }
     
     override func addTarget() {
-        parentButton.onTap = {
-            self.navigateToParentLogin()
+        parentButton.onTap = { [weak self] in
+            self?.onSelectParent?()
         }
         
-        childButton.onTap = {
-            self.navigateToChildrenLogin()
+        childButton.onTap = { [weak self] in
+            self?.onSelectChild?()
         }
-    }
-    
-    private func navigateToParentLogin() {
-        let vm = ParentLoginViewModel()
-        let vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    private func navigateToChildrenLogin() {
-        let vc = ChildrenLoginViewController(viewModel: ChildrenLoginViewModel(), diContainer: AppDIContainer.shared)
-        navigationController?.pushViewController(vc, animated: true)
     }
 }

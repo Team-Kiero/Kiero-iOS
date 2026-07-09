@@ -13,11 +13,17 @@ import Then
 
 class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
+    // MARK: - Properties
+    
+    var makeTimeTableVC: ((ScheduleViewModel) -> TimeTableViewController)?
+    var makeAddScheduleVC: ((Bool, [Schedule]) -> AddScheduleViewController)?
+    var makeNotificationFeedVC: (() -> UIViewController)?
+    
     // MARK: - UI Components
     
     private lazy var scheduleChildVC: TimeTableViewController = {
         guard let viewModel = self.viewModel else { fatalError("ViewModel is missing") }
-        let vc = AppDIContainer.shared.makeTimeTableViewController(viewModel: viewModel)
+        guard let vc = makeTimeTableVC?(viewModel) else { fatalError("makeTimeTableVC not set") }
         return vc
     }()
     
@@ -78,11 +84,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     
     private func presentAddSchedule() {
         guard let viewModel = self.viewModel else { return }
-        
-        let addScheduleVC = AppDIContainer.shared.makeAddScheduleViewController(
-            isFireLit: viewModel.isFireLit,
-            scheduleList: viewModel.scheduleList.value
-        )
+        guard let addScheduleVC = makeAddScheduleVC?(viewModel.isFireLit, viewModel.scheduleList.value) else { return }
         
         let calendar = Calendar.current
         let now = Date()
@@ -96,10 +98,8 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
         let targetDate: Date = (startOfReferenceWeek < startOfCurrentWeek) ? now : viewModel.currentReferenceDate.value
         
         addScheduleVC.baseDate = targetDate
-        
         addScheduleVC.onScheduleAdded = { [weak self] (newSchedule: Schedule, targetDate: Date) in
-            guard let self = self else { return }            
-            self.viewModel?.currentReferenceDate.send(targetDate)
+            self?.viewModel?.currentReferenceDate.send(targetDate)
         }
         
         let nav = UINavigationController(rootViewController: addScheduleVC)
@@ -148,7 +148,7 @@ class ScheduleViewController: BaseViewController<ScheduleViewModel> {
     }
     
     private func presentNotificationFeed() {
-        let notificationVC = diContainer.makeNotificationFeedViewController()
-        self.navigationController?.pushViewController(notificationVC, animated: true)
+        guard let notificationVC = makeNotificationFeedVC?() else { return }
+        navigationController?.pushViewController(notificationVC, animated: true)
     }
 }

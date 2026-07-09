@@ -9,11 +9,13 @@ import SwiftUI
 
 final class MySpaceHostingController: UIHostingController<MySpaceView> {
     
+    var makeWishRoomVC: (() -> UIViewController)?
+    
     init() {
         super.init(rootView: MySpaceView())
         
         rootView.onNavigateToWishRoom = { [weak self] in
-            let vc = WishRoomHostingController()
+            guard let vc = self?.makeWishRoomVC?() else { return }
             vc.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(vc, animated: true)
         }

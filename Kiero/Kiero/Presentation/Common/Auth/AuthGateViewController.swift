@@ -95,29 +95,37 @@ final class AuthGateViewController: UIViewController {
         switch route {
         case .pickRole:
             prepareOverlaysIfNeeded()
-
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + IntroTiming.splashHold) { [weak self] in
                 self?.showPickRoleOverlaySequence()
             }
-
+            
         case .parentRequiredTerms(let terms):
-            let vm = ParentLoginViewModel()
-
-            let vc = ParentLoginViewController(
-                viewModel: vm,
-                diContainer: AppDIContainer.shared
-            )
-
-            vc.pendingRequiredTerms = terms
-
-            changeRoot(
-                UINavigationController(rootViewController: vc)
-            )
-
+#if KIERO_PARENT
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.parentCoordinator = coordinator
+            coordinator.showParentLogin(pendingRequiredTerms: terms)
+#endif
+            
         case .parentOnboarding:
-            let vc = AppDIContainer.shared.makeParentOnboardingViewController()
-            changeRoot(UINavigationController(rootViewController: vc))
-
+#if KIERO_PARENT
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.parentCoordinator = coordinator
+            coordinator.showParentOnboardingDirectly()
+#endif
+            
         case .parentTab:
             changeRoot(TabBarViewController(factory: AppDIContainer.shared, isParent: true))
 
@@ -178,22 +186,37 @@ final class AuthGateViewController: UIViewController {
     }
 
     private func goLoginFlow(for role: LoginUser) {
-        let vc: UIViewController
-
         switch role {
         case .parent:
-            let vm = ParentLoginViewModel()
-            vc = ParentLoginViewController(viewModel: vm, diContainer: AppDIContainer.shared)
+#if KIERO_PARENT
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.parentCoordinator = coordinator
+            coordinator.start()
+#endif
             
         case .child:
-            vc = ChildrenLoginViewController(
-                viewModel: ChildrenLoginViewModel(),
-                diContainer: AppDIContainer.shared
-            )
+#if KIERO_CHILD
+            guard let nav = navigationController,
+                  let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            navigationController?.setNavigationBarHidden(false, animated: true)
+            
+            let coordinator = ChildCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.childCoordinator = coordinator
+            coordinator.start()
+#endif
         }
-
-        navigationController?.setNavigationBarHidden(false, animated: true)
-        navigationController?.pushViewController(vc, animated: true)
     }
 
     private func changeRoot(_ vc: UIViewController) {

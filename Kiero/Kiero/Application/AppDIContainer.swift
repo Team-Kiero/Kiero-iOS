@@ -30,36 +30,55 @@ extension AppDIContainer {
     
     func makePickRoleViewController() -> UIViewController {
         let viewModel = PickRoleViewModel()
-        return PickRoleViewController(viewModel: viewModel, diContainer: self)
+        return PickRoleViewController(viewModel: viewModel)
     }
     
     func makeParentLoginViewController() -> UIViewController {
         let vm = ParentLoginViewModel(kakaoService: makeKakaoAuthService())
-        return ParentLoginViewController(viewModel: vm, diContainer: self)
+        return ParentLoginViewController(viewModel: vm)
     }
     
     func makeParentOnboardingViewController() -> UIViewController {
         let vm = ParentOnboardingViewModel()
-        return ParentOnboardingViewController(viewModel: vm, diContainer: self)
+        return ParentOnboardingViewController(viewModel: vm)
+    }
+    
+    func makeParentInviteViewController(
+        childLastName: String,
+        childFirstName: String,
+        inviteCode: String,
+        issuedAt: Date
+    ) -> UIViewController {
+        let vm = ParentInviteViewModel(
+            childLastName: childLastName,
+            childFirstName: childFirstName,
+            inviteCode: inviteCode,
+            issuedAt: issuedAt
+        )
+        return ParentInviteViewController(viewModel: vm)
+    }
+    
+    func makeChildLoginViewController() -> UIViewController {
+        let vm = ChildLoginViewModel()
+        return ChildLoginViewController(viewModel: vm)
     }
     
     func makeChildOnboardingViewController() -> UIViewController {
         let userName = TokenManager.shared.getFirstName() ?? "사용자"
         let items = ChildOnboardingScript.items
-        let viewModel = ChildrenOnboardingViewModel(
+        let viewModel = ChildOnboardingViewModel(
             items: items,
             userName: userName
         )
-        return ChildrenOnboardingViewController(viewModel: viewModel, diContainer: self)
+        let vc = ChildOnboardingViewController(viewModel: viewModel)
+        vc.makeLoadingVC = { self.makeChildLoadingViewController() }
+        
+        return vc
     }
-}
-
-// MARK: - Onboarding
-
-extension AppDIContainer {
+    
     func makeChildLoadingViewController() -> UIViewController {
         let viewModel = BaseViewModel()
-        return ChildrenLoadingViewController(viewModel: viewModel, diContainer: self)
+        return ChildLoadingViewController(viewModel: viewModel)
     }
 }
 
@@ -73,13 +92,29 @@ extension AppDIContainer {
     func makeScheduleViewController() -> UIViewController {
         let service = makeScheduleService()
         let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
-        
         let viewModel = ScheduleViewModel(service: service, childId: selectedChildId)
-        return ScheduleViewController(viewModel: viewModel, diContainer: self)
+        
+        let vc = ScheduleViewController(viewModel: viewModel)
+        
+        vc.makeTimeTableVC = { vm in
+            self.makeTimeTableViewController(viewModel: vm)
+        }
+        vc.makeAddScheduleVC = { isFireLit, scheduleList in
+            self.makeAddScheduleViewController(isFireLit: isFireLit, scheduleList: scheduleList)
+        }
+        vc.makeNotificationFeedVC = {
+            self.makeNotificationFeedViewController()
+        }
+        
+        return vc
     }
     
     func makeTimeTableViewController(viewModel: ScheduleViewModel) -> TimeTableViewController {
-        return TimeTableViewController(viewModel: viewModel, diContainer: self)
+        let vc = TimeTableViewController(viewModel: viewModel)
+        vc.makeEditScheduleVC = { schedule in
+            self.makeEditScheduleViewController(schedule: schedule)
+        }
+        return vc
     }
     
     func makeAddScheduleViewController() -> UIViewController {
@@ -94,7 +129,7 @@ extension AppDIContainer {
         viewModel.isFireLit = isFireLit
         viewModel.scheduleList = scheduleList
         
-        return AddScheduleViewController(viewModel: viewModel, diContainer: self)
+        return AddScheduleViewController(viewModel: viewModel)
     }
     
     func makeEditScheduleViewController(schedule: Schedule) -> AddScheduleViewController {
@@ -121,7 +156,7 @@ extension AppDIContainer {
     
     func makeNotificationFeedViewController() -> UIViewController {
         let viewModel = makeNotificationFeedViewModel()
-        return NotificationFeedViewController(viewModel: viewModel, diContainer: self)
+        return NotificationFeedViewController(viewModel: viewModel)
     }
 }
 
@@ -139,26 +174,34 @@ extension AppDIContainer {
     func makeMissionViewController() -> UIViewController {
         let service = makeMissionService()
         let viewModel = MissionViewModel(service: service)
-        return MissionViewController(viewModel: viewModel, diContainer: self)
+        let vc = MissionViewController(viewModel: viewModel)
+        
+        vc.makeWriteMissionVC = { self.makeWriteMissionViewController() as! WriteMissionViewController }
+        vc.makeEditMissionVC = { self.makeWriteMissionViewController() as! WriteMissionViewController }
+        vc.makeAIMissionVC = { self.makeAIMissionViewController() }
+        vc.makeNotificationFeedVC = { self.makeNotificationFeedViewController() }
+        
+        return vc
     }
     
     func makeWriteMissionViewController() -> UIViewController {
         let service = WriteMissionService()
         let selectedChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
-        
         let viewModel = WriteMissionViewModel(service: service, childId: selectedChildId)
-        return WriteMissionViewController(viewModel: viewModel, diContainer: self)
+        return WriteMissionViewController(viewModel: viewModel)
     }
-    
+
     func makeLoadingViewController() -> UIViewController {
         let viewModel = LoadingViewModel()
-        return LoadingViewController(viewModel: viewModel, diContainer: self)
+        return LoadingViewController(viewModel: viewModel)
     }
-    
+
     func makeAIMissionViewController() -> UIViewController {
         let service = makeAIMissionService()
         let viewModel = AIMissionViewModel(service: service)
-        return AIMissionViewController(viewModel: viewModel, diContainer: self)
+        let vc = AIMissionViewController(viewModel: viewModel)
+        vc.makeLoadingVC = { self.makeLoadingViewController() as! LoadingViewController }
+        return vc
     }
 }
 
@@ -167,7 +210,18 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeDailyJourneyViewController() -> UIViewController {
         let viewModel = DailyJourneyViewModel()
-        return DailyJourneyViewController(viewModel: viewModel, diContainer: self)
+        let vc = DailyJourneyViewController(viewModel: viewModel)
+        
+        vc.makeDailyJourneyMapVC = {
+            let vm = DailyJourneyMapViewModel()
+            return DailyJourneyMapViewController(viewModel: vm)
+        }
+        vc.makeGiveFireStoneVC = { stoneCount in
+            let vm = GiveFireStoneViewModel(count: stoneCount)
+            return GiveFireStoneViewController(viewModel: vm)
+        }
+        
+        return vc
     }
 }
 
@@ -176,7 +230,7 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeCoinMissionViewController() -> UIViewController {
         let viewModel = CoinMissionViewModel()
-        return CoinMissionViewController(viewModel: viewModel, diContainer: self)
+        return CoinMissionViewController(viewModel: viewModel)
     }
 }
 
@@ -193,7 +247,9 @@ extension AppDIContainer {
     
     func makeWishWellViewController() -> UIViewController {
         let viewModel = makeWishWellViewModel()
-        return WishWellViewController(viewModel: viewModel, diContainer: self)
+        let vc = WishWellViewController(viewModel: viewModel)
+        vc.makeWishRoomVC = { self.makeWishRoomViewController() }
+        return vc
     }
 }
 
@@ -202,7 +258,9 @@ extension AppDIContainer {
 extension AppDIContainer {
     func makeWishRoomViewController() -> UIViewController {
         let viewModel = WishRoomViewModel()
-        return WishRoomHostingController(viewModel: viewModel)
+        let vc = WishRoomHostingController(viewModel: viewModel)
+        vc.makeWishWellVC = { self.makeWishWellViewController() }
+        return vc
     }
 }
 
@@ -210,7 +268,9 @@ extension AppDIContainer {
 
 extension AppDIContainer {
     func makeMySpaceViewController() -> UIViewController {
-        return MySpaceHostingController()
+        let vc = MySpaceHostingController()
+        vc.makeWishRoomVC = { self.makeWishRoomViewController() }
+        return vc
     }
 }
 

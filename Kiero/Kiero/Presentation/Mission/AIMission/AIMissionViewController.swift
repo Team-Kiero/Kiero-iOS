@@ -14,6 +14,8 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
     
     // MARK: - Properties
     
+    var makeLoadingVC: (() -> LoadingViewController)?
+    
     var isAnalysisDone: Bool = false {
         didSet {
             updateViewStatus()
@@ -189,10 +191,7 @@ final class AIMissionViewController: BaseViewController<AIMissionViewModel> {
                 if isLoading {
                     if self.isAnalysisDone { return }
                     
-                    let loadingVC = LoadingViewController(
-                        viewModel: LoadingViewModel(),
-                        diContainer: AppDIContainer.shared
-                    )
+                    guard let loadingVC = self.makeLoadingVC?() else { return }
                     loadingVC.modalPresentationStyle = .overFullScreen
                     self.present(loadingVC, animated: false)
                 } else {

@@ -1,5 +1,5 @@
 //
-//  ChildrenLoginViewModel.swift
+//  ChildLoginViewModel.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/21/26.
@@ -18,7 +18,7 @@ enum ChildLoginState: Equatable {
     case failure(String)
 }
 
-final class ChildrenLoginViewModel: BaseViewModel {
+final class ChildLoginViewModel: BaseViewModel {
 
     // MARK: - Publisher
 

@@ -41,7 +41,40 @@ extension UIViewController {
     }
     
     func navigateToPickRole() {
-        let roleSelectionVC = PickRoleViewController(viewModel: PickRoleViewModel(), diContainer: AppDIContainer.shared)
+        let roleSelectionVC = AppDIContainer.shared.makePickRoleViewController() as! PickRoleViewController
+        
+        roleSelectionVC.onSelectParent = {
+#if KIERO_PARENT
+            guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            let nav = UINavigationController()
+            sceneDelegate.changeRootViewController(nav, animated: true)
+            
+            let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.parentCoordinator = coordinator
+            coordinator.showParentLogin()
+#endif
+        }
+        
+        roleSelectionVC.onSelectChild = {
+#if KIERO_CHILD
+            guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
+            
+            let nav = UINavigationController()
+            sceneDelegate.changeRootViewController(nav, animated: true)
+            
+            let coordinator = ChildCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
+            coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
+                sceneDelegate?.changeRootViewController(vc)
+            }
+            sceneDelegate.childCoordinator = coordinator
+            coordinator.start()
+#endif
+        }
+        
         let nav = UINavigationController(rootViewController: roleSelectionVC)
         
         if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {

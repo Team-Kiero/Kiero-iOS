@@ -12,6 +12,14 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+#if KIERO_PARENT
+    var parentCoordinator: ParentCoordinator?
+#endif
+    
+#if KIERO_CHILD
+    var childCoordinator: ChildCoordinator?
+#endif
 
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
@@ -75,7 +83,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidEnterBackground(_ scene: UIScene) {
         SseStreamManager.shared.pause()
     }
-
-
 }
-

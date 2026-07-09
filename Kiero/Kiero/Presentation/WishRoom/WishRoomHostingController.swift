@@ -10,13 +10,14 @@ import SwiftUI
 final class WishRoomHostingController: UIHostingController<WishRoomView> {
     
     private let viewModel: WishRoomViewModel
+    var makeWishWellVC: (() -> UIViewController)?
     
     init(viewModel: WishRoomViewModel = WishRoomViewModel()) {
         self.viewModel = viewModel
         super.init(rootView: WishRoomView(viewModel: viewModel))
         
         self.viewModel.onNavigateToWishWell = { [weak self] in
-            let wishWellVC = AppDIContainer.shared.makeWishWellViewController()
+            guard let wishWellVC = self?.makeWishWellVC?() else { return }
             self?.navigationController?.pushViewController(wishWellVC, animated: true)
         }
     }

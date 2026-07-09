@@ -11,7 +11,7 @@ import Lottie
 import SnapKit
 import Then
 
-final class ChildrenLoadingViewController: BaseViewController<BaseViewModel> {
+final class ChildLoadingViewController: BaseViewController<BaseViewModel> {
     
     // MARK: - UI Components
     
