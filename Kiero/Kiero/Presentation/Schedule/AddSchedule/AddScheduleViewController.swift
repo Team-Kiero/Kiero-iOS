@@ -179,7 +179,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         colorSelectionView.snp.makeConstraints {
             $0.top.equalTo(timeSectionTitle.snp.bottom).offset(132)
             $0.horizontalEdges.equalToSuperview().inset(15)
-            $0.height.equalTo(44)
+            $0.height.equalTo(47)
         }
     }
     
