@@ -53,4 +53,19 @@ final class FCMTokenManager {
             print("❌ FCM 토큰 서버 전송 실패: \(error)")
         }
     }
+    
+    func disablePushNotificationsForLogout() async {
+        UserDefaults.standard.set(false, forKey: "child_pushNotificationEnabled")
+
+        do {
+            let body = NotificationSettingsRequest(pushNotificationEnabled: false)
+            let _: EmptyResponse = try await BaseService.shared.request(
+                endPoint: .updateNotificationSettings,
+                body: body
+            )
+            print("✅ 로그아웃 전 푸시 알림 비활성화 성공")
+        } catch {
+            print("❌ 로그아웃 전 푸시 알림 비활성화 실패: \(error)")
+        }
+    }
 }
