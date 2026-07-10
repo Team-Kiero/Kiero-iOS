@@ -82,19 +82,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
     
     private let timeSelectionView = TimeSelectionView()
     
-    private let colorSectionTitle = UILabel().then {
-        $0.setTypo(.title3_16_SB, text: "컬러")
-        $0.textColor = .white
-    }
-    
-    private let selectedColorChip = ColorChip().then {
-        $0.isUserInteractionEnabled = false
-    }
-    
-    private let colorArrowButton = UIButton().then {
-        $0.setImage(UIImage(resource: .icRight), for: .normal)
-        $0.tintColor = .white
-    }
+    private let colorSelectionView = ColorSelectionView()
     
     // MARK: - Life Cycle
     
@@ -119,7 +107,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                          daySectionTitle, repeatLabel, repeatSwitch,
                          weekdaySelectionView,
                          timeSectionTitle, timeSelectionView,
-                         colorSectionTitle, selectedColorChip, colorArrowButton)
+                         colorSelectionView)
         
         let weekDates = Date().daysOfWeek
         
@@ -188,19 +176,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
             $0.horizontalEdges.equalToSuperview().inset(15)
         }
         
-        colorSectionTitle.snp.makeConstraints {
+        colorSelectionView.snp.makeConstraints {
             $0.top.equalTo(timeSectionTitle.snp.bottom).offset(132)
-            $0.leading.equalToSuperview().inset(15)
-        }
-        
-        selectedColorChip.snp.makeConstraints {
-            $0.centerY.equalTo(colorSectionTitle)
-            $0.trailing.equalTo(colorArrowButton.snp.leading).offset(-10)
-        }
-        
-        colorArrowButton.snp.makeConstraints {
-            $0.centerY.equalTo(colorSectionTitle)
-            $0.trailing.equalToSuperview().inset(10)
+            $0.horizontalEdges.equalToSuperview().inset(15)
+            $0.height.equalTo(47)
         }
     }
     
@@ -352,8 +331,10 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         timeSelectionView.startTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: true) }
         timeSelectionView.endTimeTapAction = { [weak self] in self?.presentTimePicker(isStart: false) }
         titleTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        colorArrowButton.addTarget(self, action: #selector(didTapColorPicker), for: .touchUpInside)
         repeatSwitch.addTarget(self, action: #selector(repeatSwitchChanged), for: .valueChanged)
+        colorSelectionView.onTap = { [weak self] in
+            self?.didTapColorPicker()
+        }
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
@@ -473,8 +454,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
                 
                 if self.currentSelectedColor == nil {
                     self.currentSelectedColor = color
-                    self.selectedColorChip.isHidden = false
-                    self.selectedColorChip.configure(with: color, isSelected: false)
+                    self.colorSelectionView.configure(with: color)
                 }
             }
             .store(in: &cancellables)
@@ -634,8 +614,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         vc.onColorSelected = { [weak self] selectedColor in
             guard let self = self else { return }
-            self.selectedColorChip.isHidden = false
-            self.selectedColorChip.configure(with: selectedColor, isSelected: false)
+            self.colorSelectionView.configure(with: selectedColor)
             self.currentSelectedColor = selectedColor
         }
         
@@ -708,8 +687,7 @@ class AddScheduleViewController: BaseViewController<AddScheduleViewModel> {
         
         let color = colorReverseMapping[schedule.scheduleColor] ?? UIColor(hex: schedule.colorCode)
         currentSelectedColor = color
-        selectedColorChip.isHidden = false
-        selectedColorChip.configure(with: color, isSelected: false)
+        colorSelectionView.configure(with: color)
     }
     
     private func handleEditConfirm() {
