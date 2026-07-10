@@ -72,6 +72,8 @@ final class ScheduleService: ScheduleServiceType {
         return Future<Void, NetworkError> { promise in
             Task {
                 do {
+                    await FCMTokenManager.shared.disablePushNotificationsForLogout()
+                    
                     let _: EmptyResponse = try await BaseService.shared.request(endPoint: .logout)
                     promise(.success(()))
                 } catch {
