@@ -2,6 +2,8 @@
 //  AmplitudeManager.swift
 //  Kiero
 //
+//  Created by Hyunseo Han on 7/28/26.
+//
 
 import Foundation
 
