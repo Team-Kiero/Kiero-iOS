@@ -81,6 +81,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                TokenManager.shared.saveEmail(loginData.email)
+                
+                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.setUserProperties([
+                    .loginMethod: AnalyticsLoginMethod.kakao.rawValue
+                ])
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -91,6 +97,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                AmplitudeManager.shared.setUserProperties([
+                    .childConnected: !children.isEmpty
+                ])
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -149,6 +158,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                TokenManager.shared.saveEmail(loginData.email)
+                
+                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.setUserProperties([
+                    .loginMethod: AnalyticsLoginMethod.apple.rawValue
+                ])
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -159,6 +174,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                AmplitudeManager.shared.setUserProperties([
+                    .childConnected: !children.isEmpty
+                ])
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -193,15 +211,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         let agreement: RequiredTermsAgreementStatusData = try await BaseService.shared.request(
             endPoint: .requiredTermsAgreementStatus
         )
-
+        
         guard agreement.isRequiredTermsAllAgreed == false else {
             return nil
         }
-
+        
         let terms: [RequiredTerm] = try await BaseService.shared.request(
             endPoint: .requiredTerms
         )
-
+        
         return terms
     }
     
@@ -213,7 +231,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             }
             return true
         }
-
+        
         return false
     }
     
