@@ -92,6 +92,11 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                     body: req
                 )
                 
+                AmplitudeManager.shared.track(.inviteCodeCreated, properties: [
+                    AnalyticsEventProperty.inviteCodeHash: AnalyticsIdentity.hashed(data.code),
+                    AnalyticsEventProperty.source: "child_manage"
+                ])
+
                 await MainActor.run {
                     let expiresAt = Date().addingTimeInterval(self.expiresIn)
 
