@@ -34,6 +34,9 @@ final class WriteMissionViewModel: BaseViewModel {
                 }
             } receiveValue: { [weak self] response in
                 print("🔍 새로 추가된 미션 id: \(response.id)")
+                AmplitudeManager.shared.track(.missionCreated, properties: [
+                    AnalyticsEventProperty.source: "manual"
+                ])
                 var recentActivity = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []
                 recentActivity.append(response.id)
                 UserDefaults.standard.set(recentActivity, forKey: "recentActivityIds")
