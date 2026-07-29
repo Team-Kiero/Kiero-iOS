@@ -18,6 +18,8 @@
 		249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 249C64192F0FA1F50016D6B7 /* Moya */; };
 		24DF523F2F0A6487007146AC /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF523E2F0A6487007146AC /* SnapKit */; };
 		24DF52422F0A64A0007146AC /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 24DF52412F0A64A0007146AC /* Then */; };
+		A100000000000000000000B2 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A100000000000000000000B1 /* AmplitudeSwift */; };
+		A100000000000000000000C2 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A100000000000000000000C1 /* AmplitudeSwift */; };
 		AE418AB42FC6CCE8000B043E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB32FC6CCE8000B043E /* FirebaseMessaging */; };
 		AE418AB62FC6CCF0000B043E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB52FC6CCF0000B043E /* FirebaseCore */; };
 		AE418AB82FC6CCFE000B043E /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = AE418AB72FC6CCFE000B043E /* FirebaseCore */; };
@@ -81,6 +83,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE418ABA2FC6CD03000B043E /* FirebaseMessaging in Frameworks */,
+				A100000000000000000000B2 /* AmplitudeSwift in Frameworks */,
 				2455DCE02F23628F00836E3D /* Kingfisher in Frameworks */,
 				2455DCE12F23628F00836E3D /* CombineMoya in Frameworks */,
 				AE418AB82FC6CCFE000B043E /* FirebaseCore in Frameworks */,
@@ -110,6 +113,7 @@
 				F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */,
 				AE418AB42FC6CCE8000B043E /* FirebaseMessaging in Frameworks */,
 				AE418AB62FC6CCF0000B043E /* FirebaseCore in Frameworks */,
+				A100000000000000000000C2 /* AmplitudeSwift in Frameworks */,
 				AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -176,6 +180,7 @@
 				AEF67B512F4C6C53007319A0 /* Lottie */,
 				AE418AB72FC6CCFE000B043E /* FirebaseCore */,
 				AE418AB92FC6CD03000B043E /* FirebaseMessaging */,
+				A100000000000000000000B1 /* AmplitudeSwift */,
 			);
 			productName = Kiero;
 			productReference = 2455DCEC2F23628F00836E3D /* Kiero_Child.app */;
@@ -210,6 +215,7 @@
 				AEF67B4F2F4C6C41007319A0 /* Lottie */,
 				AE418AB32FC6CCE8000B043E /* FirebaseMessaging */,
 				AE418AB52FC6CCF0000B043E /* FirebaseCore */,
+				A100000000000000000000C1 /* AmplitudeSwift */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero_Parent.app */;
@@ -248,6 +254,7 @@
 				AEF67B362F4C5C20007319A0 /* XCRemoteSwiftPackageReference "KingfisherWebP" */,
 				AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				A100000000000000000000A1 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 24DF50CC2F0A5173007146AC /* Products */;
@@ -662,6 +669,14 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		A100000000000000000000A1 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/Amplitude-Swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.6;
+			};
+		};
 		AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
@@ -759,6 +774,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 24DF52402F0A64A0007146AC /* XCRemoteSwiftPackageReference "Then" */;
 			productName = Then;
+		};
+		A100000000000000000000B1 /* AmplitudeSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A100000000000000000000A1 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
+			productName = AmplitudeSwift;
+		};
+		A100000000000000000000C1 /* AmplitudeSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A100000000000000000000A1 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
+			productName = AmplitudeSwift;
 		};
 		AE418AB32FC6CCE8000B043E /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;

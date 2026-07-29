@@ -8,6 +8,7 @@
 import UIKit
 import UserNotifications
 
+import AmplitudeSwift
 import KakaoSDKCommon
 import FirebaseCore
 import FirebaseMessaging
@@ -39,6 +40,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
             NSLog("❌ GoogleService-Info.plist를 찾을 수 없음")
         }
         
+        // 앰플리튜드 초기화
+        AmplitudeManager.shared.configure()
+
         UNUserNotificationCenter.current().delegate = self
         
         application.registerForRemoteNotifications()

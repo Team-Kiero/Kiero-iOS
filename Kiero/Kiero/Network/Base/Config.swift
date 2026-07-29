@@ -12,6 +12,8 @@ enum Config {
         enum Plist {
             static let BASE_URL = "BASE_URL"
             static let KAKAO_NATIVE_APP_KEY = "KAKAO_NATIVE_APP_KEY"
+            static let AMPLITUDE_API_KEY_DEV = "AMPLITUDE_API_KEY_DEV"
+            static let AMPLITUDE_API_KEY_PROD = "AMPLITUDE_API_KEY_PROD"
         }
     }
     
@@ -45,6 +47,20 @@ extension Config {
         return key
     }()
     
+    /// Debug 빌드는 앰플리튜드 DEV 프로젝트, Release 빌드는 PROD 프로젝트로 전송
+    static let amplitudeAPIKey: String = {
+        #if DEBUG
+        let plistKey = Keys.Plist.AMPLITUDE_API_KEY_DEV
+        #else
+        let plistKey = Keys.Plist.AMPLITUDE_API_KEY_PROD
+        #endif
+
+        guard let key = Config.infoDictionary[plistKey] as? String else {
+            fatalError("\(plistKey) is not set in plist for this configuration")
+        }
+        return key
+    }()
+
     static let sseURL: URL = {
         guard let url = URL(string: baseURL + "/api/v1/subscribe") else {
             fatalError("구성된 SSE_URL이 유효한 URL 형식이 아닙니다: \(baseURL)")
