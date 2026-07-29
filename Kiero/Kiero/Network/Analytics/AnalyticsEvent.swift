@@ -41,6 +41,15 @@ enum AnalyticsEvent: String {
 enum AnalyticsEventProperty {
     static let role = "role"
     static let inviteCodeHash = "invite_code_hash"
+    static let pushType = "push_type"
+    static let granted = "granted"
+    static let source = "source"
+    static let loginMethod = "login_method"
+    static let selectedRole = "selected_role"
+    static let count = "count"
+    static let earnedCoin = "earned_coin"
+    static let stoneCount = "stone_count"
+    static let price = "price"
 }
 
 enum AnalyticsUserProperty: String {

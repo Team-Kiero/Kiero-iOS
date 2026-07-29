@@ -41,6 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         }
         
         AmplitudeManager.shared.configure()
+        AmplitudeManager.shared.track(.appOpened)
 
         UNUserNotificationCenter.current().delegate = self
         
@@ -90,7 +91,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     private func handleNotification(_ userInfo: [AnyHashable: Any]) {
         let type = userInfo["type"] as? String
         let targetId = userInfo["targetId"] as? String
-        
+
+        AmplitudeManager.shared.track(.pushClicked, properties: [
+            AnalyticsEventProperty.pushType: type ?? "unknown"
+        ])
+
         Task { @MainActor in
             DeepLinkManager.shared.handle(type: type, targetId: targetId)
         }

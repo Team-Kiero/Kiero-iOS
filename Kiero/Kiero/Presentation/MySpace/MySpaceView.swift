@@ -153,6 +153,10 @@ private extension MySpaceView {
                     showNotificationDialog = true
                 case .notDetermined:
                     UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                        AmplitudeManager.shared.track(.pushPermissionResult, properties: [
+                            AnalyticsEventProperty.granted: granted,
+                            AnalyticsEventProperty.source: "my_space"
+                        ])
                         DispatchQueue.main.async {
                             isAlarmOn = granted
                             if granted {
