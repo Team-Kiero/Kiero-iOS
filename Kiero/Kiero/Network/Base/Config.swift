@@ -47,7 +47,6 @@ extension Config {
         return key
     }()
     
-    /// Debug 빌드는 앰플리튜드 DEV 프로젝트, Release 빌드는 PROD 프로젝트로 전송
     static let amplitudeAPIKey: String = {
         #if DEBUG
         let plistKey = Keys.Plist.AMPLITUDE_API_KEY_DEV
