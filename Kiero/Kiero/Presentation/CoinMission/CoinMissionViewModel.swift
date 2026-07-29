@@ -74,6 +74,7 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
                     .eraseToAnyPublisher()
             }
             .sink { [weak self] dto in
+                AmplitudeManager.shared.track(.missionCompleted)
                 self?.applyComplete(dto)
             }
             .store(in: &cancellables)

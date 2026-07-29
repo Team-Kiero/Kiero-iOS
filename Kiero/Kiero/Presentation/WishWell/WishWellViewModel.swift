@@ -65,6 +65,9 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
                 guard let self = self else { return Empty().eraseToAnyPublisher()}
                 return self.service.purchaseCoupon(couponId: couponId)
                     .handleEvents(receiveOutput: { [weak self] purchased in
+                        AmplitudeManager.shared.track(.wishPurchased, properties: [
+                            AnalyticsEventProperty.price: purchased.price
+                        ])
                         self?.purchaseCompletedSubject.send(purchased)
                     })
                     .catch { [weak self] err -> Empty<Coupon, Never> in
