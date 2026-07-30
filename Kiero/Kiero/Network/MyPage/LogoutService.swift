@@ -17,6 +17,8 @@ final class LogoutService {
             Future { promise in
                 Task {
                     do {
+                        await FCMTokenManager.shared.disablePushNotificationsForLogout()
+                        
                         let _: BaseResponse<String?> = try await BaseService.shared.request(endPoint: .logout)
                         
                         TokenManager.shared.clearAll()
