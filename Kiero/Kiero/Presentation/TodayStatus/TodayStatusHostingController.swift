@@ -122,6 +122,7 @@ private extension TodayStatusHostingController {
                     AnalyticsEventProperty.granted: granted,
                     AnalyticsEventProperty.source: "today_status"
                 ])
+                AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                 guard granted else { return }
 
                 DispatchQueue.main.async {

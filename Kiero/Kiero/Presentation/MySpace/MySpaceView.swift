@@ -157,6 +157,7 @@ private extension MySpaceView {
                             AnalyticsEventProperty.granted: granted,
                             AnalyticsEventProperty.source: "my_space"
                         ])
+                        AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                         DispatchQueue.main.async {
                             isAlarmOn = granted
                             if granted {
@@ -206,6 +207,8 @@ private extension MySpaceView {
     }
     
     func updateNotificationSettings(enabled: Bool) {
+        AmplitudeManager.shared.setUserProperties([.pushEnabled: enabled])
+
         Task {
             do {
                 let body = NotificationSettingsRequest(pushNotificationEnabled: enabled)

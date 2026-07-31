@@ -168,6 +168,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
                     AnalyticsEventProperty.granted: granted,
                     AnalyticsEventProperty.source: "daily_journey"
                 ])
+                AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                 guard granted else { return }
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
