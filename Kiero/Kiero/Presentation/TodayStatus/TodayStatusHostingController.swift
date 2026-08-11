@@ -118,10 +118,7 @@ private extension TodayStatusHostingController {
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
             ) { [weak self] granted, _ in
-                AmplitudeManager.shared.track(.pushPermissionResult, properties: [
-                    AnalyticsEventProperty.granted: granted,
-                    AnalyticsEventProperty.source: "today_status"
-                ])
+                AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .todayStatus))
                 AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                 guard granted else { return }
 

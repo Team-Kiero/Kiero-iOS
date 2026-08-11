@@ -87,9 +87,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 AmplitudeManager.shared.setUserProperties([
                     .loginMethod: AnalyticsLoginMethod.kakao.rawValue
                 ])
-                AmplitudeManager.shared.track(.loginCompleted, properties: [
-                    AnalyticsEventProperty.loginMethod: AnalyticsLoginMethod.kakao.rawValue
-                ])
+                AmplitudeManager.shared.track(.loginCompleted(method: .kakao))
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -167,9 +165,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 AmplitudeManager.shared.setUserProperties([
                     .loginMethod: AnalyticsLoginMethod.apple.rawValue
                 ])
-                AmplitudeManager.shared.track(.loginCompleted, properties: [
-                    AnalyticsEventProperty.loginMethod: AnalyticsLoginMethod.apple.rawValue
-                ])
+                AmplitudeManager.shared.track(.loginCompleted(method: .apple))
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 

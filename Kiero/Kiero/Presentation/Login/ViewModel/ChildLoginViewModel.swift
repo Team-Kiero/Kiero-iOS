@@ -74,12 +74,8 @@ final class ChildLoginViewModel: BaseViewModel {
                     .loginMethod: AnalyticsLoginMethod.inviteCode.rawValue,
                     .childConnected: true
                 ])
-                AmplitudeManager.shared.track(.loginCompleted, properties: [
-                    AnalyticsEventProperty.loginMethod: AnalyticsLoginMethod.inviteCode.rawValue
-                ])
-                AmplitudeManager.shared.track(.childConnectionCompleted, properties: [
-                    AnalyticsEventProperty.inviteCodeHash: AnalyticsIdentity.hashed(code)
-                ])
+                AmplitudeManager.shared.track(.loginCompleted(method: .inviteCode))
+                AmplitudeManager.shared.track(.childConnectionCompleted(codeHash: AnalyticsIdentity.hashed(code)))
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 

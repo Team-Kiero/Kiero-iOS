@@ -28,20 +28,20 @@ final class AmplitudeManager {
         amplitude = Amplitude(configuration: configuration)
 
         refreshUserId()
-        setUserProperties([.role: AnalyticsIdentity.role])
+        setUserProperties([.role: AnalyticsIdentity.role.rawValue])
     }
 
     // MARK: - Event
 
-    func track(_ event: AnalyticsEvent, properties: [String: Any]? = nil) {
-        var merged = properties ?? [:]
-        merged[AnalyticsEventProperty.role] = AnalyticsIdentity.role
+    func track(_ event: AnalyticsEvent) {
+        var merged = event.properties
+        merged[AnalyticsUserProperty.role.rawValue] = AnalyticsIdentity.role.rawValue
 
 #if DEBUG
-        NSLog("📊 [Amplitude] track %@ %@", event.rawValue, String(describing: merged))
+        NSLog("📊 [Amplitude] track %@ %@", event.name, String(describing: merged))
 #endif
 
-        amplitude?.track(eventType: event.rawValue, eventProperties: merged)
+        amplitude?.track(eventType: event.name, eventProperties: merged)
     }
 
     // MARK: - Identity

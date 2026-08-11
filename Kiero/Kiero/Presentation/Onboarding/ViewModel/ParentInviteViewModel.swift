@@ -83,10 +83,10 @@ final class ParentInviteViewModel: BaseViewModel {
                     body: req
                 )
 
-                AmplitudeManager.shared.track(.inviteCodeCreated, properties: [
-                    AnalyticsEventProperty.inviteCodeHash: AnalyticsIdentity.hashed(data.code),
-                    AnalyticsEventProperty.source: "reissue"
-                ])
+                AmplitudeManager.shared.track(.inviteCodeCreated(
+                    codeHash: AnalyticsIdentity.hashed(data.code),
+                    source: .reissue
+                ))
 
                 await MainActor.run {
                     self.inviteCodeSubject.send(data.code)

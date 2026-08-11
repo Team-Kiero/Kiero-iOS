@@ -13,11 +13,11 @@ enum AnalyticsIdentity {
 
     private static let deviceIdKeychainAccount = "analytics_device_id"
 
-    static var role: String {
+    static var role: AnalyticsRole {
 #if KIERO_PARENT
-        return "parent"
+        return .parent
 #else
-        return "child"
+        return .child
 #endif
     }
 

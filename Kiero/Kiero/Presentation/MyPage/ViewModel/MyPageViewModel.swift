@@ -76,10 +76,7 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 case .notDetermined:
                     UNUserNotificationCenter.current()
                         .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                            AmplitudeManager.shared.track(.pushPermissionResult, properties: [
-                                AnalyticsEventProperty.granted: granted,
-                                AnalyticsEventProperty.source: "my_page"
-                            ])
+                            AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .myPage))
                             AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                             DispatchQueue.main.async {
                                 self.isAlarmOn = granted

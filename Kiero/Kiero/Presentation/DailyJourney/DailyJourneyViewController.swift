@@ -164,10 +164,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
             ) { granted, _ in
-                AmplitudeManager.shared.track(.pushPermissionResult, properties: [
-                    AnalyticsEventProperty.granted: granted,
-                    AnalyticsEventProperty.source: "daily_journey"
-                ])
+                AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .dailyJourney))
                 AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                 guard granted else { return }
                 DispatchQueue.main.async {

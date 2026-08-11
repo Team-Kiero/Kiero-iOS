@@ -59,10 +59,10 @@ final class ParentOnboardingViewModel: BaseViewModel {
                     body: req
                 )
 
-                AmplitudeManager.shared.track(.inviteCodeCreated, properties: [
-                    AnalyticsEventProperty.inviteCodeHash: AnalyticsIdentity.hashed(data.code),
-                    AnalyticsEventProperty.source: "onboarding"
-                ])
+                AmplitudeManager.shared.track(.inviteCodeCreated(
+                    codeHash: AnalyticsIdentity.hashed(data.code),
+                    source: .onboarding
+                ))
 
                 print("✅ [VM] 2) reissueSseAccessToken() 호출 직전")
 

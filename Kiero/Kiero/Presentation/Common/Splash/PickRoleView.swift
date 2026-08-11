@@ -116,10 +116,7 @@ final class PickRoleView: UIView {
     @objc private func didTapStart() {
         guard let role = selectedRole else { return }
 
-        AmplitudeManager.shared.track(.roleSelected, properties: [
-            AnalyticsEventProperty.selectedRole: role == .parent ? "parent" : "child",
-            AnalyticsEventProperty.source: "auth_gate"
-        ])
+        AmplitudeManager.shared.track(.roleSelected(role: role == .parent ? .parent : .child, source: .authGate))
 
         onTapStart?(role)
     }

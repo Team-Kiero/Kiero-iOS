@@ -92,9 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         let type = userInfo["type"] as? String
         let targetId = userInfo["targetId"] as? String
 
-        AmplitudeManager.shared.track(.pushClicked, properties: [
-            AnalyticsEventProperty.pushType: type ?? "unknown"
-        ])
+        AmplitudeManager.shared.track(.pushClicked(pushType: type ?? "unknown"))
 
         Task { @MainActor in
             DeepLinkManager.shared.handle(type: type, targetId: targetId)

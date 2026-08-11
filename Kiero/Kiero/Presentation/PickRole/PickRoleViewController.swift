@@ -69,18 +69,12 @@ final class PickRoleViewController: BaseViewController<BaseViewModel> {
     
     override func addTarget() {
         parentButton.onTap = { [weak self] in
-            AmplitudeManager.shared.track(.roleSelected, properties: [
-                AnalyticsEventProperty.selectedRole: "parent",
-                AnalyticsEventProperty.source: "logout_dialog"
-            ])
+            AmplitudeManager.shared.track(.roleSelected(role: .parent, source: .logoutDialog))
             self?.onSelectParent?()
         }
 
         childButton.onTap = { [weak self] in
-            AmplitudeManager.shared.track(.roleSelected, properties: [
-                AnalyticsEventProperty.selectedRole: "child",
-                AnalyticsEventProperty.source: "logout_dialog"
-            ])
+            AmplitudeManager.shared.track(.roleSelected(role: .child, source: .logoutDialog))
             self?.onSelectChild?()
         }
     }
