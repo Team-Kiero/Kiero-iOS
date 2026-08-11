@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CHILD_APPSTORE_ID</key>
+	<string>$(CHILD_APPSTORE_ID)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Kiero</string>
 	<key>AMPLITUDE_API_KEY_DEV</key>

@@ -14,6 +14,11 @@ enum Config {
             static let KAKAO_NATIVE_APP_KEY = "KAKAO_NATIVE_APP_KEY"
             static let AMPLITUDE_API_KEY_DEV = "AMPLITUDE_API_KEY_DEV"
             static let AMPLITUDE_API_KEY_PROD = "AMPLITUDE_API_KEY_PROD"
+#if KIERO_PARENT
+            static let APPSTORE_ID = "PARENT_APPSTORE_ID"
+#elseif KIERO_CHILD
+            static let APPSTORE_ID = "CHILD_APPSTORE_ID"
+#endif
         }
     }
     
@@ -63,6 +68,14 @@ extension Config {
     static let sseURL: URL = {
         guard let url = URL(string: baseURL + "/api/v1/subscribe") else {
             fatalError("구성된 SSE_URL이 유효한 URL 형식이 아닙니다: \(baseURL)")
+        }
+        return url
+    }()
+    
+    static let appStoreURL: URL = {
+        guard let appStoreID = Config.infoDictionary[Keys.Plist.APPSTORE_ID] as? String,
+              let url = URL(string: "itms-apps://itunes.apple.com/us/app/id\(appStoreID)") else {
+            fatalError("APPSTORE_ID가 유효하지 않습니다.")
         }
         return url
     }()
