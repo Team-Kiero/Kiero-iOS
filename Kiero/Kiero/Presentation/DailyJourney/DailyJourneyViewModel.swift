@@ -132,6 +132,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                     self.fetchDailyJourney()
                 }
             } receiveValue: { [weak self] _ in
+                AmplitudeManager.shared.track(.scheduleSkipped)
                 self?.fetchDailyJourney()
             }
             .store(in: &cancellables)

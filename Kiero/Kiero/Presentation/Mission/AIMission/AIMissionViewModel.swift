@@ -57,6 +57,7 @@ final class AIMissionViewModel: BaseViewModel {
             .sink { [weak self] completion in
                 self?.isLoading.send(false)
             } receiveValue: { [weak self] response in
+                AmplitudeManager.shared.track(.missionCreated(source: .ai, count: response.count))
                 let sortedAiIds = response.sorted { $0.name < $1.name }.reversed().map { $0.id }
                 
                 var recentActivity = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []

@@ -48,6 +48,7 @@ final class AddScheduleViewModel: BaseViewModel {
                 }
             } receiveValue: { [weak self] _ in
                 print("✅ [VM] 서버 저장 성공")
+                AmplitudeManager.shared.track(.scheduleCreated)
                 self?.isAddSuccess.send(())
             }
             .store(in: &cancellables)

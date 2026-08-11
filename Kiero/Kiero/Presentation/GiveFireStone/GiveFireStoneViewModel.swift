@@ -72,7 +72,12 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
                 }
             } receiveValue: { [weak self] data in
                 print("✅ [GiveFireStoneVM] 성공! 획득 코인: \(data.earnedCoinAmount), 불조각: \(data.gotStones)")
-                
+
+                AmplitudeManager.shared.track(.dailyJourneyCompleted(
+                    earnedCoin: data.earnedCoinAmount,
+                    stoneCount: data.gotStones.count
+                ))
+
                 self?.resultSubject.send((data.earnedCoinAmount, data.gotStones))
             }
             .store(in: &cancellables)

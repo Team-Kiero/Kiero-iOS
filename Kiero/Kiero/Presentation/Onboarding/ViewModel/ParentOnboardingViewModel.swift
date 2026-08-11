@@ -59,6 +59,11 @@ final class ParentOnboardingViewModel: BaseViewModel {
                     body: req
                 )
 
+                AmplitudeManager.shared.track(.inviteCodeCreated(
+                    codeHash: AnalyticsIdentity.hashed(data.code),
+                    source: .onboarding
+                ))
+
                 print("✅ [VM] 2) reissueSseAccessToken() 호출 직전")
 
                 let sseToken = try await TokenRefresher.shared.reissueSseAccessToken()
