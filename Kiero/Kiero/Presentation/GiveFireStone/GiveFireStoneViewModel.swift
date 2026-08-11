@@ -75,7 +75,7 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
 
                 AmplitudeManager.shared.track(.dailyJourneyCompleted, properties: [
                     AnalyticsEventProperty.earnedCoin: data.earnedCoinAmount,
-                    AnalyticsEventProperty.stoneCount: data.gotStones
+                    AnalyticsEventProperty.stoneCount: data.gotStones.count
                 ])
 
                 self?.resultSubject.send((data.earnedCoinAmount, data.gotStones))
