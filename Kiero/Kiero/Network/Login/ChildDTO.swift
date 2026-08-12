@@ -1,17 +1,18 @@
 //
-//  ChildrenDTO.swift
+//  ChildDTO.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/21/26.
 //
 
-struct ChildSignupRequest: Encodable {
+struct ChildLoginRequest: Encodable {
     let lastName: String
     let firstName: String
     let inviteCode: String
 }
 
-struct ChildSignupData: Decodable {
+struct ChildLoginData: Decodable {
+    let id: Int
     let lastName: String
     let firstName: String
     let role: String
@@ -24,10 +25,11 @@ struct ChildRegistrationStatusDTO: Codable {
     let childId: Int?
 }
 
-struct ChildrenData: Decodable {
+struct ChildData: Decodable {
+    let id: Int
     let childId: Int
     let childLastName: String
     let childFirstName: String
 }
 
-typealias ChildListResponse = [ChildrenData]
+typealias ChildListResponse = [ChildData]
