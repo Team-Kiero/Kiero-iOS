@@ -56,7 +56,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
-                let children: [ChildrenData] = try await BaseService.shared.request(
+                let children: [ChildData] = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
                 

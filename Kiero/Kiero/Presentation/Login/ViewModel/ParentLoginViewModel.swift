@@ -71,7 +71,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             defer { self.isLoggingIn = false }
             do {
                 let kakaoToken = try await kakaoService.loginWithKakao()
-                let loginData: LoginData = try await BaseService.shared.request(
+                let loginData: ParentLoginData = try await BaseService.shared.request(
                     endPoint: .kakaoAccessToken(token: kakaoToken)
                 )
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
@@ -140,7 +140,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             defer { self.isLoggingIn = false }
             do {
                 let credential = try await appleService.loginWithApple()
-                let loginData: LoginData = try await BaseService.shared.request(
+                let loginData: ParentLoginData = try await BaseService.shared.request(
                     endPoint: .appleLogin(
                         identityToken: credential.identityToken,
                         authorizationCode: credential.authorizationCode,
