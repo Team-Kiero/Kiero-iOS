@@ -1,5 +1,5 @@
 //
-//  ChildDTO.swift
+//  ChildLoginDTO.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/21/26.
