@@ -48,13 +48,13 @@ final class ChildLoginViewModel: BaseViewModel {
             guard let self else { return }
             
             do {
-                let body = ChildSignupRequest(
+                let body = ChildLoginRequest(
                     lastName: last,
                     firstName: first,
                     inviteCode: code
                 )
                 
-                let data: ChildSignupData = try await BaseService.shared.request(
+                let data: ChildLoginData = try await BaseService.shared.request(
                     endPoint: .childSignup(
                         lastName: last,
                         firstName: first,
