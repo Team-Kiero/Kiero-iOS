@@ -69,7 +69,7 @@ final class ChildLoginViewModel: BaseViewModel {
                 TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
                 TokenManager.shared.saveFirstName(data.firstName)
                 
-                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.updateUserId(data.id)
                 AmplitudeManager.shared.setUserProperties([
                     .loginMethod: AnalyticsLoginMethod.inviteCode.rawValue,
                     .childConnected: true

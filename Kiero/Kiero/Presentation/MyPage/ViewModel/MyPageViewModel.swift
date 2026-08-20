@@ -156,6 +156,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                     endPoint: .fetchParentInfo
                 )
                 
+                AmplitudeManager.shared.updateUserId(profile.id)
+
                 let settings = await UNUserNotificationCenter.current().notificationSettings()
                 let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
                 let shouldEnable = profile.pushNotificationEnabled && isAuthorized

@@ -23,6 +23,7 @@ final class WishWellService: WishWellServiceType {
             Task {
                 do {
                     let dto: ChildrenInfoResponseDTO = try await BaseService.shared.request(endPoint: endpoint)
+                    AmplitudeManager.shared.updateUserId(dto.id)
                     promise(.success(dto.toEntity()))
                 } catch let error as NetworkError {
                     promise(.failure(error))
