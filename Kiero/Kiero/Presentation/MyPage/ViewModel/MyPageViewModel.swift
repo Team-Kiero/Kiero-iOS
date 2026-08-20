@@ -218,6 +218,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
 
                 print("📩 [MyPageVM] CHILD_JOINED:", payload.childId ?? 0)
 
+                AmplitudeManager.shared.setUserProperties([.childConnected: true])
+
                 self.childConnectionState = .connected
                 self.fetchUserInfo()
             }
