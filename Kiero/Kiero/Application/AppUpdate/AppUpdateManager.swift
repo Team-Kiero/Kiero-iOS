@@ -15,15 +15,11 @@ final class AppUpdateManager {
     static let shared = AppUpdateManager()
     
     private enum RemoteConfigKey {
-        static let parentMinimumVersion = "parent_minimum_version"
-        static let parentLatestVersion = "parent_latest_version"
-        
-        static let childMinimumVersion = "child_minimum_version"
-        static let childLatestVersion = "child_latest_version"
+        static let latestVersion = "ios_latest_version"
+        static let minimumVersion = "ios_min_force_version"
     }
     
     private let remoteConfig: RemoteConfig
-    
     private var isChecking = false
     
     private init() {
@@ -34,9 +30,7 @@ final class AppUpdateManager {
     // MARK: - Public
     
     func checkForUpdate() async -> AppUpdateType {
-        guard !isChecking else {
-            return .none
-        }
+        guard !isChecking else { return .none }
         
         isChecking = true
         defer { isChecking = false }
@@ -44,29 +38,28 @@ final class AppUpdateManager {
         do {
             _ = try await remoteConfig.fetchAndActivate()
             
-            let versions = remoteVersions()
+            let minimumVersion = remoteConfig[RemoteConfigKey.minimumVersion].stringValue ?? "1.0.0"
+            let latestVersion = remoteConfig[RemoteConfigKey.latestVersion].stringValue ?? "1.0.0"
             
             let updateType = determineUpdateType(
                 currentVersion: currentAppVersion,
-                minimumVersion: versions.minimum,
-                latestVersion: versions.latest
+                minimumVersion: minimumVersion,
+                latestVersion: latestVersion
             )
             
             print("""
-            
             ✅ [AppUpdateManager]
+            bundleId: \(Bundle.main.bundleIdentifier ?? "")
             currentVersion: \(currentAppVersion)
-            minimumVersion: \(versions.minimum)
-            latestVersion: \(versions.latest)
+            minimumVersion: \(minimumVersion)
+            latestVersion: \(latestVersion)
             updateType: \(updateType)
-            
             """)
             
             return updateType
             
         } catch {
             print("❌ [AppUpdateManager] Remote Config fetch 실패: \(error)")
-            
             return .none
         }
     }
@@ -85,32 +78,9 @@ final class AppUpdateManager {
         remoteConfig.configSettings = settings
         
         remoteConfig.setDefaults([
-            RemoteConfigKey.parentMinimumVersion: "1.0.0" as NSObject,
-            RemoteConfigKey.parentLatestVersion: "1.0.0" as NSObject,
-            RemoteConfigKey.childMinimumVersion: "1.0.0" as NSObject,
-            RemoteConfigKey.childLatestVersion: "1.0.0" as NSObject
+            RemoteConfigKey.minimumVersion: "1.0.0" as NSObject,
+            RemoteConfigKey.latestVersion: "1.0.0" as NSObject
         ])
-    }
-    
-    private func remoteVersions() -> (
-        minimum: String,
-        latest: String
-    ) {
-#if KIERO_PARENT
-        let minimumKey = RemoteConfigKey.parentMinimumVersion
-        let latestKey = RemoteConfigKey.parentLatestVersion
-#elseif KIERO_CHILD
-        let minimumKey = RemoteConfigKey.childMinimumVersion
-        let latestKey = RemoteConfigKey.childLatestVersion
-#else
-        let minimumKey = RemoteConfigKey.parentMinimumVersion
-        let latestKey = RemoteConfigKey.parentLatestVersion
-#endif
-        
-        return (
-            minimum: remoteConfig[minimumKey].stringValue ?? "1.0.0",
-            latest: remoteConfig[latestKey].stringValue ?? "1.0.0"
-        )
     }
     
     // MARK: - Version
@@ -127,30 +97,31 @@ final class AppUpdateManager {
         latestVersion: String
     ) -> AppUpdateType {
         
-        if isLowerVersion(
-            currentVersion,
-            than: minimumVersion
-        ) {
+        if isLowerVersion(currentVersion, than: minimumVersion) {
             return .required
         }
         
-        if isLowerVersion(
-            currentVersion,
-            than: latestVersion
-        ) {
+        if isLowerVersion(currentVersion, than: latestVersion) {
             return .optional
         }
         
         return .none
     }
     
-    private func isLowerVersion(
-        _ lhs: String,
-        than rhs: String
-    ) -> Bool {
-        lhs.compare(
-            rhs,
+    private func isLowerVersion(_ lhs: String, than rhs: String) -> Bool {
+        normalizedVersion(lhs).compare(
+            normalizedVersion(rhs),
             options: .numeric
         ) == .orderedAscending
+    }
+    
+    private func normalizedVersion(_ version: String) -> String {
+        var components = version.split(separator: ".").map(String.init)
+        
+        while components.count < 3 {
+            components.append("0")
+        }
+        
+        return components.prefix(3).joined(separator: ".")
     }
 }
