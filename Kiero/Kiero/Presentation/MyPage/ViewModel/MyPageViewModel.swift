@@ -152,11 +152,14 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
+                let requestedToken = TokenManager.shared.getAccessToken()
                 let profile: MyPageProfileDTO = try await BaseService.shared.request(
                     endPoint: .fetchParentInfo
                 )
-                
-                AmplitudeManager.shared.updateUserId(profile.id)
+
+                if TokenManager.shared.getAccessToken() == requestedToken {
+                    AmplitudeManager.shared.updateUserId(profile.id)
+                }
 
                 let settings = await UNUserNotificationCenter.current().notificationSettings()
                 let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
