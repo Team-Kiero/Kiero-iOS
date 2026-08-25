@@ -45,6 +45,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Coordinator/ParentCoordinator.swift,
+				"GoogleService-Info-Parent-Dev.plist",
 				"GoogleService-Info-Parent.plist",
 				ParentInfo.plist,
 			);
@@ -56,6 +57,7 @@
 				ChildInfo.plist,
 				Coordinator/ChildCoordinator.swift,
 				Dev.xcconfig,
+				"GoogleService-Info-Child-Dev.plist",
 				"GoogleService-Info-Child.plist",
 				Prod.xcconfig,
 			);
@@ -306,6 +308,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
@@ -344,6 +347,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
@@ -381,6 +385,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ParentInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
@@ -417,6 +422,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ParentInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
