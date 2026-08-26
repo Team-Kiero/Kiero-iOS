@@ -118,8 +118,10 @@ private extension TodayStatusHostingController {
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
             ) { [weak self] granted, _ in
+                AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .todayStatus))
+                AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                 guard granted else { return }
-                
+
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                     self?.viewModel.updateNotificationSettings(enabled: true)

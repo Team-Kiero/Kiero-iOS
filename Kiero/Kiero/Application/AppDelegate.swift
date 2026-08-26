@@ -8,6 +8,7 @@
 import UIKit
 import UserNotifications
 
+import AmplitudeSwift
 import KakaoSDKCommon
 import FirebaseCore
 import FirebaseMessaging
@@ -46,6 +47,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
             NSLog("❌ GoogleService-Info.plist를 찾을 수 없음")
         }
         
+        AmplitudeManager.shared.configure()
+        AmplitudeManager.shared.track(.appOpened)
+
         UNUserNotificationCenter.current().delegate = self
         
         application.registerForRemoteNotifications()
@@ -94,7 +98,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
     private func handleNotification(_ userInfo: [AnyHashable: Any]) {
         let type = userInfo["type"] as? String
         let targetId = userInfo["targetId"] as? String
-        
+
+        AmplitudeManager.shared.track(.pushClicked(pushType: type ?? "unknown"))
+
         Task { @MainActor in
             DeepLinkManager.shared.handle(type: type, targetId: targetId)
         }

@@ -164,6 +164,8 @@ final class ChildOnboardingViewController: BaseViewController<ChildOnboardingVie
     
     @objc
     private func startButtonDidTap() {
+        AmplitudeManager.shared.track(.onboardingCompleted)
+
         guard let loadingVC = makeLoadingVC?() else { return }
         loadingVC.modalPresentationStyle = .fullScreen
         present(loadingVC, animated: false)

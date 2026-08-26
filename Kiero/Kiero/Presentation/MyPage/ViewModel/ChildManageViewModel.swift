@@ -56,7 +56,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
-                let children: [ChildrenData] = try await BaseService.shared.request(
+                let children: [ChildData] = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
                 
@@ -92,6 +92,11 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                     body: req
                 )
                 
+                AmplitudeManager.shared.track(.inviteCodeCreated(
+                    codeHash: AnalyticsIdentity.hashed(data.code),
+                    source: .childManage
+                ))
+
                 await MainActor.run {
                     let expiresAt = Date().addingTimeInterval(self.expiresIn)
 

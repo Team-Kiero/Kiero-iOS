@@ -40,6 +40,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
     }
     
     private func updateNotificationSettings(enabled: Bool) {
+        AmplitudeManager.shared.setUserProperties([.pushEnabled: enabled])
+
         Task {
             do {
                 let body = NotificationSettingsRequest(pushNotificationEnabled: enabled)
@@ -74,6 +76,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 case .notDetermined:
                     UNUserNotificationCenter.current()
                         .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
+                            AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .myPage))
+                            AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
                             DispatchQueue.main.async {
                                 self.isAlarmOn = granted
                                 if granted {

@@ -59,6 +59,7 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                 switch completion {
                 case .finished:
                     print(" 쿠폰 추가 API 성공")
+                    AmplitudeManager.shared.track(.rewardCreated)
                     self?.fetchCoupons(childId: self?.currentChildId)
                     
                 case .failure(let error):
