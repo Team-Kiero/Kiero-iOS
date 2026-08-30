@@ -1,11 +1,12 @@
 //
-//  BaseResponse.swift
+//  ParentLoginDTO.swift
 //  Kiero
 //
 //  Created by 안치욱 on 1/9/26.
 //
 
-struct LoginData: Codable {
+struct ParentLoginData: Codable {
+    let id: Int
     let name: String
     let email: String
     let image: String?

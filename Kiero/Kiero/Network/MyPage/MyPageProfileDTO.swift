@@ -8,6 +8,7 @@
 import Foundation
 
 struct MyPageProfileDTO: Codable {
+    let id: Int
     let image: String?
     let name: String
     let hasPendingChildSession: Bool

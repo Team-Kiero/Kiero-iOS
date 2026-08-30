@@ -71,7 +71,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             defer { self.isLoggingIn = false }
             do {
                 let kakaoToken = try await kakaoService.loginWithKakao()
-                let loginData: LoginData = try await BaseService.shared.request(
+                let loginData: ParentLoginData = try await BaseService.shared.request(
                     endPoint: .kakaoAccessToken(token: kakaoToken)
                 )
                 TokenManager.shared.saveAccessToken(loginData.accessToken)
@@ -81,6 +81,13 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                TokenManager.shared.saveEmail(loginData.email)
+                
+                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.setUserProperties([
+                    .loginMethod: AnalyticsLoginMethod.kakao.rawValue
+                ])
+                AmplitudeManager.shared.track(.loginCompleted(method: .kakao))
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -91,6 +98,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                AmplitudeManager.shared.setUserProperties([
+                    .childConnected: !children.isEmpty
+                ])
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -130,7 +140,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             defer { self.isLoggingIn = false }
             do {
                 let credential = try await appleService.loginWithApple()
-                let loginData: LoginData = try await BaseService.shared.request(
+                let loginData: ParentLoginData = try await BaseService.shared.request(
                     endPoint: .appleLogin(
                         identityToken: credential.identityToken,
                         authorizationCode: credential.authorizationCode,
@@ -149,6 +159,13 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 }
                 TokenManager.shared.saveUserName(loginData.name)
                 TokenManager.shared.saveUserRole(loginData.role)
+                TokenManager.shared.saveEmail(loginData.email)
+                
+                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.setUserProperties([
+                    .loginMethod: AnalyticsLoginMethod.apple.rawValue
+                ])
+                AmplitudeManager.shared.track(.loginCompleted(method: .apple))
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -159,6 +176,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                AmplitudeManager.shared.setUserProperties([
+                    .childConnected: !children.isEmpty
+                ])
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -193,15 +213,15 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         let agreement: RequiredTermsAgreementStatusData = try await BaseService.shared.request(
             endPoint: .requiredTermsAgreementStatus
         )
-
+        
         guard agreement.isRequiredTermsAllAgreed == false else {
             return nil
         }
-
+        
         let terms: [RequiredTerm] = try await BaseService.shared.request(
             endPoint: .requiredTerms
         )
-
+        
         return terms
     }
     
@@ -213,7 +233,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             }
             return true
         }
-
+        
         return false
     }
     
@@ -249,8 +269,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                     )
                     
                     TokenManager.shared.removeRequiredTermsIds()
+                    AmplitudeManager.shared.track(.termsAgreementCompleted)
                 }
-                
+
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     self.routeSubject.send(.parentTab)
