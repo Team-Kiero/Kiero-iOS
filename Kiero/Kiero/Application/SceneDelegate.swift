@@ -12,7 +12,7 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-    private var isUpdateAlertPresented = false
+    private let appUpdateAlertPresenter = AppUpdateAlertPresenter()
     
 #if KIERO_PARENT
     var parentCoordinator: ParentCoordinator?
@@ -67,7 +67,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        checkAppUpdate()
+        appUpdateAlertPresenter.checkForUpdate(in: window)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -81,90 +81,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidEnterBackground(_ scene: UIScene) {
         SseStreamManager.shared.pause()
-    }
-}
-
-private extension SceneDelegate {
-    
-    func checkAppUpdate() {
-        Task { @MainActor in
-            let updateType = await AppUpdateManager.shared.checkForUpdate()
-            handleUpdate(updateType)
-        }
-    }
-    
-    func handleUpdate(_ updateType: AppUpdateType) {
-        switch updateType {
-        case .none:
-            break
-            
-        case .optional:
-            showOptionalUpdateAlert()
-            
-        case .required:
-            showRequiredUpdateAlert()
-        }
-    }
-    
-    func showOptionalUpdateAlert() {
-        guard !isUpdateAlertPresented else { return }
-        guard let viewController = topViewController() else { return }
-        
-        isUpdateAlertPresented = true
-        
-        let alert = UIAlertController(title: "새로운 업데이트",
-                                      message: "새로운 버전이 출시되었어요.\n업데이트하시겠어요?",
-                                      preferredStyle: .alert)
-        
-        alert.addAction(UIAlertAction(title: "나중에", style: .cancel) { [weak self] _ in
-            self?.isUpdateAlertPresented = false
-        })
-        
-        alert.addAction(UIAlertAction(title: "업데이트", style: .default) { [weak self] _ in
-            self?.isUpdateAlertPresented = false
-            self?.openAppStore()
-        })
-        
-        viewController.present(alert, animated: true)
-    }
-    
-    func showRequiredUpdateAlert() {
-        guard !isUpdateAlertPresented else { return }
-        guard let viewController = topViewController() else { return }
-        
-        isUpdateAlertPresented = true
-        
-        let alert = UIAlertController(title: "필수 업데이트",
-                                      message: "서비스 이용을 위해\n최신 버전으로 업데이트해 주세요.",
-                                      preferredStyle: .alert)
-        
-        alert.addAction(UIAlertAction(title: "업데이트", style: .default) { [weak self] _ in
-            self?.openAppStore()
-        })
-        
-        viewController.present(alert, animated: true)
-    }
-    
-    func openAppStore() {
-        print(Config.appStoreURL)
-        UIApplication.shared.open(Config.appStoreURL)
-    }
-    
-    func topViewController(from viewController: UIViewController? = nil) -> UIViewController? {
-        let current = viewController ?? window?.rootViewController
-        
-        if let navigationController = current as? UINavigationController {
-            return topViewController(from: navigationController.visibleViewController)
-        }
-        
-        if let tabBarController = current as? UITabBarController {
-            return topViewController(from: tabBarController.selectedViewController)
-        }
-        
-        if let presentedViewController = current?.presentedViewController {
-            return topViewController(from: presentedViewController)
-        }
-        
-        return current
     }
 }
