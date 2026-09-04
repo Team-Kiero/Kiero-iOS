@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         case "com.Kiero.Child.dev":
             googleServiceFileName = "GoogleService-Info-Child-Dev"
         default:
+            NSLog("⚠️ 알 수 없는 Bundle ID(%@) — Parent 설정으로 폴백", Bundle.main.bundleIdentifier ?? "nil")
             googleServiceFileName = "GoogleService-Info-Parent"
         }
         
