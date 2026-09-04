@@ -28,6 +28,8 @@
 		AEF67B3A2F4C5C46007319A0 /* KingfisherWebP in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B392F4C5C46007319A0 /* KingfisherWebP */; };
 		AEF67B502F4C6C41007319A0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B4F2F4C6C41007319A0 /* Lottie */; };
 		AEF67B522F4C6C53007319A0 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = AEF67B512F4C6C53007319A0 /* Lottie */; };
+		F6378B57302B6AAC0057DED9 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = F6378B56302B6AAC0057DED9 /* FirebaseRemoteConfig */; };
+		F6378B59302B6ABA0057DED9 /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = F6378B58302B6ABA0057DED9 /* FirebaseRemoteConfig */; };
 		F689777E2F18102D004D5783 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D52F123F0D007B1EE4 /* KakaoSDK */; };
 		F689777F2F18102D004D5783 /* KakaoSDKUser in Frameworks */ = {isa = PBXBuildFile; productRef = F6B015D92F123F0D007B1EE4 /* KakaoSDKUser */; };
 		F68977802F18102D004D5783 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = F6B018512F136542007B1EE4 /* CombineMoya */; };
@@ -95,6 +97,7 @@
 				AEF67B522F4C6C53007319A0 /* Lottie in Frameworks */,
 				2455DCE52F23628F00836E3D /* Then in Frameworks */,
 				2455DCE62F23628F00836E3D /* Moya in Frameworks */,
+				F6378B59302B6ABA0057DED9 /* FirebaseRemoteConfig in Frameworks */,
 				2455DCE72F23628F00836E3D /* KakaoSDKAuth in Frameworks */,
 				AEF67B3A2F4C5C46007319A0 /* KingfisherWebP in Frameworks */,
 			);
@@ -114,6 +117,7 @@
 				249C641A2F0FA1F50016D6B7 /* Moya in Frameworks */,
 				F6B015D82F123F0D007B1EE4 /* KakaoSDKAuth in Frameworks */,
 				AE418AB42FC6CCE8000B043E /* FirebaseMessaging in Frameworks */,
+				F6378B57302B6AAC0057DED9 /* FirebaseRemoteConfig in Frameworks */,
 				AE418AB62FC6CCF0000B043E /* FirebaseCore in Frameworks */,
 				A100000000000000000000C2 /* AmplitudeSwift in Frameworks */,
 				AEF67B382F4C5C20007319A0 /* KingfisherWebP in Frameworks */,
@@ -183,6 +187,7 @@
 				AE418AB72FC6CCFE000B043E /* FirebaseCore */,
 				AE418AB92FC6CD03000B043E /* FirebaseMessaging */,
 				A100000000000000000000B1 /* AmplitudeSwift */,
+				F6378B58302B6ABA0057DED9 /* FirebaseRemoteConfig */,
 			);
 			productName = Kiero;
 			productReference = 2455DCEC2F23628F00836E3D /* Kiero_Child.app */;
@@ -218,6 +223,7 @@
 				AE418AB32FC6CCE8000B043E /* FirebaseMessaging */,
 				AE418AB52FC6CCF0000B043E /* FirebaseCore */,
 				A100000000000000000000C1 /* AmplitudeSwift */,
+				F6378B56302B6AAC0057DED9 /* FirebaseRemoteConfig */,
 			);
 			productName = Kiero;
 			productReference = 24DF50CB2F0A5173007146AC /* Kiero_Parent.app */;
@@ -328,7 +334,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Child.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -367,7 +373,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Child;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -405,7 +411,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Parent.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -442,7 +448,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.Kiero.Parent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -834,6 +840,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = AEF67B4E2F4C6C41007319A0 /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
+		};
+		F6378B56302B6AAC0057DED9 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+		F6378B58302B6ABA0057DED9 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AEB0F9DF2FC5CC5500964FED /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 		F6B015D52F123F0D007B1EE4 /* KakaoSDK */ = {
 			isa = XCSwiftPackageProductDependency;
