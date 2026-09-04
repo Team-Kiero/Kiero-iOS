@@ -18,27 +18,38 @@ final class AuthGateViewController: UIViewController {
     private var pendingWork: DispatchWorkItem?
     
     private var dimPanelBottomConstraint: Constraint?
-    private var pickRoleBottomConstraint: Constraint?
 
     private var overlayPrepared = false
+    
+    private var currentRole: LoginUser {
+#if KIERO_PARENT
+        return .parent
+#elseif KIERO_CHILD
+        return .child
+#else
+        fatalError("KIERO_PARENT 또는 KIERO_CHILD 플래그가 정의되어 있지 않습니다.")
+#endif
+    }
 
     private enum IntroTiming {
         static let splashHold: TimeInterval = 2.3
         static let dimDuration: TimeInterval = 0.25
-        static let pickRoleDuration: TimeInterval = 0.35
-        static let pickRoleDelayAfterDimStart: TimeInterval = 0.08
-
-        static let dimPanelHeight: CGFloat = 520
-        static let pickRoleHiddenOffset: CGFloat = 1000
+        static let dimPanelHeight: CGFloat = 500
+        static let dimFadeStartY: CGFloat = 30
+        static let dimSolidStartY: CGFloat = 400
     }
-
+    
     private let splashView = SplashView()
 
     private let dimPanelView = GradientDimView().then {
         $0.isUserInteractionEnabled = true
+        $0.fadeStartY = IntroTiming.dimFadeStartY
+        $0.solidStartY = IntroTiming.dimSolidStartY
     }
-
-    private let pickRoleView = PickRoleView()
+    
+    private let startButton = CTAButton(enabledStyle: .main, disabledStyle: .gray900, size: .h49).then {
+        $0.configure(title: "시작하기")
+    }
 
     init(viewModel: AuthGateViewModel = AuthGateViewModel()) {
         self.viewModel = viewModel
@@ -97,7 +108,7 @@ final class AuthGateViewController: UIViewController {
             prepareOverlaysIfNeeded()
             
             DispatchQueue.main.asyncAfter(deadline: .now() + IntroTiming.splashHold) { [weak self] in
-                self?.showPickRoleOverlaySequence()
+                self?.showStartButtonSequence()
             }
             
         case .parentRequiredTerms(let terms):
@@ -138,7 +149,8 @@ final class AuthGateViewController: UIViewController {
         guard !overlayPrepared else { return }
         overlayPrepared = true
         
-        view.addSubviews(dimPanelView, pickRoleView)
+        view.addSubviews(dimPanelView)
+        dimPanelView.addSubview(startButton)
 
         dimPanelView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
@@ -149,20 +161,16 @@ final class AuthGateViewController: UIViewController {
                 .constraint
         }
 
-        pickRoleView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            self.pickRoleBottomConstraint = $0.bottom
-                .equalTo(view.safeAreaLayoutGuide)
-                .offset(IntroTiming.pickRoleHiddenOffset)
-                .constraint
+        startButton.snp.makeConstraints {
+            $0.horizontalEdges.equalToSuperview().inset(16)
+            $0.bottom.equalTo(dimPanelView.safeAreaLayoutGuide).inset(17)
+            $0.height.equalTo(49)
         }
 
-        pickRoleView.onTapStart = { [weak self] role in
-            self?.goLoginFlow(for: role)
-        }
+        startButton.addTarget(self, action: #selector(didTapStart), for: .touchUpInside)
     }
 
-    private func showPickRoleOverlaySequence() {
+    private func showStartButtonSequence() {
         view.layoutIfNeeded()
 
         UIView.animate(
@@ -174,15 +182,10 @@ final class AuthGateViewController: UIViewController {
             self.dimPanelBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
         }
-
-        UIView.animate(
-            withDuration: IntroTiming.pickRoleDuration,
-            delay: IntroTiming.pickRoleDelayAfterDimStart,
-            options: [.curveEaseOut]
-        ) {
-            self.pickRoleBottomConstraint?.update(offset: 0)
-            self.view.layoutIfNeeded()
-        }
+    }
+    
+    @objc private func didTapStart() {
+        goLoginFlow(for: currentRole)
     }
 
     private func goLoginFlow(for role: LoginUser) {
@@ -191,8 +194,6 @@ final class AuthGateViewController: UIViewController {
 #if KIERO_PARENT
             guard let nav = navigationController,
                   let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
-            
-            navigationController?.setNavigationBarHidden(false, animated: true)
             
             let coordinator = ParentCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
             coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
@@ -206,9 +207,7 @@ final class AuthGateViewController: UIViewController {
 #if KIERO_CHILD
             guard let nav = navigationController,
                   let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
-            
-            navigationController?.setNavigationBarHidden(false, animated: true)
-            
+
             let coordinator = ChildCoordinator(navigationController: nav, diContainer: AppDIContainer.shared)
             coordinator.onRequestRootChange = { [weak sceneDelegate] vc in
                 sceneDelegate?.changeRootViewController(vc)
