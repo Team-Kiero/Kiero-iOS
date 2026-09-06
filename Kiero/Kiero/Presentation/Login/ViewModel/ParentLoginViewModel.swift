@@ -83,7 +83,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserRole(loginData.role)
                 TokenManager.shared.saveEmail(loginData.email)
                 
-                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.updateUserId(loginData.id)
                 AmplitudeManager.shared.setUserProperties([
                     .loginMethod: AnalyticsLoginMethod.kakao.rawValue
                 ])
@@ -161,7 +161,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserRole(loginData.role)
                 TokenManager.shared.saveEmail(loginData.email)
                 
-                AmplitudeManager.shared.refreshUserId()
+                AmplitudeManager.shared.updateUserId(loginData.id)
                 AmplitudeManager.shared.setUserProperties([
                     .loginMethod: AnalyticsLoginMethod.apple.rawValue
                 ])

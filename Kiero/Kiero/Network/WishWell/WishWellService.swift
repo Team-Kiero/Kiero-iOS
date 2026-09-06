@@ -22,7 +22,13 @@ final class WishWellService: WishWellServiceType {
         return Future<ChildrenInfo, NetworkError> { promise in
             Task {
                 do {
+                    let requestedToken = TokenManager.shared.getAccessToken()
                     let dto: ChildrenInfoResponseDTO = try await BaseService.shared.request(endPoint: endpoint)
+
+                    if TokenManager.shared.getAccessToken() == requestedToken {
+                        AmplitudeManager.shared.updateUserId(dto.id)
+                    }
+
                     promise(.success(dto.toEntity()))
                 } catch let error as NetworkError {
                     promise(.failure(error))

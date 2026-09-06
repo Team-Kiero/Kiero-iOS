@@ -197,6 +197,8 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
 
                 print("📩 [ChildManageVM] CHILD_JOINED:", payload.childId ?? 0)
 
+                AmplitudeManager.shared.setUserProperties([.childConnected: true])
+
                 self.connectionState = .connected
                 self.clearInviteSession()
                 self.timerCancellable?.cancel()

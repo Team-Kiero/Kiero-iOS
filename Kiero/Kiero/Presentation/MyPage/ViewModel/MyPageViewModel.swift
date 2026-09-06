@@ -152,10 +152,15 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
+                let requestedToken = TokenManager.shared.getAccessToken()
                 let profile: MyPageProfileDTO = try await BaseService.shared.request(
                     endPoint: .fetchParentInfo
                 )
-                
+
+                if TokenManager.shared.getAccessToken() == requestedToken {
+                    AmplitudeManager.shared.updateUserId(profile.id)
+                }
+
                 let settings = await UNUserNotificationCenter.current().notificationSettings()
                 let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
                 let shouldEnable = profile.pushNotificationEnabled && isAuthorized
@@ -215,6 +220,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 guard let self else { return }
 
                 print("📩 [MyPageVM] CHILD_JOINED:", payload.childId ?? 0)
+
+                AmplitudeManager.shared.setUserProperties([.childConnected: true])
 
                 self.childConnectionState = .connected
                 self.fetchUserInfo()

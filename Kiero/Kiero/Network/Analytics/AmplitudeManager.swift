@@ -58,6 +58,13 @@ final class AmplitudeManager {
         amplitude?.identify(userProperties: mapped)
     }
 
+    func updateUserId(_ id: Int) {
+        guard TokenManager.shared.getUserId() != id else { return }
+
+        TokenManager.shared.saveUserId(id)
+        refreshUserId()
+    }
+
     func refreshUserId() {
         let userId = AnalyticsIdentity.resolveUserId()
 
