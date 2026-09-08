@@ -8,48 +8,24 @@
 import Foundation
 
 enum AnalyticsEvent {
-
-    // MARK: - 공통 / 온보딩
-
     case appOpened
-    case roleSelected(role: AnalyticsRole, source: RoleSelectSource)
-    case loginCompleted(method: AnalyticsLoginMethod)
-    case termsAgreementCompleted
-    case inviteCodeCreated(codeHash: String, source: InviteCodeSource)
-    case childConnectionCompleted(codeHash: String)
     case onboardingCompleted
-
-    // MARK: - 부모 핵심 행동
-
-    case scheduleCreated
-    case missionCreated(source: MissionCreateSource, count: Int?)
-    case rewardCreated
-
-    // MARK: - 자녀 핵심 행동
-
-    case scheduleAuthStarted
-    case scheduleAuthCompleted
-    case scheduleSkipped
-    case dailyJourneyCompleted(earnedCoin: Int, stoneCount: Int)
-    case missionCompleted
-    case wishPurchased(price: Int)
-
-    // MARK: - 푸시 / 알림
-
-    case pushPermissionResult(granted: Bool, source: PushPromptSource)
-    case pushClicked(pushType: String)
+    case scheduleCreated(scheduleId: String, isRecurring: Bool, selectedDayCount: Int, durationMinutes: Int)
+    case missionCreated(creationMethod: MissionCreationMethod, dueDateType: MissionDueDateType?, rewardGold: Int, missionCount: Int, missionId: String?)
+    case rewardCreated(rewardId: String, goldCost: Int)
+    case scheduleAuthStarted(scheduleId: String)
+    case scheduleAuthCompleted(scheduleId: String)
+    case scheduleSkipped(scheduleId: String)
+    case dailyJourneyCompleted(completedScheduleCount: Int, totalScheduleCount: Int)
+    case missionCompleted(rewardGold: Int, missionId: String)
+    case wishPurchased(rewardId: String, goldCost: Int)
+    case pushClicked(pushType: String, destinationScreen: AnalyticsDestinationScreen)
 }
 
 extension AnalyticsEvent {
-
     var name: String {
         switch self {
         case .appOpened: return "app_opened"
-        case .roleSelected: return "role_selected"
-        case .loginCompleted: return "login_completed"
-        case .termsAgreementCompleted: return "terms_agreement_completed"
-        case .inviteCodeCreated: return "invite_code_created"
-        case .childConnectionCompleted: return "child_connection_completed"
         case .onboardingCompleted: return "onboarding_completed"
         case .scheduleCreated: return "schedule_created"
         case .missionCreated: return "mission_created"
@@ -60,91 +36,63 @@ extension AnalyticsEvent {
         case .dailyJourneyCompleted: return "daily_journey_completed"
         case .missionCompleted: return "mission_completed"
         case .wishPurchased: return "wish_purchased"
-        case .pushPermissionResult: return "push_permission_result"
         case .pushClicked: return "push_clicked"
         }
     }
 
     var properties: [String: Any] {
         switch self {
-        case .roleSelected(let role, let source):
-            return ["selected_role": role.rawValue, "source": source.rawValue]
-
-        case .loginCompleted(let method):
-            return ["login_method": method.rawValue]
-
-        case .inviteCodeCreated(let codeHash, let source):
-            return ["invite_code_hash": codeHash, "source": source.rawValue]
-
-        case .childConnectionCompleted(let codeHash):
-            return ["invite_code_hash": codeHash]
-
-        case .missionCreated(let source, let count):
-            var properties: [String: Any] = ["source": source.rawValue]
-            properties["count"] = count
+        case .scheduleCreated(let scheduleId, let isRecurring, let selectedDayCount, let durationMinutes):
+            return ["schedule_id": scheduleId, "is_recurring": isRecurring, "selected_day_count": selectedDayCount, "duration_minutes": durationMinutes]
+        case .missionCreated(let creationMethod, let dueDateType, let rewardGold, let missionCount, let missionId):
+            var properties: [String: Any] = ["creation_method": creationMethod.rawValue, "reward_gold": rewardGold, "mission_count": missionCount]
+            if let dueDateType { properties["due_date_type"] = dueDateType.rawValue }
+            if let missionId { properties["mission_id"] = missionId }
             return properties
-
-        case .dailyJourneyCompleted(let earnedCoin, let stoneCount):
-            return ["earned_coin": earnedCoin, "stone_count": stoneCount]
-
-        case .wishPurchased(let price):
-            return ["price": price]
-
-        case .pushPermissionResult(let granted, let source):
-            return ["granted": granted, "source": source.rawValue]
-
-        case .pushClicked(let pushType):
-            return ["push_type": pushType]
-
-        case .appOpened, .termsAgreementCompleted, .onboardingCompleted,
-             .scheduleCreated, .rewardCreated, .scheduleAuthStarted,
-             .scheduleAuthCompleted, .scheduleSkipped, .missionCompleted:
+        case .rewardCreated(let rewardId, let goldCost), .wishPurchased(let rewardId, let goldCost):
+            return ["reward_id": rewardId, "gold_cost": goldCost]
+        case .scheduleAuthStarted(let scheduleId), .scheduleAuthCompleted(let scheduleId), .scheduleSkipped(let scheduleId):
+            return ["schedule_id": scheduleId]
+        case .dailyJourneyCompleted(let completedScheduleCount, let totalScheduleCount):
+            return ["completed_schedule_count": completedScheduleCount, "total_schedule_count": totalScheduleCount]
+        case .missionCompleted(let rewardGold, let missionId):
+            return ["reward_gold": rewardGold, "mission_id": missionId]
+        case .pushClicked(let pushType, let destinationScreen):
+            return ["push_type": pushType, "destination_screen": destinationScreen.rawValue]
+        case .appOpened, .onboardingCompleted:
             return [:]
         }
     }
 }
-
-// MARK: - Property Value
 
 enum AnalyticsRole: String {
     case parent
     case child
 }
 
-enum AnalyticsLoginMethod: String {
-    case kakao
-    case apple
-    case inviteCode = "invite_code"
-}
-
-enum RoleSelectSource: String {
-    case authGate = "auth_gate"
-    case logoutDialog = "logout_dialog"
-}
-
-enum InviteCodeSource: String {
-    case onboarding
-    case reissue
-    case childManage = "child_manage"
-}
-
-enum MissionCreateSource: String {
+enum MissionCreationMethod: String {
     case manual
     case ai
 }
 
-enum PushPromptSource: String {
-    case dailyJourney = "daily_journey"
-    case todayStatus = "today_status"
-    case mySpace = "my_space"
-    case myPage = "my_page"
+enum MissionDueDateType: String {
+    case today
+    case tomorrow
+    case future
 }
 
-// MARK: - User Property
+enum AnalyticsDestinationScreen: String {
+    case parentHome = "parent_home"
+    case parentNotificationFeed = "parent_notification_feed"
+    case childJourney = "child_journey"
+    case childMission = "child_mission"
+}
 
 enum AnalyticsUserProperty: String {
-    case role = "role"
+    case userRole = "user_role"
     case loginMethod = "login_method"
-    case childConnected = "child_connected"
+    case notificationPermission = "notification_permission"
     case pushEnabled = "push_enabled"
+    case platform
+    case appVersion = "app_version"
 }

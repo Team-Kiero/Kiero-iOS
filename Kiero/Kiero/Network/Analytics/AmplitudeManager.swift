@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UserNotifications
 
 import AmplitudeSwift
 
@@ -28,20 +29,22 @@ final class AmplitudeManager {
         amplitude = Amplitude(configuration: configuration)
 
         refreshUserId()
-        setUserProperties([.role: AnalyticsIdentity.role.rawValue])
+        setUserProperties([
+            .userRole: AnalyticsIdentity.role.rawValue,
+            .platform: "ios",
+            .appVersion: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+        ])
+        refreshNotificationPermission()
     }
 
     // MARK: - Event
 
     func track(_ event: AnalyticsEvent) {
-        var merged = event.properties
-        merged[AnalyticsUserProperty.role.rawValue] = AnalyticsIdentity.role.rawValue
-
 #if DEBUG
-        NSLog("📊 [Amplitude] track %@ %@", event.name, String(describing: merged))
+        NSLog("📊 [Amplitude] track %@ %@", event.name, String(describing: event.properties))
 #endif
 
-        amplitude?.track(eventType: event.name, eventProperties: merged)
+        amplitude?.track(eventType: event.name, eventProperties: event.properties)
     }
 
     // MARK: - Identity
@@ -56,6 +59,19 @@ final class AmplitudeManager {
 #endif
 
         amplitude?.identify(userProperties: mapped)
+    }
+
+    func refreshNotificationPermission() {
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            let value: String
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral: value = "granted"
+            case .denied: value = "denied"
+            case .notDetermined: value = "not_determined"
+            @unknown default: value = "not_determined"
+            }
+            self?.setUserProperties([.notificationPermission: value])
+        }
     }
 
     func updateUserId(_ id: Int) {
