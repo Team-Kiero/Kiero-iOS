@@ -49,7 +49,7 @@ final class DailyJourneyService {
     }
     
     func verifyJourney(scheduleDetailId: Int, image: UIImage) -> AnyPublisher<Void, NetworkError> {
-        AmplitudeManager.shared.track(.scheduleAuthStarted)
+        AmplitudeManager.shared.track(.scheduleAuthStarted(scheduleId: String(scheduleDetailId)))
 
         return Future<Void, NetworkError> { promise in
             Task {
@@ -106,7 +106,7 @@ final class DailyJourneyService {
                     )
                     print("✅ 여정 인증 완료 (scheduleDetailId: \(scheduleDetailId), imageUrl: \(cleanImageUrl))")
 
-                    AmplitudeManager.shared.track(.scheduleAuthCompleted)
+                    AmplitudeManager.shared.track(.scheduleAuthCompleted(scheduleId: String(scheduleDetailId)))
 
                     promise(.success(()))
                     
@@ -139,4 +139,3 @@ final class DailyJourneyService {
         .eraseToAnyPublisher()
     }
 }
-

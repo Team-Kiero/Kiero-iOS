@@ -14,7 +14,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     // MARK: - Properties
     
     var makeDailyJourneyMapVC: (() -> DailyJourneyMapViewController)?
-    var makeGiveFireStoneVC: ((Int) -> GiveFireStoneViewController)?
+    var makeGiveFireStoneVC: ((Int, Int) -> GiveFireStoneViewController)?
     
     private let mainView = DailyJourneyView()
     private let viewWillAppearSubject = PassthroughSubject<Void, Never>()
@@ -117,8 +117,9 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             openCamera()
             
         case .tryLightFire:
-            let stoneCount = self.viewModel?.currentEarnedStoneCount ?? 0
-            guard let vc = self.makeGiveFireStoneVC?(stoneCount) else { return }
+            let completedScheduleCount = self.viewModel?.currentEarnedStoneCount ?? 0
+            let totalScheduleCount = self.viewModel?.currentTotalScheduleCount ?? 0
+            guard let vc = self.makeGiveFireStoneVC?(completedScheduleCount, totalScheduleCount) else { return }
             vc.hidesBottomBarWhenPushed = true
             self.navigationController?.pushViewController(vc, animated: true)
         }
@@ -164,8 +165,8 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
             ) { granted, _ in
-                AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .dailyJourney))
                 AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
+                AmplitudeManager.shared.refreshNotificationPermission()
                 guard granted else { return }
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
