@@ -92,10 +92,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         let type = userInfo["type"] as? String
         let targetId = userInfo["targetId"] as? String
 
-        AmplitudeManager.shared.track(.pushClicked(pushType: type ?? "unknown"))
+        if let type, let destinationScreen = destinationScreen(for: type) {
+            AmplitudeManager.shared.track(.pushClicked(
+                pushType: type,
+                destinationScreen: destinationScreen
+            ))
+        }
 
         Task { @MainActor in
             DeepLinkManager.shared.handle(type: type, targetId: targetId)
+        }
+    }
+
+    private func destinationScreen(for pushType: String) -> AnalyticsDestinationScreen? {
+        switch pushType {
+        case "SCHEDULE_VERIFIED", "FIRE_LIT", "MISSION_COMPLETE", "COUPON_PURCHASED":
+            return .parentNotificationFeed
+        case "PARENT_DAILY_START", "SCHEDULE_SKIPPED", "PARENT_SCHEDULE_REMINDER":
+            return .parentHome
+        case "CHILD_DAILY_START", "CHILD_NEXT_JOURNEY", "SCHEDULE_CREATED", "SCHEDULE_DELETED", "SCHEDULE_MODIFIED":
+            return .childJourney
+        case "CHILD_MISSION_INCOMPLETE":
+            return .childMission
+        default:
+            return nil
         }
     }
     

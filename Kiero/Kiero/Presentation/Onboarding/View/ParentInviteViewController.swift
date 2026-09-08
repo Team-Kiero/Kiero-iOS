@@ -140,8 +140,6 @@ final class ParentInviteViewController: BaseViewController<ParentInviteViewModel
                     print("⚠️ childId 없음, fallback 필요")
                 }
                 self.isChildJoined = true
-                AmplitudeManager.shared.setUserProperties([.childConnected: true])
-
                 let expired = viewModel.isExpiredValue
                 let enabled = (!expired) && self.isChildJoined
                 self.startButton.isEnabled = enabled

@@ -92,11 +92,6 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                     body: req
                 )
                 
-                AmplitudeManager.shared.track(.inviteCodeCreated(
-                    codeHash: AnalyticsIdentity.hashed(data.code),
-                    source: .childManage
-                ))
-
                 await MainActor.run {
                     let expiresAt = Date().addingTimeInterval(self.expiresIn)
 
@@ -196,8 +191,6 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                 guard let self else { return }
 
                 print("📩 [ChildManageVM] CHILD_JOINED:", payload.childId ?? 0)
-
-                AmplitudeManager.shared.setUserProperties([.childConnected: true])
 
                 self.connectionState = .connected
                 self.clearInviteSession()

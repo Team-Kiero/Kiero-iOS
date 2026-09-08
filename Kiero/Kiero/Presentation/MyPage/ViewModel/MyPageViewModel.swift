@@ -76,8 +76,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 case .notDetermined:
                     UNUserNotificationCenter.current()
                         .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                            AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .myPage))
                             AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
+                            AmplitudeManager.shared.refreshNotificationPermission()
                             DispatchQueue.main.async {
                                 self.isAlarmOn = granted
                                 if granted {
@@ -220,8 +220,6 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 guard let self else { return }
 
                 print("📩 [MyPageVM] CHILD_JOINED:", payload.childId ?? 0)
-
-                AmplitudeManager.shared.setUserProperties([.childConnected: true])
 
                 self.childConnectionState = .connected
                 self.fetchUserInfo()
