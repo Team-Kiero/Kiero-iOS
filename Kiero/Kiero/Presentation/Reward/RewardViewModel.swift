@@ -59,14 +59,15 @@ final class RewardViewModel: BaseViewModel, ObservableObject {
                 switch completion {
                 case .finished:
                     print(" 쿠폰 추가 API 성공")
-                    AmplitudeManager.shared.track(.rewardCreated)
                     self?.fetchCoupons(childId: self?.currentChildId)
                     
                 case .failure(let error):
                     print(" 쿠폰 추가 API 실패: \(error)")
                     Toast.show(message: "보상 추가에 실패했습니다.", bottomInset: 88)
                 }
-            } receiveValue: { _ in }
+            } receiveValue: { rewardId in
+                AmplitudeManager.shared.track(.rewardCreated(rewardId: String(rewardId), goldCost: cost))
+            }
             .store(in: &cancellables)
     }
     

@@ -34,7 +34,13 @@ final class WriteMissionViewModel: BaseViewModel {
                 }
             } receiveValue: { [weak self] response in
                 print("🔍 새로 추가된 미션 id: \(response.id)")
-                AmplitudeManager.shared.track(.missionCreated(source: .manual, count: nil))
+                AmplitudeManager.shared.track(.missionCreated(
+                    creationMethod: .manual,
+                    dueDateType: Self.dueDateType(from: response.dueAt),
+                    rewardGold: response.reward,
+                    missionCount: 1,
+                    missionId: String(response.id)
+                ))
                 var recentActivity = UserDefaults.standard.array(forKey: "recentActivityIds") as? [Int] ?? []
                 recentActivity.append(response.id)
                 UserDefaults.standard.set(recentActivity, forKey: "recentActivityIds")
@@ -63,5 +69,17 @@ final class WriteMissionViewModel: BaseViewModel {
                 self?.isMissionUpdateSuccess.send(())
             })
             .store(in: &cancellables)
+    }
+
+    private static func dueDateType(from value: String) -> MissionDueDateType? {
+        let isoFormatter = ISO8601DateFormatter()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let date = isoFormatter.date(from: value) ?? dateFormatter.date(from: value)
+        guard let date else { return nil }
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return .today }
+        if calendar.isDateInTomorrow(date) { return .tomorrow }
+        return .future
     }
 }
