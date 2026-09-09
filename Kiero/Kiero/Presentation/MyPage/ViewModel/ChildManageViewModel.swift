@@ -61,6 +61,7 @@ final class ChildManageViewModel: BaseViewModel, ObservableObject {
                 )
                 
                 guard let child = children.first else { return }
+                AmplitudeManager.shared.updateFamilyConnectionId(child.id)
                 
                 await MainActor.run {
                     self.childLastName = child.childLastName

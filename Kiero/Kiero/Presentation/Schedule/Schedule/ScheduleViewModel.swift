@@ -50,9 +50,11 @@ final class ScheduleViewModel: BaseViewModel, ViewModelType {
     private func fetchInitialChildId() {
         service.fetchChildren()
             .sink { _ in } receiveValue: { [weak self] children in
-                if let firstChildId = children.first?.childId {
+                if let child = children.first {
+                    let firstChildId = child.childId
                     self?.childId.send(firstChildId)
                     UserDefaults.standard.set(firstChildId, forKey: "selectedChildId")
+                    AmplitudeManager.shared.updateFamilyConnectionId(child.id)
                     print("📍 [저장 완료] childId \(firstChildId)를 UserDefaults에 저장했습니다.")
                 }
             }

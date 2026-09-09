@@ -95,4 +95,5 @@ enum AnalyticsUserProperty: String {
     case pushEnabled = "push_enabled"
     case platform
     case appVersion = "app_version"
+    case familyConnectionId = "family_connection_id"
 }

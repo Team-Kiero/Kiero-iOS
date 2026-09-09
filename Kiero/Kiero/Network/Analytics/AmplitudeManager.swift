@@ -81,6 +81,10 @@ final class AmplitudeManager {
         refreshUserId()
     }
 
+    func updateFamilyConnectionId(_ id: Int) {
+        setUserProperties([.familyConnectionId: String(id)])
+    }
+
     func refreshUserId() {
         let userId = AnalyticsIdentity.resolveUserId()
 

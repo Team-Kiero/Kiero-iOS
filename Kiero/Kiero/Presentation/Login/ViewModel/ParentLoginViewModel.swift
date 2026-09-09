@@ -95,6 +95,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -167,6 +170,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -235,6 +241,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 
                 if children.isEmpty {
                     await MainActor.run {
