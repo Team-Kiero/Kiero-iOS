@@ -46,13 +46,13 @@ final class AddScheduleViewModel: BaseViewModel {
                         self.errorMessage.send("일정 저장에 실패했어요. 잠시 후 다시 시도해주세요.")
                     }
                 }
-            } receiveValue: { [weak self] scheduleId in
+            } receiveValue: { [weak self] in
                 print("✅ [VM] 서버 저장 성공")
                 let selectedDayCount = request.isRecurring
                     ? request.dayOfWeek?.split(separator: ",").count ?? 0
                     : request.dates?.split(separator: ",").count ?? 1
                 AmplitudeManager.shared.track(.scheduleCreated(
-                    scheduleId: String(scheduleId),
+                    scheduleId: nil,
                     isRecurring: request.isRecurring,
                     selectedDayCount: selectedDayCount,
                     durationMinutes: Self.durationMinutes(start: request.startTime, end: request.endTime)

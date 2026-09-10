@@ -10,7 +10,7 @@ import Foundation
 enum AnalyticsEvent {
     case appOpened
     case onboardingCompleted
-    case scheduleCreated(scheduleId: String, isRecurring: Bool, selectedDayCount: Int, durationMinutes: Int)
+    case scheduleCreated(scheduleId: String?, isRecurring: Bool, selectedDayCount: Int, durationMinutes: Int)
     case missionCreated(creationMethod: MissionCreationMethod, dueDateType: MissionDueDateType?, rewardGold: Int, missionCount: Int, missionId: String?)
     case rewardCreated(rewardId: String, goldCost: Int)
     case scheduleAuthStarted(scheduleId: String)
@@ -43,7 +43,9 @@ extension AnalyticsEvent {
     var properties: [String: Any] {
         switch self {
         case .scheduleCreated(let scheduleId, let isRecurring, let selectedDayCount, let durationMinutes):
-            return ["schedule_id": scheduleId, "is_recurring": isRecurring, "selected_day_count": selectedDayCount, "duration_minutes": durationMinutes]
+            var properties: [String: Any] = ["is_recurring": isRecurring, "selected_day_count": selectedDayCount, "duration_minutes": durationMinutes]
+            if let scheduleId { properties["schedule_id"] = scheduleId }
+            return properties
         case .missionCreated(let creationMethod, let dueDateType, let rewardGold, let missionCount, let missionId):
             var properties: [String: Any] = ["creation_method": creationMethod.rawValue, "reward_gold": rewardGold, "mission_count": missionCount]
             if let dueDateType { properties["due_date_type"] = dueDateType.rawValue }

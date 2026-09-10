@@ -41,12 +41,12 @@ final class RewardService: RewardServiceType {
             Task {
                 do {
                     let requestBody = RewardCreateRequestDTO(name: title, price: cost)
-                    let rewardId: Int = try await BaseService.shared.request(
+                    let response: RewardResponseDTO = try await BaseService.shared.request(
                         endPoint: .addCoupon(childId: childId),
                         body: requestBody
                     )
                     
-                    promise(.success(rewardId))
+                    promise(.success(response.couponId))
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {
