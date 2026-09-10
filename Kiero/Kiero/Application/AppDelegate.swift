@@ -26,10 +26,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate,
         // Firebase 초기화
         let googleServiceFileName: String
         
-        if Bundle.main.bundleIdentifier == "com.Kiero.Parent" {
+        switch Bundle.main.bundleIdentifier {
+        case "com.Kiero.Parent":
             googleServiceFileName = "GoogleService-Info-Parent"
-        } else {
+        case "com.Kiero.Parent.dev":
+            googleServiceFileName = "GoogleService-Info-Parent-Dev"
+        case "com.Kiero.Child":
             googleServiceFileName = "GoogleService-Info-Child"
+        case "com.Kiero.Child.dev":
+            googleServiceFileName = "GoogleService-Info-Child-Dev"
+        default:
+            NSLog("⚠️ 알 수 없는 Bundle ID(%@) — Parent 설정으로 폴백", Bundle.main.bundleIdentifier ?? "nil")
+            googleServiceFileName = "GoogleService-Info-Parent"
         }
         
         if let filePath = Bundle.main.path(forResource: googleServiceFileName, ofType: "plist"),

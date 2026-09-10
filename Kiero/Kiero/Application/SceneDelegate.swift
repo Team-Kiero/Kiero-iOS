@@ -12,6 +12,7 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    private let appUpdateAlertPresenter = AppUpdateAlertPresenter()
     
 #if KIERO_PARENT
     var parentCoordinator: ParentCoordinator?
@@ -44,7 +45,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         }
     }
-
     
     func changeRootViewController(_ vc: UIViewController, animated: Bool = true) {
         guard let window = self.window else { return }
@@ -70,6 +70,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         AmplitudeManager.shared.refreshNotificationPermission()
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        appUpdateAlertPresenter.checkForUpdate(in: window)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
