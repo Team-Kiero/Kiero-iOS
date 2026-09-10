@@ -22,6 +22,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private(set) var currentStoneType: StoneType?
     private var currentButtonType: DailyJourneyModel.ActionButtonType = .hidden
     public var currentEarnedStoneCount: Int = 0
+    public var currentTotalScheduleCount: Int = 0
     private var isCurrentlyLastJourney = false
     
     // MARK: - Input & Output
@@ -106,6 +107,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
             self.currentStoneType = scheduleDTO.stoneType
             self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
+            self.currentTotalScheduleCount = scheduleDTO.totalSchedule
             
             let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
             self.viewDataSubject.send(model)
@@ -132,7 +134,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                     self.fetchDailyJourney()
                 }
             } receiveValue: { [weak self] _ in
-                AmplitudeManager.shared.track(.scheduleSkipped)
+                AmplitudeManager.shared.track(.scheduleSkipped(scheduleId: String(id)))
                 self?.fetchDailyJourney()
             }
             .store(in: &cancellables)

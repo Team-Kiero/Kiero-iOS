@@ -76,8 +76,8 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
                 case .notDetermined:
                     UNUserNotificationCenter.current()
                         .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
-                            AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .myPage))
                             AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
+                            AmplitudeManager.shared.refreshNotificationPermission()
                             DispatchQueue.main.async {
                                 self.isAlarmOn = granted
                                 if granted {
@@ -152,10 +152,15 @@ final class MyPageViewModel: BaseViewModel, ObservableObject {
             guard let self else { return }
             
             do {
+                let requestedToken = TokenManager.shared.getAccessToken()
                 let profile: MyPageProfileDTO = try await BaseService.shared.request(
                     endPoint: .fetchParentInfo
                 )
-                
+
+                if TokenManager.shared.getAccessToken() == requestedToken {
+                    AmplitudeManager.shared.updateUserId(profile.id)
+                }
+
                 let settings = await UNUserNotificationCenter.current().notificationSettings()
                 let isAuthorized = self.isOSAuthorized(settings.authorizationStatus)
                 let shouldEnable = profile.pushNotificationEnabled && isAuthorized

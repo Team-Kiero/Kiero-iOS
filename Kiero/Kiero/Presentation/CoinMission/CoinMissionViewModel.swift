@@ -74,7 +74,10 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
                     .eraseToAnyPublisher()
             }
             .sink { [weak self] dto in
-                AmplitudeManager.shared.track(.missionCompleted)
+                AmplitudeManager.shared.track(.missionCompleted(
+                    rewardGold: dto.reward,
+                    missionId: String(dto.id)
+                ))
                 self?.applyComplete(dto)
             }
             .store(in: &cancellables)

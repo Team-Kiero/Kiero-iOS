@@ -216,8 +216,11 @@ extension AppDIContainer {
             let vm = DailyJourneyMapViewModel()
             return DailyJourneyMapViewController(viewModel: vm)
         }
-        vc.makeGiveFireStoneVC = { stoneCount in
-            let vm = GiveFireStoneViewModel(count: stoneCount)
+        vc.makeGiveFireStoneVC = { completedScheduleCount, totalScheduleCount in
+            let vm = GiveFireStoneViewModel(
+                completedScheduleCount: completedScheduleCount,
+                totalScheduleCount: totalScheduleCount
+            )
             return GiveFireStoneViewController(viewModel: vm)
         }
         

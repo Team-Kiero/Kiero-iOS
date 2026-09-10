@@ -10,10 +10,12 @@ import UIKit
 
 final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
     
-    let earnedStoneCount: Int
+    let completedScheduleCount: Int
+    let totalScheduleCount: Int
     
-    init(count: Int) {
-        self.earnedStoneCount = count
+    init(completedScheduleCount: Int, totalScheduleCount: Int) {
+        self.completedScheduleCount = completedScheduleCount
+        self.totalScheduleCount = totalScheduleCount
     }
     
     // MARK: - Input & Output
@@ -74,8 +76,8 @@ final class GiveFireStoneViewModel: BaseViewModel, ViewModelType {
                 print("✅ [GiveFireStoneVM] 성공! 획득 코인: \(data.earnedCoinAmount), 불조각: \(data.gotStones)")
 
                 AmplitudeManager.shared.track(.dailyJourneyCompleted(
-                    earnedCoin: data.earnedCoinAmount,
-                    stoneCount: data.gotStones.count
+                    completedScheduleCount: self?.completedScheduleCount ?? 0,
+                    totalScheduleCount: self?.totalScheduleCount ?? 0
                 ))
 
                 self?.resultSubject.send((data.earnedCoinAmount, data.gotStones))

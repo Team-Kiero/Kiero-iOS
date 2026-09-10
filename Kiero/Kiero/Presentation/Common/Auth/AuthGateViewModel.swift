@@ -78,6 +78,9 @@ final class AuthGateViewModel {
                 let children: [ChildData] = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 
                 await MainActor.run {
                     if children.isEmpty {

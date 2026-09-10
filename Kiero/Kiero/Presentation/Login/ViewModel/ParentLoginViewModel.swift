@@ -83,11 +83,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserRole(loginData.role)
                 TokenManager.shared.saveEmail(loginData.email)
                 
-                AmplitudeManager.shared.refreshUserId()
-                AmplitudeManager.shared.setUserProperties([
-                    .loginMethod: AnalyticsLoginMethod.kakao.rawValue
-                ])
-                AmplitudeManager.shared.track(.loginCompleted(method: .kakao))
+                AmplitudeManager.shared.updateUserId(loginData.id)
+                AmplitudeManager.shared.setUserProperties([.loginMethod: "kakao"])
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -98,9 +95,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
-                AmplitudeManager.shared.setUserProperties([
-                    .childConnected: !children.isEmpty
-                ])
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -161,11 +158,8 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 TokenManager.shared.saveUserRole(loginData.role)
                 TokenManager.shared.saveEmail(loginData.email)
                 
-                AmplitudeManager.shared.refreshUserId()
-                AmplitudeManager.shared.setUserProperties([
-                    .loginMethod: AnalyticsLoginMethod.apple.rawValue
-                ])
-                AmplitudeManager.shared.track(.loginCompleted(method: .apple))
+                AmplitudeManager.shared.updateUserId(loginData.id)
+                AmplitudeManager.shared.setUserProperties([.loginMethod: "apple"])
                 
                 await FCMTokenManager.shared.sendCurrentTokenToServer()
                 
@@ -176,9 +170,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
-                AmplitudeManager.shared.setUserProperties([
-                    .childConnected: !children.isEmpty
-                ])
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 await MainActor.run {
                     self.stateSubject.send(.idle)
                     if children.isEmpty {
@@ -247,6 +241,9 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let children: ChildListResponse = try await BaseService.shared.request(
                     endPoint: .fetchChildren
                 )
+                if let familyConnectionId = children.first?.id {
+                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+                }
                 
                 if children.isEmpty {
                     await MainActor.run {
@@ -269,7 +266,6 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                     )
                     
                     TokenManager.shared.removeRequiredTermsIds()
-                    AmplitudeManager.shared.track(.termsAgreementCompleted)
                 }
 
                 await MainActor.run {

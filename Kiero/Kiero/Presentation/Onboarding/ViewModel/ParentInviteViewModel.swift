@@ -83,11 +83,6 @@ final class ParentInviteViewModel: BaseViewModel {
                     body: req
                 )
 
-                AmplitudeManager.shared.track(.inviteCodeCreated(
-                    codeHash: AnalyticsIdentity.hashed(data.code),
-                    source: .reissue
-                ))
-
                 await MainActor.run {
                     self.inviteCodeSubject.send(data.code)
                     self.expiresAt = Date().addingTimeInterval(self.expiresIn)
@@ -169,7 +164,6 @@ final class ParentInviteViewModel: BaseViewModel {
                         body: request
                     )
                     TokenManager.shared.removeRequiredTermsIds()
-                    AmplitudeManager.shared.track(.termsAgreementCompleted)
                 }
                 AmplitudeManager.shared.track(.onboardingCompleted)
                 await MainActor.run {

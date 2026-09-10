@@ -23,6 +23,7 @@ final class TokenManager {
         static let sse = "sse_token"
         static let nameKey = "firstName"
         static let email = "user_email"
+        static let userId = "user_id"
     }
     
     func saveAccessToken(_ access: String) {
@@ -81,6 +82,14 @@ final class TokenManager {
         userDefaults.string(forKey: Key.email)
     }
     
+    func saveUserId(_ id: Int) {
+        userDefaults.set(id, forKey: Key.userId)
+    }
+
+    func getUserId() -> Int? {
+        userDefaults.object(forKey: Key.userId) as? Int
+    }
+
     func saveProfile(_ profile: String) {
         userDefaults.set(profile, forKey: Key.profile)
     }
@@ -100,6 +109,7 @@ final class TokenManager {
         userDefaults.removeObject(forKey: Key.nameKey)
         userDefaults.removeObject(forKey: Key.profile)
         userDefaults.removeObject(forKey: Key.email)
+        userDefaults.removeObject(forKey: Key.userId)
     }
     
     func clearAll() {

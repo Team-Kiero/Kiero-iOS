@@ -118,8 +118,8 @@ private extension TodayStatusHostingController {
             UNUserNotificationCenter.current().requestAuthorization(
                 options: [.alert, .badge, .sound]
             ) { [weak self] granted, _ in
-                AmplitudeManager.shared.track(.pushPermissionResult(granted: granted, source: .todayStatus))
                 AmplitudeManager.shared.setUserProperties([.pushEnabled: granted])
+                AmplitudeManager.shared.refreshNotificationPermission()
                 guard granted else { return }
 
                 DispatchQueue.main.async {

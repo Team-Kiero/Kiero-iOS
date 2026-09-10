@@ -71,9 +71,10 @@ final class NotificationFeedViewModel: BaseViewModel, ViewModelType {
                 
                 return self.scheduleService.fetchChildren()
                     .map { children -> Int in
-                        if let firstId = children.first?.childId {
-                            self.childId = firstId
-                            return firstId
+                        if let child = children.first {
+                            self.childId = child.childId
+                            AmplitudeManager.shared.updateFamilyConnectionId(child.id)
+                            return child.childId
                         }
                         return 0
                     }

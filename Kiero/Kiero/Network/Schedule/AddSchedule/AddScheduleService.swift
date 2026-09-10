@@ -9,15 +9,15 @@ import Foundation
 import Combine
 
 protocol AddScheduleServiceType {
-    func postSchedule(childId: Int, request: AddScheduleRequestDTO) -> AnyPublisher<Bool, NetworkError>
+    func postSchedule(childId: Int, request: AddScheduleRequestDTO) -> AnyPublisher<Void, NetworkError>
     func fetchDefaultColor(childId: Int) -> AnyPublisher<DefaultColorResponseDTO, NetworkError>
 }
 
 final class AddScheduleService: AddScheduleServiceType {
-    func postSchedule(childId: Int, request: AddScheduleRequestDTO) -> AnyPublisher<Bool, NetworkError> {
+    func postSchedule(childId: Int, request: AddScheduleRequestDTO) -> AnyPublisher<Void, NetworkError> {
         let endPoint = EndPoint.postSchedule(childId: childId, request: request)
         
-        return Future<Bool, NetworkError> { promise in
+        return Future<Void, NetworkError> { promise in
             Task {
                 do {
                     let _: EmptyResponse = try await BaseService.shared.request(
@@ -25,8 +25,7 @@ final class AddScheduleService: AddScheduleServiceType {
                         body: request
                     )
                     
-                    print("✅ [Service] 일정 생성 성공 (EmptyResponse 처리 완료)")
-                    promise(.success(true))
+                    promise(.success(()))
                     
                 } catch let error as NetworkError {
                     print("❌ [Service] 네트워크 에러: \(error.errorDescription)")

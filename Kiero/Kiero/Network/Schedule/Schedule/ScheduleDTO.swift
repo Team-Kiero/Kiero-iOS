@@ -25,6 +25,7 @@ struct ScheduleItemDTO: Decodable {
 }
 
 struct ChildResponseDTO: Decodable {
+    let id: Int
     let childId: Int
     let childLastName: String
     let childFirstName: String

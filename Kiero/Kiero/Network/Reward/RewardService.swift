@@ -10,7 +10,7 @@ import Foundation
 
 protocol RewardServiceType {
     func fetchCoupons(childId: Int) -> AnyPublisher<[Reward], NetworkError>
-    func addCoupon(childId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError>
+    func addCoupon(childId: Int, title: String, cost: Int) -> AnyPublisher<Int, NetworkError>
     func deleteCoupon(couponId: Int) -> AnyPublisher<Void, NetworkError>
     func updateCoupon(couponId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError>
 }
@@ -36,17 +36,17 @@ final class RewardService: RewardServiceType {
         .eraseToAnyPublisher()
     }
     
-    func addCoupon(childId: Int, title: String, cost: Int) -> AnyPublisher<Void, NetworkError> {
-        return Future<Void, NetworkError> { promise in
+    func addCoupon(childId: Int, title: String, cost: Int) -> AnyPublisher<Int, NetworkError> {
+        return Future<Int, NetworkError> { promise in
             Task {
                 do {
                     let requestBody = RewardCreateRequestDTO(name: title, price: cost)
-                    let _: EmptyResponse = try await BaseService.shared.request(
+                    let response: RewardResponseDTO = try await BaseService.shared.request(
                         endPoint: .addCoupon(childId: childId),
                         body: requestBody
                     )
                     
-                    promise(.success(()))
+                    promise(.success(response.couponId))
                 } catch let error as NetworkError {
                     promise(.failure(error))
                 } catch {
