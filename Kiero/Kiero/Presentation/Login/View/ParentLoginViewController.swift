@@ -103,6 +103,11 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         parentNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(parentBubbleLongPressed(_:)))
+        longPress.minimumPressDuration = 1.0
+        parentBubble.isUserInteractionEnabled = true
+        parentBubble.addGestureRecognizer(longPress)
     }
     
     override func bind(viewModel: ParentLoginViewModel) {
@@ -171,6 +176,19 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         case let .toast(message):
             Toast.show(message: message, bottomInset: 83)
         }
+    }
+    
+    private func presentReviewerLoginDialog() {
+        let dialog = DialogBox()
+        dialog.configure(state: .reviewerLogin)
+        // TODO: 심사용 로그인 API 연결
+        dialog.show(in: self)
+    }
+    
+    @objc
+    private func parentBubbleLongPressed(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began, presentedViewController == nil else { return }
+        presentReviewerLoginDialog()
     }
     
     @objc
