@@ -245,6 +245,7 @@ final class DialogBox: UIView {
         $0.backgroundColor = .gray800
         $0.layer.cornerRadius = 8
         $0.clipsToBounds = true
+        $0.textContentType = .oneTimeCode
         $0.autocapitalizationType = .none
         $0.autocorrectionType = .no
         $0.returnKeyType = .done

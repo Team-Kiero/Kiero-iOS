@@ -21,6 +21,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private let appleTap = PassthroughSubject<Void, Never>()
     private let requiredTermsConfirmTap = PassthroughSubject<Void, Never>()
+    private let reviewerLoginTap = PassthroughSubject<String, Never>()
     
     private var loadingVC: UIViewController?
     
@@ -117,7 +118,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             input: .init(
                 kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
                 appleButtonTapped: appleTap.eraseToAnyPublisher(),
-                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher()
+                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher(),
+                reviewerLoginTapped: reviewerLoginTap.eraseToAnyPublisher()
             )
         )
         
@@ -181,7 +183,13 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private func presentReviewerLoginDialog() {
         let dialog = DialogBox()
         dialog.configure(state: .reviewerLogin)
-        // TODO: 심사용 로그인 API 연결
+        dialog.onTapConfirm = { [weak self, weak dialog] in
+            guard let self, let dialog else { return }
+            let password = dialog.passwordText
+            guard !password.isEmpty else { return }
+            dialog.dismiss()
+            self.reviewerLoginTap.send(password)
+        }
         dialog.show(in: self)
     }
     
