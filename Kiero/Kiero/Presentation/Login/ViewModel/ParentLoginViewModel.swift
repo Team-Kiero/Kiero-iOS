@@ -14,6 +14,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
         let kakaoButtonTapped: AnyPublisher<Void, Never>
         let appleButtonTapped: AnyPublisher<Void, Never>
         let requiredTermsConfirmTapped: AnyPublisher<Void, Never>
+        let reviewerLoginTapped: AnyPublisher<String, Never>
     }
     
     struct Output {
@@ -56,6 +57,12 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
+        input.reviewerLoginTapped
+            .sink { [weak self] password in
+                self?.requestReviewerLogin(password: password)
+            }
+            .store(in: &cancellables)
+        
         return Output(
             state: stateSubject.eraseToAnyPublisher(),
             route: routeSubject.eraseToAnyPublisher()
@@ -74,38 +81,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                 let loginData: ParentLoginData = try await BaseService.shared.request(
                     endPoint: .kakaoAccessToken(token: kakaoToken)
                 )
-                TokenManager.shared.saveAccessToken(loginData.accessToken)
-                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
-                if let image = loginData.image {
-                    TokenManager.shared.saveProfile(image)
-                }
-                TokenManager.shared.saveUserName(loginData.name)
-                TokenManager.shared.saveUserRole(loginData.role)
-                TokenManager.shared.saveEmail(loginData.email)
-                
-                AmplitudeManager.shared.updateUserId(loginData.id)
-                AmplitudeManager.shared.setUserProperties([.loginMethod: "kakao"])
-                
-                await FCMTokenManager.shared.sendCurrentTokenToServer()
-                
-                if try await routeRequiredTermsIfNeeded() {
-                    return
-                }
-                
-                let children: ChildListResponse = try await BaseService.shared.request(
-                    endPoint: .fetchChildren
-                )
-                if let familyConnectionId = children.first?.id {
-                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
-                }
-                await MainActor.run {
-                    self.stateSubject.send(.idle)
-                    if children.isEmpty {
-                        self.routeSubject.send(.parentOnboarding)
-                    } else {
-                        self.routeSubject.send(.parentTab)
-                    }
-                }
+                try await self.completeLogin(loginData, method: "kakao")
             } catch let error as KakaoLoginError {
                 await MainActor.run {
                     self.stateSubject.send(.idle)
@@ -149,38 +125,7 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                         name: credential.name
                     )
                 )
-                TokenManager.shared.saveAccessToken(loginData.accessToken)
-                TokenManager.shared.saveRefreshToken(loginData.refreshToken)
-                if let image = loginData.image {
-                    TokenManager.shared.saveProfile(image)
-                }
-                TokenManager.shared.saveUserName(loginData.name)
-                TokenManager.shared.saveUserRole(loginData.role)
-                TokenManager.shared.saveEmail(loginData.email)
-                
-                AmplitudeManager.shared.updateUserId(loginData.id)
-                AmplitudeManager.shared.setUserProperties([.loginMethod: "apple"])
-                
-                await FCMTokenManager.shared.sendCurrentTokenToServer()
-                
-                if try await routeRequiredTermsIfNeeded() {
-                    return
-                }
-                
-                let children: ChildListResponse = try await BaseService.shared.request(
-                    endPoint: .fetchChildren
-                )
-                if let familyConnectionId = children.first?.id {
-                    AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
-                }
-                await MainActor.run {
-                    self.stateSubject.send(.idle)
-                    if children.isEmpty {
-                        self.routeSubject.send(.parentOnboarding)
-                    } else {
-                        self.routeSubject.send(.parentTab)
-                    }
-                }
+                try await self.completeLogin(loginData, method: "apple")
             } catch let error as AppleLoginError {
                 await MainActor.run {
                     self.stateSubject.send(.idle)
@@ -200,6 +145,60 @@ final class ParentLoginViewModel: BaseViewModel, ViewModelType {
                     self.stateSubject.send(.failure("알 수 없는 에러"))
                 }
             }
+        }
+    }
+    
+    private func requestReviewerLogin(password: String) {
+        guard !isLoggingIn else { return }
+        isLoggingIn = true
+        stateSubject.send(.loading)
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.isLoggingIn = false }
+            do {
+                let loginData: ParentLoginData = try await BaseService.shared.request(
+                    endPoint: .reviewerLogin(password: password),
+                    body: ReviewerLoginRequestDTO(password: password)
+                )
+                try await self.completeLogin(loginData, method: "reviewer")
+            } catch let error as NetworkError {
+                await MainActor.run {
+                    self.stateSubject.send(.failure(error.errorDescription))
+                }
+            } catch {
+                await MainActor.run {
+                    self.stateSubject.send(.failure("알 수 없는 에러"))
+                }
+            }
+        }
+    }
+    
+    private func completeLogin(_ loginData: ParentLoginData, method: String) async throws {
+        TokenManager.shared.saveAccessToken(loginData.accessToken)
+        TokenManager.shared.saveRefreshToken(loginData.refreshToken)
+        if let image = loginData.image {
+            TokenManager.shared.saveProfile(image)
+        }
+        TokenManager.shared.saveUserName(loginData.name)
+        TokenManager.shared.saveUserRole(loginData.role)
+        TokenManager.shared.saveEmail(loginData.email)
+        
+        AmplitudeManager.shared.updateUserId(loginData.id)
+        AmplitudeManager.shared.setUserProperties([.loginMethod: method])
+        
+        await FCMTokenManager.shared.sendCurrentTokenToServer()
+        
+        if try await routeRequiredTermsIfNeeded() { return }
+        
+        let children: ChildListResponse = try await BaseService.shared.request(
+            endPoint: .fetchChildren
+        )
+        if let familyConnectionId = children.first?.id {
+            AmplitudeManager.shared.updateFamilyConnectionId(familyConnectionId)
+        }
+        await MainActor.run {
+            self.stateSubject.send(.idle)
+            self.routeSubject.send(children.isEmpty ? .parentOnboarding : .parentTab)
         }
     }
     

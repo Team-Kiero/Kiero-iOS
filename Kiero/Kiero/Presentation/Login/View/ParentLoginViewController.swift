@@ -21,6 +21,7 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
     private let kakaoTap = PassthroughSubject<Void, Never>()
     private let appleTap = PassthroughSubject<Void, Never>()
     private let requiredTermsConfirmTap = PassthroughSubject<Void, Never>()
+    private let reviewerLoginTap = PassthroughSubject<String, Never>()
     
     private var loadingVC: UIViewController?
     
@@ -103,6 +104,11 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         parentNaviBar.leftButtonAction = { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(parentBubbleLongPressed(_:)))
+        longPress.minimumPressDuration = 1.0
+        parentBubble.isUserInteractionEnabled = true
+        parentBubble.addGestureRecognizer(longPress)
     }
     
     override func bind(viewModel: ParentLoginViewModel) {
@@ -112,7 +118,8 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
             input: .init(
                 kakaoButtonTapped: kakaoTap.eraseToAnyPublisher(),
                 appleButtonTapped: appleTap.eraseToAnyPublisher(),
-                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher()
+                requiredTermsConfirmTapped: requiredTermsConfirmTap.eraseToAnyPublisher(),
+                reviewerLoginTapped: reviewerLoginTap.eraseToAnyPublisher()
             )
         )
         
@@ -171,6 +178,25 @@ final class ParentLoginViewController: BaseViewController<ParentLoginViewModel> 
         case let .toast(message):
             Toast.show(message: message, bottomInset: 83)
         }
+    }
+    
+    private func presentReviewerLoginDialog() {
+        let dialog = DialogBox()
+        dialog.configure(state: .reviewerLogin)
+        dialog.onTapConfirm = { [weak self, weak dialog] in
+            guard let self, let dialog else { return }
+            let password = dialog.passwordText
+            guard !password.isEmpty else { return }
+            dialog.dismiss()
+            self.reviewerLoginTap.send(password)
+        }
+        dialog.show(in: self)
+    }
+    
+    @objc
+    private func parentBubbleLongPressed(_ gesture: UILongPressGestureRecognizer) {
+        guard gesture.state == .began, presentedViewController == nil else { return }
+        presentReviewerLoginDialog()
     }
     
     @objc

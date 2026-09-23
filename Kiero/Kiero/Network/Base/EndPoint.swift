@@ -27,6 +27,7 @@ enum EndPoint {
     case appleLogin(identityToken: String, authorizationCode: String, name: String?)
     case requiredTermsAgreementStatus
     case requiredTerms
+    case reviewerLogin(password: String)
     
     // Logout & Token
     case logout
@@ -89,7 +90,7 @@ enum EndPoint {
     
     var refreshPolicy: TokenRefreshPolicy {
         switch self {
-        case .kakaoLogin, .appleLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens:
+        case .kakaoLogin, .appleLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens, .reviewerLogin:
             return .none
         case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus, .fetchCouponHistory:
             return .child
@@ -136,6 +137,8 @@ enum EndPoint {
             return "/api/v1/parents/login/kakao"
         case .appleLogin:
             return "/api/v1/parents/login/apple"
+        case .reviewerLogin:
+            return "/api/v1/parents/login/reviewer"
         case .kakaoAccessToken:
             return "/api/v1/parents/login/kakao/access-token"
         case .requiredTermsAgreementStatus:
@@ -259,7 +262,7 @@ enum EndPoint {
     
     var header: [String: String] {
         switch self {
-        case .kakaoLogin, .appleLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken:
+        case .kakaoLogin, .appleLogin, .kakaoAccessToken, .childSignup, .reissueAllTokens, .reissueAccessToken, .reviewerLogin:
             return HeaderType.none.type
         case .sseToken:
             return HeaderType.sseSubscribe.type

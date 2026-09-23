@@ -28,6 +28,7 @@ final class DialogBox: UIView {
         case endJourney
         case parentNotification
         case parentRequestNotification
+        case reviewerLogin
         
         var title: String {
             switch self {
@@ -57,6 +58,8 @@ final class DialogBox: UIView {
                 return "설정에서 알림을 켜주세요."
             case .parentRequestNotification:
                 return "아이의 여정을 알려드릴게요."
+            case .reviewerLogin:
+                return "Reviewer Login"
             }
         }
 
@@ -84,6 +87,8 @@ final class DialogBox: UIView {
                 return "아이의 일정과 미션 알림을 받으려면\n설정에서 키어로 알림을 켜주세요."
             case .parentRequestNotification:
                 return "일정 인증, 미션 완료, 쿠폰 사용처럼\n중요한 순간을 알림으로 받아보세요."
+            case .reviewerLogin:
+                return ""
             }
         }
         
@@ -98,7 +103,7 @@ final class DialogBox: UIView {
         
         var isCloseButtonHidden: Bool {
             switch self {
-            case .logout:
+            case .logout, .reviewerLogin:
                 return true
             default:
                 return false
@@ -137,9 +142,21 @@ final class DialogBox: UIView {
                 return "기기 설정으로 이동하기"
             case .parentRequestNotification:
                 return "알림 받기"
+            case .reviewerLogin:
+                return "로그인"
             default:
                 return "확인"
             }
+        }
+        
+        var isMessageHidden: Bool {
+            if case .reviewerLogin = self { return true }
+            return false
+        }
+        
+        var hasPasswordField: Bool {
+            if case .reviewerLogin = self { return true }
+            return false
         }
     }
     
@@ -152,6 +169,8 @@ final class DialogBox: UIView {
     var isFollowingSelected: Bool {
         return followingOption.isSelected
     }
+    
+    var passwordText: String { passwordTextField.text ?? "" }
     
     private weak var overlayVC: UIViewController?
     
@@ -219,6 +238,26 @@ final class DialogBox: UIView {
         $0.numberOfLines = 2
     }
     
+    private let passwordTextField = UITextField().then {
+        $0.isSecureTextEntry = true
+        $0.font = .body3_14_R
+        $0.textColor = .white
+        $0.backgroundColor = .gray800
+        $0.layer.cornerRadius = 8
+        $0.clipsToBounds = true
+        $0.textContentType = .oneTimeCode
+        $0.autocapitalizationType = .none
+        $0.autocorrectionType = .no
+        $0.returnKeyType = .done
+        $0.attributedPlaceholder = NSAttributedString(
+            string: "비밀번호 입력",
+            attributes: [.foregroundColor: UIColor.gray400]
+        )
+        $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 12, height: 0))
+        $0.leftViewMode = .always
+        $0.isHidden = true
+    }
+    
     private let contentStack = UIStackView().then {
         $0.axis = .vertical
         $0.alignment = .center
@@ -273,7 +312,7 @@ final class DialogBox: UIView {
         addSubviews(container, closeButton)
         
         coinStack.addArrangedSubviews(coinIcon, coinLabel)
-        contentStack.addArrangedSubviews(titleLabel, coinStack, messageLabel, optionStack)
+        contentStack.addArrangedSubviews(titleLabel, coinStack, messageLabel, passwordTextField, optionStack)
         buttonStack.addArrangedSubviews(cancelButton, confirmButton)
         container.addArrangedSubviews(contentStack, buttonStack)
         
@@ -310,6 +349,11 @@ final class DialogBox: UIView {
             $0.height.equalTo(49)
         }
         
+        passwordTextField.snp.makeConstraints {
+            $0.width.equalToSuperview()
+            $0.height.equalTo(49)
+        }
+        
         optionStack.snp.makeConstraints {
             $0.width.equalToSuperview()
         }
@@ -324,6 +368,7 @@ final class DialogBox: UIView {
         confirmButton.addTarget(self, action: #selector(didTapConfirm), for: .touchUpInside)
         onlyThisOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
         followingOption.addTarget(self, action: #selector(didTapOption), for: .touchUpInside)
+        passwordTextField.addTarget(self, action: #selector(didEndOnExit), for: .editingDidEndOnExit)
     }
     
     // MARK: - Action
@@ -399,6 +444,10 @@ final class DialogBox: UIView {
         }
         
         updateOptionColors()
+        
+        messageLabel.isHidden = state.isMessageHidden
+        passwordTextField.isHidden = !state.hasPasswordField
+        passwordTextField.text = nil
     }
     
     private func updateOptionColors() {
@@ -429,6 +478,9 @@ final class DialogBox: UIView {
     
     @objc
     private func didTapConfirm() { onTapConfirm?() }
+    
+    @objc
+    private func didEndOnExit() { endEditing(true) }
     
     @objc
     private func didTapDim(_ gesture: UITapGestureRecognizer) {
