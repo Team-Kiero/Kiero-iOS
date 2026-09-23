@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DailyJourneyDTO: Decodable {
+struct DailyJourneyDTO: Codable {
     let scheduleDetailId: Int?
     let scheduleOrder: Int
     let startTime: String?
@@ -21,7 +21,7 @@ struct DailyJourneyDTO: Decodable {
     let isNowScheduleVerified: Bool
 }
 
-enum ScheduleStatus: String, Decodable {
+enum ScheduleStatus: String, Codable {
     case noSchedule = "NO_SCHEDULE"
     case firstSchedule = "FIRST_SCHEDULE"
     case nextScheduleExist = "NEXT_SCHEDULE_EXIST"
@@ -30,7 +30,7 @@ enum ScheduleStatus: String, Decodable {
     case fireLit = "FIRE_LIT"
 }
 
-enum StoneType: String, Decodable {
+enum StoneType: String, Codable {
     case courage = "COURAGE"
     case grit = "GRIT"
     case wisdom = "WISDOM"

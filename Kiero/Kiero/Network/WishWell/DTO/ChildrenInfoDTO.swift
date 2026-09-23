@@ -16,7 +16,8 @@ struct ChildrenInfoResponseDTO: Decodable {
     let pushNotificationEnabled: Bool?
 }
 
-struct ChildrenInfo {
+struct ChildrenInfo: Codable {
+    let id: Int = 0
     let firstName: String
     let coinAmount: Int
     let today: String
@@ -26,6 +27,7 @@ struct ChildrenInfo {
 extension ChildrenInfoResponseDTO {
     func toEntity() -> ChildrenInfo {
         .init(
+            id: id,
             firstName: firstName,
             coinAmount: coinAmount,
             today: today,
