@@ -45,6 +45,8 @@ final class AuthGateViewModel {
     private func decideChildRoute() {
         Task {
             do {
+                try await TokenRefresher.shared.refreshAccessToken()
+
                 let status: ParentWithdrawalStatusDTO = try await BaseService.shared.request(
                     endPoint: .checkParentWithdrawalStatus
                 )
@@ -58,7 +60,7 @@ final class AuthGateViewModel {
                 }
             } catch {
                 await MainActor.run {
-                    self.routeSubject.send(.childTab)
+                    LogoutHelper.logoutToPickRole()
                 }
             }
         }
