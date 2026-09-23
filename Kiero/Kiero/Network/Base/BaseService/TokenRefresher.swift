@@ -58,7 +58,9 @@ final class TokenRefresher {
         let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
         guard let tokenData = decoded.data else { throw NetworkError.noData }
         
+        let newRefresh = extractCookieValue(from: http, cookieName: "refreshToken") ?? refresh
         TokenManager.shared.saveAccessToken(tokenData.accessToken)
+        TokenManager.shared.saveRefreshToken(newRefresh)
     }
     
     func refreshAllTokens() async throws {

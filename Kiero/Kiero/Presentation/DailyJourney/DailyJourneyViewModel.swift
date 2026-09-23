@@ -16,6 +16,11 @@ enum DailyJourneyRoute {
 }
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
+
+    private struct CachedDailyJourney: Codable {
+        let schedule: DailyJourneyDTO
+        let child: ChildrenInfo
+    }
     
     private let wishWellService = WishWellService()
     public var currentScheduleDetailId: Int?
@@ -44,6 +49,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     
     private let routeSubject = PassthroughSubject<DailyJourneyRoute, Never>()
     private let viewDataSubject = PassthroughSubject<DailyJourneyModel, Never>()
+    private var hasRestoredCachedJourney = false
     
     // MARK: - Transform
     
@@ -92,6 +98,8 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     // MARK: - Network Logic
     
     private func fetchDailyJourney() {
+        restoreCachedJourneyIfNeeded()
+
         Publishers.Zip(
             DailyJourneyService.shared.updateDailyJourney(),
             self.wishWellService.fetchMyInfo()
@@ -103,16 +111,48 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             }
         } receiveValue: { [weak self] (scheduleDTO, childInfo) in
             guard let self = self else { return }
-            
-            self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
-            self.currentStoneType = scheduleDTO.stoneType
-            self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
-            self.currentTotalScheduleCount = scheduleDTO.totalSchedule
-            
-            let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
-            self.viewDataSubject.send(model)
+
+            self.publishJourney(schedule: scheduleDTO, child: childInfo)
+            self.saveCachedJourney(schedule: scheduleDTO, child: childInfo)
         }
         .store(in: &cancellables)
+    }
+
+    private func restoreCachedJourneyIfNeeded() {
+        guard hasRestoredCachedJourney == false,
+              let userId = TokenManager.shared.getUserId(),
+              let data = UserDefaults.standard.data(forKey: cachedJourneyKey(for: userId)),
+              let cached = try? JSONDecoder().decode(CachedDailyJourney.self, from: data) else {
+            hasRestoredCachedJourney = true
+            return
+        }
+
+        hasRestoredCachedJourney = true
+        publishJourney(schedule: cached.schedule, child: cached.child)
+    }
+
+    private func saveCachedJourney(schedule: DailyJourneyDTO, child: ChildrenInfo) {
+        TokenManager.shared.saveUserId(child.id)
+
+        guard let data = try? JSONEncoder().encode(CachedDailyJourney(schedule: schedule, child: child)) else {
+            return
+        }
+
+        UserDefaults.standard.set(data, forKey: cachedJourneyKey(for: child.id))
+    }
+
+    private func cachedJourneyKey(for userId: Int) -> String {
+        "dailyJourneySnapshot_\(userId)"
+    }
+
+    private func publishJourney(schedule: DailyJourneyDTO, child: ChildrenInfo) {
+        currentScheduleDetailId = schedule.scheduleDetailId
+        currentStoneType = schedule.stoneType
+        currentEarnedStoneCount = schedule.earnedStones ?? 0
+        currentTotalScheduleCount = schedule.totalSchedule
+
+        let model = convertDTOToModel(schedule: schedule, child: child)
+        viewDataSubject.send(model)
     }
     
     private func skipSchedule() {

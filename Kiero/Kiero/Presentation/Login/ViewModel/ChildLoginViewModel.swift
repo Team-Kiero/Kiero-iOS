@@ -68,6 +68,7 @@ final class ChildLoginViewModel: BaseViewModel {
                 TokenManager.shared.saveUserRole(data.role)
                 TokenManager.shared.saveUserName("\(data.lastName)\(data.firstName)")
                 TokenManager.shared.saveFirstName(data.firstName)
+                TokenManager.shared.saveUserId(data.id)
                 
                 AmplitudeManager.shared.updateUserId(data.id)
                 AmplitudeManager.shared.setUserProperties([.loginMethod: "invite_code"])
