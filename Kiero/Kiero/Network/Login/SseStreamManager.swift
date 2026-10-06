@@ -39,6 +39,10 @@ final class SseStreamManager {
     private let dedupeWindow: TimeInterval = 10
     private let refreshIntervalNanoseconds: UInt64 = 270 * 1_000_000_000
     
+    var isActive: Bool {
+        withLock { isRunning }
+    }
+    
     init(sseURL: URL) {
         self.sseURL = sseURL
     }
