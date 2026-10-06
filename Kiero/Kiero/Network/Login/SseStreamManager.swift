@@ -38,6 +38,7 @@ final class SseStreamManager {
     private var recentEventHashes: [String: Date] = [:]
     private let dedupeWindow: TimeInterval = 10
     private let refreshIntervalNanoseconds: UInt64 = 270 * 1_000_000_000
+    private let recoveryDelayNanoseconds: UInt64 = 2 * 1_000_000_000
     
     var isActive: Bool {
         withLock { isRunning }
@@ -399,7 +400,7 @@ final class SseStreamManager {
                 
                 isRecoveringActive = true
                 
-                let currentToken = sseAccessToken
+                let currentToken = isTokenRejected(error) ? nil : sseAccessToken
                 let oldActive = activeClient
                 activeClient = nil
                 activeClientID = nil
@@ -440,6 +441,18 @@ final class SseStreamManager {
             return
         }
         
+        try? await Task.sleep(nanoseconds: recoveryDelayNanoseconds)
+        
+        let alreadyReconnected = withLock { () -> Bool in
+            guard isRunning, activeClient == nil else {
+                isRecoveringActive = false
+                return true
+            }
+            return false
+        }
+        
+        guard !alreadyReconnected else { return }
+        
         if let currentToken = context.currentToken, !currentToken.isEmpty {
             let shouldReconnect = withLock { () -> Bool in
                 guard isRunning else {
@@ -478,6 +491,11 @@ final class SseStreamManager {
             }
             print("❌ [SSEManager] active recovery failed:", error)
         }
+    }
+    
+    private func isTokenRejected(_ error: Error) -> Bool {
+        guard case NetworkError.clientError(let statusCode) = error else { return false }
+        return statusCode == 401 || statusCode == 403
     }
     
     private func shouldSkipDuplicateEvent(_ payload: SseEventPayload) -> Bool {

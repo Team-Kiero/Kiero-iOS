@@ -18,6 +18,7 @@ final class SseClient: NSObject {
     private var session: URLSession!
     private var task: URLSessionDataTask?
     private var buffer = ""
+    private var failedStatusCode: Int?
     
     init(
         url: URL,
@@ -55,6 +56,7 @@ final class SseClient: NSObject {
         print("🌐 [SSEClient] HEADERS:", req.allHTTPHeaderFields ?? [:])
         
         buffer = ""
+        failedStatusCode = nil
         task = session.dataTask(with: req)
         task?.resume()
         
@@ -143,6 +145,12 @@ extension SseClient: URLSessionDataDelegate {
         if let http = response as? HTTPURLResponse {
             print("✅ [SSEClient] RESPONSE status:", http.statusCode)
             print("✅ [SSEClient] RESPONSE headers:", http.allHeaderFields)
+            
+            guard (200...299).contains(http.statusCode) else {
+                failedStatusCode = http.statusCode
+                completionHandler(.cancel)
+                return
+            }
         } else {
             print("✅ [SSEClient] RESPONSE non-http:", response)
         }
@@ -155,6 +163,12 @@ extension SseClient: URLSessionDataDelegate {
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let statusCode = failedStatusCode {
+            print("❌ [SSEClient] connection rejected with status:", statusCode)
+            onError(statusCode >= 500 ? NetworkError.internalServerError : NetworkError.clientError(statusCode: statusCode))
+            return
+        }
+        
         if let error = error {
             print("❌ [SSEClient] connection terminated:", error.localizedDescription)
             onError(error)
