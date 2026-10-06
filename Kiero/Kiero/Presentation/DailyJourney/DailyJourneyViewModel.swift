@@ -55,6 +55,19 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
+        NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .filter {
+                $0.eventType == "SCHEDULE_STATUS_UPDATED"
+                || $0.eventType == "SCHEDULE_MODIFIED"
+                || $0.eventType == "DATE_CHANGED"
+            }
+            .sink { [weak self] payload in
+                print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
+                self?.fetchDailyJourney()
+            }
+            .store(in: &cancellables)
+        
         input.nextJourneyButtonTap
             .sink { [weak self] in
                 if self?.isCurrentlyLastJourney == true {
@@ -161,13 +174,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             }
             
             await MainActor.run {
-                SseStreamManager.shared.startIfNeeded(initialToken: token) { [weak self] payload in
-                    guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                       || payload.eventType == "SCHEDULE_MODIFIED"
-                       || payload.eventType == "DATE_CHANGED" else { return }
-                    print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
-                    self?.fetchDailyJourney()
-                }
+                SseStreamManager.shared.startIfNeeded(initialToken: token) { _ in }
             }
         }
     }
