@@ -64,8 +64,9 @@ final class SseClient: NSObject {
     }
     
     func disconnect() {
-        task?.cancel()
+        let currentTask = task
         task = nil
+        currentTask?.cancel()
         buffer = ""
     }
     
@@ -163,6 +164,9 @@ extension SseClient: URLSessionDataDelegate {
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        // disconnect()로 직접 끊은 연결은 재연결 대상이 아니므로 무시
+        guard task === self.task else { return }
+        
         if let statusCode = failedStatusCode {
             print("❌ [SSEClient] connection rejected with status:", statusCode)
             onError(statusCode >= 500 ? NetworkError.internalServerError : NetworkError.clientError(statusCode: statusCode))
@@ -172,6 +176,14 @@ extension SseClient: URLSessionDataDelegate {
         if let error = error {
             print("❌ [SSEClient] connection terminated:", error.localizedDescription)
             onError(error)
+            return
         }
+        
+        print("❌ [SSEClient] stream closed by server")
+        onError(SseClientError.streamClosed)
     }
+}
+
+enum SseClientError: Error {
+    case streamClosed
 }
