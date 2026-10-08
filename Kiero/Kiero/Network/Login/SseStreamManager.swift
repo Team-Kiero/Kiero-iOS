@@ -32,13 +32,14 @@ final class SseStreamManager {
     private var isRunning = false
     private var isRefreshing = false
     private var isRecoveringActive = false
+    private var recoveryAttempt = 0
     
     private var storedOnEvent: EventHandler?
     
     private var recentEventHashes: [String: Date] = [:]
     private let dedupeWindow: TimeInterval = 10
     private let refreshIntervalNanoseconds: UInt64 = 270 * 1_000_000_000
-    private let recoveryDelayNanoseconds: UInt64 = 2 * 1_000_000_000
+    private let maxRecoveryDelaySeconds = 30
     
     var isActive: Bool {
         withLock { isRunning }
@@ -99,6 +100,14 @@ final class SseStreamManager {
                 self.startRefreshLoop(onEvent: onEvent)
             } catch {
                 print("❌ [SSEManager] resume failed:", error)
+                
+                if self.isTokenRejected(error) {
+                    self.pause()
+                    return
+                }
+                
+                self.startRefreshLoop(onEvent: onEvent)
+                self.scheduleRecovery(token: nil, onEvent: onEvent)
             }
         }
     }
@@ -118,6 +127,7 @@ final class SseStreamManager {
             isRunning = false
             isRefreshing = false
             isRecoveringActive = false
+            recoveryAttempt = 0
             
             return (active, candidate, task)
         }
@@ -333,8 +343,8 @@ final class SseStreamManager {
             let shouldNotifyReconnect = withLock { () -> Bool in
                 guard activeClientID == clientID, isRunning else { return false }
                 
-                let wasRecovering = isRecoveringActive
-                isRecoveringActive = false
+                let wasRecovering = recoveryAttempt > 0
+                recoveryAttempt = 0
                 
                 print("✅ [SSEManager] active connected")
                 return wasRecovering
@@ -360,6 +370,7 @@ final class SseStreamManager {
                 candidateClient = nil
                 candidateClientID = nil
                 isRefreshing = false
+                recoveryAttempt = 0
                 
                 return oldActive
             }
@@ -393,13 +404,6 @@ final class SseStreamManager {
                     return nil
                 }
                 
-                if isRecoveringActive {
-                    print("⚠️ [SSEManager] active recovery already in progress")
-                    return nil
-                }
-                
-                isRecoveringActive = true
-                
                 let currentToken = isTokenRejected(error) ? nil : sseAccessToken
                 let oldActive = activeClient
                 activeClient = nil
@@ -415,9 +419,7 @@ final class SseStreamManager {
             guard let recoveryContext else { return }
             recoveryContext.oldClient?.disconnect()
             
-            Task { [weak self] in
-                await self?.recoverActiveConnection(using: recoveryContext)
-            }
+            scheduleRecovery(token: recoveryContext.currentToken, onEvent: recoveryContext.onEvent)
         case .candidate:
             let candidateToDisconnect: SseClient? = withLock {
                 guard candidateClientID == clientID else { return nil }
@@ -435,62 +437,79 @@ final class SseStreamManager {
         }
     }
     
-    private func recoverActiveConnection(using context: ActiveRecoveryContext) async {
-        guard let onEvent = context.onEvent else {
-            withLock { isRecoveringActive = false }
-            return
+    private func scheduleRecovery(token: String?, onEvent: @escaping EventHandler) {
+        let shouldStart = withLock { () -> Bool in
+            guard isRunning, !isRecoveringActive else { return false }
+            isRecoveringActive = true
+            return true
         }
         
-        try? await Task.sleep(nanoseconds: recoveryDelayNanoseconds)
+        guard shouldStart else { return }
         
-        let alreadyReconnected = withLock { () -> Bool in
-            guard isRunning, activeClient == nil else {
-                isRecoveringActive = false
-                return true
-            }
-            return false
+        Task { [weak self] in
+            await self?.recoverActiveConnection(token: token, onEvent: onEvent)
         }
+    }
+    
+    private func recoverActiveConnection(token initialToken: String?, onEvent: @escaping EventHandler) async {
+        var token = initialToken
         
-        guard !alreadyReconnected else { return }
-        
-        if let currentToken = context.currentToken, !currentToken.isEmpty {
-            let shouldReconnect = withLock { () -> Bool in
-                guard isRunning else {
+        while true {
+            let attempt = withLock { recoveryAttempt }
+            try? await Task.sleep(nanoseconds: recoveryDelayNanoseconds(for: attempt))
+            
+            let canRecover = withLock { () -> Bool in
+                guard isRunning, activeClient == nil else {
                     isRecoveringActive = false
                     return false
                 }
                 return true
             }
             
-            if shouldReconnect {
-                print("🔄 [SSEManager] recover active with existing token")
-                connectActive(token: currentToken, onEvent: onEvent)
-                return
-            }
-        }
-        
-        do {
-            print("🔄 [SSEManager] recover active with reissued token")
-            let newToken = try await TokenRefresher.shared.reissueSseAccessToken()
+            guard canRecover else { return }
             
-            let shouldReconnect = withLock { () -> Bool in
-                guard isRunning else {
+            if token?.isEmpty ?? true {
+                do {
+                    print("🔄 [SSEManager] reissue token for recovery (attempt \(attempt + 1))")
+                    token = try await TokenRefresher.shared.reissueSseAccessToken()
+                } catch {
+                    if isTokenRejected(error) {
+                        print("❌ [SSEManager] token reissue rejected, stop recovery:", error)
+                        pause()
+                        return
+                    }
+                    
+                    print("❌ [SSEManager] token reissue failed, retry later:", error)
+                    withLock { recoveryAttempt += 1 }
+                    continue
+                }
+            }
+            
+            guard let validToken = token else { continue }
+            
+            let shouldConnect = withLock { () -> Bool in
+                guard isRunning, activeClient == nil else {
                     isRecoveringActive = false
                     return false
                 }
                 
-                sseAccessToken = newToken
+                sseAccessToken = validToken
+                recoveryAttempt += 1
+                isRecoveringActive = false
                 return true
             }
             
-            guard shouldReconnect else { return }
-            connectActive(token: newToken, onEvent: onEvent)
-        } catch {
-            withLock {
-                isRecoveringActive = false
-            }
-            print("❌ [SSEManager] active recovery failed:", error)
+            guard shouldConnect else { return }
+            
+            print("🔄 [SSEManager] recover active connection (attempt \(attempt + 1))")
+            connectActive(token: validToken, onEvent: onEvent)
+            return
         }
+    }
+    
+    private func recoveryDelayNanoseconds(for attempt: Int) -> UInt64 {
+        let seconds = min(2 << min(attempt, 4), maxRecoveryDelaySeconds)
+        return UInt64(seconds) * 1_000_000_000
     }
     
     private func isTokenRejected(_ error: Error) -> Bool {
@@ -548,7 +567,7 @@ private extension SseStreamManager {
     
     struct ActiveRecoveryContext {
         let currentToken: String?
-        let onEvent: EventHandler?
+        let onEvent: EventHandler
         let oldClient: SseClient?
     }
 }
