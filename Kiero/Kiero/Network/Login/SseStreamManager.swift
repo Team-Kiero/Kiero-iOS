@@ -33,6 +33,7 @@ final class SseStreamManager {
     private var isRefreshing = false
     private var isRecoveringActive = false
     private var recoveryAttempt = 0
+    private var activeFailedDuringRefresh = false
     
     private var storedOnEvent: EventHandler?
     
@@ -128,6 +129,7 @@ final class SseStreamManager {
             isRefreshing = false
             isRecoveringActive = false
             recoveryAttempt = 0
+            activeFailedDuringRefresh = false
             
             return (active, candidate, task)
         }
@@ -226,6 +228,7 @@ final class SseStreamManager {
                         self.isRefreshing = false
                     }
                     print("❌ [SSEManager] refresh failed after retries")
+                    self.recoverActiveIfFailedDuringRefresh(tokenRejected: false, onEvent: onEvent)
                 }
             }
         }
@@ -252,7 +255,6 @@ final class SseStreamManager {
         let client = makeClient(
             id: clientID,
             token: token,
-            role: .active,
             onEvent: onEvent
         )
         
@@ -285,7 +287,6 @@ final class SseStreamManager {
         let client = makeClient(
             id: clientID,
             token: token,
-            role: .candidate,
             onEvent: onEvent
         )
         
@@ -305,7 +306,6 @@ final class SseStreamManager {
     private func makeClient(
         id: UUID,
         token: String,
-        role: ClientRole,
         onEvent: @escaping EventHandler
     ) -> SseClient {
         SseClient(
@@ -329,15 +329,18 @@ final class SseStreamManager {
                 }
             },
             onConnected: { [weak self] in
-                self?.handleConnected(clientID: id, role: role)
+                self?.handleConnected(clientID: id)
             },
             onError: { [weak self] error in
-                self?.handleError(error, clientID: id, role: role, onEvent: onEvent)
+                self?.handleError(error, clientID: id, onEvent: onEvent)
             }
         )
     }
     
-    private func handleConnected(clientID: UUID, role: ClientRole) {
+    private func handleConnected(clientID: UUID) {
+        // 갱신으로 승격된 연결도 현재 역할로 처리하도록 콜백 시점의 ID로 역할 판단
+        guard let role = withLock({ currentRole(of: clientID) }) else { return }
+        
         switch role {
         case .active:
             let shouldNotifyReconnect = withLock { () -> Bool in
@@ -371,6 +374,7 @@ final class SseStreamManager {
                 candidateClientID = nil
                 isRefreshing = false
                 recoveryAttempt = 0
+                activeFailedDuringRefresh = false
                 
                 return oldActive
             }
@@ -388,9 +392,11 @@ final class SseStreamManager {
     private func handleError(
         _ error: Error,
         clientID: UUID,
-        role: ClientRole,
         onEvent: @escaping EventHandler
     ) {
+        // 갱신으로 승격된 연결도 현재 역할로 처리하도록 콜백 시점의 ID로 역할 판단
+        guard let role = withLock({ currentRole(of: clientID) }) else { return }
+        
         print("❌ [SSEManager] \(role) error:", error)
         
         switch role {
@@ -400,7 +406,9 @@ final class SseStreamManager {
                 guard isRunning else { return nil }
                 
                 if isRefreshing {
-                    print("⚠️ [SSEManager] active error while refresh in progress, skip immediate recovery")
+                    // 새 연결이 승격되면 대체되고, 실패하면 그때 복구를 시작
+                    print("⚠️ [SSEManager] active error while refresh in progress, defer recovery")
+                    activeFailedDuringRefresh = true
                     return nil
                 }
                 
@@ -433,8 +441,40 @@ final class SseStreamManager {
             }
             
             candidateToDisconnect?.disconnect()
-            print("⚠️ [SSEManager] candidate failed, keep existing active connection")
+            print("⚠️ [SSEManager] candidate failed")
+            
+            recoverActiveIfFailedDuringRefresh(tokenRejected: isTokenRejected(error), onEvent: onEvent)
         }
+    }
+    
+    private func currentRole(of clientID: UUID) -> ClientRole? {
+        if activeClientID == clientID { return .active }
+        if candidateClientID == clientID { return .candidate }
+        return nil
+    }
+    
+    private func recoverActiveIfFailedDuringRefresh(tokenRejected: Bool, onEvent: @escaping EventHandler) {
+        let recoveryContext: ActiveRecoveryContext? = withLock {
+            guard isRunning, activeFailedDuringRefresh else { return nil }
+            
+            activeFailedDuringRefresh = false
+            
+            let oldActive = activeClient
+            activeClient = nil
+            activeClientID = nil
+            
+            return ActiveRecoveryContext(
+                currentToken: tokenRejected ? nil : sseAccessToken,
+                onEvent: onEvent,
+                oldClient: oldActive
+            )
+        }
+        
+        guard let recoveryContext else { return }
+        recoveryContext.oldClient?.disconnect()
+        
+        print("🔄 [SSEManager] active failed during refresh, start recovery")
+        scheduleRecovery(token: recoveryContext.currentToken, onEvent: recoveryContext.onEvent)
     }
     
     private func scheduleRecovery(token: String?, onEvent: @escaping EventHandler) {
