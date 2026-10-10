@@ -61,6 +61,19 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
+        NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .filter {
+                $0.eventType == "SCHEDULE_STATUS_UPDATED"
+                || $0.eventType == "SCHEDULE_MODIFIED"
+                || $0.eventType == "DATE_CHANGED"
+            }
+            .sink { [weak self] payload in
+                print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
+                self?.fetchDailyJourney()
+            }
+            .store(in: &cancellables)
+        
         input.nextJourneyButtonTap
             .sink { [weak self] in
                 if self?.isCurrentlyLastJourney == true {
@@ -187,30 +200,21 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     func startSseConnection() {
         print("✅ [DailyJourneyViewModel] startSseConnection called")
         
+        guard !SseStreamManager.shared.isActive else { return }
+        
         Task {
-            var token = TokenManager.shared.getSseToken()
+            let token: String
             
-            if token == nil {
-                print("⚠️ [DailyJourneyViewModel] No SSE Token found. Reissuing...")
-                do {
-                    token = try await TokenRefresher.shared.reissueSseAccessToken()
-                    print("✅ [DailyJourneyViewModel] SSE Token reissued successfully.")
-                } catch {
-                    print("❌ [DailyJourneyViewModel] Failed to reissue SSE Token: \(error)")
-                    return
-                }
+            do {
+                token = try await TokenRefresher.shared.reissueSseAccessToken()
+                print("✅ [DailyJourneyViewModel] SSE Token reissued successfully.")
+            } catch {
+                print("❌ [DailyJourneyViewModel] Failed to reissue SSE Token: \(error)")
+                return
             }
             
-            guard let validToken = token else { return }
-            
             await MainActor.run {
-                SseStreamManager.shared.startIfNeeded(initialToken: validToken) { [weak self] payload in
-                    guard payload.eventType == "SCHEDULE_STATUS_UPDATED"
-                       || payload.eventType == "SCHEDULE_MODIFIED"
-                       || payload.eventType == "DATE_CHANGED" else { return }
-                    print("📩 [DailyJourneyViewModel] SSE Event received: \(payload.eventType)")
-                    self?.fetchDailyJourney()
-                }
+                SseStreamManager.shared.startIfNeeded(initialToken: token) { _ in }
             }
         }
     }

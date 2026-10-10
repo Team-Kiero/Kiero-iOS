@@ -22,8 +22,6 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
     var userName: String { userInfoSubject.value?.firstName ?? "" }
     var coupons: [Coupon] { couponsSubject.value }
     
-    private var sseStarted = false
-    
     struct Input {
         let viewDidLoad: AnyPublisher<Void, Never>
         let refresh: AnyPublisher<Void, Never>
@@ -89,9 +87,10 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        input.viewWillDisappear
-            .sink { [weak self] _ in
-                self?.stopSSE()
+        NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .sink { [weak self] payload in
+                self?.handleCouponSse(payload: payload)
             }
             .store(in: &cancellables)
         
@@ -115,7 +114,7 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
         let me = self.service.fetchMyInfo()
             .catch { [weak self] err -> Just<ChildrenInfo> in
                 self?.errorMessageSubject.send(err.errorDescription)
-                return Just(ChildrenInfo(firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false))
+                return Just(ChildrenInfo(id: 0, firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false))
             }
         
         let coupons = self.service.fetchCoupons()
@@ -141,34 +140,20 @@ final class WishWellViewModel: BaseViewModel, ViewModelType {
     // MARK: - SSE Connection
     
     private func startSSEIfNeeded() {
-        guard !sseStarted else { return }
-        sseStarted = true
+        guard !SseStreamManager.shared.isActive else { return }
         
-        Task { [weak self] in
-            guard let self = self else { return }
-            
+        Task {
             do {
                 let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
                 
-                await MainActor.run { [weak self] in
-                    guard let self = self else { return }
-                    
-                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
-                        self?.handleCouponSse(payload: payload)
-                    }
+                await MainActor.run {
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { _ in }
                     print("✅ [WishWellVM] SSE started")
                 }
             } catch {
                 print("❌ [WishWellVM] SSE token reissue failed:", error)
-                self.sseStarted = false
             }
         }
-    }
-    
-    private func stopSSE() {
-        SseStreamManager.shared.stop()
-        sseStarted = false
-        print("🛑 [WishWellVM] SSE stopped")
     }
     
     private func handleCouponSse(payload: SseEventPayload) {

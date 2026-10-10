@@ -25,10 +25,9 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     private let missionService: MissionServiceType
     private let coinMissionService: CoinMissionServiceType
     private let userInfoSubject = CurrentValueSubject<ChildrenInfo, Never>(
-        .init(firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false)
+        .init(id: 0, firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false)
     )
     private let missionsSubject = CurrentValueSubject<[MissionGroupDTO], Never>([])
-    private var sseStarted = false
     
     init(
         wishWellService: WishWellServiceType = WishWellService(),
@@ -57,9 +56,10 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
             }
             .store(in: &cancellables)
         
-        input.viewWillDisappear
-            .sink { [weak self] _ in
-                self?.stopSSE()
+        NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .sink { [weak self] payload in
+                self?.handleMissionSse(payload: payload)
             }
             .store(in: &cancellables)
         
@@ -137,6 +137,7 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
         
         var user = userInfoSubject.value
         user = ChildrenInfo(
+            id: user.id,
             firstName: user.firstName,
             coinAmount: user.coinAmount + dto.reward,
             today: user.today,
@@ -148,33 +149,20 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     // MARK: - SSE
     
     private func startSSEIfNeeded() {
-        guard !sseStarted else { return }
-        sseStarted = true
+        guard !SseStreamManager.shared.isActive else { return }
         
-        Task { [weak self] in
-            guard let self else { return }
-            
+        Task {
             do {
                 let initialToken = try await TokenRefresher.shared.reissueSseAccessToken()
                 
-                await MainActor.run { [weak self] in
-                    guard let self else { return }
-                    
-                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { [weak self] payload in
-                        self?.handleMissionSse(payload: payload)
-                    }
+                await MainActor.run {
+                    SseStreamManager.shared.startIfNeeded(initialToken: initialToken) { _ in }
                     print("✅ [CoinMissionVM] SSE started")
                 }
             } catch {
                 print("❌ [CoinMissionVM] SSE token reissue failed:", error)
-                self.sseStarted = false
             }
         }
-    }
-    
-    private func stopSSE() {
-        SseStreamManager.shared.stop()
-        sseStarted = false
     }
     
     private func handleMissionSse(payload: SseEventPayload) {

@@ -17,7 +17,7 @@ struct ChildrenInfoResponseDTO: Decodable {
 }
 
 struct ChildrenInfo: Codable {
-    let id: Int = 0
+    let id: Int
     let firstName: String
     let coinAmount: Int
     let today: String
