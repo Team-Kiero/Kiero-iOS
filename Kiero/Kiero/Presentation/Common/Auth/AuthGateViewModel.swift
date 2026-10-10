@@ -22,20 +22,25 @@ final class AuthGateViewModel {
     var route: AnyPublisher<AuthGateRoute, Never> { routeSubject.eraseToAnyPublisher() }
     
     func decideRoute() {
+        let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
+
+        if role.contains("child") {
+            guard TokenManager.shared.getRefreshToken() != nil else {
+                routeSubject.send(.pickRole)
+                return
+            }
+
+            decideChildRoute()
+            return
+        }
+
         guard TokenManager.shared.getAccessToken() != nil else {
             routeSubject.send(.pickRole)
             return
         }
         
-        let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
-        
         if role.contains("parent") {
             decideParentRoute()
-            return
-        }
-        
-        if role.contains("child") {
-            decideChildRoute()
             return
         }
         
