@@ -58,9 +58,13 @@ final class AuthGateViewModel {
                         self.routeSubject.send(.childTab)
                     }
                 }
-            } catch {
+            } catch NetworkError.clientError(let statusCode) where statusCode == 401 || statusCode == 403 {
                 await MainActor.run {
                     LogoutHelper.logoutToPickRole()
+                }
+            } catch {
+                await MainActor.run {
+                    self.routeSubject.send(.childTab)
                 }
             }
         }

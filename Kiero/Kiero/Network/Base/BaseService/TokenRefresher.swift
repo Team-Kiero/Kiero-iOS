@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class TokenRefresher {
+actor TokenRefresher {
     
     static let shared = TokenRefresher()
     private var refreshTask: Task<Void, Error>?
