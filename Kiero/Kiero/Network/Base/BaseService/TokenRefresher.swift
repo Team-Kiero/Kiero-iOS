@@ -12,6 +12,7 @@ actor TokenRefresher {
     static let shared = TokenRefresher()
     private var refreshTask: Task<Void, Error>?
     private var refreshAllTask: Task<Void, Error>?
+    private var sseRefreshTask: Task<String, Error>?
     private init() {}
     
     func refreshAccessToken() async throws {
@@ -117,6 +118,21 @@ actor TokenRefresher {
     }
     
     func reissueSseAccessToken() async throws -> String {
+        if let task = sseRefreshTask {
+            return try await task.value
+        }
+
+        let task = Task {
+            try await performReissueSseAccessToken()
+        }
+
+        sseRefreshTask = task
+        defer { sseRefreshTask = nil }
+
+        return try await task.value
+    }
+
+    private func performReissueSseAccessToken() async throws -> String {
         guard let refresh = TokenManager.shared.getRefreshToken(), !refresh.isEmpty else {
             throw NetworkError.clientError(statusCode: 401)
         }
