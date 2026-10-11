@@ -143,6 +143,11 @@ extension SseClient: URLSessionDataDelegate {
         didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
     ) {
+        guard dataTask === self.task else {
+            completionHandler(.cancel)
+            return
+        }
+
         if let http = response as? HTTPURLResponse {
             print("✅ [SSEClient] RESPONSE status:", http.statusCode)
             print("✅ [SSEClient] RESPONSE headers:", http.allHeaderFields)
@@ -159,6 +164,8 @@ extension SseClient: URLSessionDataDelegate {
     }
     
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        guard dataTask === self.task else { return }
+
         print("📥 [SSEClient] RAW CHUNK:", String(data: data, encoding: .utf8) ?? "nil")
         handleChunk(data)
     }
