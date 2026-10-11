@@ -157,7 +157,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     private func restoreCachedJourneyIfNeeded() {
         guard hasRestoredCachedJourney == false,
               let userId = TokenManager.shared.getUserId(),
-              let data = UserDefaults.standard.data(forKey: cachedJourneyKey(for: userId)) else {
+              let data = UserDefaults.standard.data(forKey: TokenManager.dailyJourneySnapshotKey(for: userId)) else {
             hasRestoredCachedJourney = true
             return
         }
@@ -165,7 +165,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         hasRestoredCachedJourney = true
         guard let cached = try? JSONDecoder().decode(CachedDailyJourney.self, from: data),
               isToday(cached.savedAt) else {
-            UserDefaults.standard.removeObject(forKey: cachedJourneyKey(for: userId))
+            UserDefaults.standard.removeObject(forKey: TokenManager.dailyJourneySnapshotKey(for: userId))
             return
         }
         publishJourney(schedule: cached.schedule, child: cached.child)
@@ -176,11 +176,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
             return
         }
 
-        UserDefaults.standard.set(data, forKey: cachedJourneyKey(for: child.id))
-    }
-
-    private func cachedJourneyKey(for userId: Int) -> String {
-        "dailyJourneySnapshot_\(userId)"
+        UserDefaults.standard.set(data, forKey: TokenManager.dailyJourneySnapshotKey(for: child.id))
     }
 
     private func publishJourney(schedule: DailyJourneyDTO, child: ChildrenInfo) {
