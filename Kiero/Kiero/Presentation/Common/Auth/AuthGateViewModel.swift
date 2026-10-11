@@ -50,7 +50,9 @@ final class AuthGateViewModel {
     private func decideChildRoute() {
         Task {
             do {
-                try await TokenRefresher.shared.refreshAccessToken()
+                if TokenManager.shared.getAccessToken()?.isEmpty != false {
+                    try await TokenRefresher.shared.refreshAccessToken()
+                }
 
                 let status: ParentWithdrawalStatusDTO = try await BaseService.shared.request(
                     endPoint: .checkParentWithdrawalStatus
