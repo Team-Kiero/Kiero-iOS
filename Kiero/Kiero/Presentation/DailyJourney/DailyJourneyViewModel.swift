@@ -145,8 +145,6 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     }
 
     private func saveCachedJourney(schedule: DailyJourneyDTO, child: ChildrenInfo) {
-        TokenManager.shared.saveUserId(child.id)
-
         guard let data = try? JSONEncoder().encode(CachedDailyJourney(schedule: schedule, child: child)) else {
             return
         }
