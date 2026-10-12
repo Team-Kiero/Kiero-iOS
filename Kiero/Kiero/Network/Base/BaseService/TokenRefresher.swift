@@ -164,48 +164,10 @@ actor TokenRefresher {
     }
     
     private func extractCookieValue(from response: HTTPURLResponse, cookieName: String) -> String? {
-        let headers = response.allHeaderFields
-        
-        if let setCookie = headers["Set-Cookie"] as? String {
-            return parseCookie(from: setCookie, cookieName: cookieName)
-        }
-        
-        if let setCookies = headers["Set-Cookie"] as? [String] {
-            for item in setCookies {
-                if let value = parseCookie(from: item, cookieName: cookieName) {
-                    return value
-                }
-            }
-        }
-        
-        for (k, v) in headers {
-            guard let key = (k as? String)?.lowercased(), key == "set-cookie" else { continue }
-            
-            if let str = v as? String, let value = parseCookie(from: str, cookieName: cookieName) {
-                return value
-            }
-            
-            if let arr = v as? [String] {
-                for item in arr {
-                    if let value = parseCookie(from: item, cookieName: cookieName) {
-                        return value
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    private func parseCookie(from setCookie: String, cookieName: String) -> String? {
-        let parts = setCookie
-            .split(separator: ";")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-        
-        for part in parts where part.hasPrefix("\(cookieName)=") {
-            return String(part.dropFirst("\(cookieName)=".count))
-        }
-        
-        return nil
+        guard let url = response.url,
+              let setCookie = response.value(forHTTPHeaderField: "Set-Cookie") else { return nil }
+
+        return HTTPCookie.cookies(withResponseHeaderFields: ["Set-Cookie": setCookie], for: url)
+            .first { $0.name == cookieName }?.value
     }
 }
