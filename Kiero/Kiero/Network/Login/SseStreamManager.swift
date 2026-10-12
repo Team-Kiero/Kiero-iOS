@@ -338,7 +338,6 @@ final class SseStreamManager {
     }
     
     private func handleConnected(clientID: UUID) {
-        // 갱신으로 승격된 연결도 현재 역할로 처리하도록 콜백 시점의 ID로 역할 판단
         guard let role = withLock({ currentRole(of: clientID) }) else { return }
         
         switch role {
@@ -394,7 +393,6 @@ final class SseStreamManager {
         clientID: UUID,
         onEvent: @escaping EventHandler
     ) {
-        // 갱신으로 승격된 연결도 현재 역할로 처리하도록 콜백 시점의 ID로 역할 판단
         guard let role = withLock({ currentRole(of: clientID) }) else { return }
         
         print("❌ [SSEManager] \(role) error:", error)
@@ -406,7 +404,6 @@ final class SseStreamManager {
                 guard isRunning else { return nil }
                 
                 if isRefreshing {
-                    // 새 연결이 승격되면 대체되고, 실패하면 그때 복구를 시작
                     print("⚠️ [SSEManager] active error while refresh in progress, defer recovery")
                     activeFailedDuringRefresh = true
                     return nil

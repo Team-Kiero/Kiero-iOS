@@ -171,7 +171,6 @@ extension SseClient: URLSessionDataDelegate {
     }
     
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        // disconnect()로 직접 끊은 연결은 재연결 대상이 아니므로 무시
         guard task === self.task else { return }
         
         if let statusCode = failedStatusCode {
