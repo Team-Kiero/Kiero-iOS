@@ -108,12 +108,11 @@ actor TokenRefresher {
         let decoded = try JSONDecoder().decode(BaseResponse<AccessTokenData>.self, from: data)
         guard let tokenData = decoded.data else { throw NetworkError.noData }
         
-        TokenManager.shared.saveAccessToken(tokenData.accessToken)
-        
         guard let newRefresh = extractCookieValue(from: http, cookieName: "refreshToken") else {
             throw NetworkError.responseDecodingError
         }
         
+        TokenManager.shared.saveAccessToken(tokenData.accessToken)
         TokenManager.shared.saveRefreshToken(newRefresh)
     }
     
