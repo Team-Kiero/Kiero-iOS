@@ -22,20 +22,25 @@ final class AuthGateViewModel {
     var route: AnyPublisher<AuthGateRoute, Never> { routeSubject.eraseToAnyPublisher() }
     
     func decideRoute() {
+        let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
+
+        if role.contains("child") {
+            guard TokenManager.shared.getRefreshToken() != nil else {
+                routeSubject.send(.pickRole)
+                return
+            }
+
+            decideChildRoute()
+            return
+        }
+
         guard TokenManager.shared.getAccessToken() != nil else {
             routeSubject.send(.pickRole)
             return
         }
         
-        let role = (TokenManager.shared.getUserRole() ?? "").lowercased()
-        
         if role.contains("parent") {
             decideParentRoute()
-            return
-        }
-        
-        if role.contains("child") {
-            decideChildRoute()
             return
         }
         
@@ -45,6 +50,10 @@ final class AuthGateViewModel {
     private func decideChildRoute() {
         Task {
             do {
+                if TokenManager.shared.getAccessToken()?.isEmpty != false {
+                    try await TokenRefresher.shared.refreshAccessToken()
+                }
+
                 let status: ParentWithdrawalStatusDTO = try await BaseService.shared.request(
                     endPoint: .checkParentWithdrawalStatus
                 )
@@ -55,6 +64,10 @@ final class AuthGateViewModel {
                     } else {
                         self.routeSubject.send(.childTab)
                     }
+                }
+            } catch NetworkError.clientError(let statusCode) where statusCode == 401 || statusCode == 403 {
+                await MainActor.run {
+                    LogoutHelper.logoutToPickRole()
                 }
             } catch {
                 await MainActor.run {

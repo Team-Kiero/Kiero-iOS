@@ -202,6 +202,12 @@ final class DailyJourneyView: BaseUIView {
         }
     }
     
+    func setActionsEnabled(_ enabled: Bool) {
+        verifyPhotoButton.isEnabled = enabled
+        speechField.isUserInteractionEnabled = enabled
+        speechField.alpha = enabled ? 1 : 0.5
+    }
+
     func updateData(with data: DailyJourneyModel, animated: Bool = false) {
         headerView.configure(
             kidName: data.kidName,

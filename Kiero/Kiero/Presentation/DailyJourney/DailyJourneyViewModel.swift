@@ -16,6 +16,12 @@ enum DailyJourneyRoute {
 }
 
 final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
+
+    private struct CachedDailyJourney: Codable {
+        let schedule: DailyJourneyDTO
+        let child: ChildrenInfo
+        let savedAt: Date
+    }
     
     private let wishWellService = WishWellService()
     public var currentScheduleDetailId: Int?
@@ -38,12 +44,27 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
     struct Output {
         let viewData: AnyPublisher<DailyJourneyModel, Never>
         let route: AnyPublisher<DailyJourneyRoute, Never>
+        let actionsEnabled: AnyPublisher<Bool, Never>
     }
     
     // MARK: - Properties
     
     private let routeSubject = PassthroughSubject<DailyJourneyRoute, Never>()
     private let viewDataSubject = PassthroughSubject<DailyJourneyModel, Never>()
+    private var hasRestoredCachedJourney = false
+    private let actionsEnabledSubject = CurrentValueSubject<Bool, Never>(false)
+    private var fetchedAt: Date?
+    private var fetchCancellable: AnyCancellable?
+
+    var canPerformActions: Bool {
+        actionsEnabledSubject.value && fetchedAt.map(isToday) == true
+    }
+
+    private func isToday(_ date: Date) -> Bool {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        return calendar.isDate(date, inSameDayAs: Date())
+    }
     
     // MARK: - Transform
     
@@ -70,6 +91,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         input.nextJourneyButtonTap
             .sink { [weak self] in
+                guard self?.canPerformActions == true else { return }
                 if self?.isCurrentlyLastJourney == true {
                     self?.routeSubject.send(.showEndJourneyDialogBox)
                 } else {
@@ -80,7 +102,7 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         input.verifyButtonTap
             .sink { [weak self] in
-                guard let self = self else { return }
+                guard let self = self, self.canPerformActions else { return }
                 switch self.currentButtonType {
                 case .verify:
                     self.routeSubject.send(.showCamera)
@@ -98,14 +120,22 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
         
         return Output(
             viewData: viewDataSubject.eraseToAnyPublisher(),
-            route: routeSubject.eraseToAnyPublisher()
+            route: routeSubject.eraseToAnyPublisher(),
+            actionsEnabled: actionsEnabledSubject.eraseToAnyPublisher()
         )
     }
     
     // MARK: - Network Logic
     
     private func fetchDailyJourney() {
-        Publishers.Zip(
+        fetchCancellable?.cancel()
+        actionsEnabledSubject.send(false)
+        fetchedAt = nil
+        currentScheduleDetailId = nil
+        restoreCachedJourneyIfNeeded()
+        let requestedAt = Date()
+
+        fetchCancellable = Publishers.Zip(
             DailyJourneyService.shared.updateDailyJourney(),
             self.wishWellService.fetchMyInfo()
         )
@@ -115,23 +145,54 @@ final class DailyJourneyViewModel: BaseViewModel, ViewModelType {
                 print("❌ Fetch Error: \(error)")
             }
         } receiveValue: { [weak self] (scheduleDTO, childInfo) in
-            guard let self = self else { return }
-            
-            self.currentScheduleDetailId = scheduleDTO.scheduleDetailId
-            self.currentStoneType = scheduleDTO.stoneType
-            self.currentEarnedStoneCount = scheduleDTO.earnedStones ?? 0
-            self.currentTotalScheduleCount = scheduleDTO.totalSchedule
-            
-            let model = self.convertDTOToModel(schedule: scheduleDTO, child: childInfo)
-            self.viewDataSubject.send(model)
+            guard let self = self, self.isToday(requestedAt) else { return }
+
+            self.fetchedAt = requestedAt
+            self.publishJourney(schedule: scheduleDTO, child: childInfo)
+            self.actionsEnabledSubject.send(true)
+            self.saveCachedJourney(schedule: scheduleDTO, child: childInfo, savedAt: requestedAt)
         }
-        .store(in: &cancellables)
+    }
+
+    private func restoreCachedJourneyIfNeeded() {
+        guard hasRestoredCachedJourney == false,
+              let userId = TokenManager.shared.getUserId(),
+              let data = UserDefaults.standard.data(forKey: TokenManager.dailyJourneySnapshotKey(for: userId)) else {
+            hasRestoredCachedJourney = true
+            return
+        }
+
+        hasRestoredCachedJourney = true
+        guard let cached = try? JSONDecoder().decode(CachedDailyJourney.self, from: data),
+              isToday(cached.savedAt) else {
+            UserDefaults.standard.removeObject(forKey: TokenManager.dailyJourneySnapshotKey(for: userId))
+            return
+        }
+        publishJourney(schedule: cached.schedule, child: cached.child)
+    }
+
+    private func saveCachedJourney(schedule: DailyJourneyDTO, child: ChildrenInfo, savedAt: Date) {
+        guard let data = try? JSONEncoder().encode(CachedDailyJourney(schedule: schedule, child: child, savedAt: savedAt)) else {
+            return
+        }
+
+        UserDefaults.standard.set(data, forKey: TokenManager.dailyJourneySnapshotKey(for: child.id))
+    }
+
+    private func publishJourney(schedule: DailyJourneyDTO, child: ChildrenInfo) {
+        currentScheduleDetailId = fetchedAt == nil ? nil : schedule.scheduleDetailId
+        currentStoneType = schedule.stoneType
+        currentEarnedStoneCount = schedule.earnedStones ?? 0
+        currentTotalScheduleCount = schedule.totalSchedule
+
+        let model = convertDTOToModel(schedule: schedule, child: child)
+        viewDataSubject.send(model)
     }
     
     private func skipSchedule() {
         print("📢 skipSchedule() 함수 호출됨")
         
-        guard let id = currentScheduleDetailId else { return }
+        guard canPerformActions, let id = currentScheduleDetailId else { return }
         
         DailyJourneyService.shared.skipJourney(scheduleDetailId: id)
             .receive(on: DispatchQueue.main)

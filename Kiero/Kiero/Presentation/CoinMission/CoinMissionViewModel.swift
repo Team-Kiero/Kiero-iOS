@@ -25,7 +25,7 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
     private let missionService: MissionServiceType
     private let coinMissionService: CoinMissionServiceType
     private let userInfoSubject = CurrentValueSubject<ChildrenInfo, Never>(
-        .init(firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false)
+        .init(id: 0, firstName: "", coinAmount: 0, today: "", pushNotificationEnabled: false)
     )
     private let missionsSubject = CurrentValueSubject<[MissionGroupDTO], Never>([])
     
@@ -137,6 +137,7 @@ final class CoinMissionViewModel: BaseViewModel, ViewModelType {
         
         var user = userInfoSubject.value
         user = ChildrenInfo(
+            id: user.id,
             firstName: user.firstName,
             coinAmount: user.coinAmount + dto.reward,
             today: user.today,

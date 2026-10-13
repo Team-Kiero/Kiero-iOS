@@ -24,8 +24,13 @@ final class TokenManager {
         static let nameKey = "firstName"
         static let email = "user_email"
         static let userId = "user_id"
+        static let dailyJourneySnapshotPrefix = "dailyJourneySnapshot_"
     }
     
+    static func dailyJourneySnapshotKey(for userId: Int) -> String {
+        Key.dailyJourneySnapshotPrefix + String(userId)
+    }
+
     func saveAccessToken(_ access: String) {
         save(key: Key.access, value: access)
     }
@@ -104,6 +109,9 @@ final class TokenManager {
     }
     
     func clearUserInfo() {
+        if let userId = getUserId() {
+            userDefaults.removeObject(forKey: Self.dailyJourneySnapshotKey(for: userId))
+        }
         userDefaults.removeObject(forKey: Key.role)
         userDefaults.removeObject(forKey: Key.name)
         userDefaults.removeObject(forKey: Key.nameKey)

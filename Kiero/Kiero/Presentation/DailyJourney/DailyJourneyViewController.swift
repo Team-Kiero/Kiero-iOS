@@ -72,6 +72,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
         )
         
         let output = viewModel.transform(input: input)
+
+        output.actionsEnabled
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] enabled in
+                self?.mainView.setActionsEnabled(enabled)
+            }
+            .store(in: &cancellables)
         
         output.viewData
             .receive(on: DispatchQueue.main)
@@ -199,6 +206,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
     
     private func moveToMissionCompleteView(with image: UIImage) {
+        guard viewModel?.canPerformActions == true else { return }
         let completeViewModel = MissionCompleteViewModel()
         completeViewModel.capturedImage = image
         completeViewModel.receivedStoneType = self.viewModel?.currentStoneType

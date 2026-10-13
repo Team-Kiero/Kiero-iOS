@@ -92,7 +92,7 @@ enum EndPoint {
         switch self {
         case .kakaoLogin, .appleLogin, .kakaoAccessToken, .reissueAccessToken, .reissueAllTokens, .reviewerLogin:
             return .none
-        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus, .fetchCouponHistory:
+        case .fetchSchedules, .fetchChildrenInfo, .fetchWishes, .purchaseCoupon, .completeMission, .fireLit, .fetchJourneyList, .childSignup, .fetchChildTerms, .checkParentWithdrawalStatus, .fetchCouponHistory, .updateDailyJourney, .skipJourney, .getPresignedURL, .completeSchedule:
             return .child
         default:
             return .parent
