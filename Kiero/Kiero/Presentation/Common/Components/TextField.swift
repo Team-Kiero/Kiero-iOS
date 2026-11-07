@@ -51,8 +51,10 @@ extension UserRole {
     
     var regex: String? {
         switch self {
-        case .parent(.lastName), .child(.lastName), .parent(.firstName), .parent(.totalName), .child(.firstName):
+        case .parent(.lastName), .parent(.firstName), .parent(.totalName):
             return "^[가-힣]{0,5}$"
+        case .child(.lastName), .child(.firstName):
+            return "^[가-힣a-zA-Z]{0,5}$"
         case .child(.inviteCode):
             return nil
         }
