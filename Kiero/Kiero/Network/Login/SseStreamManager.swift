@@ -555,7 +555,9 @@ final class SseStreamManager {
     }
     
     private func shouldSkipDuplicateEvent(_ payload: SseEventPayload) -> Bool {
-        withLock {
+        // 식별 정보가 없는 상태 변경은 내용이 같아도 별개의 변경일 수 있다.
+        guard payload.feedItemId != nil || payload.occurredAt != nil else { return false }
+        return withLock {
             cleanupExpiredEventHashesLocked()
             
             let hash = makeEventHash(from: payload)

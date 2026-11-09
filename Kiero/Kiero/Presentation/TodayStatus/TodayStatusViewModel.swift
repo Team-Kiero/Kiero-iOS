@@ -22,6 +22,7 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     
     private var refreshWorkItem: DispatchWorkItem?
     private var isSseBound = false
+    private var sseCancellable: AnyCancellable?
     
     override init() {
         super.init()
@@ -102,62 +103,49 @@ final class TodayStatusViewModel: BaseViewModel, ObservableObject {
     func bindSSEIfNeeded() {
         guard !isSseBound else { return }
         
+        isSseBound = true
+        sseCancellable = NotificationCenter.default.publisher(for: .sseEventReceived)
+            .compactMap { $0.userInfo?["payload"] as? SseEventPayload }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] payload in
+                guard let self, self.isSseBound,
+                      self.shouldRefreshTodayStatus(for: payload) else { return }
+                print("📩 [TodayStatusVM] SSE EVENT:", payload.eventType, payload.childId as Any)
+                self.scheduleRefresh()
+            }
+
+        SseStreamManager.shared.onRefreshWillStart = { [weak self] in
+            guard let self, self.isSseBound else { return }
+            self.scheduleRefresh()
+        }
+        SseStreamManager.shared.onReconnected = { [weak self] in
+            guard let self, self.isSseBound else { return }
+            self.scheduleRefresh()
+        }
+
+        guard !SseStreamManager.shared.isActive else { return }
         Task { [weak self] in
             guard let self else { return }
-            
             do {
                 let token = try await TokenRefresher.shared.reissueSseAccessToken()
-                
                 await MainActor.run {
-                    self.isSseBound = true
-                    
-                    print("✅ [TodayStatusVM] SSE 연결 시작")
-                    
-                    SseStreamManager.shared.onRefreshWillStart = { [weak self] in
-                        DispatchQueue.main.async {
-                            print("🔄 [TodayStatusVM] onRefreshWillStart")
-                            self?.scheduleRefresh()
-                        }
-                    }
-                    
-                    SseStreamManager.shared.onReconnected = { [weak self] in
-                        DispatchQueue.main.async {
-                            print("🔄 [TodayStatusVM] onReconnected")
-                            self?.scheduleRefresh()
-                        }
-                    }
-                    
-                    SseStreamManager.shared.startIfNeeded(
-                        initialToken: token,
-                        onEvent: { [weak self] payload in
-                            guard let self else { return }
-                            
-                            print("📩 [TodayStatusVM] SSE EVENT:", payload.eventType, payload.childId as Any)
-                            
-                            if self.shouldRefreshTodayStatus(for: payload) {
-                                DispatchQueue.main.async {
-                                    self.scheduleRefresh()
-                                }
-                            }
-                        }
-                    )
+                    guard self.isSseBound else { return }
+                    SseStreamManager.shared.startIfNeeded(initialToken: token) { _ in }
                 }
             } catch {
                 print("❌ [TodayStatusVM] SSE 토큰 재발급 실패:", error)
-                
-                await MainActor.run {
-                    self.isSseBound = false
-                }
             }
         }
     }
-    
+
     func unbindSSE() {
+        isSseBound = false
+        sseCancellable?.cancel()
+        sseCancellable = nil
         refreshWorkItem?.cancel()
         refreshWorkItem = nil
-        isSseBound = false
     }
-    
+
     private func shouldRefreshTodayStatus(for payload: SseEventPayload) -> Bool {
         let latestChildId = UserDefaults.standard.integer(forKey: "selectedChildId")
         
