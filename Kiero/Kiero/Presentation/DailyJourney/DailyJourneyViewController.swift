@@ -24,6 +24,7 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     private let skipConfirmSubject = PassthroughSubject<Void, Never>()
     private var previousHasSchedule: Bool?
     private var hasCheckedNotification = false
+    private var photoVerificationContext: (scheduleDetailId: Int, stoneType: StoneType?, startedAt: Date)?
     
     // MARK: - Life Cycle
     
@@ -191,10 +192,13 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
 
     private func openCamera() {
+        guard let viewModel, viewModel.canPerformActions,
+              let scheduleDetailId = viewModel.currentScheduleDetailId else { return }
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             print("카메라를 사용할 수 없습니다.")
             return
         }
+        photoVerificationContext = (scheduleDetailId, viewModel.currentStoneType, Date())
         
         let picker = UIImagePickerController()
         picker.sourceType = .camera
@@ -206,11 +210,16 @@ final class DailyJourneyViewController: BaseViewController<DailyJourneyViewModel
     }
     
     private func moveToMissionCompleteView(with image: UIImage) {
-        guard viewModel?.canPerformActions == true else { return }
+        defer { photoVerificationContext = nil }
+        guard let context = photoVerificationContext else { return }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "Asia/Seoul")!
+        guard calendar.isDate(context.startedAt, inSameDayAs: Date()) else { return }
+
         let completeViewModel = MissionCompleteViewModel()
         completeViewModel.capturedImage = image
-        completeViewModel.receivedStoneType = self.viewModel?.currentStoneType
-        completeViewModel.scheduleDetailId = self.viewModel?.currentScheduleDetailId
+        completeViewModel.receivedStoneType = context.stoneType
+        completeViewModel.scheduleDetailId = context.scheduleDetailId
         
         let completeVC = MissionCompleteViewController(viewModel: completeViewModel)
         completeVC.initialImage = image
@@ -223,6 +232,7 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         guard let capturedImage = info[.originalImage] as? UIImage else {
+            photoVerificationContext = nil
             picker.dismiss(animated: true)
             return
         }
@@ -233,6 +243,7 @@ extension DailyJourneyViewController: UINavigationControllerDelegate, UIImagePic
     }
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        photoVerificationContext = nil
         picker.dismiss(animated: true)
     }
 }

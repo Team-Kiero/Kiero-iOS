@@ -555,7 +555,8 @@ final class SseStreamManager {
     }
     
     private func shouldSkipDuplicateEvent(_ payload: SseEventPayload) -> Bool {
-        withLock {
+        guard payload.feedItemId != nil || payload.occurredAt != nil else { return false }
+        return withLock {
             cleanupExpiredEventHashesLocked()
             
             let hash = makeEventHash(from: payload)
