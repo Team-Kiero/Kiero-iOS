@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CHILD_APPSTORE_ID</key>
-	<string>$(CHILD_APPSTORE_ID)</string>
-	<key>CFBundleDisplayName</key>
-	<string>Kiero</string>
 	<key>AMPLITUDE_API_KEY_DEV</key>
 	<string>$(AMPLITUDE_API_KEY_DEV)</string>
 	<key>AMPLITUDE_API_KEY_PROD</key>
@@ -25,6 +21,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>CHILD_APPSTORE_ID</key>
+	<string>$(CHILD_APPSTORE_ID)</string>
 	<key>KAKAO_NATIVE_APP_KEY</key>
 	<string>$(KAKAO_NATIVE_APP_KEY)</string>
 	<key>LSApplicationQueriesSchemes</key>

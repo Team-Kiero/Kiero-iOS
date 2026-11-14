@@ -323,7 +323,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "일정 장소에 도착한 것을 인증하기 위해 카메라로 사진을 찍습니다. 찍은 사진은 연결된 보호자에게 전달됩니다. 예: 학원에 도착시 학원 입구 사진을 찍어 인증하기";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -362,7 +362,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Kiero/ChildInfo.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Kiero;
-				INFOPLIST_KEY_NSCameraUsageDescription = "";
+				INFOPLIST_KEY_NSCameraUsageDescription = "일정 장소에 도착한 것을 인증하기 위해 카메라로 사진을 찍습니다. 찍은 사진은 연결된 보호자에게 전달됩니다. 예: 학원에 도착시 학원 입구 사진을 찍어 인증하기";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
